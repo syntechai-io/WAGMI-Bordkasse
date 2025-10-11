@@ -2,10 +2,10 @@
 
 ## Overview
 
-Crew Wallet is a minimalist expense tracking and settlement application designed for sailing crew members to manage shared expenses during trips. The application works without login/authentication and allows up to 12 crew members to track deposits into a shared wallet, record expenses (both from the wallet and private payments), and automatically calculate who owes whom at the end of the trip using an optimized settlement algorithm.
+Crew Wallet is a minimalist expense tracking and settlement application designed for sailing crew members to manage shared expenses during trips. The application features secure user authentication with two roles (Admin and Crew) and allows up to 12 crew members to track deposits into a shared wallet, record expenses (both from the wallet and private payments), and automatically calculate who owes whom at the end of the trip using an optimized settlement algorithm.
 
 Key features:
-- **No authentication required** - instant access without login
+- **Secure authentication system** - Session-based login with Admin and Crew roles
 - Crew member management for up to 12 members with unique codes (up to 20 chars) and payment handles (IBAN/PayPal/etc.)
 - Deposit tracking into shared wallet with **edit and delete** capabilities
 - Expense recording with flexible split modes (equal split or specific participants) and **edit and delete** capabilities
@@ -31,6 +31,15 @@ Key features:
   - Maritime gradient buttons (ocean, sea-foam, coral, purple with sailboat)
   - Ship wheel branding and anchor navigation icons
   - Wave-themed borders and maritime typography (Bebas Neue headers)
+- **Implemented secure authentication system**:
+  - Session-based authentication with SessionMiddleware
+  - Two user roles: Admin (full access) and Crew (standard access)
+  - Password hashing with werkzeug.security
+  - Global auth middleware protecting all routes except /login
+  - Secure login/logout flow with maritime-themed login page
+  - Navigation displays logged-in user with logout button
+  - All secrets (SESSION_SECRET, ADMIN_PASSWORD, CREW_PASSWORD) required from environment
+  - No hardcoded credentials or fallback secrets for production security
 
 ## User Preferences
 
@@ -41,8 +50,8 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 
 **Framework**: FastAPI (Python)
-- Router-based modular structure with separate modules for crew, deposits, expenses, receipts, balances, and export
-- **No authentication required** - open access model for trusted crew environments
+- Router-based modular structure with separate modules for crew, deposits, expenses, receipts, balances, export, and auth
+- **Secure authentication** - Session-based login with Admin/Crew roles
 - Dependency injection for database sessions
 
 **Template Engine**: Jinja2
@@ -60,7 +69,7 @@ Preferred communication style: Simple, everyday language.
 
 1. **Modular Router Structure**: Split functionality into domain-specific routers (crew, deposits, expenses, etc.) for maintainability and clear separation of concerns. This allows independent development and testing of features.
 
-2. **No Authentication Model**: Removed authentication system for instant access. Designed for trusted crew environments on sailing trips where simplicity and speed are prioritized. The app is intended for temporary use during a single trip without long-term data retention.
+2. **Authentication Model**: Session-based authentication with two roles (Admin and Crew). Admin has full access to all features including deleting records. Crew has standard access. Passwords are hashed with werkzeug.security. All routes except /login are protected by AuthMiddleware. The app requires SESSION_SECRET, ADMIN_PASSWORD, and CREW_PASSWORD from environment variables for security.
 
 3. **File Upload Security**: Receipts are stored with UUID-based filenames to prevent directory traversal attacks. File type validation (PDF/JPG/PNG only) and size limits (10MB max) enforce security boundaries.
 

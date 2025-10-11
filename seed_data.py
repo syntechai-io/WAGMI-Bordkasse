@@ -1,8 +1,29 @@
 from sqlalchemy.orm import Session
-from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum
+from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum, User, UserRole
 from datetime import date, timedelta
+import os
 
 def seed_database(db: Session):
+    # Seed users first
+    existing_user = db.query(User).first()
+    if not existing_user:
+        admin_password = os.getenv("ADMIN_PASSWORD")
+        crew_password = os.getenv("CREW_PASSWORD")
+        
+        if not admin_password or not crew_password:
+            raise RuntimeError("ADMIN_PASSWORD and CREW_PASSWORD environment variables are required!")
+        
+        admin_user = User(username="Sven", role=UserRole.admin)
+        admin_user.set_password(admin_password)
+        
+        crew_user = User(username="crew", role=UserRole.crew)
+        crew_user.set_password(crew_password)
+        
+        db.add(admin_user)
+        db.add(crew_user)
+        db.commit()
+        print("Users seeded: Admin 'Sven' and Crew 'crew'")
+    
     existing_crew = db.query(CrewMember).first()
     if existing_crew:
         print("Database already seeded, skipping...")

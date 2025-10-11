@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e3a5f">
+    <title>Login - Crew Wallet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy-deep: #1e3a5f;
+            --ocean-blue: #0077be;
+            --sea-foam: #2ecc71;
+            --coral: #ff6b35;
+            --sand: #d4a574;
+            --sky-blue: #87ceeb;
+            --cream: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #1e3a5f 0%, #0077be 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .maritime-header {
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 1px;
+        }
+        
+        .porthole-card {
+            background: white;
+            border: 3px solid var(--sky-blue);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 119, 190, 0.3);
+        }
+        
+        .ship-wheel {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .ocean-gradient {
+            background: linear-gradient(135deg, var(--ocean-blue) 0%, #005a8c 100%);
+        }
+        
+        .wave-border {
+            border-bottom: 3px solid var(--sky-blue);
+            position: relative;
+        }
+        
+        .wave-border::after {
+            content: '〜〜〜';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--sky-blue);
+            font-size: 20px;
+            letter-spacing: 10px;
+        }
+        
+        input {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="w-full max-w-md px-4">
+        <!-- Ship Wheel Logo -->
+        <div class="text-center mb-8">
+            <div class="ship-wheel text-8xl mb-4">⚓</div>
+            <h1 class="text-4xl font-bold maritime-header text-white mb-2">BORDKASSE</h1>
+            <p class="text-sky-200">Crew Wallet Login</p>
+        </div>
+        
+        <!-- Login Card -->
+        <div class="porthole-card p-8">
+            <div class="text-center mb-6 wave-border pb-4">
+                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">🔐 LOGIN</h2>
+            </div>
+            
+            {% if error %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
+                <div class="flex items-center">
+                    <span class="text-2xl mr-2">⚠️</span>
+                    <span>{{ error }}</span>
+                </div>
+            </div>
+            {% endif %}
+            
+            <form method="post" action="/login" class="space-y-6">
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
+                        👤 Benutzername
+                    </label>
+                    <input 
+                        type="text" 
+                        name="username" 
+                        required 
+                        autofocus
+                        class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none focus:border-ocean-blue transition" 
+                        style="border-color: var(--sky-blue);"
+                        placeholder="Benutzername eingeben">
+                </div>
+                
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
+                        🔑 Passwort
+                    </label>
+                    <input 
+                        type="password" 
+                        name="password" 
+                        required 
+                        class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none focus:border-ocean-blue transition" 
+                        style="border-color: var(--sky-blue);"
+                        placeholder="••••••••">
+                </div>
+                
+                <button 
+                    type="submit" 
+                    class="w-full ocean-gradient text-white font-bold py-4 px-4 rounded-lg text-lg transition transform hover:scale-105">
+                    ⛵ Einloggen
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center text-sm" style="color: var(--navy-deep);">
+                <p>🌊 Kontaktieren Sie den Administrator für Login-Daten</p>
+            </div>
+        </div>
+        
+        <div class="text-center mt-6 text-sky-200 text-sm">
+            <p>⚓ Crew Wallet - Bordkasse für Segeltrips</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,16 +1,38 @@
 from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy import func
 from db import init_db, get_db
 from sqlalchemy.orm import Session
 from models import Deposit, Expense, PaidFromEnum
 from seed_data import seed_database
+import os
 
-from routers import crew, deposits, expenses, receipts, balances, export as export_router
+from routers.crew import router as crew_router
+from routers.deposits import router as deposits_router
+from routers.expenses import router as expenses_router
+from routers.receipts import router as receipts_router
+from routers.balances import router as balances_router
+from routers.export import router as export_router
+from routers.auth import router as auth_router
 
 app = FastAPI(title="Crew Wallet - Bordkasse")
+
+# Session middleware for authentication
+session_secret = os.getenv("SESSION_SECRET")
+if not session_secret:
+    raise RuntimeError("SESSION_SECRET environment variable is required for security!")
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=session_secret
+)
+
+# Auth middleware to protect all routes
+from middleware.auth import AuthMiddleware
+app.add_middleware(AuthMiddleware)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -21,12 +43,13 @@ init_db()
 with next(get_db()) as db:
     seed_database(db)
 
-app.include_router(crew.router)
-app.include_router(deposits.router)
-app.include_router(expenses.router)
-app.include_router(receipts.router)
-app.include_router(balances.router)
-app.include_router(export_router.router)
+app.include_router(auth_router)
+app.include_router(crew_router)
+app.include_router(deposits_router)
+app.include_router(expenses_router)
+app.include_router(receipts_router)
+app.include_router(balances_router)
+app.include_router(export_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):
