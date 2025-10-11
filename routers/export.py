@@ -123,9 +123,9 @@ async def download_pdf(request: Request, db: Session = Depends(get_db)):
     for member in db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all():
         crew_data.append([
             str(member.id),
-            member.code,
-            member.name,
-            member.iban_or_handle if member.iban_or_handle is not None else ""
+            str(member.code),
+            str(member.name),
+            str(member.iban_or_handle) if member.iban_or_handle is not None else ""
         ])
     
     crew_table = Table(crew_data, colWidths=[0.5*inch, 1*inch, 2*inch, 2.5*inch])
@@ -151,7 +151,7 @@ async def download_pdf(request: Request, db: Session = Depends(get_db)):
             f"{deposit.member.code} - {deposit.member.name}",
             f"€{deposit.amount_eur:.2f}",
             str(deposit.date),
-            deposit.note if deposit.note is not None else ""
+            str(deposit.note) if deposit.note is not None else ""
         ])
     
     deposit_table = Table(deposit_data, colWidths=[0.5*inch, 2*inch, 1.2*inch, 1.2*inch, 2*inch])
@@ -172,15 +172,16 @@ async def download_pdf(request: Request, db: Session = Depends(get_db)):
     elements.append(Paragraph("📊 Expenses", section_style))
     expense_data = [["ID", "Payer", "Date", "Category", "Description", "Amount EUR", "From", "Split"]]
     for expense in db.query(Expense).filter(Expense.trip_id == active_trip.id).all():
+        desc = str(expense.description)
         expense_data.append([
             str(expense.id),
-            f"{expense.payer.code}",
+            str(expense.payer.code),
             str(expense.date),
-            expense.category,
-            expense.description[:30] + "..." if len(expense.description) > 30 else expense.description,
+            str(expense.category),
+            desc[:30] + "..." if len(desc) > 30 else desc,
             f"€{expense.amount_eur:.2f}",
-            expense.paid_from.value,
-            expense.split_mode.value
+            str(expense.paid_from.value),
+            str(expense.split_mode.value)
         ])
     
     expense_table = Table(expense_data, colWidths=[0.4*inch, 0.8*inch, 0.9*inch, 1*inch, 1.8*inch, 1*inch, 0.8*inch, 0.8*inch])
