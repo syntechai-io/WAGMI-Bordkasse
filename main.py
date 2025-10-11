@@ -10,10 +10,9 @@ from sqlalchemy.orm import Session
 from models import Deposit, Expense, PaidFromEnum, Trip
 from seed_data import seed_database
 from services.trip import TripService
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+from limiter_config import limiter
 import os
 
 from routers.crew import router as crew_router
@@ -27,7 +26,7 @@ from routers.trips import router as trips_router
 
 app = FastAPI(title="Crew Wallet - Bordkasse")
 
-limiter = Limiter(key_func=get_remote_address, default_limits=["200/hour", "50/minute"])
+# Use shared limiter instance
 app.state.limiter = limiter
 
 # Add custom exception handler for rate limiting to return proper 429 responses

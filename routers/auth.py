@@ -4,14 +4,10 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import User
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from limiter_config import limiter
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
-
-# Create limiter instance for this router
-limiter = Limiter(key_func=get_remote_address)
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
