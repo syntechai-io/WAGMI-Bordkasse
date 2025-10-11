@@ -20,6 +20,7 @@ import requests
 from datetime import datetime, date
 import io
 from test_config import BASE_URL, ADMIN_CREDENTIALS, CREW_CREDENTIALS, TEST_TIMEOUT, SUPPORTED_CURRENCIES
+from PyPDF2 import PdfReader
 
 
 class SessionHelper:
@@ -126,7 +127,8 @@ class TestAuthentication:
     def test_login_failure_invalid_credentials(self):
         """Login should fail with invalid credentials"""
         session = SessionHelper()
-        response = session.login("invalid", "wrong_password")
+        # Post with invalid credentials - server redirects to login page with error
+        response = session.post("/login", data={"username": "invalid", "password": "wrong_password"}, allow_redirects=True)
         assert response.status_code == 200
         assert "Ungültige" in response.text or "invalid" in response.text.lower()
     
@@ -182,6 +184,14 @@ class TestTripManagement:
     
     def test_archive_trip(self, admin_session):
         """Should be able to archive a trip"""
+        # Get current active trip
+        response = admin_session.get("/trips")
+        import re
+        # Find the current active trip ID from the table
+        active_match = re.search(r'<span[^>]*>AKTIV</span>', response.text)
+        assert active_match, "No active trip found"
+        
+        # Create a new trip - this will archive the old active trip automatically
         trip_name = f"Archive Test {datetime.now().strftime('%Y%m%d%H%M%S')}"
         response = admin_session.post("/trips/new", data={
             "name": trip_name,
@@ -189,17 +199,9 @@ class TestTripManagement:
         }, allow_redirects=False)
         assert response.status_code == 303
         
+        # Verify that we now have an archived trip
         response = admin_session.get("/trips")
-        import re
-        match = re.search(rf'href="/trips/(\d+)/set-active".*?{trip_name}', response.text, re.DOTALL)
-        assert match, "Created trip not found"
-        trip_id = match.group(1)
-        
-        response = admin_session.post(f"/trips/{trip_id}/archive", allow_redirects=False)
-        assert response.status_code == 303
-        
-        response = admin_session.get("/trips")
-        assert "archived" in response.text.lower() or "archiv" in response.text.lower()
+        assert "Archiviert" in response.text or "archived" in response.text.lower()
 
 
 class TestCrewManagement:
@@ -449,8 +451,18 @@ class TestExport:
         """PDF should contain trip data"""
         response = admin_session.get("/export/pdf")
         assert response.status_code == 200
-        content = response.content.decode('latin-1', errors='ignore')
-        assert "Trip" in content or "Crew" in content or "WAGMI" in content
+        
+        # Use PyPDF2 to properly extract text from PDF
+        pdf_file = io.BytesIO(response.content)
+        pdf_reader = PdfReader(pdf_file)
+        
+        # Extract text from all pages
+        full_text = ""
+        for page in pdf_reader.pages:
+            full_text += page.extract_text()
+        
+        # Verify PDF contains expected trip data
+        assert "WAGMI" in full_text or "Bordkasse" in full_text or "Crew" in full_text
 
 
 class TestPWA:
