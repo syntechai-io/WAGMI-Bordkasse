@@ -89,6 +89,40 @@ async def delete_crew(
     db: Session = Depends(get_db)
 ):
     member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
-    db.delete(member)
-    db.commit()
-    return RedirectResponse(url="/crew", status_code=303)
+    
+    if not member:
+        return RedirectResponse(url="/crew", status_code=303)
+    
+    # Check if member has deposits or expenses
+    has_deposits = len(member.deposits) > 0
+    has_expenses = len(member.paid_expenses) > 0
+    
+    if has_deposits or has_expenses:
+        crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+        error_msg = f"'{member.name}' kann nicht gelöscht werden, da "
+        if has_deposits and has_expenses:
+            error_msg += "Einzahlungen und Ausgaben existieren."
+        elif has_deposits:
+            error_msg += "Einzahlungen existieren."
+        else:
+            error_msg += "Ausgaben existieren."
+        error_msg += " Bitte löschen Sie zuerst alle verknüpften Einträge."
+        
+        return templates.TemplateResponse("crew_list.html", {
+            "request": request,
+            "crew_members": crew_members,
+            "error": error_msg
+        }, status_code=400)
+    
+    try:
+        db.delete(member)
+        db.commit()
+        return RedirectResponse(url="/crew", status_code=303)
+    except IntegrityError:
+        db.rollback()
+        crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+        return templates.TemplateResponse("crew_list.html", {
+            "request": request,
+            "crew_members": crew_members,
+            "error": f"'{member.name}' kann nicht gelöscht werden. Bitte löschen Sie zuerst alle verknüpften Einträge."
+        }, status_code=400)
