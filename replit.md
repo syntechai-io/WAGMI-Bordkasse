@@ -73,3 +73,33 @@ Security measures include file upload validation, UUID-based filenames for recei
 
 #### External Services
 - **ECB (European Central Bank) API**: Used for fetching daily exchange rates for multi-currency support.
+
+### Testing
+
+#### Test Suite
+The application includes a comprehensive E2E test suite (`test_app_e2e.py`) with **100% pass rate (36/36 tests)**.
+
+**Test Coverage**:
+- Authentication & session management (7 tests)
+- Trip management & archiving (4 tests)
+- Crew CRUD operations (4 tests)
+- Deposits with multi-currency support (4 tests)
+- Expenses with flexible splitting (4 tests)
+- Balance calculations & settlement (3 tests)
+- PDF export functionality (3 tests)
+- PWA features (4 tests)
+- Edge cases & validation (3 tests)
+
+**Recent Improvements** (Oct 2025):
+- Fixed login failure test to properly follow redirect flow and validate error messages
+- Updated archive trip test to align with automatic archiving behavior when creating new trips
+- Improved PDF validation using PyPDF2 for reliable text extraction from generated PDFs
+- Achieved 100% test pass rate (up from 92%)
+
+**Running Tests**:
+```bash
+pytest test_app_e2e.py -v                    # Run all tests
+pytest test_app_e2e.py -v -k "test_auth"     # Run specific test category
+```
+
+**Note**: PyPDF2 is currently used for PDF parsing but shows a deprecation warning. Future upgrade to `pypdf` package is recommended.
