@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, Form
+from fastapi import APIRouter, Request, Depends, Form, UploadFile, File
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -6,12 +6,17 @@ from sqlalchemy.exc import IntegrityError
 from db import get_db
 from models import Expense, ExpenseParticipant, CrewMember, Receipt, PaidFromEnum, SplitModeEnum
 from datetime import date
-from typing import List
+from typing import List, Optional
+from pathlib import Path
+import uuid
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 templates = Jinja2Templates(directory="templates")
 
 CATEGORIES = ["Proviant", "Getränke", "Mooring", "Diesel", "Wasser", "Strom", "Gas", "Taxi/Transfer", "Restaurant", "Eintritte", "Sonstiges"]
+
+ALLOWED_CONTENT_TYPES = {"application/pdf", "image/jpeg", "image/png"}
+MAX_FILE_SIZE = 10 * 1024 * 1024
 
 @router.get("", response_class=HTMLResponse)
 async def list_expenses(request: Request, db: Session = Depends(get_db)):
@@ -36,6 +41,7 @@ async def create_expense(
     paid_from: str = Form(...),
     split_mode: str = Form(...),
     participant_ids: List[int] = Form([]),
+    receipt: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
     expense = Expense(
@@ -60,7 +66,44 @@ async def create_expense(
             db.add(ExpenseParticipant(expense_id=expense.id, member_id=member.id))
     
     db.commit()
-    return RedirectResponse(url="/expenses", status_code=303)
+    
+    # Handle receipt upload if provided
+    receipt_uploaded = False
+    if receipt and receipt.filename:
+        if receipt.content_type in ALLOWED_CONTENT_TYPES:
+            content = await receipt.read()
+            if len(content) <= MAX_FILE_SIZE:
+                ext_map = {
+                    "application/pdf": ".pdf",
+                    "image/jpeg": ".jpg",
+                    "image/png": ".png"
+                }
+                ext = ext_map.get(receipt.content_type, ".bin")
+                
+                filename = str(uuid.uuid4()) + ext
+                filepath = Path("uploads") / filename
+                
+                # Ensure uploads directory exists
+                Path("uploads").mkdir(exist_ok=True)
+                
+                filepath.write_bytes(content)
+                
+                receipt_record = Receipt(
+                    expense_id=expense.id,
+                    stored_filename=filename,
+                    original_name=receipt.filename or "unknown",
+                    content_type=receipt.content_type,
+                    size_bytes=len(content)
+                )
+                db.add(receipt_record)
+                db.commit()
+                receipt_uploaded = True
+    
+    # Redirect to detail page if receipt was uploaded, otherwise to list
+    if receipt_uploaded:
+        return RedirectResponse(url=f"/expenses/{expense.id}", status_code=303)
+    else:
+        return RedirectResponse(url="/expenses", status_code=303)
 
 @router.get("/{expense_id}", response_class=HTMLResponse)
 async def expense_detail(
