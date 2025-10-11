@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Receipt, Expense
@@ -7,6 +8,7 @@ from pathlib import Path
 import uuid
 
 router = APIRouter(prefix="/receipts", tags=["receipts"])
+templates = Jinja2Templates(directory="templates")
 
 ALLOWED_CONTENT_TYPES = {"application/pdf", "image/jpeg", "image/png"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -50,8 +52,32 @@ async def upload_receipt(
     
     return RedirectResponse(url=f"/expenses/{expense_id}", status_code=303)
 
-@router.get("/{receipt_id}")
-async def get_receipt(
+@router.get("/{receipt_id}", response_class=HTMLResponse)
+async def view_receipt(
+    request: Request,
+    receipt_id: str,
+    db: Session = Depends(get_db)
+):
+    filepath = Path("uploads") / receipt_id
+    
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    receipt = db.query(Receipt).filter(Receipt.stored_filename == receipt_id).first()
+    
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    return templates.TemplateResponse("receipt_view.html", {
+        "request": request,
+        "filename": receipt.stored_filename,
+        "original_name": receipt.original_name,
+        "content_type": receipt.content_type,
+        "expense_id": receipt.expense_id
+    })
+
+@router.get("/download/{receipt_id}")
+async def download_receipt(
     receipt_id: str,
     db: Session = Depends(get_db)
 ):

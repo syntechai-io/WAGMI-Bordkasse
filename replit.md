@@ -46,6 +46,8 @@ Key features:
   - Supports PDF, JPG, PNG (max 10MB)
   - Automatic redirect to detail page when receipt is uploaded
   - Simple and robust browser-native implementation
+  - Receipt viewer page with navigation (Dashboard & Back buttons)
+  - Users can always navigate back from receipt view
 
 ## User Preferences
 

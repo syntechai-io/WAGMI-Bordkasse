@@ -54,7 +54,7 @@
             {% if expense.receipts %}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {% for receipt in expense.receipts %}
-                <a href="/receipts/{{ receipt.stored_filename }}" target="_blank" class="block porthole-card p-3 touch-action" style="transition: transform 0.2s; border-color: var(--sky-blue);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                <a href="/receipts/{{ receipt.stored_filename }}" class="block porthole-card p-3 touch-action" style="transition: transform 0.2s; border-color: var(--sky-blue);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                     <p class="text-sm font-medium truncate" style="color: var(--navy-deep);">{{ receipt.original_name }}</p>
                     <p class="text-xs" style="color: var(--navy-deep); opacity: 0.6;">{{ (receipt.size_bytes / 1024) | round(1) }} KB</p>
                 </a>

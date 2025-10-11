@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📎 Beleg ansehen</h1>
+        <div class="flex gap-4">
+            <a href="/" class="px-4 py-2 rounded-lg font-semibold transition touch-action" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%); color: white;">
+                🏠 Dashboard
+            </a>
+            <a href="/expenses/{{ expense_id }}" class="px-4 py-2 rounded-lg font-semibold transition touch-action" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #0056a3 100%); color: white;">
+                ← Zurück zur Ausgabe
+            </a>
+        </div>
+    </div>
+    
+    <div class="bg-white porthole-card p-6">
+        <div class="mb-4">
+            <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📁 Dateiname</p>
+            <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ original_name }}</p>
+        </div>
+        
+        <div class="rope-divider"></div>
+        
+        <div class="mt-6">
+            {% if content_type == 'application/pdf' %}
+            <div class="bg-gray-100 rounded-lg p-4 text-center">
+                <p class="mb-4" style="color: var(--navy-deep);">📄 PDF-Dokument</p>
+                <a href="/receipts/download/{{ filename }}" download="{{ original_name }}" class="inline-block px-6 py-3 rounded-lg font-semibold transition touch-action" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%); color: white;">
+                    💾 PDF herunterladen
+                </a>
+                <div class="mt-6">
+                    <iframe src="/receipts/download/{{ filename }}" class="w-full" style="height: 70vh; border: 2px solid var(--sky-blue); border-radius: 0.5rem;"></iframe>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center">
+                <img src="/receipts/download/{{ filename }}" alt="{{ original_name }}" class="max-w-full h-auto mx-auto rounded-lg shadow-lg" style="max-height: 70vh; border: 2px solid var(--sky-blue);">
+                <div class="mt-4">
+                    <a href="/receipts/download/{{ filename }}" download="{{ original_name }}" class="inline-block px-6 py-3 rounded-lg font-semibold transition touch-action" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%); color: white;">
+                        💾 Bild herunterladen
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
