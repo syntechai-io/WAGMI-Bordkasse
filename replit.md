@@ -23,6 +23,14 @@ Key features:
 - Robust error handling for edge cases (stale IDs, deleted records, concurrent modifications)
 - User-friendly error messages displayed when records are not found or cannot be modified
 - Crew member deletion now validates for related deposits/expenses before allowing deletion
+- **Implemented complete maritime/nautical UI theme** for sailing crew use case:
+  - Maritime color palette: navy-deep (#1e3a5f), ocean-blue (#0077be), sea-foam (#2ecc71), coral (#ff6b35), sand (#d4a574)
+  - Porthole-style cards with sky-blue rounded borders
+  - Rope dividers with dashed sandy borders
+  - Nautical emojis throughout (⚓🌊💰⛵📊👥📂)
+  - Maritime gradient buttons (ocean, sea-foam, coral, purple with sailboat)
+  - Ship wheel branding and anchor navigation icons
+  - Wave-themed borders and maritime typography (Bebas Neue headers)
 
 ## User Preferences
 
@@ -109,6 +117,16 @@ Preferred communication style: Simple, everyday language.
 - Viewport settings prevent zoom on input focus (font-size: 16px)
 - Sticky navigation with mobile menu toggle
 - Bottom padding accommodation for mobile browsers
+
+**Maritime UI Theme**:
+- Complete nautical design aesthetic with ocean blues, sea-foam greens, coral oranges, and sandy gold
+- Custom CSS properties for maritime color palette (--navy-deep, --ocean-blue, --sea-foam, --coral, --sand)
+- Porthole-card styling for all containers (rounded borders with sky-blue color)
+- Rope dividers for section separation (dashed sandy borders)
+- Maritime gradient buttons and status badges throughout
+- Nautical emojis and ship wheel branding
+- Bebas Neue font for headers with maritime letter-spacing
+- Zero Tailwind gray colors - 100% maritime palette compliance
 
 **Key Design Decisions**:
 
