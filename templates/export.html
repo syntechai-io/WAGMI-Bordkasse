@@ -27,7 +27,7 @@
 </div>
 
 <script>
-document.getElementById('downloadBtn').addEventListener('click', async function() {
+document.getElementById('downloadBtn').addEventListener('click', function() {
     const btn = this;
     const downloadText = document.getElementById('downloadText');
     const downloadLoading = document.getElementById('downloadLoading');
@@ -38,31 +38,24 @@ document.getElementById('downloadBtn').addEventListener('click', async function(
     btn.disabled = true;
     btn.style.opacity = '0.7';
     
-    try {
-        const response = await fetch('/export/download');
-        const blob = await response.blob();
-        
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'crew_wallet_export.csv';
-        document.body.appendChild(a);
-        a.click();
-        
-        // Cleanup
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    } catch (error) {
-        console.error('Download failed:', error);
-        alert('Download fehlgeschlagen. Bitte versuchen Sie es erneut.');
-    } finally {
-        // Reset button state
+    // Create hidden iframe for download
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = '/export/download';
+    document.body.appendChild(iframe);
+    
+    // Reset button state after a short delay
+    setTimeout(function() {
         downloadText.classList.remove('hidden');
         downloadLoading.classList.add('hidden');
         btn.disabled = false;
         btn.style.opacity = '1';
-    }
+        
+        // Remove iframe after download initiated
+        setTimeout(function() {
+            document.body.removeChild(iframe);
+        }, 1000);
+    }, 500);
 });
 </script>
 {% endblock %}
