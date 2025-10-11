@@ -59,7 +59,7 @@ class CrewMember(Base):
     )
     
     id = Column(Integer, primary_key=True, index=True)
-    trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False)
+    trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
     code = Column(String(20), nullable=False, index=True)
     name = Column(String(100), nullable=False)
     iban_or_handle = Column(String(100), nullable=True)
@@ -78,8 +78,8 @@ class Deposit(Base):
     )
     
     id = Column(Integer, primary_key=True, index=True)
-    trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False)
-    member_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False)
+    trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
+    member_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False, index=True)
     amount = Column(Float, nullable=False)
     currency = Column(SQLEnum(Currency), nullable=False, default=Currency.EUR)
     amount_eur = Column(Float, nullable=False)
@@ -106,8 +106,8 @@ class Expense(Base):
     )
     
     id = Column(Integer, primary_key=True, index=True)
-    trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False)
-    payer_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False)
+    trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
+    payer_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False, index=True)
     date = Column(Date, nullable=False)
     category = Column(String(50), nullable=False)
     description = Column(String(200), nullable=False)
@@ -127,8 +127,8 @@ class ExpenseParticipant(Base):
     __tablename__ = "expense_participants"
     
     id = Column(Integer, primary_key=True, index=True)
-    expense_id = Column(Integer, ForeignKey("expenses.id"), nullable=False)
-    member_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False)
+    expense_id = Column(Integer, ForeignKey("expenses.id"), nullable=False, index=True)
+    member_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False, index=True)
     
     expense = relationship("Expense", back_populates="participants")
     member = relationship("CrewMember", back_populates="expense_participations")
@@ -137,7 +137,7 @@ class Receipt(Base):
     __tablename__ = "receipts"
     
     id = Column(Integer, primary_key=True, index=True)
-    expense_id = Column(Integer, ForeignKey("expenses.id"), nullable=False)
+    expense_id = Column(Integer, ForeignKey("expenses.id"), nullable=False, index=True)
     stored_filename = Column(String(100), nullable=False)
     original_name = Column(String(200), nullable=False)
     content_type = Column(String(50), nullable=False)

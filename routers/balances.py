@@ -13,33 +13,66 @@ templates = Jinja2Templates(directory="templates")
 
 def calculate_balances(db: Session, trip_id: int):
     crew_members = db.query(CrewMember).filter(CrewMember.trip_id == trip_id).all()
+    member_ids = [m.id for m in crew_members]
+    
+    # Pre-calculate deposits per member in one query
+    deposits_by_member = {}
+    deposit_sums = db.query(
+        Deposit.member_id,
+        func.sum(Deposit.amount_eur).label('total')
+    ).filter(
+        Deposit.trip_id == trip_id
+    ).group_by(Deposit.member_id).all()
+    for member_id, total in deposit_sums:
+        deposits_by_member[member_id] = total or 0.0
+    
+    # Pre-calculate private expenses per member in one query
+    private_expenses_by_member = {}
+    private_sums = db.query(
+        Expense.payer_id,
+        func.sum(Expense.amount_eur).label('total')
+    ).filter(
+        Expense.trip_id == trip_id,
+        Expense.paid_from == PaidFromEnum.private
+    ).group_by(Expense.payer_id).all()
+    for payer_id, total in private_sums:
+        private_expenses_by_member[payer_id] = total or 0.0
+    
+    # Pre-calculate participant counts per expense in one query (filtered by trip)
+    participant_counts = {}
+    count_query = db.query(
+        ExpenseParticipant.expense_id,
+        func.count(ExpenseParticipant.member_id).label('count')
+    ).join(Expense).filter(
+        Expense.trip_id == trip_id
+    ).group_by(ExpenseParticipant.expense_id).all()
+    for expense_id, count in count_query:
+        participant_counts[expense_id] = count
+    
+    # Get all participations for this trip's members in one query
+    participations_by_member = {}
+    participations = db.query(ExpenseParticipant, Expense).join(Expense).filter(
+        Expense.trip_id == trip_id,
+        ExpenseParticipant.member_id.in_(member_ids) if member_ids else False
+    ).all()
+    
+    for participation, expense in participations:
+        if participation.member_id not in participations_by_member:
+            participations_by_member[participation.member_id] = []
+        participations_by_member[participation.member_id].append((participation, expense))
+    
     balances = []
     net_map = {}
     
     for member in crew_members:
-        deposits_total = db.query(func.sum(Deposit.amount_eur)).filter(
-            Deposit.member_id == member.id,
-            Deposit.trip_id == trip_id
-        ).scalar() or 0.0
-        
-        private_paid = db.query(func.sum(Expense.amount_eur)).filter(
-            Expense.payer_id == member.id,
-            Expense.paid_from == PaidFromEnum.private,
-            Expense.trip_id == trip_id
-        ).scalar() or 0.0
-        
-        participations = db.query(ExpenseParticipant).join(Expense).filter(
-            ExpenseParticipant.member_id == member.id,
-            Expense.trip_id == trip_id
-        ).all()
+        deposits_total = deposits_by_member.get(member.id, 0.0)
+        private_paid = private_expenses_by_member.get(member.id, 0.0)
         
         share_owed = 0.0
-        for participation in participations:
-            expense = participation.expense
-            total_participants = db.query(ExpenseParticipant).filter(
-                ExpenseParticipant.expense_id == expense.id
-            ).count()
-            share_owed += expense.amount_eur / total_participants if total_participants > 0 else 0
+        for participation, expense in participations_by_member.get(member.id, []):
+            total_participants = participant_counts.get(expense.id, 0)
+            if total_participants > 0:
+                share_owed += expense.amount_eur / total_participants
         
         paid_total = deposits_total + private_paid
         net = paid_total - share_owed

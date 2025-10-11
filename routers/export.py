@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import StreamingResponse, RedirectResponse, HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from db import get_db
 from models import CrewMember, Deposit, Expense
 from services.trip import TripService
@@ -46,7 +46,7 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
     writer.writerow([])
     writer.writerow(["DEPOSITS"])
     writer.writerow(["ID", "Member Code", "Member Name", "Amount EUR", "Date", "Note"])
-    for deposit in db.query(Deposit).filter(Deposit.trip_id == active_trip.id).all():
+    for deposit in db.query(Deposit).options(joinedload(Deposit.member)).filter(Deposit.trip_id == active_trip.id).all():
         writer.writerow([
             deposit.id,
             deposit.member.code,
@@ -59,7 +59,10 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
     writer.writerow([])
     writer.writerow(["EXPENSES"])
     writer.writerow(["ID", "Payer Code", "Payer Name", "Date", "Category", "Description", "Amount EUR", "Paid From", "Split Mode", "Participants"])
-    for expense in db.query(Expense).filter(Expense.trip_id == active_trip.id).all():
+    for expense in db.query(Expense).options(
+        joinedload(Expense.payer),
+        joinedload(Expense.participants).joinedload('member')
+    ).filter(Expense.trip_id == active_trip.id).all():
         participants = ", ".join([p.member.code for p in expense.participants])
         writer.writerow([
             expense.id,
@@ -145,7 +148,7 @@ async def download_pdf(request: Request, db: Session = Depends(get_db)):
     # Deposits
     elements.append(Paragraph("💰 Deposits", section_style))
     deposit_data = [["ID", "Member", "Amount EUR", "Date", "Note"]]
-    for deposit in db.query(Deposit).filter(Deposit.trip_id == active_trip.id).all():
+    for deposit in db.query(Deposit).options(joinedload(Deposit.member)).filter(Deposit.trip_id == active_trip.id).all():
         deposit_data.append([
             str(deposit.id),
             f"{deposit.member.code} - {deposit.member.name}",
@@ -171,7 +174,7 @@ async def download_pdf(request: Request, db: Session = Depends(get_db)):
     # Expenses
     elements.append(Paragraph("📊 Expenses", section_style))
     expense_data = [["ID", "Payer", "Date", "Category", "Description", "Amount EUR", "From", "Split"]]
-    for expense in db.query(Expense).filter(Expense.trip_id == active_trip.id).all():
+    for expense in db.query(Expense).options(joinedload(Expense.payer)).filter(Expense.trip_id == active_trip.id).all():
         desc = str(expense.description)
         expense_data.append([
             str(expense.id),
