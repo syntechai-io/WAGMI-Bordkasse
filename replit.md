@@ -22,6 +22,7 @@ Preferred communication style: Simple, everyday language.
 - **File Upload Security**: UUID-based filenames, type validation (PDF/JPG/PNG), and size limits (10MB) for receipt uploads.
 - **Trip Management**: Introduced a `Trip` model to organize expenses and deposits, supporting active and archived trips, with all data scoped to a specific trip.
 - **Multi-Currency Support**: Integrated ECB API for daily exchange rates to convert DKK, SEK, GBP to EUR for calculations, with rates cached to minimize API calls.
+- **Performance Optimization** (Oct 2025): Eliminated N+1 query problems through pre-aggregation with GROUP BY, eager loading with joinedload(), and database indexes on all foreign keys. Balances calculation reduced from O(n*m) queries to O(1) with 4-5 total queries.
 
 #### Data Model
 
