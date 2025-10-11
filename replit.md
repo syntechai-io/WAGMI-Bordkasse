@@ -16,6 +16,14 @@ Key features:
 
 ## Recent Changes
 
+**October 11, 2025 - PWA Icon Implementation**:
+- **Added Professional PWA Icons**: Created custom app icons for home screen installation
+  - Generated 192x192px and 512x512px maritime-themed icons with WAGMI Bordkasse branding
+  - Icons feature circular badge design with sailboat silhouette and navy-deep background
+  - Updated manifest.json with correct app name "WAGMI Bordkasse" and theme color (#1e3a5f)
+  - PWA now displays professional branding when installed on mobile/desktop devices
+  - Offline capability fully functional with service worker caching
+
 **October 11, 2025 - PDF Export Implementation**:
 - **Replaced CSV with PDF Export**: Implemented professional PDF export using ReportLab
   - Maritime-themed PDF with color-coded tables (crew: ocean blue, deposits: sea-foam, expenses: coral)
