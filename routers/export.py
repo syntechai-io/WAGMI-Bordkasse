@@ -3,14 +3,13 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from db import get_db
 from models import CrewMember, Deposit, Expense
-from security import require_admin
 import io
 import csv
 
 router = APIRouter(prefix="/export", tags=["export"])
 
 @router.get("/csv")
-async def export_csv(request: Request, db: Session = Depends(get_db), user = Depends(require_admin)):
+async def export_csv(request: Request, db: Session = Depends(get_db)):
     output = io.StringIO()
     writer = csv.writer(output)
     

@@ -2,16 +2,17 @@
 
 ## Overview
 
-Crew Wallet is a minimalist expense tracking and settlement application designed for sailing crew members to manage shared expenses during trips. The application allows crew members to track deposits into a shared wallet, record expenses (both from the wallet and private payments), and automatically calculate who owes whom at the end of the trip using an optimized settlement algorithm.
+Crew Wallet is a minimalist expense tracking and settlement application designed for sailing crew members to manage shared expenses during trips. The application works without login/authentication and allows up to 12 crew members to track deposits into a shared wallet, record expenses (both from the wallet and private payments), and automatically calculate who owes whom at the end of the trip using an optimized settlement algorithm.
 
 Key features:
-- Crew member management with unique codes and payment handles (IBAN/PayPal/etc.)
+- **No authentication required** - instant access without login
+- Crew member management for up to 12 members with unique codes (up to 20 chars) and payment handles (IBAN/PayPal/etc.)
 - Deposit tracking into shared wallet
 - Expense recording with flexible split modes (equal split or specific participants)
-- Receipt upload and storage for expenses
+- Receipt upload and storage for expenses with camera integration
 - Automatic balance calculation and minimal settlement transfers
 - CSV export functionality
-- Progressive Web App (PWA) support for mobile usage
+- Progressive Web App (PWA) support for mobile usage and home screen installation
 
 ## User Preferences
 
@@ -22,10 +23,9 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 
 **Framework**: FastAPI (Python)
-- Router-based modular structure with separate modules for auth, crew, deposits, expenses, receipts, balances, and export
-- Session-based authentication using itsdangerous serializer
-- CSRF protection for all mutating operations
-- Dependency injection for database sessions and authentication
+- Router-based modular structure with separate modules for crew, deposits, expenses, receipts, balances, and export
+- **No authentication required** - open access model for trusted crew environments
+- Dependency injection for database sessions
 
 **Template Engine**: Jinja2
 - Server-side rendering for all pages
@@ -40,19 +40,17 @@ Preferred communication style: Simple, everyday language.
 
 **Key Architectural Decisions**:
 
-1. **Modular Router Structure**: Split functionality into domain-specific routers (auth, crew, deposits, expenses, etc.) for maintainability and clear separation of concerns. This allows independent development and testing of features.
+1. **Modular Router Structure**: Split functionality into domain-specific routers (crew, deposits, expenses, etc.) for maintainability and clear separation of concerns. This allows independent development and testing of features.
 
-2. **Session-Based Authentication**: Simple admin-only authentication using session cookies with URLSafeTimedSerializer. Chosen for simplicity over JWT/OAuth as the application has a single admin user. Sessions expire after 24 hours for security.
+2. **No Authentication Model**: Removed authentication system for instant access. Designed for trusted crew environments on sailing trips where simplicity and speed are prioritized. The app is intended for temporary use during a single trip without long-term data retention.
 
-3. **CSRF Protection Pattern**: Every mutating POST request requires a CSRF token stored in session and validated on submission. This prevents cross-site request forgery attacks while maintaining simplicity.
-
-4. **File Upload Security**: Receipts are stored with UUID-based filenames to prevent directory traversal attacks. File type validation (PDF/JPG/PNG only) and size limits (10MB max) enforce security boundaries.
+3. **File Upload Security**: Receipts are stored with UUID-based filenames to prevent directory traversal attacks. File type validation (PDF/JPG/PNG only) and size limits (10MB max) enforce security boundaries.
 
 ### Data Model
 
 **Core Entities**:
 
-1. **CrewMember**: Stores crew member information with unique code (max 8 chars), name, and optional payment handle (IBAN/PayPal/Revolut)
+1. **CrewMember**: Stores crew member information with unique code (up to 20 chars, supporting 12+ members), name, and optional payment handle (IBAN/PayPal/Revolut)
 
 2. **Deposit**: Records money added to shared wallet by crew members, including amount, date, and optional note
 
@@ -78,21 +76,15 @@ Preferred communication style: Simple, everyday language.
 
 **Rationale**: Minimizes number of transactions needed, making settlement more practical. Alternative approaches like full graph optimization were considered but rejected for complexity vs. benefit tradeoff.
 
-### Authentication & Security
-
-**Authentication**: 
-- Environment variable-based admin credentials (ADMIN_USER, ADMIN_PASSWORD)
-- Session secret key from environment or generated randomly
-- Token-based session storage with 24-hour expiration
-- No user registration - admin-only access model
+### Security
 
 **Security Measures**:
-- CSRF tokens for all state-changing operations
 - File upload validation (type, size, sanitized storage)
-- Session middleware for secure cookie handling
+- UUID-based filename generation to prevent directory traversal
 - Input validation through Pydantic schemas
+- No authentication required - designed for trusted crew environments on isolated sailing trips
 
-**Tradeoffs**: Chose simplicity over multi-user authentication system as application targets small crew groups with trusted admin. Could be extended with PIN-based crew access if needed.
+**Design Philosophy**: Prioritizes simplicity and instant access over authentication complexity. The app is intended for temporary use during a single sailing trip with a small, trusted group. Data is not persisted beyond the trip duration.
 
 ### Frontend Architecture
 
@@ -123,9 +115,8 @@ Preferred communication style: Simple, everyday language.
 - **SQLAlchemy**: ORM for database operations
 - **Jinja2**: Template engine for HTML rendering
 - **python-multipart**: File upload handling
-- **itsdangerous**: Session token serialization and CSRF token generation
 - **python-dotenv**: Environment variable management
-- **Starlette**: ASGI framework (FastAPI dependency) providing session middleware
+- **Starlette**: ASGI framework (FastAPI dependency)
 
 ### Frontend Libraries (CDN)
 - **Tailwind CSS**: Utility-first CSS framework
@@ -142,9 +133,7 @@ Preferred communication style: Simple, everyday language.
 - Supported formats: PDF, JPG, PNG
 
 ### Environment Variables
-- `ADMIN_USER`: Administrator username (default: "admin")
-- `ADMIN_PASSWORD`: Administrator password (default: "changeme123")
-- `SESSION_SECRET`: Secret key for session signing (auto-generated if not provided)
+- No environment variables required (authentication removed)
 
 ### No External Services
 The application is designed to run completely self-contained without external APIs, cloud storage, or third-party authentication services. This ensures functionality even in offline/boat environments.

@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException, Form
+from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Receipt, Expense
-from security import require_admin, require_csrf
 from pathlib import Path
 import uuid
 
@@ -17,11 +16,8 @@ async def upload_receipt(
     request: Request,
     expense_id: int,
     file: UploadFile = File(...),
-    csrf_token: str = Form(...),
-    db: Session = Depends(get_db),
-    user = Depends(require_admin)
+    db: Session = Depends(get_db)
 ):
-    require_csrf(request, csrf_token)
     
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise HTTPException(status_code=415, detail="Only PDF, JPG, and PNG files are allowed")
@@ -57,8 +53,7 @@ async def upload_receipt(
 @router.get("/{receipt_id}")
 async def get_receipt(
     receipt_id: str,
-    db: Session = Depends(get_db),
-    user = Depends(require_admin)
+    db: Session = Depends(get_db)
 ):
     filepath = Path("uploads") / receipt_id
     

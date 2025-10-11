@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from db import get_db
 from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum
-from security import require_admin, generate_csrf_token
 from settlement import compute_settlement
 
 router = APIRouter(tags=["balances"])
@@ -54,10 +53,8 @@ def calculate_balances(db: Session):
     return balances, net_map
 
 @router.get("/balances", response_class=HTMLResponse)
-async def show_balances(request: Request, db: Session = Depends(get_db), user = Depends(require_admin)):
+async def show_balances(request: Request, db: Session = Depends(get_db)):
     balances, _ = calculate_balances(db)
-    csrf_token = generate_csrf_token()
-    request.session["csrf_token"] = csrf_token
     
     total_deposits = db.query(func.sum(Deposit.amount_eur)).scalar() or 0.0
     wallet_expenses = db.query(func.sum(Expense.amount_eur)).filter(
@@ -68,12 +65,11 @@ async def show_balances(request: Request, db: Session = Depends(get_db), user = 
     return templates.TemplateResponse("balances.html", {
         "request": request,
         "balances": balances,
-        "wallet_balance": round(wallet_balance, 2),
-        "csrf_token": csrf_token
+        "wallet_balance": round(wallet_balance, 2)
     })
 
 @router.get("/settlement", response_class=HTMLResponse)
-async def show_settlement(request: Request, db: Session = Depends(get_db), user = Depends(require_admin)):
+async def show_settlement(request: Request, db: Session = Depends(get_db)):
     balances, net_map = calculate_balances(db)
     transfers = compute_settlement(net_map)
     
@@ -89,11 +85,7 @@ async def show_settlement(request: Request, db: Session = Depends(get_db), user 
             "amount": amount
         })
     
-    csrf_token = generate_csrf_token()
-    request.session["csrf_token"] = csrf_token
-    
     return templates.TemplateResponse("settlement.html", {
         "request": request,
-        "transfers": settlement_data,
-        "csrf_token": csrf_token
+        "transfers": settlement_data
     })

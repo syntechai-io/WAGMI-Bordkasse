@@ -10,7 +10,7 @@ class CrewMember(Base):
     __tablename__ = "crew_members"
     
     id = Column(Integer, primary_key=True, index=True)
-    code = Column(String(8), unique=True, nullable=False, index=True)
+    code = Column(String(20), unique=True, nullable=False, index=True)
     name = Column(String(100), nullable=False)
     iban_or_handle = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

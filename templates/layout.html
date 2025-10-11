@@ -46,10 +46,7 @@
                     <a href="/expenses" class="block py-2 lg:py-0 hover:text-blue-200 transition touch-action">Ausgaben</a>
                     <a href="/balances" class="block py-2 lg:py-0 hover:text-blue-200 transition touch-action">Salden</a>
                     <a href="/settlement" class="block py-2 lg:py-0 hover:text-blue-200 transition touch-action">Ausgleich</a>
-                    <form action="/logout" method="post" class="inline">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                        <button type="submit" class="block py-2 lg:py-0 hover:text-blue-200 transition touch-action">Logout</button>
-                    </form>
+                    <a href="/export/csv" class="block py-2 lg:py-0 hover:text-blue-200 transition touch-action">Export CSV</a>
                 </div>
             </div>
             <div id="mobile-menu" class="hidden lg:hidden pb-4">
@@ -59,10 +56,7 @@
                 <a href="/expenses" class="block py-2 hover:text-blue-200 transition touch-action">Ausgaben</a>
                 <a href="/balances" class="block py-2 hover:text-blue-200 transition touch-action">Salden</a>
                 <a href="/settlement" class="block py-2 hover:text-blue-200 transition touch-action">Ausgleich</a>
-                <form action="/logout" method="post" class="inline">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <button type="submit" class="block py-2 hover:text-blue-200 transition touch-action">Logout</button>
-                </form>
+                <a href="/export/csv" class="block py-2 hover:text-blue-200 transition touch-action">Export CSV</a>
             </div>
         </div>
     </nav>

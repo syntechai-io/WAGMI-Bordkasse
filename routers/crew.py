@@ -4,30 +4,23 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import CrewMember
-from security import require_admin, generate_csrf_token, require_csrf
 
 router = APIRouter(prefix="/crew", tags=["crew"])
 templates = Jinja2Templates(directory="templates")
 
 @router.get("", response_class=HTMLResponse)
-async def list_crew(request: Request, db: Session = Depends(get_db), user = Depends(require_admin)):
+async def list_crew(request: Request, db: Session = Depends(get_db)):
     crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
-    csrf_token = generate_csrf_token()
-    request.session["csrf_token"] = csrf_token
     return templates.TemplateResponse("crew_list.html", {
         "request": request,
-        "crew_members": crew_members,
-        "csrf_token": csrf_token
+        "crew_members": crew_members
     })
 
 @router.get("/new", response_class=HTMLResponse)
-async def new_crew_form(request: Request, user = Depends(require_admin)):
-    csrf_token = generate_csrf_token()
-    request.session["csrf_token"] = csrf_token
+async def new_crew_form(request: Request):
     return templates.TemplateResponse("crew_form.html", {
         "request": request,
-        "member": None,
-        "csrf_token": csrf_token
+        "member": None
     })
 
 @router.post("/new")
@@ -36,11 +29,8 @@ async def create_crew(
     code: str = Form(...),
     name: str = Form(...),
     iban_or_handle: str = Form(""),
-    csrf_token: str = Form(...),
-    db: Session = Depends(get_db),
-    user = Depends(require_admin)
+    db: Session = Depends(get_db)
 ):
-    require_csrf(request, csrf_token)
     member = CrewMember(code=code, name=name, iban_or_handle=iban_or_handle or None)
     db.add(member)
     db.commit()
@@ -50,16 +40,12 @@ async def create_crew(
 async def edit_crew_form(
     request: Request,
     member_id: int,
-    db: Session = Depends(get_db),
-    user = Depends(require_admin)
+    db: Session = Depends(get_db)
 ):
     member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
-    csrf_token = generate_csrf_token()
-    request.session["csrf_token"] = csrf_token
     return templates.TemplateResponse("crew_form.html", {
         "request": request,
-        "member": member,
-        "csrf_token": csrf_token
+        "member": member
     })
 
 @router.post("/{member_id}/edit")
@@ -69,11 +55,8 @@ async def update_crew(
     code: str = Form(...),
     name: str = Form(...),
     iban_or_handle: str = Form(""),
-    csrf_token: str = Form(...),
-    db: Session = Depends(get_db),
-    user = Depends(require_admin)
+    db: Session = Depends(get_db)
 ):
-    require_csrf(request, csrf_token)
     member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
     member.code = code
     member.name = name
@@ -85,11 +68,8 @@ async def update_crew(
 async def delete_crew(
     request: Request,
     member_id: int,
-    csrf_token: str = Form(...),
-    db: Session = Depends(get_db),
-    user = Depends(require_admin)
+    db: Session = Depends(get_db)
 ):
-    require_csrf(request, csrf_token)
     member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
     db.delete(member)
     db.commit()
