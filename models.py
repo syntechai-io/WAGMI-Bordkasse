@@ -97,6 +97,7 @@ class PaidFromEnum(str, enum.Enum):
 class SplitModeEnum(str, enum.Enum):
     equal = "equal"
     participants = "participants"
+    percentage = "percentage"
 
 class Expense(Base):
     __tablename__ = "expenses"
@@ -125,10 +126,14 @@ class Expense(Base):
 
 class ExpenseParticipant(Base):
     __tablename__ = "expense_participants"
+    __table_args__ = (
+        CheckConstraint('percentage > 0 AND percentage <= 100', name='check_percentage_valid'),
+    )
     
     id = Column(Integer, primary_key=True, index=True)
     expense_id = Column(Integer, ForeignKey("expenses.id"), nullable=False, index=True)
     member_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False, index=True)
+    percentage = Column(Float, nullable=True)
     
     expense = relationship("Expense", back_populates="participants")
     member = relationship("CrewMember", back_populates="expense_participations")
@@ -145,3 +150,19 @@ class Receipt(Base):
     uploaded_at = Column(DateTime, default=datetime.utcnow)
     
     expense = relationship("Expense", back_populates="receipts")
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    trip_id = Column(Integer, ForeignKey("trips.id"), nullable=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    action = Column(String(50), nullable=False, index=True)
+    entity_type = Column(String(50), nullable=False)
+    entity_id = Column(Integer, nullable=True)
+    details = Column(String(500), nullable=True)
+    ip_address = Column(String(50), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    
+    trip = relationship("Trip")
+    user = relationship("User")

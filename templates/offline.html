@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Offline - WAGMI Bordkasse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --navy-deep: #1e3a5f;
+            --ocean-blue: #0077be;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #e3f2fd 0%, #f8f9fa 100%);
+            min-height: 100vh;
+        }
+        
+        .ocean-gradient {
+            background: linear-gradient(135deg, var(--navy-deep) 0%, var(--ocean-blue) 100%);
+        }
+        
+        .maritime-header {
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 1px;
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg); }
+            75% { transform: rotate(-20deg); }
+        }
+        
+        .wave-animation {
+            animation: wave 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div class="mb-6 wave-animation inline-block text-6xl">⚓</div>
+            <h1 class="text-3xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">
+                Offline Modus
+            </h1>
+            <p class="text-gray-600 mb-6">
+                Sie sind momentan offline. Die App funktioniert weiterhin, aber einige Funktionen sind eingeschränkt.
+            </p>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 text-left">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="text-sm text-gray-700">
+                        <p class="font-semibold mb-1">Was Sie tun können:</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Gespeicherte Daten anzeigen</li>
+                            <li>Änderungen vornehmen (werden synchronisiert)</li>
+                            <li>Offline arbeiten</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6 text-left">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-yellow-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="text-sm text-gray-700">
+                        <p class="font-semibold">Ihre Änderungen werden automatisch synchronisiert, sobald Sie wieder online sind.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="location.reload()" class="w-full ocean-gradient text-white font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition">
+                ⟳ Verbindung erneut versuchen
+            </button>
+            
+            <p class="text-xs text-gray-500 mt-6">
+                Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        window.addEventListener('online', () => {
+            location.reload();
+        });
+    </script>
+</body>
+</html>

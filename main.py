@@ -3,12 +3,17 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from starlette_csrf.middleware import CSRFMiddleware
 from sqlalchemy import func
 from db import init_db, get_db
 from sqlalchemy.orm import Session
 from models import Deposit, Expense, PaidFromEnum, Trip
 from seed_data import seed_database
 from services.trip import TripService
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 import os
 
 from routers.crew import router as crew_router
@@ -22,6 +27,28 @@ from routers.trips import router as trips_router
 
 app = FastAPI(title="Crew Wallet - Bordkasse")
 
+limiter = Limiter(key_func=get_remote_address, default_limits=["200/hour", "50/minute"])
+app.state.limiter = limiter
+
+# Add custom exception handler for rate limiting to return proper 429 responses
+from fastapi.responses import JSONResponse
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """Custom handler that returns 429 Too Many Requests with Retry-After header"""
+    response = JSONResponse(
+        status_code=429,
+        content={
+            "error": "Rate limit exceeded",
+            "message": "Too many requests. Please try again later."
+        }
+    )
+    # Add Retry-After header (60 seconds for minute-based limits)
+    response.headers["Retry-After"] = "60"
+    return response
+
+# Add SlowAPI middleware
+app.add_middleware(SlowAPIMiddleware)
+
 # Auth middleware to protect all routes (must be added BEFORE SessionMiddleware)
 from middleware.auth import AuthMiddleware
 app.add_middleware(AuthMiddleware)
@@ -33,12 +60,23 @@ if not session_secret:
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key=session_secret
+    secret_key=session_secret,
+    max_age=86400,
+    same_site='lax',
+    https_only=False
+)
+
+csrf_secret = os.getenv("CSRF_SECRET", session_secret)
+app.add_middleware(
+    CSRFMiddleware,
+    secret=csrf_secret,
+    sensitive_cookies={"session"}
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-templates = Jinja2Templates(directory="templates")
+from template_helpers import create_templates
+templates = create_templates()
 
 init_db()
 
@@ -97,3 +135,7 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
         "top_categories": top_categories,
         "expense_count": expense_count
     })
+
+@app.get("/offline", response_class=HTMLResponse)
+async def offline_page(request: Request):
+    return templates.TemplateResponse("offline.html", {"request": request})

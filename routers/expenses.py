@@ -48,6 +48,7 @@ async def create_expense(
     paid_from: str = Form(...),
     split_mode: str = Form(...),
     participant_ids: List[int] = Form([]),
+    participant_percentages: List[float] = Form([]),
     receipt: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
@@ -97,13 +98,75 @@ async def create_expense(
             "error": "Ausgabe konnte nicht erstellt werden."
         }, status_code=400)
     
-    if split_mode == "participants" and participant_ids:
+    if split_mode == "percentage":
+        if not participant_ids:
+            db.rollback()
+            db.delete(expense)
+            db.commit()
+            expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+            crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+            return templates.TemplateResponse("expenses.html", {
+                "request": request,
+                "expenses": expenses,
+                "crew_members": crew_members,
+                "categories": CATEGORIES,
+                "error": "Mindestens ein Teilnehmer muss für Prozent-Aufteilung ausgewählt werden."
+            }, status_code=400)
+        
+        if len(participant_ids) != len(participant_percentages):
+            db.rollback()
+            db.delete(expense)
+            db.commit()
+            expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+            crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+            return templates.TemplateResponse("expenses.html", {
+                "request": request,
+                "expenses": expenses,
+                "crew_members": crew_members,
+                "categories": CATEGORIES,
+                "error": "Anzahl der Teilnehmer und Prozentsätze stimmt nicht überein."
+            }, status_code=400)
+        
+        if any(p <= 0 or p > 100 for p in participant_percentages):
+            db.rollback()
+            db.delete(expense)
+            db.commit()
+            expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+            crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+            return templates.TemplateResponse("expenses.html", {
+                "request": request,
+                "expenses": expenses,
+                "crew_members": crew_members,
+                "categories": CATEGORIES,
+                "error": "Jeder Prozentsatz muss zwischen 0 und 100 liegen."
+            }, status_code=400)
+        
+        total_percentage = sum(participant_percentages)
+        if abs(total_percentage - 100.0) > 0.01:
+            db.rollback()
+            db.delete(expense)
+            db.commit()
+            expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+            crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+            return templates.TemplateResponse("expenses.html", {
+                "request": request,
+                "expenses": expenses,
+                "crew_members": crew_members,
+                "categories": CATEGORIES,
+                "error": f"Prozentsätze müssen genau 100% ergeben (aktuell: {total_percentage}%)."
+            }, status_code=400)
+        
+        for pid, percentage in zip(participant_ids, participant_percentages):
+            db.add(ExpenseParticipant(expense_id=expense.id, member_id=pid, percentage=percentage))
+    elif split_mode == "participants" and participant_ids:
+        percentage_per_participant = 100.0 / len(participant_ids)
         for pid in participant_ids:
-            db.add(ExpenseParticipant(expense_id=expense.id, member_id=pid))
+            db.add(ExpenseParticipant(expense_id=expense.id, member_id=pid, percentage=percentage_per_participant))
     elif split_mode == "equal":
         all_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all()
+        percentage_per_member = 100.0 / len(all_members) if all_members else 0
         for member in all_members:
-            db.add(ExpenseParticipant(expense_id=expense.id, member_id=member.id))
+            db.add(ExpenseParticipant(expense_id=expense.id, member_id=member.id, percentage=percentage_per_member))
     
     db.commit()
     
@@ -214,6 +277,7 @@ async def update_expense(
     paid_from: str = Form(...),
     split_mode: str = Form(...),
     participant_ids: List[int] = Form([]),
+    participant_percentages: List[float] = Form([]),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_active_trip(db)
@@ -267,13 +331,71 @@ async def update_expense(
         
         db.query(ExpenseParticipant).filter(ExpenseParticipant.expense_id == expense_id).delete()
         
-        if split_mode == "participants" and participant_ids:
+        if split_mode == "percentage":
+            if not participant_ids:
+                db.rollback()
+                crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+                participant_ids_display = [p.member_id for p in expense.participants]
+                return templates.TemplateResponse("expense_edit.html", {
+                    "request": request,
+                    "expense": expense,
+                    "crew_members": crew_members,
+                    "categories": CATEGORIES,
+                    "participant_ids": participant_ids_display,
+                    "error": "Mindestens ein Teilnehmer muss für Prozent-Aufteilung ausgewählt werden."
+                }, status_code=400)
+            
+            if len(participant_ids) != len(participant_percentages):
+                db.rollback()
+                crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+                participant_ids_display = [p.member_id for p in expense.participants]
+                return templates.TemplateResponse("expense_edit.html", {
+                    "request": request,
+                    "expense": expense,
+                    "crew_members": crew_members,
+                    "categories": CATEGORIES,
+                    "participant_ids": participant_ids_display,
+                    "error": "Anzahl der Teilnehmer und Prozentsätze stimmt nicht überein."
+                }, status_code=400)
+            
+            if any(p <= 0 or p > 100 for p in participant_percentages):
+                db.rollback()
+                crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+                participant_ids_display = [p.member_id for p in expense.participants]
+                return templates.TemplateResponse("expense_edit.html", {
+                    "request": request,
+                    "expense": expense,
+                    "crew_members": crew_members,
+                    "categories": CATEGORIES,
+                    "participant_ids": participant_ids_display,
+                    "error": "Jeder Prozentsatz muss zwischen 0 und 100 liegen."
+                }, status_code=400)
+            
+            total_percentage = sum(participant_percentages)
+            if abs(total_percentage - 100.0) > 0.01:
+                db.rollback()
+                crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+                participant_ids_display = [p.member_id for p in expense.participants]
+                return templates.TemplateResponse("expense_edit.html", {
+                    "request": request,
+                    "expense": expense,
+                    "crew_members": crew_members,
+                    "categories": CATEGORIES,
+                    "participant_ids": participant_ids_display,
+                    "error": f"Prozentsätze müssen genau 100% ergeben (aktuell: {total_percentage}%)."
+                }, status_code=400)
+            
+            for pid, percentage in zip(participant_ids, participant_percentages):
+                db.add(ExpenseParticipant(expense_id=expense.id, member_id=pid, percentage=percentage))
+        elif split_mode == "participants" and participant_ids:
+            percentage_per_participant = 100.0 / len(participant_ids)
             for pid in participant_ids:
-                db.add(ExpenseParticipant(expense_id=expense.id, member_id=pid))
+                db.add(ExpenseParticipant(expense_id=expense.id, member_id=pid, percentage=percentage_per_participant))
         elif split_mode == "equal":
             all_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all()
+            percentage_per_member = 100.0 / len(all_members) if all_members else 0
             for member in all_members:
-                db.add(ExpenseParticipant(expense_id=expense.id, member_id=member.id))
+                db.add(ExpenseParticipant(expense_id=expense.id, member_id=member.id, percentage=percentage_per_member))
         
         db.commit()
         return RedirectResponse(url="/expenses", status_code=303)

@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.11"
 dependencies = [
+    "alembic>=1.17.0",
     "defusedxml>=0.7.1",
     "django-routers>=0.2",
     "fastapi>=0.118.3",
@@ -18,7 +19,9 @@ dependencies = [
     "python-multipart>=0.0.20",
     "reportlab>=4.4.4",
     "requests>=2.32.5",
+    "slowapi>=0.1.9",
     "sqlalchemy>=2.0.44",
+    "starlette-csrf>=3.0.0",
     "starlette>=0.48.0",
     "uvicorn[standard]>=0.37.0",
     "werkzeug>=3.1.3",

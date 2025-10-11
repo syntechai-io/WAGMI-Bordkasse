@@ -4,9 +4,14 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import User
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
+
+# Create limiter instance for this router
+limiter = Limiter(key_func=get_remote_address)
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
@@ -20,13 +25,14 @@ async def login_page(request: Request):
     })
 
 @router.post("/login")
+@limiter.limit("5/minute")
 async def login(
     request: Request,
     username: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    """Process login"""
+    """Process login with rate limiting (5 attempts per minute per IP)"""
     user = db.query(User).filter(User.username == username).first()
     
     if not user or not user.check_password(password):

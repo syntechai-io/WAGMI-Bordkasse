@@ -29,12 +29,33 @@ class SessionHelper:
     def __init__(self):
         self.session = requests.Session()
         self.base_url = BASE_URL
+        self._csrf_token = None
+        
+    def _extract_csrf_token(self, html):
+        """Extract CSRF token from HTML response"""
+        import re
+        match = re.search(r'name="csrf_token"\s+value="([^"]+)"', html)
+        if match:
+            return match.group(1)
+        return None
+        
+    def _get_csrf_token(self):
+        """Get CSRF token by fetching login page"""
+        response = self.session.get(f"{self.base_url}/login", timeout=TEST_TIMEOUT)
+        self._csrf_token = self._extract_csrf_token(response.text)
+        return self._csrf_token
         
     def login(self, username, password):
         """Login and maintain session cookies"""
+        # Get CSRF token first
+        csrf_token = self._get_csrf_token()
+        data = {"username": username, "password": password}
+        if csrf_token:
+            data["csrf_token"] = csrf_token
+            
         response = self.session.post(
             f"{self.base_url}/login",
-            data={"username": username, "password": password},
+            data=data,
             timeout=TEST_TIMEOUT,
             allow_redirects=False
         )
@@ -55,7 +76,15 @@ class SessionHelper:
         return self.session.get(f"{self.base_url}{path}", timeout=TEST_TIMEOUT, **kwargs)
         
     def post(self, path, **kwargs):
-        """POST request with session"""
+        """POST request with session, automatically includes CSRF token"""
+        # Try to get CSRF token from the page we're posting to
+        if 'data' in kwargs and isinstance(kwargs['data'], dict):
+            if 'csrf_token' not in kwargs['data']:
+                # Fetch the form page to get CSRF token
+                form_response = self.session.get(f"{self.base_url}{path.rsplit('/', 1)[0]}", timeout=TEST_TIMEOUT)
+                csrf_token = self._extract_csrf_token(form_response.text)
+                if csrf_token:
+                    kwargs['data']['csrf_token'] = csrf_token
         return self.session.post(f"{self.base_url}{path}", timeout=TEST_TIMEOUT, **kwargs)
         
     def delete(self, path, **kwargs):

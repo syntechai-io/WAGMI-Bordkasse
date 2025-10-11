@@ -1,50 +1,405 @@
-const CACHE_NAME = 'crew-wallet-v1';
-const urlsToCache = [
+const CACHE_VERSION = 'v2';
+const STATIC_CACHE = `crew-wallet-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `crew-wallet-dynamic-${CACHE_VERSION}`;
+const API_CACHE = `crew-wallet-api-${CACHE_VERSION}`;
+const DB_NAME = 'CrewWalletDB';
+const DB_VERSION = 1;
+const SYNC_TAG = 'sync-crew-wallet';
+
+const STATIC_ASSETS = [
   '/',
-  '/static/manifest.json'
+  '/static/manifest.json',
+  '/static/icon-192.png',
+  '/static/icon-512.png',
+  '/static/logo.jpeg',
+  'https://cdn.tailwindcss.com',
+  'https://unpkg.com/htmx.org@1.9.10',
+  'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap'
 ];
 
-self.addEventListener('install', event => {
+const PAGES_TO_CACHE = [
+  '/offline',
+  '/login',
+  '/trips',
+  '/crew',
+  '/deposits',
+  '/expenses',
+  '/balances',
+  '/settlement',
+  '/help'
+];
+
+let db;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (db) {
+      resolve(db);
+      return;
+    }
+
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db = request.result;
+      resolve(db);
+    };
+
+    request.onupgradeneeded = (event) => {
+      const database = event.target.result;
+
+      if (!database.objectStoreNames.contains('pendingRequests')) {
+        const store = database.createObjectStore('pendingRequests', { 
+          keyPath: 'id', 
+          autoIncrement: true 
+        });
+        store.createIndex('timestamp', 'timestamp', { unique: false });
+        store.createIndex('synced', 'synced', { unique: false });
+      }
+
+      if (!database.objectStoreNames.contains('offlineData')) {
+        const dataStore = database.createObjectStore('offlineData', { 
+          keyPath: 'key' 
+        });
+      }
+    };
+  });
+}
+
+async function queueRequest(request, body = null) {
+  const database = await openDB();
+  const tx = database.transaction(['pendingRequests'], 'readwrite');
+  const store = tx.objectStore('pendingRequests');
+
+  const requestData = {
+    url: request.url,
+    method: request.method,
+    headers: [...request.headers.entries()],
+    body: body,
+    timestamp: Date.now(),
+    synced: false
+  };
+
+  await store.add(requestData);
+  
+  if ('sync' in self.registration) {
+    await self.registration.sync.register(SYNC_TAG);
+  }
+}
+
+async function getPendingRequests() {
+  const database = await openDB();
+  const tx = database.transaction(['pendingRequests'], 'readonly');
+  const store = tx.objectStore('pendingRequests');
+  const index = store.index('synced');
+  
+  return new Promise((resolve, reject) => {
+    const request = index.getAll(false);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function markRequestSynced(id) {
+  const database = await openDB();
+  const tx = database.transaction(['pendingRequests'], 'readwrite');
+  const store = tx.objectStore('pendingRequests');
+  
+  const request = await store.get(id);
+  if (request) {
+    request.synced = true;
+    await store.put(request);
+  }
+}
+
+async function deleteSyncedRequests() {
+  const database = await openDB();
+  const tx = database.transaction(['pendingRequests'], 'readwrite');
+  const store = tx.objectStore('pendingRequests');
+  const index = store.index('synced');
+  
+  const syncedRequests = await new Promise((resolve, reject) => {
+    const request = index.getAll(true);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  for (const req of syncedRequests) {
+    await store.delete(req.id);
+  }
+}
+
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    Promise.all([
+      caches.open(STATIC_CACHE).then((cache) => {
+        return cache.addAll(STATIC_ASSETS.concat(PAGES_TO_CACHE)).catch(err => {
+          console.warn('Some assets failed to cache during install:', err);
+        });
+      }),
+      openDB()
+    ]).then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request).then(
-          response => {
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    Promise.all([
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName.startsWith('crew-wallet-') && 
+                cacheName !== STATIC_CACHE && 
+                cacheName !== DYNAMIC_CACHE && 
+                cacheName !== API_CACHE) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
             }
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-            return response;
-          }
+          })
         );
-      })
+      }),
+      deleteSyncedRequests(),
+      self.clients.claim()
+    ])
   );
 });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
+function isStaticAsset(url) {
+  return url.includes('/static/') || 
+         url.includes('tailwindcss.com') || 
+         url.includes('unpkg.com') ||
+         url.includes('googleapis.com') ||
+         url.includes('gstatic.com') ||
+         url.match(/\.(png|jpg|jpeg|svg|gif|woff|woff2|ttf|eot|css|js)$/);
+}
+
+function isAPIRequest(url) {
+  return url.includes('/api/') || 
+         (url.includes('/crew') || 
+          url.includes('/deposits') || 
+          url.includes('/expenses') || 
+          url.includes('/trips')) && 
+         !url.includes('.html');
+}
+
+function isNavigationRequest(request) {
+  return request.mode === 'navigate' || 
+         (request.method === 'GET' && request.headers.get('accept')?.includes('text/html'));
+}
+
+async function cacheFirstStrategy(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse && networkResponse.status === 200) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    console.error('Cache-first strategy failed:', error);
+    throw error;
+  }
+}
+
+async function networkFirstStrategy(request) {
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse && networkResponse.status === 200) {
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    if (isNavigationRequest(request)) {
+      const offlineResponse = await caches.match('/offline');
+      if (offlineResponse) {
+        return offlineResponse;
+      }
+    }
+    
+    throw error;
+  }
+}
+
+async function handleAPIRequest(request) {
+  if (request.method === 'GET') {
+    try {
+      const networkResponse = await fetch(request);
+      if (networkResponse && networkResponse.status === 200) {
+        const cache = await caches.open(API_CACHE);
+        cache.put(request, networkResponse.clone());
+      }
+      return networkResponse;
+    } catch (error) {
+      const cachedResponse = await caches.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return new Response(JSON.stringify({ error: 'Offline - data may be outdated' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+  }
+
+  if (request.method === 'POST' || request.method === 'PUT' || request.method === 'DELETE') {
+    try {
+      const response = await fetch(request);
+      broadcastOnlineStatus(true);
+      return response;
+    } catch (error) {
+      const clonedRequest = request.clone();
+      const body = await clonedRequest.text();
+      
+      await queueRequest(request, body);
+      broadcastOnlineStatus(false);
+      
+      return new Response(JSON.stringify({ 
+        queued: true, 
+        message: 'Request queued for sync when online' 
+      }), {
+        status: 202,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+  }
+
+  return fetch(request);
+}
+
+function broadcastOnlineStatus(isOnline) {
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'ONLINE_STATUS',
+        isOnline: isOnline,
+        timestamp: Date.now()
+      });
+    });
+  });
+}
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  if (url.origin !== location.origin && !isStaticAsset(url.href)) {
+    return;
+  }
+
+  if (isStaticAsset(url.href)) {
+    event.respondWith(cacheFirstStrategy(request));
+  } else if (isAPIRequest(url.href)) {
+    event.respondWith(handleAPIRequest(request));
+  } else {
+    event.respondWith(networkFirstStrategy(request));
+  }
+});
+
+async function syncPendingRequests() {
+  const pendingRequests = await getPendingRequests();
+  const results = [];
+
+  for (const reqData of pendingRequests) {
+    try {
+      const headers = new Headers();
+      reqData.headers.forEach(([key, value]) => {
+        headers.append(key, value);
+      });
+
+      const response = await fetch(reqData.url, {
+        method: reqData.method,
+        headers: headers,
+        body: reqData.body
+      });
+
+      if (response.ok) {
+        await markRequestSynced(reqData.id);
+        results.push({ success: true, url: reqData.url });
+      } else {
+        results.push({ success: false, url: reqData.url, status: response.status });
+      }
+    } catch (error) {
+      console.error('Sync failed for request:', reqData.url, error);
+      results.push({ success: false, url: reqData.url, error: error.message });
+    }
+  }
+
+  await deleteSyncedRequests();
+  
+  return results;
+}
+
+self.addEventListener('sync', (event) => {
+  if (event.tag === SYNC_TAG) {
+    event.waitUntil(
+      syncPendingRequests()
+        .then((results) => {
+          const successCount = results.filter(r => r.success).length;
+          const failCount = results.filter(r => !r.success).length;
+          
+          broadcastOnlineStatus(true);
+          
+          self.clients.matchAll().then(clients => {
+            clients.forEach(client => {
+              client.postMessage({
+                type: 'SYNC_COMPLETE',
+                success: successCount,
+                failed: failCount,
+                timestamp: Date.now()
+              });
+            });
+          });
+
+          if ('Notification' in self && successCount > 0) {
+            self.registration.showNotification('Crew Wallet', {
+              body: `${successCount} Aktionen erfolgreich synchronisiert`,
+              icon: '/static/icon-192.png',
+              badge: '/static/icon-192.png'
+            });
           }
         })
-      );
-    })
-  );
+        .catch((error) => {
+          console.error('Background sync failed:', error);
+        })
+    );
+  }
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'CHECK_ONLINE_STATUS') {
+    fetch('/').then(() => {
+      broadcastOnlineStatus(true);
+    }).catch(() => {
+      broadcastOnlineStatus(false);
+    });
+  }
+});
+
+self.addEventListener('online', () => {
+  broadcastOnlineStatus(true);
+  if ('sync' in self.registration) {
+    self.registration.sync.register(SYNC_TAG).catch(err => {
+      console.error('Failed to register sync:', err);
+    });
+  }
+});
+
+self.addEventListener('offline', () => {
+  broadcastOnlineStatus(false);
 });

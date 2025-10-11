@@ -166,17 +166,130 @@
         </div>
     </footer>
 
+    <div id="offline-indicator" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 hidden transition-all">
+        <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <span>Offline - Änderungen werden synchronisiert</span>
+        </div>
+    </div>
+
+    <div id="sync-notification" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 hidden transition-all">
+        <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span id="sync-message">Synchronisation erfolgreich</span>
+        </div>
+    </div>
+
     <script>
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
 
+        const offlineIndicator = document.getElementById('offline-indicator');
+        const syncNotification = document.getElementById('sync-notification');
+        const syncMessage = document.getElementById('sync-message');
+        let isOnline = navigator.onLine;
+
+        function showOfflineIndicator(show) {
+            if (show) {
+                offlineIndicator.classList.remove('hidden');
+            } else {
+                offlineIndicator.classList.add('hidden');
+            }
+        }
+
+        function showSyncNotification(message, duration = 3000) {
+            syncMessage.textContent = message;
+            syncNotification.classList.remove('hidden');
+            setTimeout(() => {
+                syncNotification.classList.add('hidden');
+            }, duration);
+        }
+
+        window.addEventListener('online', () => {
+            isOnline = true;
+            showOfflineIndicator(false);
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'CHECK_ONLINE_STATUS'
+                });
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            showOfflineIndicator(true);
+        });
+
         if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data.type === 'ONLINE_STATUS') {
+                    if (event.data.isOnline) {
+                        showOfflineIndicator(false);
+                    } else {
+                        showOfflineIndicator(true);
+                    }
+                }
+
+                if (event.data.type === 'SYNC_COMPLETE') {
+                    const { success, failed } = event.data;
+                    if (success > 0) {
+                        showSyncNotification(
+                            `${success} Änderung${success > 1 ? 'en' : ''} erfolgreich synchronisiert`
+                        );
+                    }
+                    if (failed > 0) {
+                        showSyncNotification(
+                            `${failed} Änderung${failed > 1 ? 'en' : ''} konnten nicht synchronisiert werden`,
+                            5000
+                        );
+                    }
+                }
+            });
+
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/static/sw.js')
-                    .then(reg => console.log('Service Worker registered'))
+                    .then(reg => {
+                        console.log('Service Worker registered');
+                        
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    if (confirm('Eine neue Version ist verfügbar. Jetzt aktualisieren?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+
+                        if (!navigator.onLine) {
+                            showOfflineIndicator(true);
+                        }
+
+                        if (navigator.serviceWorker.controller) {
+                            navigator.serviceWorker.controller.postMessage({
+                                type: 'CHECK_ONLINE_STATUS'
+                            });
+                        }
+                    })
                     .catch(err => console.log('Service Worker registration failed:', err));
             });
+
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    console.log('Notification permission:', permission);
+                });
+            }
+        }
+
+        if (!navigator.onLine) {
+            showOfflineIndicator(true);
         }
     </script>
 </body>

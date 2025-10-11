@@ -67,6 +67,7 @@
                 <select name="split_mode" id="split_mode" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
                     <option value="equal" {% if expense and expense.split_mode.value == 'equal' %}selected{% endif %}>Gleichmäßig (alle)</option>
                     <option value="participants" {% if expense and expense.split_mode.value == 'participants' %}selected{% endif %}>Teilnehmer auswählen</option>
+                    <option value="percentage" {% if expense and expense.split_mode.value == 'percentage' %}selected{% endif %}>Prozent-Aufteilung</option>
                 </select>
             </div>
             
@@ -81,6 +82,38 @@
                         <span class="text-lg">{{ member.code }} - {{ member.name }}</span>
                     </label>
                     {% endfor %}
+                </div>
+            </div>
+            
+            <div id="percentage_div" class="md:col-span-2 {% if not expense or expense.split_mode.value != 'percentage' %}hidden{% endif %}">
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">📊 Prozent-Aufteilung</label>
+                <p class="text-sm mb-3" style="color: var(--navy-deep); opacity: 0.8;">Die Prozentsätze müssen 100% ergeben</p>
+                <div class="space-y-3">
+                    {% for member in crew_members %}
+                    <div class="flex items-center gap-3">
+                        <label class="flex items-center space-x-2 flex-1">
+                            <input type="checkbox" name="participant_ids" value="{{ member.id }}" 
+                                {% if member.id in participant_ids %}checked{% endif %}
+                                class="rounded h-5 w-5 percentage-participant">
+                            <span class="text-lg">{{ member.code }} - {{ member.name }}</span>
+                        </label>
+                        <div class="flex items-center gap-1">
+                            <input type="number" 
+                                name="participant_percentages" 
+                                min="0" 
+                                max="100" 
+                                step="0.01" 
+                                value="{% if member.id in participant_percentages %}{{ participant_percentages[member.id] }}{% else %}0{% endif %}"
+                                class="w-24 px-3 py-2 border rounded-lg text-lg percentage-input" 
+                                style="border-color: var(--sky-blue);"
+                                data-member-id="{{ member.id }}">
+                            <span class="text-lg" style="color: var(--navy-deep);">%</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div id="percentage_warning" class="hidden mt-3 text-sm font-medium" style="color: var(--coral);">
+                    ⚠️ Die Summe der Prozentsätze beträgt <span id="percentage_sum">0</span>% (sollte 100% sein)
                 </div>
             </div>
         </div>
@@ -99,13 +132,66 @@
 </div>
 
 <script>
-    document.getElementById('split_mode').addEventListener('change', function() {
-        const participantsDiv = document.getElementById('participants_div');
-        if (this.value === 'participants') {
+    const splitModeSelect = document.getElementById('split_mode');
+    const participantsDiv = document.getElementById('participants_div');
+    const percentageDiv = document.getElementById('percentage_div');
+    const percentageWarning = document.getElementById('percentage_warning');
+    const percentageSumSpan = document.getElementById('percentage_sum');
+    
+    function updateSplitMode() {
+        const mode = splitModeSelect.value;
+        
+        if (mode === 'participants') {
             participantsDiv.classList.remove('hidden');
+            percentageDiv.classList.add('hidden');
+        } else if (mode === 'percentage') {
+            participantsDiv.classList.add('hidden');
+            percentageDiv.classList.remove('hidden');
+            validatePercentages();
         } else {
             participantsDiv.classList.add('hidden');
+            percentageDiv.classList.add('hidden');
         }
+    }
+    
+    function validatePercentages() {
+        const percentageInputs = document.querySelectorAll('.percentage-input');
+        const participantCheckboxes = document.querySelectorAll('.percentage-participant');
+        let sum = 0;
+        
+        percentageInputs.forEach((input, index) => {
+            const checkbox = participantCheckboxes[index];
+            if (checkbox.checked) {
+                sum += parseFloat(input.value) || 0;
+            }
+        });
+        
+        percentageSumSpan.textContent = sum.toFixed(2);
+        
+        if (Math.abs(sum - 100) > 0.01 && sum > 0) {
+            percentageWarning.classList.remove('hidden');
+        } else {
+            percentageWarning.classList.add('hidden');
+        }
+    }
+    
+    splitModeSelect.addEventListener('change', updateSplitMode);
+    
+    document.querySelectorAll('.percentage-input').forEach(input => {
+        input.addEventListener('input', validatePercentages);
     });
+    
+    document.querySelectorAll('.percentage-participant').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const memberId = this.value;
+            const percentageInput = document.querySelector(`.percentage-input[data-member-id="${memberId}"]`);
+            if (!this.checked && percentageInput) {
+                percentageInput.value = '0';
+            }
+            validatePercentages();
+        });
+    });
+    
+    updateSplitMode();
 </script>
 {% endblock %}
