@@ -1,11 +1,11 @@
 {
-  "name": "Crew Wallet - Bordkasse",
-  "short_name": "Crew Wallet",
+  "name": "WAGMI Bordkasse",
+  "short_name": "WAGMI",
   "description": "Bordkassen-Verwaltung für Segeltörns",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#1e40af",
+  "theme_color": "#1e3a5f",
   "orientation": "portrait-primary",
   "icons": [
     {
