@@ -2,9 +2,31 @@ from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKe
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 import enum
 
 Base = declarative_base()
+
+class UserRole(str, enum.Enum):
+    admin = "admin"
+    crew = "crew"
+
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    password_hash = Column(String(200), nullable=False)
+    role = Column(SQLEnum(UserRole), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    def set_password(self, password: str):
+        """Hash and set password"""
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password: str) -> bool:
+        """Verify password against hash"""
+        return check_password_hash(self.password_hash, password)
 
 class CrewMember(Base):
     __tablename__ = "crew_members"
