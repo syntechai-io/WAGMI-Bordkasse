@@ -53,6 +53,11 @@ Key features:
   - Direct link to https://www.paypal.com/pool/9j4PpWiLVC?sr=ancr
   - Opens in new tab for easy crew deposits
   - Clear call-to-action: "Hier ins Wallet einzahlen"
+- **Crew help documentation**:
+  - Comprehensive crew guide (README_CREW.md) for sharing
+  - Integrated help page in app (/help route)
+  - Accessible via "📖 Anleitung" in navigation
+  - Covers login, deposits, expenses, receipts, balances, settlement, and tips
 
 ## User Preferences
 

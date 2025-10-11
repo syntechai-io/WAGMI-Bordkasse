@@ -123,6 +123,7 @@
                     <a href="/balances" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📊 Salden</a>
                     <a href="/settlement" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⛵ Ausgleich</a>
                     <a href="/export/csv" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📋 Export</a>
+                    <a href="/help" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📖 Anleitung</a>
                     {% if request.session.get('user_id') %}
                     <div class="border-l border-sky-300 pl-6 ml-2 flex items-center space-x-4">
                         <span class="text-sm">👤 {{ request.session.get('username', 'User') }}</span>
@@ -141,6 +142,7 @@
                 <a href="/balances" class="block py-2 hover:text-sky-200 transition touch-action">📊 Salden</a>
                 <a href="/settlement" class="block py-2 hover:text-sky-200 transition touch-action">⛵ Ausgleich</a>
                 <a href="/export/csv" class="block py-2 hover:text-sky-200 transition touch-action">📋 Export</a>
+                <a href="/help" class="block py-2 hover:text-sky-200 transition touch-action">📖 Anleitung</a>
                 {% if request.session.get('user_id') %}
                 <div class="border-t border-sky-300 pt-4 mt-4">
                     <div class="text-sm mb-2">👤 Angemeldet als: <strong>{{ request.session.get('username', 'User') }}</strong></div>

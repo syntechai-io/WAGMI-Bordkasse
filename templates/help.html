@@ -1,0 +1,175 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">📖 Anleitung für die Crew</h1>
+    
+    <div class="bg-white porthole-card p-8 prose max-w-none">
+        <div style="color: var(--navy-deep);">
+            
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">🔐 Login</h2>
+            <div class="mb-6">
+                <p class="mb-2"><strong>Zugangsdaten:</strong></p>
+                <ul class="list-disc ml-6 mb-4">
+                    <li><strong>Benutzername:</strong> crew</li>
+                    <li><strong>Passwort:</strong> Bitte beim Skipper erfragen</li>
+                </ul>
+                <p class="text-sm opacity-75">Der Skipper (Sven) hat Admin-Zugang mit erweiterten Rechten.</p>
+            </div>
+
+            <div class="rope-divider"></div>
+
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💰 Einzahlungen ins gemeinsame Wallet</h2>
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">So zahlst du ein:</h3>
+                <ol class="list-decimal ml-6 space-y-2 mb-4">
+                    <li><strong>Klicke auf den PayPal Pool Button</strong> (auf Dashboard oder unter "Einzahlungen")</li>
+                    <li><strong>Zahle deinen Betrag ein</strong> über PayPal (Karte, PayPal-Konto, etc.)</li>
+                    <li><strong>Erfasse die Einzahlung in der App:</strong>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li>Gehe zu <strong>"💰 Einzahlungen"</strong></li>
+                            <li>Wähle dein Crew-Mitglied aus</li>
+                            <li>Gib den Betrag ein</li>
+                            <li>Datum auswählen</li>
+                            <li>Optional: Notiz hinzufügen</li>
+                            <li><strong>"✅ Einzahlung hinzufügen"</strong> klicken</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                    <p class="font-semibold mb-2">💳 PayPal Pool:</p>
+                    <a href="https://www.paypal.com/pool/9j4PpWiLVC?sr=ancr" target="_blank" class="text-blue-600 hover:underline break-all">
+                        https://www.paypal.com/pool/9j4PpWiLVC?sr=ancr
+                    </a>
+                </div>
+            </div>
+
+            <div class="rope-divider"></div>
+
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⚓ Ausgaben erfassen</h2>
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Wenn du vom Wallet bezahlt hast:</h3>
+                <ol class="list-decimal ml-6 space-y-2 mb-4">
+                    <li>Gehe zu <strong>"⚓ Ausgaben"</strong></li>
+                    <li>Klicke <strong>"Neue Ausgabe"</strong></li>
+                    <li>Fülle das Formular aus:
+                        <ul class="list-disc ml-6 mt-2">
+                            <li><strong>Kategorie:</strong> z.B. Verpflegung, Hafengebühren, Diesel</li>
+                            <li><strong>Beschreibung:</strong> Was wurde gekauft?</li>
+                            <li><strong>Betrag:</strong> Wie viel Euro?</li>
+                            <li><strong>Bezahlt von:</strong> Dein Name</li>
+                            <li><strong>Bezahlt aus:</strong> <strong>"wallet"</strong> (vom gemeinsamen Geld)</li>
+                            <li><strong>Aufteilung:</strong> "equal" (alle zahlen gleich viel)</li>
+                            <li><strong>Optional:</strong> Beleg hochladen 📸</li>
+                        </ul>
+                    </li>
+                    <li><strong>"💸 Ausgabe erfassen"</strong> klicken</li>
+                </ol>
+
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Wenn du privat bezahlt hast (Geld zurückhaben):</h3>
+                <p class="mb-2">Gleicher Prozess wie oben, aber bei <strong>"Bezahlt aus"</strong> wählst du <strong>"private"</strong></p>
+                <p class="text-sm opacity-75">Die App berechnet dann automatisch, wer dir wie viel zurückzahlen muss!</p>
+            </div>
+
+            <div class="rope-divider"></div>
+
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📸 Belege hochladen</h2>
+            <div class="mb-6">
+                <p class="mb-4">Du kannst direkt beim Erfassen einer Ausgabe einen Beleg hochladen:</p>
+                <ul class="list-disc ml-6 mb-4">
+                    <li><strong>Am Handy:</strong> Kamera öffnet sich automatisch</li>
+                    <li><strong>Am Computer:</strong> Datei auswählen (PDF, JPG, PNG bis 10MB)</li>
+                </ul>
+                <p class="text-sm opacity-75">Oder später auf der Ausgaben-Detail-Seite nachträglich hinzufügen.</p>
+            </div>
+
+            <div class="rope-divider"></div>
+
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📊 Übersicht & Salden</h2>
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Dashboard (Startseite)</h3>
+                <ul class="list-disc ml-6 mb-4">
+                    <li>Zeigt aktuellen <strong>Wallet-Saldo</strong></li>
+                    <li><strong>Gesamte Einzahlungen</strong> und <strong>Ausgaben</strong></li>
+                    <li><strong>Top Kategorien</strong> - wo wurde am meisten ausgegeben?</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Salden anzeigen</h3>
+                <p>Gehe zu <strong>"📊 Salden"</strong> um zu sehen:</p>
+                <ul class="list-disc ml-6 mb-4">
+                    <li>Wer wie viel eingezahlt hat</li>
+                    <li>Wer wie viel Anteil an Ausgaben hat</li>
+                    <li>Wer im Plus oder Minus ist</li>
+                </ul>
+            </div>
+
+            <div class="rope-divider"></div>
+
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⛵ Ausgleich berechnen</h2>
+            <div class="mb-6">
+                <p class="mb-2">Am Ende des Törns:</p>
+                <ol class="list-decimal ml-6 space-y-2">
+                    <li>Gehe zu <strong>"⛵ Ausgleich"</strong></li>
+                    <li>Die App zeigt dir <strong>minimale Überweisungen</strong>, um alle Schulden auszugleichen</li>
+                    <li>Beispiel: "A überweist 50€ an B" statt vieler einzelner Überweisungen</li>
+                </ol>
+            </div>
+
+            <div class="rope-divider"></div>
+
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📋 Daten exportieren</h2>
+            <div class="mb-6">
+                <p>Unter <strong>"📋 Export"</strong> kannst du alle Daten als CSV-Datei herunterladen für deine eigenen Unterlagen.</p>
+            </div>
+
+            <div class="rope-divider"></div>
+
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">✏️ Fehler korrigieren</h2>
+            <div class="mb-6">
+                <p class="mb-2">Du kannst Einzahlungen und Ausgaben <strong>bearbeiten</strong> oder <strong>löschen</strong>:</p>
+                <ul class="list-disc ml-6 mb-4">
+                    <li>Auf der Übersichts-Seite: <strong>"✏️ Bearbeiten"</strong> oder <strong>"🗑️ Löschen"</strong> klicken</li>
+                    <li>Änderungen werden sofort übernommen</li>
+                    <li>Die Salden passen sich automatisch an</li>
+                </ul>
+            </div>
+
+            <div class="rope-divider"></div>
+
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">🧭 Navigation</h2>
+            <div class="mb-6">
+                <ul class="list-disc ml-6 space-y-1">
+                    <li><strong>Dashboard:</strong> 🏠 Startseite mit Übersicht</li>
+                    <li><strong>Crew:</strong> 👥 Alle Crew-Mitglieder (Admin kann bearbeiten)</li>
+                    <li><strong>Einzahlungen:</strong> 💰 Geld ins Wallet einzahlen</li>
+                    <li><strong>Ausgaben:</strong> ⚓ Ausgaben erfassen und ansehen</li>
+                    <li><strong>Salden:</strong> 📊 Wer schuldet wem?</li>
+                    <li><strong>Ausgleich:</strong> ⛵ Minimale Überweisungen berechnen</li>
+                    <li><strong>Export:</strong> 📋 Daten als CSV exportieren</li>
+                </ul>
+            </div>
+
+            <div class="rope-divider"></div>
+
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💡 Tipps</h2>
+            <div class="mb-6">
+                <ol class="list-decimal ml-6 space-y-2">
+                    <li><strong>Belege fotografieren:</strong> Immer direkt den Kassenzettel abfotografieren</li>
+                    <li><strong>Sofort erfassen:</strong> Ausgaben direkt eintragen, damit nichts vergessen wird</li>
+                    <li><strong>Richtige Aufteilung:</strong> Überlege, ob wirklich alle mitzahlen (z.B. persönliche Snacks → private)</li>
+                    <li><strong>PayPal Pool nutzen:</strong> Einfach und jeder kann mit Karte einzahlen</li>
+                </ol>
+            </div>
+
+            <div class="rope-divider"></div>
+
+            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border-2" style="border-color: var(--sky-blue);">
+                <h2 class="text-2xl font-bold maritime-header mb-3" style="color: var(--ocean-blue);">❓ Fragen?</h2>
+                <p class="mb-4">Bei Problemen oder Fragen: Sprich den Skipper oder Admin an!</p>
+                <p class="text-xl font-bold maritime-header" style="color: var(--sea-foam);">Schönen Törn und fair winds! ⛵🌊</p>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

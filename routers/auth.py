@@ -44,3 +44,10 @@ async def logout(request: Request):
     """Process logout"""
     request.session.clear()
     return RedirectResponse(url="/login", status_code=303)
+
+@router.get("/help", response_class=HTMLResponse)
+async def help_page(request: Request):
+    """Display help/guide page for crew"""
+    return templates.TemplateResponse("help.html", {
+        "request": request
+    })
