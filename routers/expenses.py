@@ -255,15 +255,15 @@ async def update_expense(
         currency_enum = Currency(currency)
         amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
         
-        expense.payer_id = payer_id
-        expense.date = date.fromisoformat(expense_date)
-        expense.category = category
-        expense.description = description
-        expense.amount = amount
-        expense.currency = currency_enum
-        expense.amount_eur = amount_eur
-        expense.paid_from = PaidFromEnum(paid_from)
-        expense.split_mode = SplitModeEnum(split_mode)
+        expense.payer_id = payer_id  # type: ignore[assignment]
+        expense.date = date.fromisoformat(expense_date)  # type: ignore[assignment]
+        expense.category = category  # type: ignore[assignment]
+        expense.description = description  # type: ignore[assignment]
+        expense.amount = amount  # type: ignore[assignment]
+        expense.currency = currency_enum  # type: ignore[assignment]
+        expense.amount_eur = amount_eur  # type: ignore[assignment]
+        expense.paid_from = PaidFromEnum(paid_from)  # type: ignore[assignment]
+        expense.split_mode = SplitModeEnum(split_mode)  # type: ignore[assignment]
         
         db.query(ExpenseParticipant).filter(ExpenseParticipant.expense_id == expense_id).delete()
         

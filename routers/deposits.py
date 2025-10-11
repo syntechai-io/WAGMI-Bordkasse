@@ -156,12 +156,12 @@ async def update_deposit(
         currency_enum = Currency(currency)
         amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
         
-        deposit.member_id = member_id
-        deposit.amount = amount
-        deposit.currency = currency_enum
-        deposit.amount_eur = amount_eur
-        deposit.date = date.fromisoformat(deposit_date)
-        deposit.note = note or None
+        deposit.member_id = member_id  # type: ignore[assignment]
+        deposit.amount = amount  # type: ignore[assignment]
+        deposit.currency = currency_enum  # type: ignore[assignment]
+        deposit.amount_eur = amount_eur  # type: ignore[assignment]
+        deposit.date = date.fromisoformat(deposit_date)  # type: ignore[assignment]
+        deposit.note = note or None  # type: ignore[assignment]
         db.commit()
         return RedirectResponse(url="/deposits", status_code=303)
     except IntegrityError:
