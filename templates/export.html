@@ -12,9 +12,10 @@
         </div>
         
         <div class="space-y-4">
-            <a href="/export/download" download class="inline-block text-white px-8 py-4 rounded-lg transition transform hover:scale-105 touch-action font-semibold text-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #005a8c 100%);">
-                📥 CSV herunterladen
-            </a>
+            <button id="downloadBtn" class="inline-block text-white px-8 py-4 rounded-lg transition transform hover:scale-105 touch-action font-semibold text-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #005a8c 100%);">
+                <span id="downloadText">📥 CSV herunterladen</span>
+                <span id="downloadLoading" class="hidden">⏳ Wird geladen...</span>
+            </button>
             
             <div>
                 <a href="/" class="inline-block text-white px-8 py-4 rounded-lg transition transform hover:scale-105 touch-action font-semibold text-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
@@ -24,4 +25,44 @@
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('downloadBtn').addEventListener('click', async function() {
+    const btn = this;
+    const downloadText = document.getElementById('downloadText');
+    const downloadLoading = document.getElementById('downloadLoading');
+    
+    // Show loading state
+    downloadText.classList.add('hidden');
+    downloadLoading.classList.remove('hidden');
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+    
+    try {
+        const response = await fetch('/export/download');
+        const blob = await response.blob();
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'crew_wallet_export.csv';
+        document.body.appendChild(a);
+        a.click();
+        
+        // Cleanup
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    } catch (error) {
+        console.error('Download failed:', error);
+        alert('Download fehlgeschlagen. Bitte versuchen Sie es erneut.');
+    } finally {
+        // Reset button state
+        downloadText.classList.remove('hidden');
+        downloadLoading.classList.add('hidden');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    }
+});
+</script>
 {% endblock %}
