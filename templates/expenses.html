@@ -6,7 +6,7 @@
     
     <div class="bg-white porthole-card p-6">
         <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Neue Ausgabe</h2>
-        <form method="post" action="/expenses/new" class="space-y-4">
+        <form method="post" action="/expenses/new" enctype="multipart/form-data" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 Bezahlt von</label>
@@ -62,6 +62,15 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="rope-divider"></div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">📎 Beleg (optional)</label>
+                <input type="file" name="receipt" accept="image/*,.pdf" capture="environment" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.6;">📸 Auf Mobilgeräten: Kamera verwenden oder Datei auswählen (PDF, JPG, PNG max. 10MB)</p>
+            </div>
+            
             <button type="submit" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
                 ✅ Ausgabe hinzufügen
             </button>
