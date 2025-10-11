@@ -44,3 +44,13 @@ def generate_csrf_token() -> str:
 def verify_csrf_token(request: Request, token: str) -> bool:
     session_token = request.session.get("csrf_token")
     return bool(session_token and session_token == token)
+
+def require_csrf(request: Request, csrf_token: str):
+    if not verify_csrf_token(request, csrf_token):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid CSRF token"
+        )
+    new_token = generate_csrf_token()
+    request.session["csrf_token"] = new_token
+    return new_token

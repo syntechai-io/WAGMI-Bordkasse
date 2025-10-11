@@ -47,6 +47,7 @@
                     <a href="/balances" class="block py-2 lg:py-0 hover:text-blue-200 transition touch-action">Salden</a>
                     <a href="/settlement" class="block py-2 lg:py-0 hover:text-blue-200 transition touch-action">Ausgleich</a>
                     <form action="/logout" method="post" class="inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <button type="submit" class="block py-2 lg:py-0 hover:text-blue-200 transition touch-action">Logout</button>
                     </form>
                 </div>
@@ -59,6 +60,7 @@
                 <a href="/balances" class="block py-2 hover:text-blue-200 transition touch-action">Salden</a>
                 <a href="/settlement" class="block py-2 hover:text-blue-200 transition touch-action">Ausgleich</a>
                 <form action="/logout" method="post" class="inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <button type="submit" class="block py-2 hover:text-blue-200 transition touch-action">Logout</button>
                 </form>
             </div>
@@ -78,6 +80,14 @@
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
     </script>
 </body>
 </html>

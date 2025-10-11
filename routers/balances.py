@@ -17,8 +17,13 @@ def calculate_balances(db: Session):
     net_map = {}
     
     for member in crew_members:
-        paid_total = db.query(func.sum(Expense.amount_eur)).filter(
-            Expense.payer_id == member.id
+        deposits_total = db.query(func.sum(Deposit.amount_eur)).filter(
+            Deposit.member_id == member.id
+        ).scalar() or 0.0
+        
+        private_paid = db.query(func.sum(Expense.amount_eur)).filter(
+            Expense.payer_id == member.id,
+            Expense.paid_from == PaidFromEnum.private
         ).scalar() or 0.0
         
         participations = db.query(ExpenseParticipant).filter(
@@ -28,17 +33,12 @@ def calculate_balances(db: Session):
         share_owed = 0.0
         for participation in participations:
             expense = participation.expense
-            if expense.split_mode.value == "equal":
-                total_participants = db.query(ExpenseParticipant).filter(
-                    ExpenseParticipant.expense_id == expense.id
-                ).count()
-                share_owed += expense.amount_eur / total_participants if total_participants > 0 else 0
-            elif expense.split_mode.value == "participants":
-                total_participants = db.query(ExpenseParticipant).filter(
-                    ExpenseParticipant.expense_id == expense.id
-                ).count()
-                share_owed += expense.amount_eur / total_participants if total_participants > 0 else 0
+            total_participants = db.query(ExpenseParticipant).filter(
+                ExpenseParticipant.expense_id == expense.id
+            ).count()
+            share_owed += expense.amount_eur / total_participants if total_participants > 0 else 0
         
+        paid_total = deposits_total + private_paid
         net = paid_total - share_owed
         status = "receives" if net > 0.01 else "pays" if net < -0.01 else "settled"
         

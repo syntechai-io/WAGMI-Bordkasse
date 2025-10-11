@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Deposit, CrewMember
-from security import require_admin, generate_csrf_token
+from security import require_admin, generate_csrf_token, require_csrf
 from datetime import date
 
 router = APIRouter(prefix="/deposits", tags=["deposits"])
@@ -35,6 +35,7 @@ async def create_deposit(
     db: Session = Depends(get_db),
     user = Depends(require_admin)
 ):
+    require_csrf(request, csrf_token)
     deposit = Deposit(
         member_id=member_id,
         amount_eur=amount_eur,

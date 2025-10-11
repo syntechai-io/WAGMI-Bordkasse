@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Expense, ExpenseParticipant, CrewMember, Receipt, PaidFromEnum, SplitModeEnum
-from security import require_admin, generate_csrf_token
+from security import require_admin, generate_csrf_token, require_csrf
 from datetime import date
 from typing import List
 
@@ -43,6 +43,7 @@ async def create_expense(
     db: Session = Depends(get_db),
     user = Depends(require_admin)
 ):
+    require_csrf(request, csrf_token)
     expense = Expense(
         payer_id=payer_id,
         date=date.fromisoformat(expense_date),
@@ -88,9 +89,11 @@ async def expense_detail(
 async def delete_expense(
     request: Request,
     expense_id: int,
+    csrf_token: str = Form(...),
     db: Session = Depends(get_db),
     user = Depends(require_admin)
 ):
+    require_csrf(request, csrf_token)
     expense = db.query(Expense).filter(Expense.id == expense_id).first()
     db.delete(expense)
     db.commit()

@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException, Form
 from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Receipt, Expense
-from security import require_admin
+from security import require_admin, require_csrf
 from pathlib import Path
 import uuid
 
@@ -14,11 +14,15 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 @router.post("/expenses/{expense_id}/upload")
 async def upload_receipt(
+    request: Request,
     expense_id: int,
     file: UploadFile = File(...),
+    csrf_token: str = Form(...),
     db: Session = Depends(get_db),
     user = Depends(require_admin)
 ):
+    require_csrf(request, csrf_token)
+    
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise HTTPException(status_code=415, detail="Only PDF, JPG, and PNG files are allowed")
     

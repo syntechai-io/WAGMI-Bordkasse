@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import CrewMember
-from security import require_admin, generate_csrf_token
+from security import require_admin, generate_csrf_token, require_csrf
 
 router = APIRouter(prefix="/crew", tags=["crew"])
 templates = Jinja2Templates(directory="templates")
@@ -40,6 +40,7 @@ async def create_crew(
     db: Session = Depends(get_db),
     user = Depends(require_admin)
 ):
+    require_csrf(request, csrf_token)
     member = CrewMember(code=code, name=name, iban_or_handle=iban_or_handle or None)
     db.add(member)
     db.commit()
@@ -72,6 +73,7 @@ async def update_crew(
     db: Session = Depends(get_db),
     user = Depends(require_admin)
 ):
+    require_csrf(request, csrf_token)
     member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
     member.code = code
     member.name = name
@@ -83,9 +85,11 @@ async def update_crew(
 async def delete_crew(
     request: Request,
     member_id: int,
+    csrf_token: str = Form(...),
     db: Session = Depends(get_db),
     user = Depends(require_admin)
 ):
+    require_csrf(request, csrf_token)
     member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
     db.delete(member)
     db.commit()
