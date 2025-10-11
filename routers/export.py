@@ -35,7 +35,7 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
     writer.writerow(["CREW MEMBERS"])
     writer.writerow(["ID", "Code", "Name", "IBAN/Handle"])
     for member in db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all():
-        writer.writerow([member.id, member.code, member.name, member.iban_or_handle or ""])
+        writer.writerow([member.id, member.code, member.name, member.iban_or_handle if member.iban_or_handle is not None else ""])
     
     writer.writerow([])
     writer.writerow(["DEPOSITS"])
@@ -47,7 +47,7 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
             deposit.member.name,
             deposit.amount_eur,
             deposit.date,
-            deposit.note or ""
+            deposit.note if deposit.note is not None else ""
         ])
     
     writer.writerow([])
