@@ -48,6 +48,11 @@ Key features:
   - Simple and robust browser-native implementation
   - Receipt viewer page with navigation (Dashboard & Back buttons)
   - Users can always navigate back from receipt view
+- **Integrated PayPal Money Pool link**:
+  - Prominent PayPal Pool button on Dashboard and Einzahlungen page
+  - Direct link to https://www.paypal.com/pool/9j4PpWiLVC?sr=ancr
+  - Opens in new tab for easy crew deposits
+  - Clear call-to-action: "Hier ins Wallet einzahlen"
 
 ## User Preferences
 
