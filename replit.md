@@ -11,10 +11,18 @@ Key features:
 - Expense recording with flexible split modes (equal split or specific participants) and **edit and delete** capabilities
 - **Receipt upload directly when creating expenses** - optional file upload with camera integration on mobile devices
 - Automatic balance calculation and minimal settlement transfers
-- CSV export functionality
+- **PDF export functionality** - professional formatted PDF with crew, deposits, and expenses data
 - Progressive Web App (PWA) support for mobile usage and home screen installation
 
 ## Recent Changes
+
+**October 11, 2025 - PDF Export Implementation**:
+- **Replaced CSV with PDF Export**: Implemented professional PDF export using ReportLab
+  - Maritime-themed PDF with color-coded tables (crew: ocean blue, deposits: sea-foam, expenses: coral)
+  - Includes trip name, crew members, deposits, and expenses in formatted tables
+  - Direct download link (no JavaScript complexity) for maximum reliability
+  - Works seamlessly with authenticated sessions
+  - Professional presentation suitable for trip documentation
 
 **October 11, 2025 - Export Page Navigation & Branding**:
 - **Export Page Improvement**: Added dedicated export page with navigation
