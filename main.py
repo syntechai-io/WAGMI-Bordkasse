@@ -20,7 +20,11 @@ from routers.auth import router as auth_router
 
 app = FastAPI(title="Crew Wallet - Bordkasse")
 
-# Session middleware for authentication
+# Auth middleware to protect all routes (must be added BEFORE SessionMiddleware)
+from middleware.auth import AuthMiddleware
+app.add_middleware(AuthMiddleware)
+
+# Session middleware for authentication (must be added AFTER AuthMiddleware due to LIFO execution)
 session_secret = os.getenv("SESSION_SECRET")
 if not session_secret:
     raise RuntimeError("SESSION_SECRET environment variable is required for security!")
@@ -29,10 +33,6 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=session_secret
 )
-
-# Auth middleware to protect all routes
-from middleware.auth import AuthMiddleware
-app.add_middleware(AuthMiddleware)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
