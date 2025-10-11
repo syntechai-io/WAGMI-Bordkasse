@@ -85,7 +85,7 @@ async def create_expense(
         db.add(expense)
         db.commit()
         db.refresh(expense)
-    except IntegrityError:
+    except (IntegrityError, ValueError):
         db.rollback()
         expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
         crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
@@ -277,7 +277,7 @@ async def update_expense(
         
         db.commit()
         return RedirectResponse(url="/expenses", status_code=303)
-    except IntegrityError:
+    except (IntegrityError, ValueError):
         db.rollback()
         expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
         crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()

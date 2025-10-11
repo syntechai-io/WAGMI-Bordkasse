@@ -29,9 +29,9 @@ class CurrencyService:
             
             for cube in root.findall('.//eurofxref:Cube[@currency]', ns):
                 currency = cube.get('currency')
-                rate = float(cube.get('rate'))
-                if currency in ['DKK', 'SEK', 'GBP']:
-                    rates[currency] = rate
+                rate_str = cube.get('rate')
+                if currency and rate_str and currency in ['DKK', 'SEK', 'GBP']:
+                    rates[currency] = float(rate_str)
             
             return rates
             

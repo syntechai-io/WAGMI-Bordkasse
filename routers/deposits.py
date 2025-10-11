@@ -67,7 +67,7 @@ async def create_deposit(
         db.add(deposit)
         db.commit()
         return RedirectResponse(url="/deposits", status_code=303)
-    except IntegrityError:
+    except (IntegrityError, ValueError):
         db.rollback()
         deposits = db.query(Deposit).filter(Deposit.trip_id == active_trip.id).order_by(Deposit.date.desc()).all()
         crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
@@ -164,7 +164,7 @@ async def update_deposit(
         deposit.note = note or None  # type: ignore[assignment]
         db.commit()
         return RedirectResponse(url="/deposits", status_code=303)
-    except IntegrityError:
+    except (IntegrityError, ValueError):
         db.rollback()
         deposits = db.query(Deposit).filter(Deposit.trip_id == active_trip.id).order_by(Deposit.date.desc()).all()
         crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()

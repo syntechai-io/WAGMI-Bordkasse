@@ -36,7 +36,7 @@ class User(Base):
     
     def check_password(self, password: str) -> bool:
         """Verify password against hash"""
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(str(self.password_hash), password)
 
 class Trip(Base):
     __tablename__ = "trips"
