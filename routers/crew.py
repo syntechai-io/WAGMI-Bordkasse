@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from db import get_db
 from models import CrewMember
 
@@ -31,10 +32,18 @@ async def create_crew(
     iban_or_handle: str = Form(""),
     db: Session = Depends(get_db)
 ):
-    member = CrewMember(code=code, name=name, iban_or_handle=iban_or_handle or None)
-    db.add(member)
-    db.commit()
-    return RedirectResponse(url="/crew", status_code=303)
+    try:
+        member = CrewMember(code=code, name=name, iban_or_handle=iban_or_handle or None)
+        db.add(member)
+        db.commit()
+        return RedirectResponse(url="/crew", status_code=303)
+    except IntegrityError:
+        db.rollback()
+        return templates.TemplateResponse("crew_form.html", {
+            "request": request,
+            "member": None,
+            "error": f"Der Code '{code}' existiert bereits. Bitte wählen Sie einen anderen Code."
+        }, status_code=400)
 
 @router.get("/{member_id}/edit", response_class=HTMLResponse)
 async def edit_crew_form(
@@ -57,12 +66,21 @@ async def update_crew(
     iban_or_handle: str = Form(""),
     db: Session = Depends(get_db)
 ):
-    member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
-    member.code = code
-    member.name = name
-    member.iban_or_handle = iban_or_handle or None
-    db.commit()
-    return RedirectResponse(url="/crew", status_code=303)
+    try:
+        member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
+        member.code = code
+        member.name = name
+        member.iban_or_handle = iban_or_handle or None
+        db.commit()
+        return RedirectResponse(url="/crew", status_code=303)
+    except IntegrityError:
+        db.rollback()
+        member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
+        return templates.TemplateResponse("crew_form.html", {
+            "request": request,
+            "member": member,
+            "error": f"Der Code '{code}' wird bereits verwendet. Bitte wählen Sie einen anderen Code."
+        }, status_code=400)
 
 @router.post("/{member_id}/delete")
 async def delete_crew(
