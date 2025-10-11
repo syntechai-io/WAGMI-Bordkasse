@@ -1,0 +1,140 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📓 Logbuch</h1>
+        <a href="/logbook/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
+            ➕ Neuer Eintrag
+        </a>
+    </div>
+
+    {% if entries %}
+    <div class="space-y-4">
+        {% for entry in entries %}
+        <div class="bg-white porthole-card p-6 hover:shadow-lg transition-shadow">
+            <div class="flex flex-col md:flex-row gap-4">
+                {% if entry.photos %}
+                <div class="md:w-32 h-32 flex-shrink-0">
+                    <img src="/logbook/photos/{{ entry.photos[0].id }}/view" 
+                         alt="Logbuch Foto" 
+                         class="w-full h-full object-cover rounded-lg cursor-pointer"
+                         onclick="window.location='/logbook/{{ entry.id }}'">
+                </div>
+                {% endif %}
+                
+                <div class="flex-1">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">
+                                {{ entry.entry_date.strftime('%d.%m.%Y %H:%M') }} Uhr
+                            </h3>
+                            {% if entry.departure or entry.destination %}
+                            <p class="text-sm mt-1" style="color: var(--ocean-blue);">
+                                {% if entry.departure %}🏁 {{ entry.departure }}{% endif %}
+                                {% if entry.departure and entry.destination %} → {% endif %}
+                                {% if entry.destination %}🏁 {{ entry.destination }}{% endif %}
+                            </p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <a href="/logbook/{{ entry.id }}/edit" 
+                               class="text-sm hover:underline touch-action px-3 py-1 rounded" 
+                               style="color: var(--ocean-blue);">
+                                ✏️ Bearbeiten
+                            </a>
+                            <form action="/logbook/{{ entry.id }}/delete" method="post" class="inline" onsubmit="return confirm('Eintrag wirklich löschen?')">
+                                <button type="submit" 
+                                        class="text-sm hover:underline touch-action px-3 py-1 rounded" 
+                                        style="color: var(--coral);">
+                                    🗑️ Löschen
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                        {% if entry.latitude and entry.longitude %}
+                        <div class="text-sm">
+                            <span style="color: var(--navy-deep); opacity: 0.7;">📍 Position:</span>
+                            <span class="font-medium ml-1" style="color: var(--navy-deep);">
+                                {{ "%.4f"|format(entry.latitude) }}°, {{ "%.4f"|format(entry.longitude) }}°
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if entry.wind_direction or entry.wind_strength %}
+                        <div class="text-sm">
+                            <span style="color: var(--navy-deep); opacity: 0.7;">💨 Wind:</span>
+                            <span class="font-medium ml-1" style="color: var(--navy-deep);">
+                                {% if entry.wind_direction %}{{ entry.wind_direction }}{% endif %}
+                                {% if entry.wind_strength %}{{ entry.wind_strength }}{% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if entry.sea_state %}
+                        <div class="text-sm">
+                            <span style="color: var(--navy-deep); opacity: 0.7;">🌊 Seegang:</span>
+                            <span class="font-medium ml-1" style="color: var(--navy-deep);">
+                                {% if entry.sea_state.value == 'calm' %}Ruhig
+                                {% elif entry.sea_state.value == 'slight' %}Leicht
+                                {% elif entry.sea_state.value == 'moderate' %}Mäßig
+                                {% elif entry.sea_state.value == 'rough' %}Rau
+                                {% elif entry.sea_state.value == 'very_rough' %}Sehr rau
+                                {% elif entry.sea_state.value == 'high' %}Hoch
+                                {% else %}{{ entry.sea_state.value }}{% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if entry.temperature %}
+                        <div class="text-sm">
+                            <span style="color: var(--navy-deep); opacity: 0.7;">🌡️ Temperatur:</span>
+                            <span class="font-medium ml-1" style="color: var(--navy-deep);">{{ entry.temperature }}°C</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if entry.crew_on_watch %}
+                    <div class="mb-3">
+                        <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👥 Wache:</span>
+                        <div class="inline-flex flex-wrap gap-2 ml-2">
+                            {% for watch in entry.crew_on_watch %}
+                            <span class="inline-block px-3 py-1 rounded-full text-sm font-medium text-white" 
+                                  style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+                                {{ watch.member.code }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if entry.notes %}
+                    <p class="text-sm mt-3 p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1); color: var(--navy-deep);">
+                        {{ entry.notes }}
+                    </p>
+                    {% endif %}
+                    
+                    <a href="/logbook/{{ entry.id }}" 
+                       class="inline-block mt-3 text-sm font-medium touch-action hover:underline" 
+                       style="color: var(--ocean-blue);">
+                        👁️ Details anzeigen →
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white porthole-card p-12 text-center">
+        <p class="text-xl maritime-header mb-4" style="color: var(--navy-deep);">📓 Noch keine Logbuch-Einträge</p>
+        <p class="mb-6" style="color: var(--navy-deep); opacity: 0.7;">Erstelle deinen ersten Eintrag für diesen Törn</p>
+        <a href="/logbook/new" class="ocean-gradient text-white px-6 py-3 rounded-lg transition touch-action font-semibold inline-block">
+            ➕ Ersten Eintrag erstellen
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

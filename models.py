@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -20,6 +20,14 @@ class Currency(str, enum.Enum):
     DKK = "DKK"
     SEK = "SEK"
     GBP = "GBP"
+
+class SeaStateEnum(str, enum.Enum):
+    calm = "calm"
+    slight = "slight"
+    moderate = "moderate"
+    rough = "rough"
+    very_rough = "very_rough"
+    high = "high"
 
 class User(Base):
     __tablename__ = "users"
@@ -51,6 +59,7 @@ class Trip(Base):
     crew_members = relationship("CrewMember", back_populates="trip", cascade="all, delete-orphan")
     deposits = relationship("Deposit", back_populates="trip", cascade="all, delete-orphan")
     expenses = relationship("Expense", back_populates="trip", cascade="all, delete-orphan")
+    logbook_entries = relationship("LogbookEntry", back_populates="trip", cascade="all, delete-orphan")
 
 class CrewMember(Base):
     __tablename__ = "crew_members"
@@ -166,3 +175,54 @@ class AuditLog(Base):
     
     trip = relationship("Trip")
     user = relationship("User")
+
+class LogbookEntry(Base):
+    __tablename__ = "logbook_entries"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
+    entry_date = Column(DateTime, nullable=False, index=True)
+    entry_date_utc = Column(DateTime, nullable=False)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    wind_direction = Column(String(20), nullable=True)
+    wind_strength = Column(String(50), nullable=True)
+    sea_state = Column(SQLEnum(SeaStateEnum), nullable=True)
+    visibility = Column(String(50), nullable=True)
+    temperature = Column(Float, nullable=True)
+    sail_plan = Column(String(200), nullable=True)
+    engine_hours = Column(Float, nullable=True)
+    departure = Column(String(100), nullable=True)
+    destination = Column(String(100), nullable=True)
+    notes = Column(Text, nullable=True)
+    safety_checks_completed = Column(String(500), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    trip = relationship("Trip", back_populates="logbook_entries")
+    photos = relationship("LogbookPhoto", back_populates="entry", cascade="all, delete-orphan")
+    crew_on_watch = relationship("CrewOnWatch", back_populates="entry", cascade="all, delete-orphan")
+
+class LogbookPhoto(Base):
+    __tablename__ = "logbook_photos"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    entry_id = Column(Integer, ForeignKey("logbook_entries.id"), nullable=False, index=True)
+    stored_filename = Column(String(100), nullable=False)
+    original_name = Column(String(200), nullable=False)
+    caption = Column(String(500), nullable=True)
+    content_type = Column(String(50), nullable=False)
+    size_bytes = Column(Integer, nullable=False)
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    
+    entry = relationship("LogbookEntry", back_populates="photos")
+
+class CrewOnWatch(Base):
+    __tablename__ = "crew_on_watch"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    entry_id = Column(Integer, ForeignKey("logbook_entries.id"), nullable=False, index=True)
+    member_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False, index=True)
+    
+    entry = relationship("LogbookEntry", back_populates="crew_on_watch")
+    member = relationship("CrewMember")

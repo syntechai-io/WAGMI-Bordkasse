@@ -1,0 +1,254 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">
+        {% if entry %}✏️ Logbuch-Eintrag bearbeiten{% else %}➕ Neuer Logbuch-Eintrag{% endif %}
+    </h1>
+    
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card mb-4" role="alert">
+        <strong class="font-bold">⚠️ Fehler!</strong>
+        <span class="block sm:inline">{{ error }}</span>
+    </div>
+    {% endif %}
+    
+    <form method="post" class="bg-white porthole-card p-6 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">📅 Datum *</label>
+                <input type="date" name="entry_date" 
+                       value="{% if entry %}{{ entry.entry_date.strftime('%Y-%m-%d') }}{% endif %}" 
+                       required 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+            
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🕐 Uhrzeit *</label>
+                <input type="time" name="entry_time" 
+                       value="{% if entry %}{{ entry.entry_date.strftime('%H:%M') }}{% else %}12:00{% endif %}" 
+                       required 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+        </div>
+        
+        <div class="rope-divider"></div>
+        
+        <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">📍 Position</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌍 Breitengrad (Latitude)</label>
+                <input type="number" name="latitude" step="0.000001" 
+                       value="{% if entry and entry.latitude %}{{ entry.latitude }}{% endif %}" 
+                       placeholder="z.B. 54.0833" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+            
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌍 Längengrad (Longitude)</label>
+                <input type="number" name="longitude" step="0.000001" 
+                       value="{% if entry and entry.longitude %}{{ entry.longitude }}{% endif %}" 
+                       placeholder="z.B. 13.4378" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+        </div>
+        
+        <button type="button" id="gps-button" 
+                class="text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm" 
+                style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+            📍 GPS-Position abrufen
+        </button>
+        
+        <div class="rope-divider"></div>
+        
+        <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">🌤️ Wetter & Bedingungen</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">💨 Windrichtung</label>
+                <input type="text" name="wind_direction" 
+                       value="{% if entry and entry.wind_direction %}{{ entry.wind_direction }}{% endif %}" 
+                       placeholder="z.B. NNW" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+            
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">💨 Windstärke</label>
+                <input type="text" name="wind_strength" 
+                       value="{% if entry and entry.wind_strength %}{{ entry.wind_strength }}{% endif %}" 
+                       placeholder="z.B. 4 Bft" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+            
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌊 Seegang</label>
+                <select name="sea_state" 
+                        class="w-full px-4 py-3 border rounded-lg text-lg" 
+                        style="border-color: var(--sky-blue);">
+                    <option value="">-- Bitte wählen --</option>
+                    {% for state in sea_states %}
+                    <option value="{{ state }}" {% if entry and entry.sea_state and entry.sea_state.value == state %}selected{% endif %}>
+                        {% if state == 'calm' %}Ruhig
+                        {% elif state == 'slight' %}Leicht
+                        {% elif state == 'moderate' %}Mäßig
+                        {% elif state == 'rough' %}Rau
+                        {% elif state == 'very_rough' %}Sehr rau
+                        {% elif state == 'high' %}Hoch
+                        {% else %}{{ state }}{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">👁️ Sicht</label>
+                <input type="text" name="visibility" 
+                       value="{% if entry and entry.visibility %}{{ entry.visibility }}{% endif %}" 
+                       placeholder="z.B. gut, 5 sm" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+            
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌡️ Temperatur (°C)</label>
+                <input type="number" name="temperature" step="0.1" 
+                       value="{% if entry and entry.temperature %}{{ entry.temperature }}{% endif %}" 
+                       placeholder="z.B. 18.5" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+        </div>
+        
+        <div class="rope-divider"></div>
+        
+        <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">⛵ Schiffsdaten</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">⛵ Segelplan</label>
+                <input type="text" name="sail_plan" 
+                       value="{% if entry and entry.sail_plan %}{{ entry.sail_plan }}{% endif %}" 
+                       placeholder="z.B. Groß + Genua" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+            
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🔧 Motorstunden</label>
+                <input type="number" name="engine_hours" step="0.1" 
+                       value="{% if entry and entry.engine_hours %}{{ entry.engine_hours }}{% endif %}" 
+                       placeholder="z.B. 1234.5" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+            
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏁 Von (Abfahrt)</label>
+                <input type="text" name="departure" 
+                       value="{% if entry and entry.departure %}{{ entry.departure }}{% endif %}" 
+                       placeholder="z.B. Rostock" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+            
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏁 Nach (Ziel)</label>
+                <input type="text" name="destination" 
+                       value="{% if entry and entry.destination %}{{ entry.destination }}{% endif %}" 
+                       placeholder="z.B. Gedser" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                       style="border-color: var(--sky-blue);">
+            </div>
+        </div>
+        
+        <div class="rope-divider"></div>
+        
+        <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">👥 Crew & Notizen</h3>
+        
+        <div>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">👥 Wache (Mehrfachauswahl)</label>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
+                {% for member in crew_members %}
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" name="crew_on_watch_ids" value="{{ member.id }}" 
+                           {% if entry and entry.crew_on_watch %}
+                               {% for watch in entry.crew_on_watch %}
+                                   {% if watch.member_id == member.id %}checked{% endif %}
+                               {% endfor %}
+                           {% endif %}
+                           class="rounded touch-action">
+                    <span class="text-sm font-medium" style="color: var(--navy-deep);">{{ member.code }} - {{ member.name }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 Notizen</label>
+            <textarea name="notes" rows="4" 
+                      placeholder="Besondere Vorkommnisse, Beobachtungen..." 
+                      class="w-full px-4 py-3 border rounded-lg text-lg" 
+                      style="border-color: var(--sky-blue);">{% if entry and entry.notes %}{{ entry.notes }}{% endif %}</textarea>
+        </div>
+        
+        <div>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">✅ Sicherheitschecks</label>
+            <textarea name="safety_checks" rows="3" 
+                      placeholder="z.B. Rettungsmittel geprüft, Bilge kontrolliert..." 
+                      class="w-full px-4 py-3 border rounded-lg text-lg" 
+                      style="border-color: var(--sky-blue);">{% if entry and entry.safety_checks_completed %}{{ entry.safety_checks_completed }}{% endif %}</textarea>
+        </div>
+        
+        <div class="rope-divider"></div>
+        
+        <div class="flex gap-4">
+            <button type="submit" class="flex-1 ocean-gradient text-white font-bold py-3 px-4 rounded-lg transition touch-action">
+                💾 {% if entry %}Aktualisieren{% else %}Eintrag speichern{% endif %}
+            </button>
+            <a href="{% if entry %}/logbook/{{ entry.id }}{% else %}/logbook{% endif %}" 
+               class="flex-1 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action" 
+               style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
+                ❌ Abbrechen
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('gps-button').addEventListener('click', function() {
+    if ('geolocation' in navigator) {
+        this.textContent = '⏳ GPS-Position wird abgerufen...';
+        this.disabled = true;
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                document.querySelector('input[name="latitude"]').value = position.coords.latitude.toFixed(6);
+                document.querySelector('input[name="longitude"]').value = position.coords.longitude.toFixed(6);
+                this.textContent = '✅ Position abgerufen!';
+                setTimeout(() => {
+                    this.textContent = '📍 GPS-Position abrufen';
+                    this.disabled = false;
+                }, 2000);
+            },
+            (error) => {
+                alert('GPS-Position konnte nicht abgerufen werden: ' + error.message);
+                this.textContent = '❌ Fehler - erneut versuchen';
+                setTimeout(() => {
+                    this.textContent = '📍 GPS-Position abrufen';
+                    this.disabled = false;
+                }, 2000);
+            }
+        );
+    } else {
+        alert('Geolocation wird von diesem Browser nicht unterstützt.');
+    }
+});
+</script>
+{% endblock %}
