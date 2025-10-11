@@ -537,7 +537,11 @@ class TestEdgeCases:
         assert response.status_code == 500 or response.status_code == 422 or response.status_code == 400
         
         response = admin_session.get("/deposits")
-        assert "-50" not in response.text
+        # Check that error message is shown or no negative deposit exists in the data
+        # Use a more specific check - look for the negative amount in deposit rows, not CSS
+        import re
+        deposit_amounts = re.findall(r'<td[^>]*class="[^"]*text-right[^"]*"[^>]*>([-]?\d+[.,]\d+)\s*€', response.text)
+        assert all(float(amt.replace(',', '.')) > 0 for amt in deposit_amounts), "Negative deposit found in list"
 
 
 if __name__ == "__main__":

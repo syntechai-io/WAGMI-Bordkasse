@@ -55,24 +55,47 @@ async def create_expense(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    currency_enum = Currency(currency)
-    amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
+    if amount <= 0:
+        expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+        return templates.TemplateResponse("expenses.html", {
+            "request": request,
+            "expenses": expenses,
+            "crew_members": crew_members,
+            "categories": CATEGORIES,
+            "error": "Der Betrag muss positiv sein."
+        }, status_code=400)
     
-    expense = Expense(
-        trip_id=active_trip.id,
-        payer_id=payer_id,
-        date=date.fromisoformat(expense_date),
-        category=category,
-        description=description,
-        amount=amount,
-        currency=currency_enum,
-        amount_eur=amount_eur,
-        paid_from=PaidFromEnum(paid_from),
-        split_mode=SplitModeEnum(split_mode)
-    )
-    db.add(expense)
-    db.commit()
-    db.refresh(expense)
+    try:
+        currency_enum = Currency(currency)
+        amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
+        
+        expense = Expense(
+            trip_id=active_trip.id,
+            payer_id=payer_id,
+            date=date.fromisoformat(expense_date),
+            category=category,
+            description=description,
+            amount=amount,
+            currency=currency_enum,
+            amount_eur=amount_eur,
+            paid_from=PaidFromEnum(paid_from),
+            split_mode=SplitModeEnum(split_mode)
+        )
+        db.add(expense)
+        db.commit()
+        db.refresh(expense)
+    except IntegrityError:
+        db.rollback()
+        expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+        return templates.TemplateResponse("expenses.html", {
+            "request": request,
+            "expenses": expenses,
+            "crew_members": crew_members,
+            "categories": CATEGORIES,
+            "error": "Ausgabe konnte nicht erstellt werden."
+        }, status_code=400)
     
     if split_mode == "participants" and participant_ids:
         for pid in participant_ids:
@@ -196,6 +219,22 @@ async def update_expense(
     active_trip = TripService.get_active_trip(db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    if amount <= 0:
+        expense = db.query(Expense).filter(
+            Expense.id == expense_id,
+            Expense.trip_id == active_trip.id
+        ).first()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+        participant_ids = [p.member_id for p in expense.participants] if expense else []
+        return templates.TemplateResponse("expense_edit.html", {
+            "request": request,
+            "expense": expense,
+            "crew_members": crew_members,
+            "categories": CATEGORIES,
+            "participant_ids": participant_ids,
+            "error": "Der Betrag muss positiv sein."
+        }, status_code=400)
     
     try:
         expense = db.query(Expense).filter(

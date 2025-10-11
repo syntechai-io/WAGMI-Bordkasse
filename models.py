@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -54,6 +54,9 @@ class Trip(Base):
 
 class CrewMember(Base):
     __tablename__ = "crew_members"
+    __table_args__ = (
+        UniqueConstraint('trip_id', 'code', name='uq_crew_trip_code'),
+    )
     
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False)
@@ -69,6 +72,10 @@ class CrewMember(Base):
 
 class Deposit(Base):
     __tablename__ = "deposits"
+    __table_args__ = (
+        CheckConstraint('amount > 0', name='check_deposit_amount_positive'),
+        CheckConstraint('amount_eur > 0', name='check_deposit_amount_eur_positive'),
+    )
     
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False)
@@ -93,6 +100,10 @@ class SplitModeEnum(str, enum.Enum):
 
 class Expense(Base):
     __tablename__ = "expenses"
+    __table_args__ = (
+        CheckConstraint('amount > 0', name='check_expense_amount_positive'),
+        CheckConstraint('amount_eur > 0', name='check_expense_amount_eur_positive'),
+    )
     
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False)

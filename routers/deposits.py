@@ -41,21 +41,42 @@ async def create_deposit(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    currency_enum = Currency(currency)
-    amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
+    if amount <= 0:
+        deposits = db.query(Deposit).filter(Deposit.trip_id == active_trip.id).order_by(Deposit.date.desc()).all()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+        return templates.TemplateResponse("deposits.html", {
+            "request": request,
+            "deposits": deposits,
+            "crew_members": crew_members,
+            "error": "Der Betrag muss positiv sein."
+        }, status_code=400)
     
-    deposit = Deposit(
-        trip_id=active_trip.id,
-        member_id=member_id,
-        amount=amount,
-        currency=currency_enum,
-        amount_eur=amount_eur,
-        date=date.fromisoformat(deposit_date),
-        note=note or None
-    )
-    db.add(deposit)
-    db.commit()
-    return RedirectResponse(url="/deposits", status_code=303)
+    try:
+        currency_enum = Currency(currency)
+        amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
+        
+        deposit = Deposit(
+            trip_id=active_trip.id,
+            member_id=member_id,
+            amount=amount,
+            currency=currency_enum,
+            amount_eur=amount_eur,
+            date=date.fromisoformat(deposit_date),
+            note=note or None
+        )
+        db.add(deposit)
+        db.commit()
+        return RedirectResponse(url="/deposits", status_code=303)
+    except IntegrityError:
+        db.rollback()
+        deposits = db.query(Deposit).filter(Deposit.trip_id == active_trip.id).order_by(Deposit.date.desc()).all()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+        return templates.TemplateResponse("deposits.html", {
+            "request": request,
+            "deposits": deposits,
+            "crew_members": crew_members,
+            "error": "Einzahlung konnte nicht erstellt werden."
+        }, status_code=400)
 
 @router.get("/{deposit_id}/edit", response_class=HTMLResponse)
 async def edit_deposit_form(
@@ -103,6 +124,19 @@ async def update_deposit(
     active_trip = TripService.get_active_trip(db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    if amount <= 0:
+        deposit = db.query(Deposit).filter(
+            Deposit.id == deposit_id,
+            Deposit.trip_id == active_trip.id
+        ).first()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+        return templates.TemplateResponse("deposit_edit.html", {
+            "request": request,
+            "deposit": deposit,
+            "crew_members": crew_members,
+            "error": "Der Betrag muss positiv sein."
+        }, status_code=400)
     
     try:
         deposit = db.query(Deposit).filter(
