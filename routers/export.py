@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import StreamingResponse, RedirectResponse
+from fastapi.responses import StreamingResponse, RedirectResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import CrewMember, Deposit, Expense
@@ -8,9 +9,21 @@ import io
 import csv
 
 router = APIRouter(prefix="/export", tags=["export"])
+templates = Jinja2Templates(directory="templates")
 
-@router.get("/csv")
-async def export_csv(request: Request, db: Session = Depends(get_db)):
+@router.get("/csv", response_class=HTMLResponse)
+async def export_page(request: Request, db: Session = Depends(get_db)):
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    return templates.TemplateResponse("export.html", {
+        "request": request,
+        "active_trip": active_trip
+    })
+
+@router.get("/download")
+async def download_csv(request: Request, db: Session = Depends(get_db)):
     active_trip = TripService.get_active_trip(db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
