@@ -20,7 +20,7 @@ Key features:
 - **Replaced CSV with PDF Export**: Implemented professional PDF export using ReportLab
   - Maritime-themed PDF with color-coded tables (crew: ocean blue, deposits: sea-foam, expenses: coral)
   - Includes trip name, crew members, deposits, and expenses in formatted tables
-  - Direct download link (no JavaScript complexity) for maximum reliability
+  - Direct download link opens in new tab - keeps export page accessible for easy dashboard navigation
   - Works seamlessly with authenticated sessions
   - Professional presentation suitable for trip documentation
 
