@@ -15,7 +15,7 @@ Preferred communication style: Simple, everyday language.
 **Framework**: FastAPI (Python) for routing and API endpoints, structured with modular routers for different functionalities (crew, deposits, expenses, etc.).
 **Authentication**: Session-based with Admin and Crew roles, using `werkzeug.security` for password hashing. Requires `SESSION_SECRET`, `ADMIN_PASSWORD`, and `CREW_PASSWORD` from environment variables.
 **Template Engine**: Jinja2 for server-side rendering, integrated with HTMX for dynamic interactions.
-**Data Storage**: SQLite with SQLAlchemy ORM, using a file-based database (`/data/app.db`).
+**Data Storage**: PostgreSQL with SQLAlchemy ORM, using Replit's managed PostgreSQL database.
 **Key Architectural Decisions**:
 - **Modular Router Structure**: Enhances maintainability and separation of concerns.
 - **Authentication Model**: Session-based with two roles (Admin, Crew) and environment variable-based secrets for security.
@@ -56,6 +56,7 @@ Security measures include file upload validation, UUID-based filenames for recei
 #### Python Packages
 - **FastAPI**: Core web framework.
 - **SQLAlchemy**: ORM for database interactions.
+- **psycopg2-binary**: PostgreSQL adapter for Python.
 - **Jinja2**: Template engine.
 - **python-multipart**: Handles file uploads.
 - **python-dotenv**: Manages environment variables.
@@ -66,7 +67,7 @@ Security measures include file upload validation, UUID-based filenames for recei
 - **HTMX**: For dynamic HTML interactions.
 
 #### Database
-- **SQLite**: Embedded file-based database (`/data/app.db`).
+- **PostgreSQL**: Replit-managed PostgreSQL database (Neon-backed) accessed via the `DATABASE_URL` environment variable.
 
 #### File Storage
 - **Local filesystem**: For receipt uploads in the `/uploads` directory.
