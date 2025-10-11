@@ -16,6 +16,16 @@ Key features:
 
 ## Recent Changes
 
+**October 11, 2025 - Export Page Navigation & Branding**:
+- **Export Page Improvement**: Added dedicated export page with navigation
+  - "Back to Dashboard" button for easy navigation from export page
+  - Clean maritime-themed layout with download button
+  - Separated page view (/export/csv) from actual download (/export/download)
+- **Branding Update**: Changed from "Bordkasse" to "WAGMI Bordkasse"
+  - Updated logo to "National Support - Sail Boat" circular badge
+  - Logo displayed on login page and navigation header
+  - Consistent branding throughout the app
+
 **October 11, 2025 - Multi-Currency & Trip Archiving**:
 - **Trip Management & Archiving**:
   - Added Trip model for organizing expenses/deposits by sailing trip
