@@ -9,7 +9,7 @@ Key features:
 - Crew member management for up to 12 members with unique codes (up to 20 chars) and payment handles (IBAN/PayPal/etc.)
 - Deposit tracking into shared wallet with **edit and delete** capabilities
 - Expense recording with flexible split modes (equal split or specific participants) and **edit and delete** capabilities
-- Receipt upload and storage for expenses with camera integration
+- **Receipt upload directly when creating expenses** - optional file upload with camera integration on mobile devices
 - Automatic balance calculation and minimal settlement transfers
 - CSV export functionality
 - Progressive Web App (PWA) support for mobile usage and home screen installation
@@ -40,6 +40,12 @@ Key features:
   - Navigation displays logged-in user with logout button
   - All secrets (SESSION_SECRET, ADMIN_PASSWORD, CREW_PASSWORD) required from environment
   - No hardcoded credentials or fallback secrets for production security
+- **Added receipt upload directly in expense creation form**:
+  - Optional file upload field in "Ausgabe erfassen" form
+  - Mobile camera integration via HTML5 capture attribute
+  - Supports PDF, JPG, PNG (max 10MB)
+  - Automatic redirect to detail page when receipt is uploaded
+  - Simple and robust browser-native implementation
 
 ## User Preferences
 
