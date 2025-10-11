@@ -2,12 +2,12 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Einzahlung bearbeiten</h1>
+    <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">✏️ Einzahlung bearbeiten</h1>
     
-    <form method="post" class="bg-white rounded-lg shadow p-6 space-y-4">
+    <form method="post" class="bg-white porthole-card p-6 space-y-4">
         <div>
-            <label class="block text-gray-700 font-medium mb-2">Mitglied *</label>
-            <select name="member_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">👤 Mitglied *</label>
+            <select name="member_id" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
                 {% for member in crew_members %}
                 <option value="{{ member.id }}" {% if deposit and deposit.member_id == member.id %}selected{% endif %}>
                     {{ member.code }} - {{ member.name }}
@@ -17,29 +17,31 @@
         </div>
         
         <div>
-            <label class="block text-gray-700 font-medium mb-2">Betrag (€) *</label>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">💵 Betrag (€) *</label>
             <input type="number" name="amount_eur" step="0.01" value="{% if deposit %}{{ deposit.amount_eur }}{% endif %}" required
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
         </div>
         
         <div>
-            <label class="block text-gray-700 font-medium mb-2">Datum *</label>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">📅 Datum *</label>
             <input type="date" name="deposit_date" value="{% if deposit %}{{ deposit.date }}{% endif %}" required
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
         </div>
         
         <div>
-            <label class="block text-gray-700 font-medium mb-2">Notiz (optional)</label>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 Notiz (optional)</label>
             <input type="text" name="note" value="{% if deposit %}{{ deposit.note or '' }}{% endif %}"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
         </div>
+        
+        <div class="rope-divider"></div>
         
         <div class="flex gap-4">
-            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition touch-action">
-                Speichern
+            <button type="submit" class="flex-1 text-white font-bold py-3 px-4 rounded-lg transition touch-action" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                💾 Speichern
             </button>
-            <a href="/deposits" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action">
-                Abbrechen
+            <a href="/deposits" class="flex-1 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action" style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
+                ❌ Abbrechen
             </a>
         </div>
     </form>

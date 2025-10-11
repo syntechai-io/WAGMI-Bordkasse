@@ -2,56 +2,56 @@
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-3xl font-bold text-gray-800">Ausgaben</h1>
+    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ Ausgaben</h1>
     
-    <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Neue Ausgabe</h2>
+    <div class="bg-white porthole-card p-6">
+        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Neue Ausgabe</h2>
         <form method="post" action="/expenses/new" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bezahlt von</label>
-                    <select name="payer_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 Bezahlt von</label>
+                    <select name="payer_id" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                         {% for member in crew_members %}
                         <option value="{{ member.id }}">{{ member.code }} - {{ member.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Datum</label>
-                    <input type="date" name="expense_date" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 Datum</label>
+                    <input type="date" name="expense_date" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategorie</label>
-                    <select name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📂 Kategorie</label>
+                    <select name="category" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                         {% for cat in categories %}
                         <option value="{{ cat }}">{{ cat }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Betrag (€)</label>
-                    <input type="number" name="amount_eur" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💵 Betrag (€)</label>
+                    <input type="number" name="amount_eur" step="0.01" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
-                    <input type="text" name="description" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📝 Beschreibung</label>
+                    <input type="text" name="description" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bezahlt aus</label>
-                    <select name="paid_from" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💰 Bezahlt aus</label>
+                    <select name="paid_from" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                         <option value="wallet">Wallet (gemeinsame Kasse)</option>
                         <option value="private">Privat</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Aufteilung</label>
-                    <select name="split_mode" id="split_mode" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">🎯 Aufteilung</label>
+                    <select name="split_mode" id="split_mode" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                         <option value="equal">Gleichmäßig (alle)</option>
                         <option value="participants">Teilnehmer auswählen</option>
                     </select>
                 </div>
                 <div id="participants_div" class="md:col-span-2 hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Teilnehmer</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👥 Teilnehmer</label>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {% for member in crew_members %}
                         <label class="flex items-center space-x-2">
@@ -62,50 +62,52 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition touch-action">
-                Ausgabe hinzufügen
+            <button type="submit" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
+                ✅ Ausgabe hinzufügen
             </button>
         </form>
     </div>
 
     {% if error %}
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">
-        <strong class="font-bold">Fehler!</strong>
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card" role="alert">
+        <strong class="font-bold">⚠️ Fehler!</strong>
         <span class="block sm:inline">{{ error }}</span>
     </div>
     {% endif %}
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="rope-divider"></div>
+
+    <div class="bg-white porthole-card overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full">
-                <thead class="bg-gray-50">
+                <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Datum</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bezahlt von</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategorie</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Beschreibung</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Betrag</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quelle</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aktionen</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Datum</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Bezahlt von</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Kategorie</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Beschreibung</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Betrag</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Quelle</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aktionen</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-sky-200">
                     {% for expense in expenses %}
-                    <tr class="hover:bg-gray-50">
+                    <tr style="transition: background-color 0.2s;" onmouseover="this.style.background='rgba(135, 206, 235, 0.05)'" onmouseout="this.style.background='transparent'">
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.date }}</td>
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.payer.code }}</td>
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.category }}</td>
                         <td class="px-6 py-4 cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.description }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap font-semibold text-red-600 cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ "%.2f"|format(expense.amount_eur) }} €</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-semibold cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'" style="color: var(--coral);">{{ "%.2f"|format(expense.amount_eur) }} €</td>
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">
-                            <span class="px-2 py-1 text-xs rounded-full {% if expense.paid_from.value == 'wallet' %}bg-green-100 text-green-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+                            <span class="px-2 py-1 text-xs rounded-full {% if expense.paid_from.value == 'wallet' %}text-white{% else %}text-white{% endif %}" style="background: {% if expense.paid_from.value == 'wallet' %}linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%){% else %}linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%){% endif %};">
                                 {{ expense.paid_from.value }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                            <a href="/expenses/{{ expense.id }}/edit" class="text-blue-600 hover:text-blue-800 touch-action" onclick="event.stopPropagation()">Bearbeiten</a>
+                            <a href="/expenses/{{ expense.id }}/edit" class="hover:underline touch-action" onclick="event.stopPropagation()" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
                             <form action="/expenses/{{ expense.id }}/delete" method="post" class="inline" onsubmit="event.stopPropagation(); return confirm('Ausgabe wirklich löschen?')">
-                                <button type="submit" class="text-red-600 hover:text-red-800 touch-action">Löschen</button>
+                                <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ Löschen</button>
                             </form>
                         </td>
                     </tr>

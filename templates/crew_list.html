@@ -3,40 +3,40 @@
 {% block content %}
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-800">Crew-Mitglieder</h1>
-        <a href="/crew/new" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition touch-action">
-            + Neu
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">👥 Crew-Mitglieder</h1>
+        <a href="/crew/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
+            ➕ Neu
         </a>
     </div>
 
     {% if error %}
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">
-        <strong class="font-bold">Fehler!</strong>
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card" role="alert">
+        <strong class="font-bold">⚠️ Fehler!</strong>
         <span class="block sm:inline">{{ error }}</span>
     </div>
     {% endif %}
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-white porthole-card overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full">
-                <thead class="bg-gray-50">
+                <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IBAN/Handle</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aktionen</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Code</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">IBAN/Handle</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aktionen</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-sky-200">
                     {% for member in crew_members %}
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap font-semibold text-blue-600">{{ member.code }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ member.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ member.iban_or_handle or '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--ocean-blue);">{{ member.code }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ member.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--navy-deep); opacity: 0.7;">{{ member.iban_or_handle or '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                            <a href="/crew/{{ member.id }}/edit" class="text-blue-600 hover:text-blue-800 touch-action">Bearbeiten</a>
+                            <a href="/crew/{{ member.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
                             <form action="/crew/{{ member.id }}/delete" method="post" class="inline" onsubmit="return confirm('Wirklich löschen?')">
-                                <button type="submit" class="text-red-600 hover:text-red-800 touch-action">Löschen</button>
+                                <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ Löschen</button>
                             </form>
                         </td>
                     </tr>

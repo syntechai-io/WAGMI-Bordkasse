@@ -2,90 +2,80 @@
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+    <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">🧭 Dashboard</h1>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white porthole-card p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600">Wallet-Saldo</p>
-                    <p class="text-2xl font-bold text-green-600">{{ "%.2f"|format(wallet_balance) }} €</p>
+                    <p class="text-sm font-medium" style="color: var(--navy-deep);">Wallet-Saldo</p>
+                    <p class="text-2xl font-bold" style="color: var(--sea-foam);">{{ "%.2f"|format(wallet_balance) }} €</p>
                 </div>
-                <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+                <div class="text-5xl">💰</div>
             </div>
         </div>
         
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white porthole-card p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600">Einzahlungen</p>
-                    <p class="text-2xl font-bold text-blue-600">{{ "%.2f"|format(total_deposits) }} €</p>
+                    <p class="text-sm font-medium" style="color: var(--navy-deep);">Einzahlungen</p>
+                    <p class="text-2xl font-bold" style="color: var(--ocean-blue);">{{ "%.2f"|format(total_deposits) }} €</p>
                 </div>
-                <svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                </svg>
+                <div class="text-5xl">⬆️</div>
             </div>
         </div>
         
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white porthole-card p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600">Ausgaben Wallet</p>
-                    <p class="text-2xl font-bold text-orange-600">{{ "%.2f"|format(wallet_expenses) }} €</p>
+                    <p class="text-sm font-medium" style="color: var(--navy-deep);">Ausgaben Wallet</p>
+                    <p class="text-2xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(wallet_expenses) }} €</p>
                 </div>
-                <svg class="w-12 h-12 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
+                <div class="text-5xl">💳</div>
             </div>
         </div>
         
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white porthole-card p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600">Ausgaben Privat</p>
-                    <p class="text-2xl font-bold text-purple-600">{{ "%.2f"|format(private_expenses) }} €</p>
+                    <p class="text-sm font-medium" style="color: var(--navy-deep);">Ausgaben Privat</p>
+                    <p class="text-2xl font-bold" style="color: #9b59b6;">{{ "%.2f"|format(private_expenses) }} €</p>
                 </div>
-                <svg class="w-12 h-12 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                </svg>
+                <div class="text-5xl">💸</div>
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Top Kategorien</h2>
+    <div class="rope-divider"></div>
+
+    <div class="bg-white porthole-card p-6">
+        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">📊 Top Kategorien</h2>
         <div class="space-y-3">
             {% for category, total in top_categories %}
-            <div class="flex items-center justify-between">
-                <span class="text-gray-700">{{ category }}</span>
-                <span class="font-semibold text-blue-600">{{ "%.2f"|format(total) }} €</span>
+            <div class="flex items-center justify-between border-b border-sky-100 pb-2">
+                <span class="font-medium" style="color: var(--navy-deep);">{{ category }}</span>
+                <span class="font-semibold" style="color: var(--ocean-blue);">{{ "%.2f"|format(total) }} €</span>
             </div>
             {% endfor %}
         </div>
     </div>
 
+    <div class="rope-divider"></div>
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <a href="/crew" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg p-6 text-center transition touch-action">
-            <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-            </svg>
-            <h3 class="text-lg font-semibold">Crew verwalten</h3>
+        <a href="/crew" class="ocean-gradient text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg">
+            <div class="text-6xl mb-3">👥</div>
+            <h3 class="text-xl font-bold maritime-header">Crew verwalten</h3>
         </a>
         
-        <a href="/expenses" class="bg-green-600 hover:bg-green-700 text-white rounded-lg p-6 text-center transition touch-action">
-            <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            <h3 class="text-lg font-semibold">Ausgabe erfassen</h3>
+        <a href="/expenses" class="text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+            <div class="text-6xl mb-3">⚓</div>
+            <h3 class="text-xl font-bold maritime-header">Ausgabe erfassen</h3>
         </a>
         
-        <a href="/settlement" class="bg-purple-600 hover:bg-purple-700 text-white rounded-lg p-6 text-center transition touch-action">
-            <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-            </svg>
-            <h3 class="text-lg font-semibold">Ausgleich anzeigen</h3>
+        <a href="/settlement" class="text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
+            <div class="text-6xl mb-3">⛵</div>
+            <h3 class="text-xl font-bold maritime-header">Ausgleich anzeigen</h3>
         </a>
     </div>
 </div>

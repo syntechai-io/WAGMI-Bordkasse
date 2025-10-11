@@ -3,43 +3,43 @@
 {% block content %}
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-800">Ausgabendetails</h1>
-        <a href="/expenses" class="text-blue-600 hover:text-blue-800 touch-action">← Zurück</a>
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📋 Ausgabendetails</h1>
+        <a href="/expenses" class="hover:underline touch-action" style="color: var(--ocean-blue);">← Zurück</a>
     </div>
     
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white porthole-card p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-                <p class="text-sm text-gray-600">Datum</p>
-                <p class="text-lg font-semibold">{{ expense.date }}</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📅 Datum</p>
+                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.date }}</p>
             </div>
             <div>
-                <p class="text-sm text-gray-600">Kategorie</p>
-                <p class="text-lg font-semibold">{{ expense.category }}</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📂 Kategorie</p>
+                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.category }}</p>
             </div>
             <div>
-                <p class="text-sm text-gray-600">Bezahlt von</p>
-                <p class="text-lg font-semibold">{{ expense.payer.code }} - {{ expense.payer.name }}</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👤 Bezahlt von</p>
+                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.payer.code }} - {{ expense.payer.name }}</p>
             </div>
             <div>
-                <p class="text-sm text-gray-600">Betrag</p>
-                <p class="text-lg font-semibold text-red-600">{{ "%.2f"|format(expense.amount_eur) }} €</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💵 Betrag</p>
+                <p class="text-lg font-semibold" style="color: var(--coral);">{{ "%.2f"|format(expense.amount_eur) }} €</p>
             </div>
             <div>
-                <p class="text-sm text-gray-600">Bezahlt aus</p>
-                <p class="text-lg font-semibold">{{ expense.paid_from.value }}</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💰 Bezahlt aus</p>
+                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.paid_from.value }}</p>
             </div>
             <div>
-                <p class="text-sm text-gray-600">Aufteilung</p>
-                <p class="text-lg font-semibold">{{ expense.split_mode.value }}</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🎯 Aufteilung</p>
+                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.split_mode.value }}</p>
             </div>
             <div class="md:col-span-2">
-                <p class="text-sm text-gray-600">Beschreibung</p>
-                <p class="text-lg font-semibold">{{ expense.description }}</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📝 Beschreibung</p>
+                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.description }}</p>
             </div>
             <div class="md:col-span-2">
-                <p class="text-sm text-gray-600">Teilnehmer</p>
-                <p class="text-lg">
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👥 Teilnehmer</p>
+                <p class="text-lg" style="color: var(--navy-deep);">
                     {% for p in expense.participants %}
                         {{ p.member.code }}{% if not loop.last %}, {% endif %}
                     {% endfor %}
@@ -47,29 +47,31 @@
             </div>
         </div>
         
-        <div class="border-t pt-4">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Belege</h3>
+        <div class="rope-divider"></div>
+        
+        <div class="pt-4">
+            <h3 class="text-lg font-bold maritime-header mb-4" style="color: var(--navy-deep);">📎 Belege</h3>
             {% if expense.receipts %}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {% for receipt in expense.receipts %}
-                <a href="/receipts/{{ receipt.stored_filename }}" target="_blank" class="block border rounded-lg p-3 hover:bg-gray-50 touch-action">
-                    <p class="text-sm font-medium truncate">{{ receipt.original_name }}</p>
-                    <p class="text-xs text-gray-500">{{ (receipt.size_bytes / 1024) | round(1) }} KB</p>
+                <a href="/receipts/{{ receipt.stored_filename }}" target="_blank" class="block porthole-card p-3 touch-action" style="transition: transform 0.2s; border-color: var(--sky-blue);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    <p class="text-sm font-medium truncate" style="color: var(--navy-deep);">{{ receipt.original_name }}</p>
+                    <p class="text-xs" style="color: var(--navy-deep); opacity: 0.6;">{{ (receipt.size_bytes / 1024) | round(1) }} KB</p>
                 </a>
                 {% endfor %}
             </div>
             {% else %}
-            <p class="text-gray-500">Keine Belege vorhanden</p>
+            <p style="color: var(--navy-deep); opacity: 0.6;">Keine Belege vorhanden</p>
             {% endif %}
             
             <form action="/receipts/expenses/{{ expense.id }}/upload" method="post" enctype="multipart/form-data" class="mt-4">
                 <div class="flex gap-4">
-                    <input type="file" name="file" accept="image/*,.pdf" capture="environment" required class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition touch-action">
+                    <input type="file" name="file" accept="image/*,.pdf" capture="environment" required class="flex-1 px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <button type="submit" class="text-white px-6 py-2 rounded-lg transition touch-action font-semibold" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
                         📸 Foto/Upload
                     </button>
                 </div>
-                <p class="text-xs text-gray-500 mt-2">Auf Mobilgeräten: Kamera verwenden oder Datei auswählen</p>
+                <p class="text-xs mt-2" style="color: var(--navy-deep); opacity: 0.6;">Auf Mobilgeräten: Kamera verwenden oder Datei auswählen</p>
             </form>
         </div>
     </div>

@@ -2,13 +2,13 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Ausgabe bearbeiten</h1>
+    <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">✏️ Ausgabe bearbeiten</h1>
     
-    <form method="post" class="bg-white rounded-lg shadow p-6 space-y-4">
+    <form method="post" class="bg-white porthole-card p-6 space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block text-gray-700 font-medium mb-2">Bezahlt von *</label>
-                <select name="payer_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">👤 Bezahlt von *</label>
+                <select name="payer_id" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
                     {% for member in crew_members %}
                     <option value="{{ member.id }}" {% if expense and expense.payer_id == member.id %}selected{% endif %}>
                         {{ member.code }} - {{ member.name }}
@@ -18,14 +18,14 @@
             </div>
             
             <div>
-                <label class="block text-gray-700 font-medium mb-2">Datum *</label>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">📅 Datum *</label>
                 <input type="date" name="expense_date" value="{% if expense %}{{ expense.date }}{% endif %}" required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                    class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
             </div>
             
             <div>
-                <label class="block text-gray-700 font-medium mb-2">Kategorie *</label>
-                <select name="category" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">📂 Kategorie *</label>
+                <select name="category" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
                     {% for cat in categories %}
                     <option value="{{ cat }}" {% if expense and expense.category == cat %}selected{% endif %}>{{ cat }}</option>
                     {% endfor %}
@@ -33,35 +33,35 @@
             </div>
             
             <div>
-                <label class="block text-gray-700 font-medium mb-2">Betrag (€) *</label>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">💵 Betrag (€) *</label>
                 <input type="number" name="amount_eur" step="0.01" value="{% if expense %}{{ expense.amount_eur }}{% endif %}" required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                    class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
             </div>
             
             <div class="md:col-span-2">
-                <label class="block text-gray-700 font-medium mb-2">Beschreibung *</label>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 Beschreibung *</label>
                 <input type="text" name="description" value="{% if expense %}{{ expense.description }}{% endif %}" required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                    class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
             </div>
             
             <div>
-                <label class="block text-gray-700 font-medium mb-2">Bezahlt aus *</label>
-                <select name="paid_from" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">💰 Bezahlt aus *</label>
+                <select name="paid_from" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
                     <option value="wallet" {% if expense and expense.paid_from.value == 'wallet' %}selected{% endif %}>Wallet (gemeinsame Kasse)</option>
                     <option value="private" {% if expense and expense.paid_from.value == 'private' %}selected{% endif %}>Privat</option>
                 </select>
             </div>
             
             <div>
-                <label class="block text-gray-700 font-medium mb-2">Aufteilung *</label>
-                <select name="split_mode" id="split_mode" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🎯 Aufteilung *</label>
+                <select name="split_mode" id="split_mode" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
                     <option value="equal" {% if expense and expense.split_mode.value == 'equal' %}selected{% endif %}>Gleichmäßig (alle)</option>
                     <option value="participants" {% if expense and expense.split_mode.value == 'participants' %}selected{% endif %}>Teilnehmer auswählen</option>
                 </select>
             </div>
             
             <div id="participants_div" class="md:col-span-2 {% if not expense or expense.split_mode.value != 'participants' %}hidden{% endif %}">
-                <label class="block text-gray-700 font-medium mb-2">Teilnehmer</label>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">👥 Teilnehmer</label>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                     {% for member in crew_members %}
                     <label class="flex items-center space-x-2">
@@ -75,12 +75,14 @@
             </div>
         </div>
         
+        <div class="rope-divider"></div>
+        
         <div class="flex gap-4 pt-4">
-            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition touch-action">
-                Speichern
+            <button type="submit" class="flex-1 ocean-gradient text-white font-bold py-3 px-4 rounded-lg transition touch-action">
+                💾 Speichern
             </button>
-            <a href="/expenses" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action">
-                Abbrechen
+            <a href="/expenses" class="flex-1 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action" style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
+                ❌ Abbrechen
             </a>
         </div>
     </form>
