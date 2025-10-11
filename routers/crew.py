@@ -5,20 +5,29 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from db import get_db
 from models import CrewMember
+from services.trip import TripService
 
 router = APIRouter(prefix="/crew", tags=["crew"])
 templates = Jinja2Templates(directory="templates")
 
 @router.get("", response_class=HTMLResponse)
 async def list_crew(request: Request, db: Session = Depends(get_db)):
-    crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
     return templates.TemplateResponse("crew_list.html", {
         "request": request,
         "crew_members": crew_members
     })
 
 @router.get("/new", response_class=HTMLResponse)
-async def new_crew_form(request: Request):
+async def new_crew_form(request: Request, db: Session = Depends(get_db)):
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
     return templates.TemplateResponse("crew_form.html", {
         "request": request,
         "member": None
@@ -32,8 +41,17 @@ async def create_crew(
     iban_or_handle: str = Form(""),
     db: Session = Depends(get_db)
 ):
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
     try:
-        member = CrewMember(code=code, name=name, iban_or_handle=iban_or_handle or None)
+        member = CrewMember(
+            trip_id=active_trip.id,
+            code=code,
+            name=name,
+            iban_or_handle=iban_or_handle or None
+        )
         db.add(member)
         db.commit()
         return RedirectResponse(url="/crew", status_code=303)
@@ -51,7 +69,14 @@ async def edit_crew_form(
     member_id: int,
     db: Session = Depends(get_db)
 ):
-    member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    member = db.query(CrewMember).filter(
+        CrewMember.id == member_id,
+        CrewMember.trip_id == active_trip.id
+    ).first()
     return templates.TemplateResponse("crew_form.html", {
         "request": request,
         "member": member
@@ -66,8 +91,15 @@ async def update_crew(
     iban_or_handle: str = Form(""),
     db: Session = Depends(get_db)
 ):
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
     try:
-        member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
+        member = db.query(CrewMember).filter(
+            CrewMember.id == member_id,
+            CrewMember.trip_id == active_trip.id
+        ).first()
         member.code = code
         member.name = name
         member.iban_or_handle = iban_or_handle or None
@@ -75,7 +107,10 @@ async def update_crew(
         return RedirectResponse(url="/crew", status_code=303)
     except IntegrityError:
         db.rollback()
-        member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
+        member = db.query(CrewMember).filter(
+            CrewMember.id == member_id,
+            CrewMember.trip_id == active_trip.id
+        ).first()
         return templates.TemplateResponse("crew_form.html", {
             "request": request,
             "member": member,
@@ -88,17 +123,23 @@ async def delete_crew(
     member_id: int,
     db: Session = Depends(get_db)
 ):
-    member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    member = db.query(CrewMember).filter(
+        CrewMember.id == member_id,
+        CrewMember.trip_id == active_trip.id
+    ).first()
     
     if not member:
         return RedirectResponse(url="/crew", status_code=303)
     
-    # Check if member has deposits or expenses
     has_deposits = len(member.deposits) > 0
     has_expenses = len(member.paid_expenses) > 0
     
     if has_deposits or has_expenses:
-        crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
         error_msg = f"'{member.name}' kann nicht gelöscht werden, da "
         if has_deposits and has_expenses:
             error_msg += "Einzahlungen und Ausgaben existieren."
@@ -120,7 +161,7 @@ async def delete_crew(
         return RedirectResponse(url="/crew", status_code=303)
     except IntegrityError:
         db.rollback()
-        crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
         return templates.TemplateResponse("crew_list.html", {
             "request": request,
             "crew_members": crew_members,

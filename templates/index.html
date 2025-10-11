@@ -2,7 +2,13 @@
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">🧭 Dashboard</h1>
+    <div class="flex justify-between items-center">
+        <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">🧭 Dashboard</h1>
+        <div class="text-right">
+            <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">Aktueller Törn:</p>
+            <p class="text-xl font-bold maritime-header" style="color: var(--ocean-blue);">⛵ {{ active_trip.name }}</p>
+        </div>
+    </div>
     
     <!-- PayPal Pool Link -->
     <a href="https://www.paypal.com/pool/9j4PpWiLVC?sr=ancr" target="_blank" class="block text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #0070ba 0%, #003087 100%);">

@@ -6,8 +6,9 @@ from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy import func
 from db import init_db, get_db
 from sqlalchemy.orm import Session
-from models import Deposit, Expense, PaidFromEnum
+from models import Deposit, Expense, PaidFromEnum, Trip
 from seed_data import seed_database
+from services.trip import TripService
 import os
 
 from routers.crew import router as crew_router
@@ -17,6 +18,7 @@ from routers.receipts import router as receipts_router
 from routers.balances import router as balances_router
 from routers.export import router as export_router
 from routers.auth import router as auth_router
+from routers.trips import router as trips_router
 
 app = FastAPI(title="Crew Wallet - Bordkasse")
 
@@ -44,6 +46,7 @@ with next(get_db()) as db:
     seed_database(db)
 
 app.include_router(auth_router)
+app.include_router(trips_router)
 app.include_router(crew_router)
 app.include_router(deposits_router)
 app.include_router(expenses_router)
@@ -53,13 +56,23 @@ app.include_router(export_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):
-    total_deposits = db.query(func.sum(Deposit.amount_eur)).scalar() or 0.0
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    trip_id = active_trip.id
+    
+    total_deposits = db.query(func.sum(Deposit.amount_eur)).filter(
+        Deposit.trip_id == trip_id
+    ).scalar() or 0.0
     
     wallet_expenses = db.query(func.sum(Expense.amount_eur)).filter(
+        Expense.trip_id == trip_id,
         Expense.paid_from == PaidFromEnum.wallet
     ).scalar() or 0.0
     
     private_expenses = db.query(func.sum(Expense.amount_eur)).filter(
+        Expense.trip_id == trip_id,
         Expense.paid_from == PaidFromEnum.private
     ).scalar() or 0.0
     
@@ -69,12 +82,13 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
     top_categories = db.query(
         Expense.category,
         func.sum(Expense.amount_eur).label('total')
-    ).group_by(Expense.category).order_by(func.sum(Expense.amount_eur).desc()).limit(5).all()
+    ).filter(Expense.trip_id == trip_id).group_by(Expense.category).order_by(func.sum(Expense.amount_eur).desc()).limit(5).all()
     
-    expense_count = db.query(Expense).count()
+    expense_count = db.query(Expense).filter(Expense.trip_id == trip_id).count()
     
     return templates.TemplateResponse("index.html", {
         "request": request,
+        "active_trip": active_trip,
         "wallet_balance": round(wallet_balance, 2),
         "total_deposits": round(total_deposits, 2),
         "total_expenses": round(total_expenses, 2),

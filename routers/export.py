@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from db import get_db
 from models import CrewMember, Deposit, Expense
+from services.trip import TripService
 import io
 import csv
 
@@ -10,19 +11,23 @@ router = APIRouter(prefix="/export", tags=["export"])
 
 @router.get("/csv")
 async def export_csv(request: Request, db: Session = Depends(get_db)):
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
     output = io.StringIO()
     writer = csv.writer(output)
     
     writer.writerow([])
     writer.writerow(["CREW MEMBERS"])
     writer.writerow(["ID", "Code", "Name", "IBAN/Handle"])
-    for member in db.query(CrewMember).all():
+    for member in db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all():
         writer.writerow([member.id, member.code, member.name, member.iban_or_handle or ""])
     
     writer.writerow([])
     writer.writerow(["DEPOSITS"])
     writer.writerow(["ID", "Member Code", "Member Name", "Amount EUR", "Date", "Note"])
-    for deposit in db.query(Deposit).all():
+    for deposit in db.query(Deposit).filter(Deposit.trip_id == active_trip.id).all():
         writer.writerow([
             deposit.id,
             deposit.member.code,
@@ -35,7 +40,7 @@ async def export_csv(request: Request, db: Session = Depends(get_db)):
     writer.writerow([])
     writer.writerow(["EXPENSES"])
     writer.writerow(["ID", "Payer Code", "Payer Name", "Date", "Category", "Description", "Amount EUR", "Paid From", "Split Mode", "Participants"])
-    for expense in db.query(Expense).all():
+    for expense in db.query(Expense).filter(Expense.trip_id == active_trip.id).all():
         participants = ", ".join([p.member.code for p in expense.participants])
         writer.writerow([
             expense.id,

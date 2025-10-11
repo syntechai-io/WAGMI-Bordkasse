@@ -1,32 +1,36 @@
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from db import get_db
 from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum
+from services.trip import TripService
 from settlement import compute_settlement
 
 router = APIRouter(tags=["balances"])
 templates = Jinja2Templates(directory="templates")
 
-def calculate_balances(db: Session):
-    crew_members = db.query(CrewMember).all()
+def calculate_balances(db: Session, trip_id: int):
+    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == trip_id).all()
     balances = []
     net_map = {}
     
     for member in crew_members:
         deposits_total = db.query(func.sum(Deposit.amount_eur)).filter(
-            Deposit.member_id == member.id
+            Deposit.member_id == member.id,
+            Deposit.trip_id == trip_id
         ).scalar() or 0.0
         
         private_paid = db.query(func.sum(Expense.amount_eur)).filter(
             Expense.payer_id == member.id,
-            Expense.paid_from == PaidFromEnum.private
+            Expense.paid_from == PaidFromEnum.private,
+            Expense.trip_id == trip_id
         ).scalar() or 0.0
         
-        participations = db.query(ExpenseParticipant).filter(
-            ExpenseParticipant.member_id == member.id
+        participations = db.query(ExpenseParticipant).join(Expense).filter(
+            ExpenseParticipant.member_id == member.id,
+            Expense.trip_id == trip_id
         ).all()
         
         share_owed = 0.0
@@ -54,11 +58,18 @@ def calculate_balances(db: Session):
 
 @router.get("/balances", response_class=HTMLResponse)
 async def show_balances(request: Request, db: Session = Depends(get_db)):
-    balances, _ = calculate_balances(db)
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
     
-    total_deposits = db.query(func.sum(Deposit.amount_eur)).scalar() or 0.0
+    balances, _ = calculate_balances(db, active_trip.id)
+    
+    total_deposits = db.query(func.sum(Deposit.amount_eur)).filter(
+        Deposit.trip_id == active_trip.id
+    ).scalar() or 0.0
     wallet_expenses = db.query(func.sum(Expense.amount_eur)).filter(
-        Expense.paid_from == PaidFromEnum.wallet
+        Expense.paid_from == PaidFromEnum.wallet,
+        Expense.trip_id == active_trip.id
     ).scalar() or 0.0
     wallet_balance = total_deposits - wallet_expenses
     
@@ -70,10 +81,14 @@ async def show_balances(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/settlement", response_class=HTMLResponse)
 async def show_settlement(request: Request, db: Session = Depends(get_db)):
-    balances, net_map = calculate_balances(db)
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    balances, net_map = calculate_balances(db, active_trip.id)
     transfers = compute_settlement(net_map)
     
-    member_map = {m.code: m for m in db.query(CrewMember).all()}
+    member_map = {m.code: m for m in db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all()}
     
     settlement_data = []
     for from_code, to_code, amount in transfers:

@@ -4,7 +4,8 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from db import get_db
-from models import Expense, ExpenseParticipant, CrewMember, Receipt, PaidFromEnum, SplitModeEnum
+from models import Expense, ExpenseParticipant, CrewMember, Receipt, PaidFromEnum, SplitModeEnum, Currency
+from services.trip import TripService
 from datetime import date
 from typing import List, Optional
 from pathlib import Path
@@ -20,8 +21,12 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 @router.get("", response_class=HTMLResponse)
 async def list_expenses(request: Request, db: Session = Depends(get_db)):
-    expenses = db.query(Expense).order_by(Expense.date.desc()).all()
-    crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
     
     return templates.TemplateResponse("expenses.html", {
         "request": request,
@@ -37,19 +42,27 @@ async def create_expense(
     expense_date: str = Form(...),
     category: str = Form(...),
     description: str = Form(...),
-    amount_eur: float = Form(...),
+    amount: float = Form(...),
+    currency: str = Form(Currency.EUR.value),
     paid_from: str = Form(...),
     split_mode: str = Form(...),
     participant_ids: List[int] = Form([]),
     receipt: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
     expense = Expense(
+        trip_id=active_trip.id,
         payer_id=payer_id,
         date=date.fromisoformat(expense_date),
         category=category,
         description=description,
-        amount_eur=amount_eur,
+        amount=amount,
+        currency=Currency(currency),
+        amount_eur=amount,
         paid_from=PaidFromEnum(paid_from),
         split_mode=SplitModeEnum(split_mode)
     )
@@ -61,7 +74,7 @@ async def create_expense(
         for pid in participant_ids:
             db.add(ExpenseParticipant(expense_id=expense.id, member_id=pid))
     elif split_mode == "equal":
-        all_members = db.query(CrewMember).all()
+        all_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all()
         for member in all_members:
             db.add(ExpenseParticipant(expense_id=expense.id, member_id=member.id))
     
@@ -111,7 +124,14 @@ async def expense_detail(
     expense_id: int,
     db: Session = Depends(get_db)
 ):
-    expense = db.query(Expense).filter(Expense.id == expense_id).first()
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    expense = db.query(Expense).filter(
+        Expense.id == expense_id,
+        Expense.trip_id == active_trip.id
+    ).first()
     
     return templates.TemplateResponse("expense_detail.html", {
         "request": request,
@@ -124,10 +144,17 @@ async def edit_expense_form(
     expense_id: int,
     db: Session = Depends(get_db)
 ):
-    expense = db.query(Expense).filter(Expense.id == expense_id).first()
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    expense = db.query(Expense).filter(
+        Expense.id == expense_id,
+        Expense.trip_id == active_trip.id
+    ).first()
     if not expense:
-        expenses = db.query(Expense).order_by(Expense.date.desc()).all()
-        crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+        expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
         return templates.TemplateResponse("expenses.html", {
             "request": request,
             "expenses": expenses,
@@ -136,7 +163,7 @@ async def edit_expense_form(
             "error": "Ausgabe nicht gefunden."
         }, status_code=404)
     
-    crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
     participant_ids = [p.member_id for p in expense.participants]
     
     return templates.TemplateResponse("expense_edit.html", {
@@ -155,17 +182,25 @@ async def update_expense(
     expense_date: str = Form(...),
     category: str = Form(...),
     description: str = Form(...),
-    amount_eur: float = Form(...),
+    amount: float = Form(...),
+    currency: str = Form(Currency.EUR.value),
     paid_from: str = Form(...),
     split_mode: str = Form(...),
     participant_ids: List[int] = Form([]),
     db: Session = Depends(get_db)
 ):
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
     try:
-        expense = db.query(Expense).filter(Expense.id == expense_id).first()
+        expense = db.query(Expense).filter(
+            Expense.id == expense_id,
+            Expense.trip_id == active_trip.id
+        ).first()
         if not expense:
-            expenses = db.query(Expense).order_by(Expense.date.desc()).all()
-            crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+            expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+            crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
             return templates.TemplateResponse("expenses.html", {
                 "request": request,
                 "expenses": expenses,
@@ -178,19 +213,19 @@ async def update_expense(
         expense.date = date.fromisoformat(expense_date)
         expense.category = category
         expense.description = description
-        expense.amount_eur = amount_eur
+        expense.amount = amount
+        expense.currency = Currency(currency)
+        expense.amount_eur = amount
         expense.paid_from = PaidFromEnum(paid_from)
         expense.split_mode = SplitModeEnum(split_mode)
         
-        # Delete existing participants
         db.query(ExpenseParticipant).filter(ExpenseParticipant.expense_id == expense_id).delete()
         
-        # Add new participants
         if split_mode == "participants" and participant_ids:
             for pid in participant_ids:
                 db.add(ExpenseParticipant(expense_id=expense.id, member_id=pid))
         elif split_mode == "equal":
-            all_members = db.query(CrewMember).all()
+            all_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all()
             for member in all_members:
                 db.add(ExpenseParticipant(expense_id=expense.id, member_id=member.id))
         
@@ -198,8 +233,8 @@ async def update_expense(
         return RedirectResponse(url="/expenses", status_code=303)
     except IntegrityError:
         db.rollback()
-        expenses = db.query(Expense).order_by(Expense.date.desc()).all()
-        crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+        expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
         return templates.TemplateResponse("expenses.html", {
             "request": request,
             "expenses": expenses,
@@ -214,16 +249,23 @@ async def delete_expense(
     expense_id: int,
     db: Session = Depends(get_db)
 ):
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
     try:
-        expense = db.query(Expense).filter(Expense.id == expense_id).first()
+        expense = db.query(Expense).filter(
+            Expense.id == expense_id,
+            Expense.trip_id == active_trip.id
+        ).first()
         if expense:
             db.delete(expense)
             db.commit()
         return RedirectResponse(url="/expenses", status_code=303)
     except IntegrityError:
         db.rollback()
-        expenses = db.query(Expense).order_by(Expense.date.desc()).all()
-        crew_members = db.query(CrewMember).order_by(CrewMember.code).all()
+        expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
         return templates.TemplateResponse("expenses.html", {
             "request": request,
             "expenses": expenses,

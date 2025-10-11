@@ -16,7 +16,29 @@ Key features:
 
 ## Recent Changes
 
-**October 11, 2025**:
+**October 11, 2025 - Multi-Currency & Trip Archiving**:
+- **Trip Management & Archiving**:
+  - Added Trip model for organizing expenses/deposits by sailing trip
+  - Trip statuses: active (current trip) or archived (past trips)
+  - Only one trip can be active at a time
+  - Create new trips, switch active trip, archive old trips
+  - All crew, deposits, and expenses are scoped to a trip
+  - Trip management UI at /trips with creation and archiving
+- **Multi-Currency Support (EUR, DKK, SEK, GBP)**:
+  - ECB (European Central Bank) API integration for official exchange rates
+  - Daily rate caching to minimize API calls
+  - Automatic conversion to EUR for calculations
+  - Currency dropdown in deposit and expense forms
+  - Amounts displayed in both original currency and EUR
+  - No Turkish Lira (TRY) - only Scandinavian/European currencies
+- **Database Schema Updates**:
+  - Trip model with name, start_date, end_date, status
+  - Currency enum (EUR, DKK, SEK, GBP)
+  - All models (CrewMember, Deposit, Expense) linked to Trip via trip_id
+  - Deposits and Expenses have both amount (original) and amount_eur fields
+  - Crew member codes unique per trip (not globally unique anymore)
+
+**October 11, 2025 - Previous Updates**:
 - Added **edit and delete functionality** for deposits and expenses
 - Users can now correct mistakes in deposits and expenses through intuitive edit forms
 - Delete operations include confirmation dialogs for safety
