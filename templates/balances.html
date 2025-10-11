@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <h1 class="text-3xl font-bold text-gray-800">Salden</h1>
+    
+    <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg">
+        <p class="font-semibold">Wallet-Saldo: {{ "%.2f"|format(wallet_balance) }} €</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mitglied</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bezahlt</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Anteil</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Netto</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for balance in balances %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap font-semibold">
+                            {{ balance.member.code }} - {{ balance.member.name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ "%.2f"|format(balance.paid_total) }} €</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ "%.2f"|format(balance.share_owed) }} €</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-bold 
+                            {% if balance.net > 0 %}text-green-600{% elif balance.net < 0 %}text-red-600{% else %}text-gray-600{% endif %}">
+                            {{ "%.2f"|format(balance.net) }} €
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs rounded-full 
+                                {% if balance.status == 'receives' %}bg-green-100 text-green-800
+                                {% elif balance.status == 'pays' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {% if balance.status == 'receives' %}erhält
+                                {% elif balance.status == 'pays' %}zahlt
+                                {% else %}ausgeglichen{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="flex justify-center">
+        <a href="/settlement" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg text-lg font-semibold transition touch-action">
+            Ausgleich berechnen →
+        </a>
+    </div>
+</div>
+{% endblock %}

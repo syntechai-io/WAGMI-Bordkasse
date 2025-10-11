@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">{% if member %}Crew-Mitglied bearbeiten{% else %}Neues Crew-Mitglied{% endif %}</h1>
+    
+    <form method="post" class="bg-white rounded-lg shadow p-6 space-y-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        
+        <div>
+            <label class="block text-gray-700 font-medium mb-2">Code *</label>
+            <input type="text" name="code" value="{% if member %}{{ member.code }}{% endif %}" required maxlength="8"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+        </div>
+        
+        <div>
+            <label class="block text-gray-700 font-medium mb-2">Name *</label>
+            <input type="text" name="name" value="{% if member %}{{ member.name }}{% endif %}" required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+        </div>
+        
+        <div>
+            <label class="block text-gray-700 font-medium mb-2">IBAN/Handle (optional)</label>
+            <input type="text" name="iban_or_handle" value="{% if member %}{{ member.iban_or_handle or '' }}{% endif %}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+        </div>
+        
+        <div class="flex gap-4">
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition touch-action">
+                Speichern
+            </button>
+            <a href="/crew" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action">
+                Abbrechen
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
