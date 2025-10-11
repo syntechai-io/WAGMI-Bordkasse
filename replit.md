@@ -7,12 +7,22 @@ Crew Wallet is a minimalist expense tracking and settlement application designed
 Key features:
 - **No authentication required** - instant access without login
 - Crew member management for up to 12 members with unique codes (up to 20 chars) and payment handles (IBAN/PayPal/etc.)
-- Deposit tracking into shared wallet
-- Expense recording with flexible split modes (equal split or specific participants)
+- Deposit tracking into shared wallet with **edit and delete** capabilities
+- Expense recording with flexible split modes (equal split or specific participants) and **edit and delete** capabilities
 - Receipt upload and storage for expenses with camera integration
 - Automatic balance calculation and minimal settlement transfers
 - CSV export functionality
 - Progressive Web App (PWA) support for mobile usage and home screen installation
+
+## Recent Changes
+
+**October 11, 2025**:
+- Added **edit and delete functionality** for deposits and expenses
+- Users can now correct mistakes in deposits and expenses through intuitive edit forms
+- Delete operations include confirmation dialogs for safety
+- Robust error handling for edge cases (stale IDs, deleted records, concurrent modifications)
+- User-friendly error messages displayed when records are not found or cannot be modified
+- Crew member deletion now validates for related deposits/expenses before allowing deletion
 
 ## User Preferences
 
