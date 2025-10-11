@@ -1,0 +1,274 @@
+Alles klar. Unten findest du einen kompletten, copy-&-paste-fähigen Replit-Prompt (Deutsch), der eine Basis-Version einer Crew-Bordkassen-App erzeugen soll – mit Upload für Belege, Einzahlungen in eine gemeinsame Wallet, Ausgabenlogik (equal/participants) und automatischem Ausgleichsvorschlag. Der Prompt ist so geschrieben, dass Replit/AI-Coder daraus ein lauffähiges Minimal-Produkt baut (FastAPI + SQLite + serverseitiges HTML mit HTMX/Tailwind, ohne externe Cloud-Abhängigkeiten).
+
+⸻
+
+📋 Replit-Prompt (zum Einfügen)
+
+Projektziel (Kurzfassung)
+Baue eine minimalistische, produktionsnahe Bordkassen-Webapp für einen Segeltörn (Crew-Wallet). Anforderungen:
+	•	Gemeinsame Wallet (Einzahlungen pro Crewmitglied)
+	•	Ausgaben mit Split-Modi equal (alle) oder participants (explizite Teilmenge)
+	•	Beleg-Upload (PDF/JPG/PNG) mit sicherem Dateispeicher im Projekt (/uploads)
+	•	Automatischer Ausgleich (algorithmisch minimale Zahlungen „wer zahlt wem wie viel“)
+	•	Einfaches Login (nur Admin + Optional: PIN-Gate für Crew)
+	•	Technik: Python FastAPI, SQLite (SQLAlchemy), Jinja2 + HTMX + TailwindCSS; kein externer Dienst nötig
+
+⸻
+
+Architektur & Tech
+	•	Backend: FastAPI, Pydantic, SQLAlchemy, Alembic (optionale Migration), python-multipart
+	•	Frontend: Jinja2-Templates, HTMX (Inline-AJAX), Tailwind (CDN)
+	•	Persistenz: SQLite (/data/app.db), Ordner /uploads für Belege
+	•	Auth: sehr einfach: .env mit ADMIN_USER, ADMIN_PASSWORD; Session-Cookie (itsdangerous)
+	•	Sicherheit light:
+	•	Größenlimit Upload 10 MB, nur .pdf,.jpg,.jpeg,.png
+	•	Slug/UUID-Dateinamen, kein Originalname in Pfaden, kein Directory-Traversal
+	•	CSRF-Token pro mutierendem POST (hidden field)
+	•	Tests: kurze API-Tests (pytest) für Settlement-Algorithmus
+
+⸻
+
+Datenmodell (SQLAlchemy)
+
+CrewMember
+	•	id (int, pk)
+	•	code (str, unique, max 8)
+	•	name (str)
+	•	iban_or_handle (str, nullable)
+	•	created_at (datetime)
+
+Deposit (Einzahlung in die gemeinsame Wallet)
+	•	id, member_id (fk CrewMember)
+	•	amount_eur (decimal(12,2))
+	•	date (date)
+	•	note (str, nullable)
+
+Expense
+	•	id, payer_id (fk CrewMember)
+	•	date (date)
+	•	category (str)
+	•	description (str)
+	•	amount_eur (decimal(12,2))
+	•	currency (str, default “EUR”)
+	•	paid_from (enum: “wallet” | “private”)
+	•	split_mode (enum: “equal” | “participants”)
+
+ExpenseParticipant
+	•	id, expense_id (fk Expense)
+	•	member_id (fk CrewMember)
+
+Receipt
+	•	id, expense_id (fk Expense)
+	•	stored_filename (str)  // z. B. uuid.ext, gespeichert unter /uploads/{uuid.ext}
+	•	original_name (str)
+	•	content_type (str)
+	•	size_bytes (int)
+	•	uploaded_at (datetime)
+
+⸻
+
+Geschäftslogik
+	1.	Wallet-Saldo = Summe aller Deposits – Summe aller Ausgaben, die paid_from = wallet.
+	2.	Bezahlte Summe pro Person = Summe aller Expense.amount_eur, bei denen payer_id = Person (unabhängig von paid_from).
+	3.	Anteil pro Person je Expense
+	•	equal: Betrag / Anzahl Crewmitglieder (oder optional nur aktive)
+	•	participants: Betrag / Anzahl der in ExpenseParticipant verknüpften Personen
+	4.	Gesamter „Share Owed“ pro Person = Summe ihrer Anteile über alle Expenses.
+	5.	Netto = (Bezahlte Summe + ggf. eigene Einzahlungen?) – Share Owed.
+	•	Für Transparenz: Deposits fließen nicht direkt in Netto je Person ein, sondern in den Wallet-Saldo. Die Netto-Abrechnung basiert auf „wer hat bezahlt“ vs. „wer schuldet Anteile“. Das ist robust, egal ob „wallet“ oder „private“ gezahlt wurde.
+	6.	Ausgleichsvorschlag (Settlement): Greedy-Match
+	•	Liste creditors (Netto > 0) und debtors (Netto < 0, Betrag positiv gedacht) absteigend sortieren
+	•	immer min(debtor, creditor) ausgleichen, bis eine Seite 0 ist
+	•	Ausgabe als Tabelle „Von → An → Betrag“
+
+⸻
+
+Endpunkte & Views
+
+Auth
+	•	GET /login Formular, POST /login setzt Session-Cookie, POST /logout
+	•	Middleware prüft Admin-Session für mutierende Routen
+
+Dashboard
+	•	GET / zeigt Quick-KPIs: Wallet-Saldo, Summe Ausgaben, Summe Einzahlungen, Top-Kategorien, Link zu Salden/Ausgleich
+
+Crew
+	•	GET /crew Liste
+	•	GET /crew/new, POST /crew/new
+	•	GET /crew/{id}/edit, POST /crew/{id}/edit
+	•	POST /crew/{id}/delete (nur wenn keine referenzierten Buchungen)
+
+Deposits
+	•	GET /deposits Liste + Formular neu (HTMX)
+	•	POST /deposits/new
+
+Expenses
+	•	GET /expenses Liste + Formular neu
+	•	Felder: date, payer_id, category (Text/Select), description, amount_eur, currency (fix EUR), paid_from (wallet|private), split_mode (equal|participants), participants (Mehrfachauswahl)
+	•	POST /expenses/new
+	•	GET /expenses/{id} Detail mit Belegen
+	•	POST /expenses/{id}/delete (wenn erlaubt)
+
+Receipts
+	•	POST /expenses/{id}/receipts/upload — akzeptiert UploadFile (pdf/jpg/png), prüft Größe/Typ, speichert unter /uploads
+	•	GET /receipts/{uuid} — sendet Datei (Content-Disposition: inline)
+
+Balances/Settlement
+	•	GET /balances — Tabelle pro Person: Paid Total, Share Owed, Netto, Status
+	•	GET /settlement — vorgeschlagene Transfers (Von, An, Betrag) + CSV-Export
+
+Admin/Export
+	•	GET /export/csv — CSV aller Kernentitäten
+	•	GET /health — simple OK
+
+⸻
+
+UI (Jinja + HTMX)
+	•	Layout: Navbar (Dashboard, Crew, Einzahlungen, Ausgaben, Belege, Salden, Ausgleich), Footer mit Versionsinfo
+	•	Forms: kompakte Jinja-Formulare mit Client-Validierung (HTML5)
+	•	Tabellen: sortierbar (einfach per HTMX oder minimalem JS)
+	•	Upload: drag&drop oder Datei-Button; nach Upload wird Belegliste via HTMX neu gerendert
+
+⸻
+
+Sicherheits-/Compliance-Hinweise (minimal)
+	•	Max Upload 10 MB, erlaubte Typen: pdf/jpg/jpeg/png
+	•	CSRF-Token bei jedem POST (hidden Input; Token in Session)
+	•	Keine vertraulichen Personendaten speichern (IBAN optional, als Freitext)
+	•	Hinweisbanner: „Nur für Reiseabrechnung. Keine Archivfunktion über den Törn hinaus.“
+
+⸻
+
+Akzeptanzkriterien (Tests/Manuell)
+	1.	Crew anlegen (4 Personen), je 400 € Einzahlung → Wallet-Saldo 1.600 €.
+	2.	3 Ausgaben:
+	•	Proviant 180 € (wallet, equal)
+	•	Mooring 48 € (wallet, equal)
+	•	Dinner 160 € (private, participants: SN,AB,CD)
+→ Balances zeigen für jeden Paid-Total, Share-Owed, Netto plausibel.
+	3.	Settlement erzeugt endliche Liste Überweisungen, Summe Debtors = Summe Creditors.
+	4.	Beleg-Upload (jpg & pdf) funktioniert, Datei aufrufbar unter /receipts/{uuid}.
+	5.	CSV-Export lädt korrekte Daten.
+
+⸻
+
+Beispiel-Code-Gerüst (bitte erstellen)
+
+Dateistruktur
+
+/main.py
+/models.py
+/schemas.py
+/db.py
+/security.py
+/routers/{auth,crew,deposits,expenses,receipts,balances,export}.py
+/templates/{layout.html,index.html,crew_*.html,deposits_*.html,expenses_*.html,receipts_*.html,balances.html,settlement.html,login.html}
+/static/{htmx.min.js, favicon.svg}
+/uploads/.gitkeep
+/data/.gitkeep
+/tests/test_settlement.py
+.env.example
+
+main.py
+	•	FastAPI mit Jinja2Templates, StaticFiles, SessionMiddleware (itsdangerous secret)
+	•	Mount /uploads als Static mit Zugriffskontrolle (nur via signiertem Link GET /receipts/{uuid})
+	•	Include-Router
+
+models.py
+	•	SQLAlchemy-Modelle wie oben beschrieben
+
+db.py
+	•	SQLite Engine sqlite:///data/app.db, SessionLocal, Base.metadata.create_all()
+
+security.py
+	•	Simple Login (POST /login) vergleicht Credentials gegen .env; Session-Cookie setzen; require_admin-Dependency; CSRF-Token
+
+routers
+	•	CRUD-Routen je Bereich; Validierung mit Pydantic (schemas.py)
+
+settlement-Logik (als Funktion)
+
+def compute_settlement(net_map: dict[str, float]) -> list[tuple[str, str, float]]:
+    """
+    net_map: person_code -> net amount (positive: should receive; negative: should pay)
+    Returns list of (from_code, to_code, amount) minimal greedy.
+    """
+    creditors = [(c, a) for c, a in net_map.items() if a > 0.01]
+    debtors = [(c, -a) for c, a in net_map.items() if a < -0.01]
+    creditors.sort(key=lambda x: x[1], reverse=True)
+    debtors.sort(key=lambda x: x[1], reverse=True)
+    out = []
+    i = j = 0
+    while i < len(debtors) and j < len(creditors):
+        d_code, d_amt = debtors[i]
+        c_code, c_amt = creditors[j]
+        pay = round(min(d_amt, c_amt), 2)
+        if pay > 0:
+            out.append((d_code, c_code, pay))
+        d_amt -= pay
+        c_amt -= pay
+        if d_amt <= 0.01: i += 1
+        else: debtors[i] = (d_code, d_amt)
+        if c_amt <= 0.01: j += 1
+        else: creditors[j] = (c_code, c_amt)
+    return out
+
+tests/test_settlement.py
+	•	Unit-Test für compute_settlement (Summe Debtors == Summe Creditors, keine negativen Beträge)
+
+templates/layout.html
+	•	Tailwind via CDN, Navbar, CSRF-Meta, {{ csrf_token }} Helper
+
+templates/index.html
+	•	KPIs: Wallet-Saldo, Sum Deposits, Sum Expenses (wallet/private getrennt), Top-Kategorien
+
+Upload-Route (Ausschnitt)
+
+@router.post("/expenses/{expense_id}/receipts/upload")
+async def upload_receipt(expense_id: int, file: UploadFile = File(...), admin=Depends(require_admin)):
+    allowed = {"application/pdf","image/jpeg","image/png"}
+    if file.content_type not in allowed:
+        raise HTTPException(status_code=415, detail="Nur PDF/JPG/PNG erlaubt.")
+    content = await file.read()
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Datei zu groß (>10MB).")
+    ext = ".pdf" if file.content_type=="application/pdf" else (".jpg" if file.content_type=="image/jpeg" else ".png")
+    uid = str(uuid.uuid4()) + ext
+    path = Path("uploads")/uid
+    path.write_bytes(content)
+    # DB: Receipt anlegen (stored_filename=uid, original_name=file.filename, content_type, size_bytes=len(content))
+    return RedirectResponse(url=f"/expenses/{expense_id}", status_code=303)
+
+
+⸻
+
+Setup-Schritte (Replit)
+	1.	Neues Replit (Python) → Pakete installieren:
+fastapi uvicorn jinja2 python-multipart sqlalchemy pydantic-b[email protected] itsdangerous python-dotenv
+	2.	Ordner /uploads + /data anlegen (gitkeep)
+	3.	.env aus .env.example kopieren und ADMIN_USER/ADMIN_PASSWORD setzen
+	4.	Run-Command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+	5.	Replit Webview öffnen → /login → Dashboard
+
+⸻
+
+UX-Details
+	•	Tabellen: paginiert, Suche (HTMX), Sortier-Header
+	•	Beträge als € formatiert (serverseitig)
+	•	Kategorien: einfache Freitext-Select (Proviant, Getränke, Mooring, Diesel, Wasser, Strom, Gas, Taxi/Transfer, Restaurant, Eintritte, Sonstiges)
+	•	Download-Buttons: CSV Export (Expenses, Deposits, Settlement)
+
+⸻
+
+Erweiterungen (später)
+	•	OAuth (Google) statt Simple-Login
+	•	Mehrwährungs-Support (FX-Rate Feld)
+	•	Speichern in S3/Supabase statt lokalem /uploads
+	•	QR-Code Link zum Beleg-Upload direkt vom Smartphone
+
+Bitte jetzt das vollständige Projekt gemäß obiger Spezifikation erzeugen.
+Achte auf lauffähigen Start ohne manuelle Nacharbeit und liefere Beispiel-Seed-Daten (4 Crew, 3 Ausgaben, 4 Einzahlungen), damit Dashboard & Salden sofort Zahlen zeigen.
+
+⸻
+
+Wenn du möchtest, passe ich dir den Prompt im Anschluss noch auf deine konkreten Crew-Kürzel/Namen und die Start-Einzahlung an.
