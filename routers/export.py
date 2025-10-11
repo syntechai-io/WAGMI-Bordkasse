@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import StreamingResponse, RedirectResponse, HTMLResponse
+from fastapi.responses import StreamingResponse, RedirectResponse, HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
@@ -7,6 +7,12 @@ from models import CrewMember, Deposit, Expense
 from services.trip import TripService
 import io
 import csv
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
 router = APIRouter(prefix="/export", tags=["export"])
 templates = Jinja2Templates(directory="templates")
@@ -73,6 +79,131 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
         iter([output.getvalue()]),
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=crew_wallet_export.csv"}
+    )
+
+@router.get("/pdf")
+async def download_pdf(request: Request, db: Session = Depends(get_db)):
+    active_trip = TripService.get_active_trip(db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    # Create PDF in memory
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.5*inch, bottomMargin=0.5*inch)
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title style
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#1e3a5f'),
+        alignment=TA_CENTER,
+        spaceAfter=20
+    )
+    
+    # Section header style
+    section_style = ParagraphStyle(
+        'SectionHeader',
+        parent=styles['Heading2'],
+        fontSize=16,
+        textColor=colors.HexColor('#0077be'),
+        spaceAfter=10
+    )
+    
+    # Title
+    elements.append(Paragraph("⚓ WAGMI Bordkasse - Export", title_style))
+    elements.append(Paragraph(f"Trip: {active_trip.name}", styles['Normal']))
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # Crew Members
+    elements.append(Paragraph("👥 Crew Members", section_style))
+    crew_data = [["ID", "Code", "Name", "IBAN/Handle"]]
+    for member in db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all():
+        crew_data.append([
+            str(member.id),
+            member.code,
+            member.name,
+            member.iban_or_handle if member.iban_or_handle is not None else ""
+        ])
+    
+    crew_table = Table(crew_data, colWidths=[0.5*inch, 1*inch, 2*inch, 2.5*inch])
+    crew_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0077be')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(crew_table)
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # Deposits
+    elements.append(Paragraph("💰 Deposits", section_style))
+    deposit_data = [["ID", "Member", "Amount EUR", "Date", "Note"]]
+    for deposit in db.query(Deposit).filter(Deposit.trip_id == active_trip.id).all():
+        deposit_data.append([
+            str(deposit.id),
+            f"{deposit.member.code} - {deposit.member.name}",
+            f"€{deposit.amount_eur:.2f}",
+            str(deposit.date),
+            deposit.note if deposit.note is not None else ""
+        ])
+    
+    deposit_table = Table(deposit_data, colWidths=[0.5*inch, 2*inch, 1.2*inch, 1.2*inch, 2*inch])
+    deposit_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2ecc71')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(deposit_table)
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # Expenses
+    elements.append(Paragraph("📊 Expenses", section_style))
+    expense_data = [["ID", "Payer", "Date", "Category", "Description", "Amount EUR", "From", "Split"]]
+    for expense in db.query(Expense).filter(Expense.trip_id == active_trip.id).all():
+        expense_data.append([
+            str(expense.id),
+            f"{expense.payer.code}",
+            str(expense.date),
+            expense.category,
+            expense.description[:30] + "..." if len(expense.description) > 30 else expense.description,
+            f"€{expense.amount_eur:.2f}",
+            expense.paid_from.value,
+            expense.split_mode.value
+        ])
+    
+    expense_table = Table(expense_data, colWidths=[0.4*inch, 0.8*inch, 0.9*inch, 1*inch, 1.8*inch, 1*inch, 0.8*inch, 0.8*inch])
+    expense_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ff6b35')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(expense_table)
+    
+    # Build PDF
+    doc.build(elements)
+    buffer.seek(0)
+    
+    return Response(
+        content=buffer.getvalue(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=crew_wallet_export.pdf"}
     )
 
 @router.get("/health")
