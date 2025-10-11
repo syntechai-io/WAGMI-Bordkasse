@@ -29,8 +29,17 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💵 Betrag (€)</label>
-                    <input type="number" name="amount_eur" step="0.01" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💵 Betrag</label>
+                    <input type="number" name="amount" step="0.01" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💱 Währung</label>
+                    <select name="currency" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                        <option value="EUR" selected>EUR (€)</option>
+                        <option value="DKK">DKK (kr)</option>
+                        <option value="SEK">SEK (kr)</option>
+                        <option value="GBP">GBP (£)</option>
+                    </select>
                 </div>
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📝 Beschreibung</label>
@@ -107,7 +116,13 @@
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.payer.code }}</td>
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.category }}</td>
                         <td class="px-6 py-4 cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.description }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap font-semibold cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'" style="color: var(--coral);">{{ "%.2f"|format(expense.amount_eur) }} €</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-semibold cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'" style="color: var(--coral);">
+                            {% if expense.currency.value != 'EUR' %}
+                                {{ "%.2f"|format(expense.amount) }} {{ expense.currency.value }} (≈ {{ "%.2f"|format(expense.amount_eur) }} €)
+                            {% else %}
+                                {{ "%.2f"|format(expense.amount_eur) }} €
+                            {% endif %}
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">
                             <span class="px-2 py-1 text-xs rounded-full {% if expense.paid_from.value == 'wallet' %}text-white{% else %}text-white{% endif %}" style="background: {% if expense.paid_from.value == 'wallet' %}linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%){% else %}linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%){% endif %};">
                                 {{ expense.paid_from.value }}

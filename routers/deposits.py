@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from db import get_db
 from models import Deposit, CrewMember, Currency
 from services.trip import TripService
+from services.currency import CurrencyService
 from datetime import date
 
 router = APIRouter(prefix="/deposits", tags=["deposits"])
@@ -40,12 +41,15 @@ async def create_deposit(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    currency_enum = Currency(currency)
+    amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
+    
     deposit = Deposit(
         trip_id=active_trip.id,
         member_id=member_id,
         amount=amount,
-        currency=Currency(currency),
-        amount_eur=amount,
+        currency=currency_enum,
+        amount_eur=amount_eur,
         date=date.fromisoformat(deposit_date),
         note=note or None
     )
@@ -115,10 +119,13 @@ async def update_deposit(
                 "error": "Einzahlung nicht gefunden."
             }, status_code=404)
         
+        currency_enum = Currency(currency)
+        amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
+        
         deposit.member_id = member_id
         deposit.amount = amount
-        deposit.currency = Currency(currency)
-        deposit.amount_eur = amount
+        deposit.currency = currency_enum
+        deposit.amount_eur = amount_eur
         deposit.date = date.fromisoformat(deposit_date)
         deposit.note = note or None
         db.commit()

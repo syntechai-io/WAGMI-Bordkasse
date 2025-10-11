@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from db import get_db
 from models import Expense, ExpenseParticipant, CrewMember, Receipt, PaidFromEnum, SplitModeEnum, Currency
 from services.trip import TripService
+from services.currency import CurrencyService
 from datetime import date
 from typing import List, Optional
 from pathlib import Path
@@ -54,6 +55,9 @@ async def create_expense(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    currency_enum = Currency(currency)
+    amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
+    
     expense = Expense(
         trip_id=active_trip.id,
         payer_id=payer_id,
@@ -61,8 +65,8 @@ async def create_expense(
         category=category,
         description=description,
         amount=amount,
-        currency=Currency(currency),
-        amount_eur=amount,
+        currency=currency_enum,
+        amount_eur=amount_eur,
         paid_from=PaidFromEnum(paid_from),
         split_mode=SplitModeEnum(split_mode)
     )
@@ -209,13 +213,16 @@ async def update_expense(
                 "error": "Ausgabe nicht gefunden."
             }, status_code=404)
         
+        currency_enum = Currency(currency)
+        amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
+        
         expense.payer_id = payer_id
         expense.date = date.fromisoformat(expense_date)
         expense.category = category
         expense.description = description
         expense.amount = amount
-        expense.currency = Currency(currency)
-        expense.amount_eur = amount
+        expense.currency = currency_enum
+        expense.amount_eur = amount_eur
         expense.paid_from = PaidFromEnum(paid_from)
         expense.split_mode = SplitModeEnum(split_mode)
         

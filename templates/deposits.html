@@ -18,7 +18,7 @@
     
     <div class="bg-white porthole-card p-6">
         <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Neue Einzahlung</h2>
-        <form method="post" action="/deposits/new" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form method="post" action="/deposits/new" class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
                 <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 Mitglied</label>
                 <select name="member_id" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
@@ -28,8 +28,17 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💵 Betrag (€)</label>
-                <input type="number" name="amount_eur" step="0.01" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💵 Betrag</label>
+                <input type="number" name="amount" step="0.01" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💱 Währung</label>
+                <select name="currency" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <option value="EUR" selected>EUR (€)</option>
+                    <option value="DKK">DKK (kr)</option>
+                    <option value="SEK">SEK (kr)</option>
+                    <option value="GBP">GBP (£)</option>
+                </select>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 Datum</label>
@@ -39,7 +48,7 @@
                 <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📝 Notiz</label>
                 <input type="text" name="note" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
             </div>
-            <div class="md:col-span-4">
+            <div class="md:col-span-5">
                 <button type="submit" class="text-white px-6 py-2 rounded-lg transition touch-action font-semibold" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
                     ✅ Einzahlung hinzufügen
                 </button>
@@ -73,7 +82,13 @@
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ deposit.date }}</td>
                         <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ deposit.member.code }} - {{ deposit.member.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--sea-foam);">{{ "%.2f"|format(deposit.amount_eur) }} €</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--sea-foam);">
+                            {% if deposit.currency.value != 'EUR' %}
+                                {{ "%.2f"|format(deposit.amount) }} {{ deposit.currency.value }} (≈ {{ "%.2f"|format(deposit.amount_eur) }} €)
+                            {% else %}
+                                {{ "%.2f"|format(deposit.amount_eur) }} €
+                            {% endif %}
+                        </td>
                         <td class="px-6 py-4" style="color: var(--navy-deep);">{{ deposit.note or '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                             <a href="/deposits/{{ deposit.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
