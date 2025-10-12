@@ -32,6 +32,7 @@
                     ✏️ Bearbeiten
                 </a>
                 <form action="/logbook/{{ entry.id }}/delete" method="post" class="inline" onsubmit="return confirm('Eintrag wirklich löschen?')">
+                    {{ csrf_token }}
                     <button type="submit" 
                             class="text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm" 
                             style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
@@ -182,6 +183,7 @@
                     {% endif %}
                     <div class="p-2 border-t" style="border-color: var(--sky-blue);">
                         <form action="/logbook/photos/{{ photo.id }}/delete" method="post" class="inline" onsubmit="return confirm('Foto wirklich löschen?')">
+                            {{ csrf_token }}
                             <button type="submit" class="text-sm hover:underline touch-action" style="color: var(--coral);">
                                 🗑️ Löschen
                             </button>
@@ -195,6 +197,7 @@
             {% endif %}
             
             <form action="/logbook/{{ entry.id }}/photos/upload" method="post" enctype="multipart/form-data" class="space-y-3" id="photoUploadForm">
+                {{ csrf_token }}
                 <div>
                     <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">📷 Neues Foto hinzufügen</label>
                     <input type="file" id="photoInput" accept="image/jpeg,image/png,image/jpg" required class="hidden">

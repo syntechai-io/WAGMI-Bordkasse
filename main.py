@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
-from starlette_csrf.middleware import CSRFMiddleware
+from fastapi_csrf_jinja.middleware import FastAPICSRFJinjaMiddleware
 from sqlalchemy import func
 from db import init_db, get_db
 from sqlalchemy.orm import Session
@@ -68,7 +68,7 @@ app.add_middleware(
 
 csrf_secret = os.getenv("CSRF_SECRET", session_secret)
 app.add_middleware(
-    CSRFMiddleware,
+    FastAPICSRFJinjaMiddleware,
     secret=csrf_secret,
     sensitive_cookies={"session"}
 )

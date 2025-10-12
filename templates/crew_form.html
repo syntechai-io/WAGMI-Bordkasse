@@ -12,6 +12,7 @@
     {% endif %}
     
     <form method="post" class="bg-white porthole-card p-6 space-y-4">
+        {{ csrf_token }}
         <div>
             <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 Code *</label>
             <input type="text" name="code" value="{% if member %}{{ member.code }}{% endif %}" required maxlength="20"
