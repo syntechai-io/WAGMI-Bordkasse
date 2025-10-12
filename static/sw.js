@@ -473,6 +473,43 @@ function base64ToBlob(base64, mimeType) {
   return new Blob(byteArrays, { type: mimeType });
 }
 
+// Helper: Get CSRF token from client page
+async function getCSRFToken() {
+  try {
+    const clients = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
+    
+    if (clients.length === 0) {
+      console.warn('No clients available to get CSRF token');
+      return null;
+    }
+
+    // Ask the first available client for the CSRF token
+    const client = clients[0];
+    
+    return new Promise((resolve) => {
+      const messageChannel = new MessageChannel();
+      
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data && event.data.csrfToken) {
+          resolve(event.data.csrfToken);
+        } else {
+          resolve(null);
+        }
+      };
+      
+      client.postMessage({
+        type: 'GET_CSRF_TOKEN'
+      }, [messageChannel.port2]);
+      
+      // Timeout after 1 second
+      setTimeout(() => resolve(null), 1000);
+    });
+  } catch (error) {
+    console.error('Error getting CSRF token:', error);
+    return null;
+  }
+}
+
 async function syncPendingRequests() {
   const pendingRequests = await getPendingRequests();
   const results = [];
