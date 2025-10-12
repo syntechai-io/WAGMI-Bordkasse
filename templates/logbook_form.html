@@ -223,33 +223,141 @@
 </div>
 
 <script>
-document.getElementById('gps-button').addEventListener('click', function() {
-    if ('geolocation' in navigator) {
-        this.textContent = '⏳ GPS-Position wird abgerufen...';
-        this.disabled = true;
-        
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                document.querySelector('input[name="latitude"]').value = position.coords.latitude.toFixed(6);
-                document.querySelector('input[name="longitude"]').value = position.coords.longitude.toFixed(6);
-                this.textContent = '✅ Position abgerufen!';
-                setTimeout(() => {
-                    this.textContent = '📍 GPS-Position abrufen';
-                    this.disabled = false;
-                }, 2000);
-            },
-            (error) => {
-                alert('GPS-Position konnte nicht abgerufen werden: ' + error.message);
-                this.textContent = '❌ Fehler - erneut versuchen';
-                setTimeout(() => {
-                    this.textContent = '📍 GPS-Position abrufen';
-                    this.disabled = false;
-                }, 2000);
-            }
-        );
+function getPermissionInstructions() {
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    
+    if (isIOS) {
+        return `📱 iPhone/iPad Einstellungen:
+
+1. Öffne die Einstellungen-App
+2. Scrolle runter zu "Safari"
+3. Tippe auf "Standort"
+4. Wähle "Beim Verwenden erlauben"
+5. Lade diese Seite neu
+
+Oder in Safari direkt:
+• Tippe auf "aA" in der Adressleiste
+• Wähle "Website-Einstellungen"
+• Aktiviere "Standort"`;
+    } else if (isAndroid) {
+        return `📱 Android Chrome Einstellungen:
+
+1. Tippe auf die 3 Punkte (⋮) oben rechts
+2. Wähle "Einstellungen"
+3. Tippe auf "Website-Einstellungen"
+4. Tippe auf "Standort"
+5. Stelle sicher, dass Standort aktiviert ist
+6. Lade diese Seite neu
+
+Oder schnell:
+• Tippe auf das 🔒 Symbol in der Adressleiste
+• Wähle "Berechtigungen"
+• Aktiviere "Standort"`;
+    } else if (isSafari) {
+        return `💻 Safari Desktop Einstellungen:
+
+1. Gehe zu Safari > Einstellungen
+2. Klicke auf "Websites"
+3. Wähle "Standort" in der linken Liste
+4. Aktiviere Standort für wagmibordkasse.com
+5. Lade diese Seite neu`;
     } else {
-        alert('Geolocation wird von diesem Browser nicht unterstützt.');
+        return `💻 Browser Einstellungen:
+
+Chrome/Edge:
+1. Klicke auf das 🔒 Symbol in der Adressleiste
+2. Wähle "Website-Einstellungen"
+3. Ändere "Standort" zu "Zulassen"
+4. Lade diese Seite neu
+
+Firefox:
+1. Klicke auf das ⓘ Symbol in der Adressleiste
+2. Klicke auf "Verbindung sicher"
+3. Klicke auf "Weitere Informationen"
+4. Wähle "Berechtigungen"
+5. Aktiviere "Standort"`;
     }
+}
+
+document.getElementById('gps-button').addEventListener('click', async function() {
+    if (!('geolocation' in navigator)) {
+        alert('❌ Geolocation wird von diesem Browser nicht unterstützt.\n\nBitte verwende einen modernen Browser wie Chrome, Firefox, Safari oder Edge.');
+        return;
+    }
+    
+    const button = this;
+    button.textContent = '⏳ GPS-Position wird abgerufen...';
+    button.disabled = true;
+    
+    // Check permission status if API is available
+    if (navigator.permissions) {
+        try {
+            const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+            
+            if (permissionStatus.state === 'denied') {
+                const instructions = getPermissionInstructions();
+                alert(`🚫 Standort-Zugriff blockiert!\n\n${instructions}`);
+                button.textContent = '🔒 Standort gesperrt - Einstellungen prüfen';
+                setTimeout(() => {
+                    button.textContent = '📍 GPS-Position abrufen';
+                    button.disabled = false;
+                }, 3000);
+                return;
+            }
+        } catch (e) {
+            console.log('Permission API not fully supported, continuing with geolocation request');
+        }
+    }
+    
+    const options = {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+    };
+    
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            document.querySelector('input[name="latitude"]').value = position.coords.latitude.toFixed(6);
+            document.querySelector('input[name="longitude"]').value = position.coords.longitude.toFixed(6);
+            button.textContent = '✅ Position abgerufen!';
+            setTimeout(() => {
+                button.textContent = '📍 GPS-Position abrufen';
+                button.disabled = false;
+            }, 2000);
+        },
+        (error) => {
+            let errorMessage = '';
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    const instructions = getPermissionInstructions();
+                    errorMessage = `🚫 Standort-Zugriff verweigert!\n\n${instructions}`;
+                    button.textContent = '🔒 Zugriff verweigert';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = `📡 GPS-Signal nicht verfügbar!\n\nMögliche Lösungen:\n• Gehe nach draußen für besseren GPS-Empfang\n• Prüfe ob Standortdienste aktiviert sind\n• Versuche es in ein paar Sekunden erneut`;
+                    button.textContent = '📡 Kein Signal';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = `⏱️ GPS-Timeout!\n\nDie Position konnte nicht schnell genug ermittelt werden.\n\n• Prüfe deine GPS-Verbindung\n• Versuche es erneut`;
+                    button.textContent = '⏱️ Timeout';
+                    break;
+                default:
+                    errorMessage = `❌ GPS-Fehler: ${error.message}\n\nBitte versuche es erneut oder gib die Position manuell ein.`;
+                    button.textContent = '❌ Fehler';
+            }
+            
+            alert(errorMessage);
+            
+            setTimeout(() => {
+                button.textContent = '📍 GPS-Position abrufen';
+                button.disabled = false;
+            }, 3000);
+        },
+        options
+    );
 });
 
 // Offline form submission handling
