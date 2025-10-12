@@ -88,6 +88,7 @@ The application uses a greedy matching algorithm to calculate net balances for e
 - FormData reconstruction with receipt file for proper backend upload
 - Supports camera capture and file selection while offline
 - Seamless sync of photos with expense data when connection restored
+- **UX Improvements** (Oct 2025): Receipt upload only on expense creation form (removed duplicate from details page). Multiple offline expense entries supported with proper form reset - clears all form data, hides split mode UI sections, removes receipt previews, and shows success notification without page reload
 
 ### External Dependencies
 
