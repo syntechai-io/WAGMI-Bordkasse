@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi_csrf_jinja.middleware import FastAPICSRFJinjaMiddleware
 from sqlalchemy import func
@@ -25,18 +24,8 @@ from routers.export import router as export_router
 from routers.auth import router as auth_router
 from routers.trips import router as trips_router
 from routers.logbook import router as logbook_router
-from routers.api_v1 import router as api_v1_router
 
 app = FastAPI(title="Crew Wallet - Bordkasse")
-
-# CORS middleware for Flutter/mobile app
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific Flutter app origin
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Use shared limiter instance
 app.state.limiter = limiter
@@ -96,7 +85,6 @@ init_db()
 with next(get_db()) as db:
     seed_database(db)
 
-app.include_router(api_v1_router)
 app.include_router(auth_router)
 app.include_router(trips_router)
 app.include_router(crew_router)
