@@ -3,7 +3,7 @@ const STATIC_CACHE = `crew-wallet-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `crew-wallet-dynamic-${CACHE_VERSION}`;
 const API_CACHE = `crew-wallet-api-${CACHE_VERSION}`;
 const DB_NAME = 'CrewWalletDB';
-const DB_VERSION = 1;
+const DB_VERSION = 3;
 const SYNC_TAG = 'sync-crew-wallet';
 
 const STATIC_ASSETS = [
@@ -48,6 +48,7 @@ function openDB() {
 
     request.onupgradeneeded = (event) => {
       const database = event.target.result;
+      const oldVersion = event.oldVersion;
 
       if (!database.objectStoreNames.contains('pendingRequests')) {
         const store = database.createObjectStore('pendingRequests', { 
@@ -62,6 +63,85 @@ function openDB() {
         const dataStore = database.createObjectStore('offlineData', { 
           keyPath: 'key' 
         });
+      }
+
+      if (oldVersion < 2) {
+        if (!database.objectStoreNames.contains('logbookEntries')) {
+          const logbookStore = database.createObjectStore('logbookEntries', { 
+            keyPath: 'id' 
+          });
+          logbookStore.createIndex('tripId', 'tripId', { unique: false });
+          logbookStore.createIndex('syncStatus', 'syncStatus', { unique: false });
+          logbookStore.createIndex('clientTempId', 'clientTempId', { unique: false });
+        }
+
+        if (!database.objectStoreNames.contains('expenses')) {
+          const expensesStore = database.createObjectStore('expenses', { 
+            keyPath: 'id' 
+          });
+          expensesStore.createIndex('tripId', 'tripId', { unique: false });
+          expensesStore.createIndex('syncStatus', 'syncStatus', { unique: false });
+          expensesStore.createIndex('clientTempId', 'clientTempId', { unique: false });
+        }
+
+        if (!database.objectStoreNames.contains('deposits')) {
+          const depositsStore = database.createObjectStore('deposits', { 
+            keyPath: 'id' 
+          });
+          depositsStore.createIndex('tripId', 'tripId', { unique: false });
+          depositsStore.createIndex('syncStatus', 'syncStatus', { unique: false });
+          depositsStore.createIndex('clientTempId', 'clientTempId', { unique: false });
+        }
+
+        if (!database.objectStoreNames.contains('crewMembers')) {
+          const crewStore = database.createObjectStore('crewMembers', { 
+            keyPath: 'id' 
+          });
+          crewStore.createIndex('tripId', 'tripId', { unique: false });
+        }
+
+        if (!database.objectStoreNames.contains('pendingPhotos')) {
+          const photosStore = database.createObjectStore('pendingPhotos', { 
+            keyPath: 'id', 
+            autoIncrement: true 
+          });
+          photosStore.createIndex('entryId', 'entryId', { unique: false });
+          photosStore.createIndex('entityType', 'entityType', { unique: false });
+          photosStore.createIndex('synced', 'synced', { unique: false });
+        }
+      }
+
+      if (oldVersion < 3) {
+        if (database.objectStoreNames.contains('logbookEntries')) {
+          database.deleteObjectStore('logbookEntries');
+        }
+        if (database.objectStoreNames.contains('expenses')) {
+          database.deleteObjectStore('expenses');
+        }
+        if (database.objectStoreNames.contains('deposits')) {
+          database.deleteObjectStore('deposits');
+        }
+
+        const logbookStore = database.createObjectStore('logbookEntries', { 
+          keyPath: 'id' 
+        });
+        logbookStore.createIndex('tripId', 'tripId', { unique: false });
+        logbookStore.createIndex('syncStatus', 'syncStatus', { unique: false });
+        logbookStore.createIndex('clientTempId', 'clientTempId', { unique: false });
+
+        const expensesStore = database.createObjectStore('expenses', { 
+          keyPath: 'id' 
+        });
+        expensesStore.createIndex('tripId', 'tripId', { unique: false });
+        expensesStore.createIndex('syncStatus', 'syncStatus', { unique: false });
+        expensesStore.createIndex('clientTempId', 'clientTempId', { unique: false });
+
+        const depositsStore = database.createObjectStore('deposits', { 
+          keyPath: 'id' 
+        });
+        depositsStore.createIndex('tripId', 'tripId', { unique: false });
+        depositsStore.createIndex('syncStatus', 'syncStatus', { unique: false });
+        depositsStore.createIndex('clientTempId', 'clientTempId', { unique: false });
       }
     };
   });
@@ -128,6 +208,74 @@ async function deleteSyncedRequests() {
   for (const req of syncedRequests) {
     await store.delete(req.id);
   }
+}
+
+async function saveToCache(storeName, data) {
+  const database = await openDB();
+  const tx = database.transaction([storeName], 'readwrite');
+  const store = tx.objectStore(storeName);
+  
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      await store.put(item);
+    }
+  } else {
+    await store.put(data);
+  }
+  
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function getFromCache(storeName, key = null) {
+  const database = await openDB();
+  const tx = database.transaction([storeName], 'readonly');
+  const store = tx.objectStore(storeName);
+  
+  return new Promise((resolve, reject) => {
+    const request = key ? store.get(key) : store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function getCachedByIndex(storeName, indexName, value) {
+  const database = await openDB();
+  const tx = database.transaction([storeName], 'readonly');
+  const store = tx.objectStore(storeName);
+  const index = store.index(indexName);
+  
+  return new Promise((resolve, reject) => {
+    const request = index.getAll(value);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function deleteFromCache(storeName, key) {
+  const database = await openDB();
+  const tx = database.transaction([storeName], 'readwrite');
+  const store = tx.objectStore(storeName);
+  
+  return new Promise((resolve, reject) => {
+    const request = store.delete(key);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function clearCache(storeName) {
+  const database = await openDB();
+  const tx = database.transaction([storeName], 'readwrite');
+  const store = tx.objectStore(storeName);
+  
+  return new Promise((resolve, reject) => {
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
 }
 
 self.addEventListener('install', (event) => {
