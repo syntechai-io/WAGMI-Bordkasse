@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from typing import List, Optional
+from datetime import date, datetime
 from db import get_db
-from models import User
-from jwt_auth import create_token_pair, verify_token, get_current_user
+from models import User, Trip, TripStatus
+from services.trip import TripService
+from jwt_auth import create_token_pair, verify_token, get_current_user, get_admin_user
 
 router = APIRouter(prefix="/api/v1", tags=["API v1"])
 
@@ -74,3 +77,93 @@ async def verify_auth(current_user: dict = Depends(get_current_user)):
         "authenticated": True,
         "user": current_user
     }
+
+# Pydantic schemas for Trips
+class TripCreate(BaseModel):
+    name: str
+    start_date: date
+    end_date: Optional[date] = None
+
+class TripResponse(BaseModel):
+    id: int
+    name: str
+    start_date: date
+    end_date: Optional[date]
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Trip endpoints
+@router.get("/trips", response_model=List[TripResponse])
+async def list_trips(
+    status: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """List all trips, optionally filtered by status"""
+    query = db.query(Trip)
+    if status:
+        query = query.filter(Trip.status == status)
+    trips = query.order_by(Trip.created_at.desc()).all()
+    return trips
+
+@router.post("/trips", response_model=TripResponse, status_code=status.HTTP_201_CREATED)
+async def create_trip(
+    trip_data: TripCreate,
+    current_user: dict = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new trip (admin only). Archives the current active trip if exists."""
+    active_trip = TripService.get_active_trip(db)
+    if active_trip:
+        active_trip.status = TripStatus.archived
+    
+    new_trip = Trip(
+        name=trip_data.name,
+        start_date=trip_data.start_date,
+        end_date=trip_data.end_date,
+        status=TripStatus.active
+    )
+    db.add(new_trip)
+    db.commit()
+    db.refresh(new_trip)
+    return new_trip
+
+@router.get("/trips/{trip_id}", response_model=TripResponse)
+async def get_trip(
+    trip_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get a specific trip by ID"""
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    return trip
+
+@router.put("/trips/{trip_id}/archive", response_model=TripResponse)
+async def archive_trip(
+    trip_id: int,
+    current_user: dict = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Archive a trip (admin only)"""
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    
+    trip.status = TripStatus.archived
+    db.commit()
+    db.refresh(trip)
+    return trip
+
+@router.get("/trips/active/current", response_model=Optional[TripResponse])
+async def get_active_trip(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get the currently active trip"""
+    active_trip = TripService.get_active_trip(db)
+    return active_trip
