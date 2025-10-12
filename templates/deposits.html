@@ -123,6 +123,51 @@
 
 {% block scripts %}
 <script>
+    // Offline form submission handling
+    const depositForm = document.querySelector('form[action="/deposits/new"]');
+    if (depositForm) {
+        depositForm.addEventListener('submit', async function(e) {
+            if (!navigator.onLine && window.createOfflineEntry) {
+                e.preventDefault();
+                
+                const formData = new FormData(depositForm);
+                const depositData = {
+                    member_id: parseInt(formData.get('member_id')),
+                    amount: parseFloat(formData.get('amount')),
+                    currency: formData.get('currency'),
+                    date: formData.get('deposit_date'),
+                    note: formData.get('note') || null
+                };
+                
+                const submitBtn = depositForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = '⏳ Offline speichern...';
+                submitBtn.disabled = true;
+                
+                try {
+                    const result = await window.createOfflineEntry('deposits', depositData, '/deposits/new');
+                    
+                    if (result && result.success) {
+                        submitBtn.textContent = '✅ Offline gespeichert!';
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        throw new Error(result?.error || 'Offline-Speicherung fehlgeschlagen');
+                    }
+                } catch (err) {
+                    console.error('Offline save failed:', err);
+                    submitBtn.textContent = '❌ Fehler';
+                    submitBtn.disabled = false;
+                    alert('Fehler beim Offline-Speichern: ' + err.message);
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                    }, 2000);
+                }
+            }
+        });
+    }
+
     {% if deposits %}
     if (window.cacheData) {
         window.addEventListener('load', () => {
@@ -255,8 +300,60 @@
         tbody.innerHTML = html;
     }
     
+    // Load and display pending offline deposits
+    async function loadPendingDeposits() {
+        if (window.getCachedData) {
+            try {
+                const [allDeposits, cachedCrew] = await Promise.all([
+                    window.getCachedData('deposits'),
+                    window.getCachedData('crewMembers')
+                ]);
+                const pendingDeposits = allDeposits?.filter(d => d.syncStatus === 'pending') || [];
+                
+                if (pendingDeposits.length > 0 && cachedCrew) {
+                    const crewMap = {};
+                    cachedCrew.forEach(m => { crewMap[m.id] = m; });
+                    
+                    const tbody = document.getElementById('depositsTableBody');
+                    const existingContent = tbody.innerHTML;
+                    
+                    const pendingHtml = pendingDeposits.map(deposit => {
+                        const member = crewMap[deposit.member_id] || { code: '?', name: 'Unknown' };
+                        const date = new Date(deposit.date).toLocaleDateString('de-DE');
+                        
+                        return `
+                            <tr class="bg-yellow-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">
+                                        🔄 Pending
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">${date}</td>
+                                <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">${member.code} - ${member.name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--sea-foam);">
+                                    ${deposit.currency !== 'EUR' 
+                                        ? `${parseFloat(deposit.amount).toFixed(2)} ${deposit.currency}`
+                                        : `${parseFloat(deposit.amount).toFixed(2)} €`
+                                    }
+                                </td>
+                                <td class="px-6 py-4" style="color: var(--navy-deep);">${deposit.note || '-'}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    
+                    tbody.innerHTML = pendingHtml + existingContent;
+                }
+            } catch (err) {
+                console.error('Failed to load pending deposits:', err);
+            }
+        }
+    }
+    
     // Load cached data if offline on page load
-    window.addEventListener('load', loadFromCacheIfOffline);
+    window.addEventListener('load', () => {
+        loadFromCacheIfOffline();
+        loadPendingDeposits();
+    });
     
     // Reload when back online
     window.addEventListener('online', () => {

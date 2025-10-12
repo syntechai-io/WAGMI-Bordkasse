@@ -282,6 +282,56 @@
         }
     });
 
+    // Offline form submission handling
+    const expenseForm = document.querySelector('form[action="/expenses/new"]');
+    if (expenseForm) {
+        expenseForm.addEventListener('submit', async function(e) {
+            if (!navigator.onLine && window.createOfflineEntry) {
+                e.preventDefault();
+                
+                const formData = new FormData(expenseForm);
+                const expenseData = {
+                    payer_id: parseInt(formData.get('payer_id')),
+                    date: formData.get('expense_date'),
+                    category: formData.get('category'),
+                    description: formData.get('description'),
+                    amount: parseFloat(formData.get('amount')),
+                    currency: formData.get('currency'),
+                    paid_from: formData.get('paid_from'),
+                    split_mode: formData.get('split_mode'),
+                    participant_ids: formData.getAll('participant_ids').map(id => parseInt(id)),
+                    participant_percentages: formData.getAll('participant_percentages').map(p => parseFloat(p) || 0)
+                };
+                
+                const submitBtn = expenseForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = '⏳ Offline speichern...';
+                submitBtn.disabled = true;
+                
+                try {
+                    const result = await window.createOfflineEntry('expenses', expenseData, '/expenses/new');
+                    
+                    if (result && result.success) {
+                        submitBtn.textContent = '✅ Offline gespeichert!';
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        throw new Error(result?.error || 'Offline-Speicherung fehlgeschlagen');
+                    }
+                } catch (err) {
+                    console.error('Offline save failed:', err);
+                    submitBtn.textContent = '❌ Fehler';
+                    submitBtn.disabled = false;
+                    alert('Fehler beim Offline-Speichern: ' + err.message);
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                    }, 2000);
+                }
+            }
+        });
+    }
+
     {% if expenses %}
     if (window.cacheData) {
         window.addEventListener('load', () => {
@@ -401,8 +451,67 @@
         tbody.innerHTML = html;
     }
     
+    // Load and display pending offline expenses
+    async function loadPendingExpenses() {
+        if (window.getCachedData) {
+            try {
+                const [allExpenses, cachedCrew] = await Promise.all([
+                    window.getCachedData('expenses'),
+                    window.getCachedData('crewMembers')
+                ]);
+                const pendingExpenses = allExpenses?.filter(e => e.syncStatus === 'pending') || [];
+                
+                if (pendingExpenses.length > 0 && cachedCrew) {
+                    const crewMap = {};
+                    cachedCrew.forEach(m => { crewMap[m.id] = m; });
+                    
+                    const tbody = document.getElementById('expensesTableBody');
+                    const existingContent = tbody.innerHTML;
+                    
+                    const pendingHtml = pendingExpenses.map(expense => {
+                        const payer = crewMap[expense.payer_id] || { code: '?' };
+                        const date = new Date(expense.date).toLocaleDateString('de-DE');
+                        const isPaidFromWallet = expense.paid_from === 'wallet';
+                        
+                        return `
+                            <tr class="bg-yellow-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">
+                                        🔄 Pending
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">${date}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${payer.code}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${expense.category}</td>
+                                <td class="px-6 py-4">${expense.description}</td>
+                                <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--coral);">
+                                    ${expense.currency !== 'EUR' 
+                                        ? `${parseFloat(expense.amount).toFixed(2)} ${expense.currency}`
+                                        : `${parseFloat(expense.amount).toFixed(2)} €`
+                                    }
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs rounded-full text-white" style="background: ${isPaidFromWallet ? 'linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%)' : 'linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)'};">
+                                        ${expense.paid_from}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                    
+                    tbody.innerHTML = pendingHtml + existingContent;
+                }
+            } catch (err) {
+                console.error('Failed to load pending expenses:', err);
+            }
+        }
+    }
+    
     // Load cached data if offline on page load
-    window.addEventListener('load', loadFromCacheIfOffline);
+    window.addEventListener('load', () => {
+        loadFromCacheIfOffline();
+        loadPendingExpenses();
+    });
     
     // Reload when back online
     window.addEventListener('online', () => {
