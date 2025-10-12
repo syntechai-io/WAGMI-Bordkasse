@@ -126,6 +126,10 @@
                     <a href="/help" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📖 Anleitung</a>
                     {% if request.session.get('user_id') %}
                     <div class="border-l border-sky-300 pl-6 ml-2 flex items-center space-x-4">
+                        <button id="syncButton" onclick="manualSync()" class="relative px-4 py-2 rounded-lg text-sm font-semibold transition hover:scale-105" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);" title="Manuell synchronisieren">
+                            🔄 Sync
+                            <span id="pendingBadge" class="hidden absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"></span>
+                        </button>
                         <span class="text-sm">👤 {{ request.session.get('username', 'User') }}</span>
                         <a href="/logout" class="px-4 py-2 rounded-lg text-sm font-semibold transition hover:scale-105" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
                             🚪 Logout
@@ -214,6 +218,7 @@
         window.addEventListener('online', async () => {
             isOnline = true;
             showOfflineIndicator(false);
+            updateSyncButton(true);
             if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     type: 'CHECK_ONLINE_STATUS'
@@ -235,7 +240,65 @@
         window.addEventListener('offline', () => {
             isOnline = false;
             showOfflineIndicator(true);
+            updateSyncButton(false);
         });
+
+        // Manual sync function
+        window.manualSync = async function() {
+            if (!navigator.onLine) {
+                alert('⚠️ Keine Internetverbindung. Synchronisierung nicht möglich.');
+                return;
+            }
+            
+            const syncButton = document.getElementById('syncButton');
+            const originalText = syncButton.innerHTML;
+            syncButton.disabled = true;
+            syncButton.innerHTML = '⏳ Syncing...';
+            
+            try {
+                if ('serviceWorker' in navigator && 'sync' in navigator.serviceWorker) {
+                    const registration = await navigator.serviceWorker.ready;
+                    await registration.sync.register('sync-crew-wallet');
+                    console.log('Manual sync triggered');
+                    
+                    // Show success state briefly
+                    syncButton.innerHTML = '✅ Sync gestartet';
+                    setTimeout(() => {
+                        syncButton.innerHTML = originalText;
+                        updateSyncButton(true);
+                    }, 1500);
+                }
+            } catch (err) {
+                console.error('Manual sync failed:', err);
+                alert('Synchronisierung fehlgeschlagen: ' + err.message);
+                syncButton.innerHTML = originalText;
+                syncButton.disabled = false;
+            }
+        };
+
+        // Update sync button state and pending count
+        async function updateSyncButton(online = navigator.onLine) {
+            const syncButton = document.getElementById('syncButton');
+            const pendingBadge = document.getElementById('pendingBadge');
+            
+            if (!syncButton) return;
+            
+            syncButton.disabled = !online;
+            
+            if (window.getPendingCount) {
+                const count = await window.getPendingCount();
+                if (count > 0) {
+                    pendingBadge.textContent = count;
+                    pendingBadge.classList.remove('hidden');
+                } else {
+                    pendingBadge.classList.add('hidden');
+                }
+            }
+        }
+
+        // Update pending count periodically
+        setInterval(updateSyncButton, 2000);
+        updateSyncButton();
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', (event) => {
