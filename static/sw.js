@@ -455,6 +455,24 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
+// Helper: Convert base64 to Blob
+function base64ToBlob(base64, mimeType) {
+  const byteCharacters = atob(base64.split(',')[1]);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+    const slice = byteCharacters.slice(offset, offset + 512);
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+
+  return new Blob(byteArrays, { type: mimeType });
+}
+
 async function syncPendingRequests() {
   const pendingRequests = await getPendingRequests();
   const results = [];
@@ -466,10 +484,61 @@ async function syncPendingRequests() {
         headers.append(key, value);
       });
 
+      let requestBody = reqData.body;
+      
+      // Check if this is an expense with a receipt attachment
+      if (reqData.url.includes('/expenses/new') && reqData.body) {
+        try {
+          const bodyData = JSON.parse(reqData.body);
+          
+          // If receipt base64 data exists, convert to FormData
+          if (bodyData.receipt && bodyData.receipt.base64) {
+            const formData = new FormData();
+            
+            // Add all expense fields
+            formData.append('payer_id', bodyData.payer_id);
+            formData.append('expense_date', bodyData.date);
+            formData.append('category', bodyData.category);
+            formData.append('description', bodyData.description);
+            formData.append('amount', bodyData.amount);
+            formData.append('currency', bodyData.currency);
+            formData.append('paid_from', bodyData.paid_from);
+            formData.append('split_mode', bodyData.split_mode);
+            
+            if (bodyData.participant_ids) {
+              bodyData.participant_ids.forEach(id => {
+                formData.append('participant_ids', id);
+              });
+            }
+            
+            if (bodyData.participant_percentages) {
+              bodyData.participant_percentages.forEach(p => {
+                formData.append('participant_percentages', p);
+              });
+            }
+            
+            if (bodyData.clientTempId) {
+              formData.append('clientTempId', bodyData.clientTempId);
+            }
+            
+            // Convert base64 to Blob and add as file
+            const blob = base64ToBlob(bodyData.receipt.base64, bodyData.receipt.type);
+            formData.append('receipt', blob, bodyData.receipt.name);
+            
+            requestBody = formData;
+            
+            // Remove Content-Type header to let browser set it with boundary for multipart
+            headers.delete('Content-Type');
+          }
+        } catch (e) {
+          console.warn('Failed to parse expense body for receipt:', e);
+        }
+      }
+
       const response = await fetch(reqData.url, {
         method: reqData.method,
         headers: headers,
-        body: reqData.body
+        body: requestBody
       });
 
       if (response.ok) {

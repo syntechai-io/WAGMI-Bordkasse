@@ -278,9 +278,39 @@
     
     receiptInput.addEventListener('change', function(e) {
         if (e.target.files.length > 0) {
-            document.getElementById('receiptFileName').textContent = '✓ Datei ausgewählt: ' + e.target.files[0].name;
+            const file = e.target.files[0];
+            const fileName = document.getElementById('receiptFileName');
+            fileName.textContent = '✓ Datei ausgewählt: ' + file.name;
+            
+            // Show preview for images when offline
+            if (!navigator.onLine && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const preview = document.createElement('img');
+                    preview.src = ev.target.result;
+                    preview.className = 'mt-2 max-w-xs max-h-48 rounded-lg border-2';
+                    preview.style.borderColor = 'var(--sea-foam)';
+                    
+                    // Remove old preview if exists
+                    const oldPreview = fileName.parentElement.querySelector('img');
+                    if (oldPreview) oldPreview.remove();
+                    
+                    fileName.parentElement.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            }
         }
     });
+
+    // Helper: Convert File to base64
+    async function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
 
     // Offline form submission handling
     const expenseForm = document.querySelector('form[action="/expenses/new"]');
@@ -302,6 +332,18 @@
                     participant_ids: formData.getAll('participant_ids').map(id => parseInt(id)),
                     participant_percentages: formData.getAll('participant_percentages').map(p => parseFloat(p) || 0)
                 };
+                
+                // Handle receipt file if present
+                const receiptFile = receiptInput.files[0];
+                if (receiptFile) {
+                    const base64 = await fileToBase64(receiptFile);
+                    expenseData.receipt = {
+                        base64: base64,
+                        name: receiptFile.name,
+                        type: receiptFile.type,
+                        size: receiptFile.size
+                    };
+                }
                 
                 const submitBtn = expenseForm.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
