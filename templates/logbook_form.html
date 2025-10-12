@@ -250,5 +250,62 @@ document.getElementById('gps-button').addEventListener('click', function() {
         alert('Geolocation wird von diesem Browser nicht unterstützt.');
     }
 });
+
+// Offline form submission handling
+const form = document.querySelector('form');
+form.addEventListener('submit', async function(e) {
+    // Only handle offline submissions for new entries (not edits)
+    {% if not entry %}
+    if (!navigator.onLine && window.createOfflineEntry) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const entryData = {
+            entry_date: formData.get('entry_date'),
+            entry_time: formData.get('entry_time'),
+            latitude: formData.get('latitude') ? parseFloat(formData.get('latitude')) : null,
+            longitude: formData.get('longitude') ? parseFloat(formData.get('longitude')) : null,
+            wind_direction: formData.get('wind_direction') || null,
+            wind_strength: formData.get('wind_strength') || null,
+            sea_state: formData.get('sea_state') || null,
+            visibility: formData.get('visibility') || null,
+            temperature: formData.get('temperature') ? parseFloat(formData.get('temperature')) : null,
+            sail_plan: formData.get('sail_plan') || null,
+            engine_hours: formData.get('engine_hours') ? parseFloat(formData.get('engine_hours')) : null,
+            departure: formData.get('departure') || null,
+            destination: formData.get('destination') || null,
+            notes: formData.get('notes') || null,
+            safety_checks_completed: formData.get('safety_checks') || null,
+            crew_on_watch_ids: formData.getAll('crew_on_watch_ids').map(id => parseInt(id))
+        };
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '⏳ Offline speichern...';
+        submitBtn.disabled = true;
+        
+        try {
+            const result = await window.createOfflineEntry('logbookEntries', entryData, '/logbook/new');
+            
+            if (result && result.success) {
+                submitBtn.textContent = '✅ Offline gespeichert!';
+                setTimeout(() => {
+                    window.location.href = '/logbook';
+                }, 1000);
+            } else {
+                throw new Error(result?.error || 'Offline-Speicherung fehlgeschlagen');
+            }
+        } catch (err) {
+            console.error('Offline save failed:', err);
+            submitBtn.textContent = '❌ Fehler';
+            submitBtn.disabled = false;
+            alert('Fehler beim Offline-Speichern: ' + err.message);
+            setTimeout(() => {
+                submitBtn.textContent = originalText;
+            }, 2000);
+        }
+    }
+    {% endif %}
+});
 </script>
 {% endblock %}
