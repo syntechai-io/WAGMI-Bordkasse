@@ -138,7 +138,3 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
         "top_categories": top_categories,
         "expense_count": expense_count
     })
-
-@app.get("/offline", response_class=HTMLResponse)
-async def offline_page(request: Request):
-    return templates.TemplateResponse("offline.html", {"request": request})
