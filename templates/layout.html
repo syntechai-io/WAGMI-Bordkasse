@@ -309,6 +309,24 @@
                         showOfflineIndicator(true);
                     }
                 }
+                
+                if (event.data.type === 'GET_CSRF_TOKEN') {
+                    // Extract CSRF token from cookie and send back to service worker
+                    // Use substring to preserve tokens with '=' padding (base64/URL-safe tokens)
+                    const cookieRow = document.cookie
+                        .split('; ')
+                        .find(row => row.startsWith('fastapi-csrf-token='));
+                    
+                    const csrfToken = cookieRow 
+                        ? decodeURIComponent(cookieRow.substring('fastapi-csrf-token='.length))
+                        : null;
+                    
+                    if (!csrfToken) {
+                        console.warn('CSRF token not found in cookies - sync may fail');
+                    }
+                    
+                    event.ports[0].postMessage({ csrfToken: csrfToken });
+                }
 
                 if (event.data.type === 'SYNC_COMPLETE') {
                     const { success, failed } = event.data;

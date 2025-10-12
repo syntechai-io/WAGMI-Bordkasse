@@ -513,6 +513,13 @@ async function getCSRFToken() {
 async function syncPendingRequests() {
   const pendingRequests = await getPendingRequests();
   const results = [];
+  
+  // Get CSRF token from client page before syncing
+  const csrfToken = await getCSRFToken();
+  
+  if (!csrfToken) {
+    console.warn('No CSRF token available - sync may fail');
+  }
 
   for (const reqData of pendingRequests) {
     try {
@@ -520,6 +527,11 @@ async function syncPendingRequests() {
       reqData.headers.forEach(([key, value]) => {
         headers.append(key, value);
       });
+      
+      // Add CSRF token to headers for POST/PUT/DELETE requests
+      if (csrfToken && (reqData.method === 'POST' || reqData.method === 'PUT' || reqData.method === 'DELETE')) {
+        headers.set('X-CSRF-Token', csrfToken);
+      }
 
       let requestBody = reqData.body;
       
