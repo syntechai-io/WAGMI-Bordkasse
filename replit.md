@@ -59,6 +59,7 @@ The application uses a greedy matching algorithm to calculate net balances for e
 - **Maritime UI Theme**: A comprehensive nautical aesthetic with a custom color palette, porthole-style cards, rope dividers, maritime gradient buttons, and ship wheel branding.
 - **Professional PDF Export**: ReportLab for maritime-themed PDF exports of trip data.
 - **Mobile Camera/File Upload**: Dual-button interface for photo/receipt uploads - separate "📷 Kamera" and "📁 Datei" buttons. Uses single hidden file input with dynamic `capture` attribute toggling for iOS Safari compatibility. Camera button sets `capture="environment"` to trigger rear camera on mobile devices.
+- **Responsive Dashboard** (Oct 2025): Mobile-friendly landing page with prominent help guide link at top, simplified navigation cards with descriptions, single wallet balance display. Desktop/tablet retains full statistics, PayPal integration, and detailed metrics. Designed to reduce confusion for inexperienced mobile users.
 
 ### External Dependencies
 
