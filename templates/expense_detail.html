@@ -64,15 +64,49 @@
             <p style="color: var(--navy-deep); opacity: 0.6;">Keine Belege vorhanden</p>
             {% endif %}
             
-            <form action="/receipts/expenses/{{ expense.id }}/upload" method="post" enctype="multipart/form-data" class="mt-4">
-                <div class="flex gap-4">
-                    <input type="file" name="file" accept="image/*,.pdf" capture="environment" required class="flex-1 px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-                    <button type="submit" class="text-white px-6 py-2 rounded-lg transition touch-action font-semibold" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-                        📸 Foto/Upload
+            <form action="/receipts/expenses/{{ expense.id }}/upload" method="post" enctype="multipart/form-data" class="mt-4" id="receiptUploadForm">
+                <input type="file" id="fileInput" accept="image/*,.pdf" required class="hidden">
+                <div class="flex gap-3">
+                    <button type="button" onclick="activateFileCamera()" 
+                            class="flex-1 text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-center"
+                            style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+                        📷 Kamera
+                    </button>
+                    <button type="button" onclick="activateFileSelect()" 
+                            class="flex-1 text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-center"
+                            style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
+                        📁 Datei
                     </button>
                 </div>
-                <p class="text-xs mt-2" style="color: var(--navy-deep); opacity: 0.6;">Auf Mobilgeräten: Kamera verwenden oder Datei auswählen</p>
+                <p id="fileName" class="text-sm mt-2" style="color: var(--navy-deep); opacity: 0.7;"></p>
+                <button type="submit" id="uploadBtn" disabled class="mt-3 w-full text-white px-6 py-2 rounded-lg transition touch-action font-semibold opacity-50" 
+                        style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                    📤 Beleg hochladen
+                </button>
             </form>
+            <script>
+                const fileInput = document.getElementById('fileInput');
+                
+                function activateFileCamera() {
+                    fileInput.setAttribute('capture', 'environment');
+                    fileInput.setAttribute('name', 'file');
+                    fileInput.click();
+                }
+                
+                function activateFileSelect() {
+                    fileInput.removeAttribute('capture');
+                    fileInput.setAttribute('name', 'file');
+                    fileInput.click();
+                }
+                
+                fileInput.addEventListener('change', function(e) {
+                    if (e.target.files.length > 0) {
+                        document.getElementById('fileName').textContent = '✓ Datei ausgewählt: ' + e.target.files[0].name;
+                        document.getElementById('uploadBtn').disabled = false;
+                        document.getElementById('uploadBtn').classList.remove('opacity-50');
+                    }
+                });
+            </script>
         </div>
     </div>
 </div>
