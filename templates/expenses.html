@@ -357,8 +357,44 @@
                     
                     if (result && result.success) {
                         submitBtn.textContent = '✅ Offline gespeichert!';
+                        
+                        // Clear the form for next entry
                         setTimeout(() => {
-                            location.reload();
+                            expenseForm.reset();
+                            submitBtn.textContent = originalText;
+                            submitBtn.disabled = false;
+                            
+                            // Reset split mode UI to default (equal)
+                            participantsDiv.classList.add('hidden');
+                            percentageDiv.classList.add('hidden');
+                            percentageWarning.classList.add('hidden');
+                            
+                            // Clear receipt file selection
+                            receiptInput.value = '';
+                            const receiptFileName = document.getElementById('receiptFileName');
+                            if (receiptFileName) {
+                                receiptFileName.textContent = '';
+                                // Remove any receipt preview images
+                                const existingPreview = receiptFileName.parentElement.querySelector('img');
+                                if (existingPreview) {
+                                    existingPreview.remove();
+                                }
+                            }
+                            
+                            // Update sync button count
+                            if (window.updateSyncButton) {
+                                window.updateSyncButton();
+                            }
+                            
+                            // Show success notification
+                            const notification = document.createElement('div');
+                            notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                            notification.textContent = '✅ Ausgabe offline gespeichert - wird synchronisiert wenn online';
+                            document.body.appendChild(notification);
+                            
+                            setTimeout(() => {
+                                notification.remove();
+                            }, 3000);
                         }, 1000);
                     } else {
                         throw new Error(result?.error || 'Offline-Speicherung fehlgeschlagen');
