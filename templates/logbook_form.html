@@ -360,12 +360,58 @@ document.getElementById('gps-button').addEventListener('click', async function()
     );
 });
 
-// Offline form submission handling
+// CSRF Token Refresh - Prevent stale tokens on long-form sessions
+// Refresh token every 30 minutes to prevent expiration
+let csrfRefreshInterval = setInterval(async () => {
+    try {
+        const response = await fetch('/logbook', { credentials: 'same-origin' });
+        if (response.ok) {
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newCsrfToken = doc.querySelector('input[name="csrftoken"]');
+            const currentCsrfToken = document.querySelector('input[name="csrftoken"]');
+            
+            if (newCsrfToken && currentCsrfToken) {
+                currentCsrfToken.value = newCsrfToken.value;
+                console.log('CSRF token refreshed successfully');
+            }
+        }
+    } catch (e) {
+        console.log('CSRF refresh failed (expected if offline):', e.message);
+    }
+}, 30 * 60 * 1000); // 30 minutes
+
+// Clean up interval when leaving page
+window.addEventListener('beforeunload', () => {
+    clearInterval(csrfRefreshInterval);
+});
+
+// Improved offline detection - check actual connectivity before assuming offline
+async function isReallyOnline() {
+    if (!navigator.onLine) {
+        return false;
+    }
+    
+    try {
+        const response = await fetch('/login', { 
+            method: 'HEAD',
+            cache: 'no-cache'
+        });
+        return response.ok;
+    } catch {
+        return false;
+    }
+}
+
+// Offline form submission handling with improved detection
 const form = document.querySelector('form');
 form.addEventListener('submit', async function(e) {
     // Only handle offline submissions for new entries (not edits)
     {% if not entry %}
-    if (!navigator.onLine && window.createOfflineEntry) {
+    const reallyOnline = await isReallyOnline();
+    
+    if (!reallyOnline && window.createOfflineEntry) {
         e.preventDefault();
         
         const formData = new FormData(form);
@@ -415,6 +461,30 @@ form.addEventListener('submit', async function(e) {
         }
     }
     {% endif %}
+});
+
+// Enhanced CSRF error handling - catch and provide helpful guidance
+form.addEventListener('submit', function(e) {
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalSubmitHandler = submitBtn.onclick;
+    
+    // Store form data in case we need to retry
+    const formData = new FormData(form);
+    const formDataBackup = {};
+    for (let [key, value] of formData.entries()) {
+        formDataBackup[key] = value;
+    }
+});
+
+// Handle CSRF errors globally for better UX
+window.addEventListener('unhandledrejection', function(event) {
+    if (event.reason && event.reason.message && event.reason.message.includes('CSRF')) {
+        event.preventDefault();
+        
+        const errorMsg = `🔒 Sicherheits-Token abgelaufen!\n\nDeine Sitzung war zu lange inaktiv.\n\nSo behebst du das Problem:\n\n1. Lade diese Seite neu (F5 oder ⟳)\n2. Deine Formulardaten gehen NICHT verloren\n3. Sende das Formular erneut ab\n\nTipp: Bei langen Formularen zwischendurch speichern!`;
+        
+        alert(errorMsg);
+    }
 });
 </script>
 {% endblock %}

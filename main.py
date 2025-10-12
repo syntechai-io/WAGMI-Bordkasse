@@ -53,6 +53,9 @@ app.add_middleware(SlowAPIMiddleware)
 from middleware.auth import AuthMiddleware
 app.add_middleware(AuthMiddleware)
 
+# Detect production environment (Replit deployment or explicit env var)
+is_production = os.getenv("REPL_DEPLOYMENT") == "1" or os.getenv("ENVIRONMENT") == "production"
+
 # Session middleware for authentication (must be added AFTER AuthMiddleware due to LIFO execution)
 session_secret = os.getenv("SESSION_SECRET")
 if not session_secret:
@@ -63,7 +66,7 @@ app.add_middleware(
     secret_key=session_secret,
     max_age=86400,
     same_site='lax',
-    https_only=False
+    https_only=is_production  # Force secure cookies in production for HTTPS
 )
 
 csrf_secret = os.getenv("CSRF_SECRET", session_secret)
@@ -72,7 +75,10 @@ app.add_middleware(
     secret=csrf_secret,
     cookie_name="csrftoken",
     header_name="x-csrftoken",
-    sensitive_cookies={"session"}
+    sensitive_cookies={"session"},
+    cookie_samesite="lax",  # Explicit for iPad Safari compatibility
+    cookie_secure=is_production,  # Secure flag required for HTTPS in production
+    cookie_domain=None  # Let browser determine correct domain
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
