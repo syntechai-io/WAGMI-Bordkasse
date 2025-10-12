@@ -52,44 +52,13 @@ The application uses a greedy matching algorithm to calculate net balances for e
 
 #### Frontend Architecture
 
-**Technology Stack**: Jinja2 for templates, Tailwind CSS (CDN) for styling, HTMX for AJAX, and PWA support for mobile and offline use.
+**Technology Stack**: Jinja2 for templates, Tailwind CSS (CDN) for styling, HTMX for AJAX interactions.
+
 **Design Principles**:
 - **Mobile-First Design**: Touch-optimized interface with responsive elements.
 - **Maritime UI Theme**: A comprehensive nautical aesthetic with a custom color palette, porthole-style cards, rope dividers, maritime gradient buttons, and ship wheel branding.
-- **PWA Support**: Manifest and service worker enable home screen installation and offline functionality.
-- **Professional PDF Export**: Replaced CSV with ReportLab for maritime-themed PDF exports of trip data.
-- **Mobile Camera/File Upload** (Oct 2025): Dual-button interface for photo/receipt uploads - separate "📷 Kamera" and "📁 Datei" buttons. Uses single hidden file input with dynamic `capture` attribute toggling for iOS Safari compatibility (avoids DataTransfer API issues). Camera button sets `capture="environment"` to trigger rear camera on mobile devices.
-
-#### Offline-First PWA Capabilities (Oct 2025)
-
-**Complete offline functionality** enabling use in areas with poor connectivity:
-
-**Phase 1-2: Cache-First Offline Viewing**
-- IndexedDB storage for logbook entries, expenses, deposits, and crew data
-- Cache-first strategy with "last synced" timestamps
-- Auto-reload on reconnection to show latest data
-- Visual indicators for offline mode and sync status
-
-**Phase 3: Offline Entry Creation & Background Sync**
-- Offline form submission for logbook, expenses, and deposits with optimistic UI
-- Yellow "🔄 Pending" badges for entries awaiting sync
-- Automatic background sync when connection restored
-- Manual sync button in navbar with pending count indicator
-- Database migration (12a376fa962e) adds `client_temp_id` for duplicate prevention
-- Backend duplicate detection in all routers using clientTempId parameter
-- Toast notifications for successful sync
-- **CSRF Token Sync Support** (Oct 2025): Service worker requests CSRF token from client page via postMessage during background sync, extracts token from `fastapi-csrf-token` cookie using substring parsing (preserves base64 padding), and includes token in `X-CSRF-Token` header for all POST/PUT/DELETE sync requests to prevent 403 rejection
-
-**Phase 4: Offline Photo/Receipt Uploads**
-- Base64 conversion for offline photo/receipt storage in IndexedDB
-- File-to-base64 conversion helper for expense receipts when offline
-- Image preview thumbnail when photo selected offline
-- Service worker base64-to-Blob conversion during sync
-- FormData reconstruction with receipt file for proper backend upload
-- Supports camera capture and file selection while offline
-- Seamless sync of photos with expense data when connection restored
-- **UX Improvements** (Oct 2025): Receipt upload only on expense creation form (removed duplicate from details page). Multiple offline expense entries supported with proper form reset - clears all form data, hides split mode UI sections, removes receipt previews, and shows success notification without page reload
-- **Enhanced Error Handling** (Oct 2025): Comprehensive offline save diagnostics with IndexedDB availability checks, Service Worker readiness validation, detailed error messages in German, quota exceeded detection, and console logging with [SW] prefix for debugging. Errors now show actual failure reason instead of generic messages
+- **Professional PDF Export**: ReportLab for maritime-themed PDF exports of trip data.
+- **Mobile Camera/File Upload**: Dual-button interface for photo/receipt uploads - separate "📷 Kamera" and "📁 Datei" buttons. Uses single hidden file input with dynamic `capture` attribute toggling for iOS Safari compatibility. Camera button sets `capture="environment"` to trigger rear camera on mobile devices.
 
 ### External Dependencies
 
@@ -132,7 +101,6 @@ The application includes a comprehensive E2E test suite (`test_app_e2e.py`) with
 - Expenses with flexible splitting (4 tests)
 - Balance calculations & settlement (3 tests)
 - PDF export functionality (3 tests)
-- PWA features (4 tests)
 - Edge cases & validation (3 tests)
 
 **Recent Improvements** (Oct 2025):
