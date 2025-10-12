@@ -33,7 +33,7 @@ Preferred communication style: Simple, everyday language.
 - **ExpenseParticipant**: Links expenses to specific crew for custom splits, with optional percentage field for percentage-based splitting.
 - **Receipt**: Stores uploaded receipt files with metadata.
 - **Trip**: Organizes all related data for a specific sailing trip.
-- **AuditLog**: Records all financial transactions with user attribution, action type, entity reference, and timestamps for compliance and debugging.
+- **AuditLog**: Records all financial transactions with user attribution (session-based user_id without FK constraint), action type, entity reference, and timestamps for compliance and debugging. Note: user_id is stored as opaque session identifier for tracking purposes.
 
 #### Settlement Algorithm
 
