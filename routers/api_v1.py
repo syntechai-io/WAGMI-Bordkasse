@@ -1,15 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import date, datetime
 from db import get_db
-from models import User, Trip, TripStatus, CrewMember, Deposit, Currency, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum
+from models import User, Trip, TripStatus, CrewMember, Deposit, Currency, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum, Receipt
 from services.trip import TripService
 from services.currency import CurrencyService
 from jwt_auth import create_token_pair, verify_token, get_current_user, get_admin_user
 from sqlalchemy import func
 from settlement import compute_settlement
+from pathlib import Path
+import uuid
 
 router = APIRouter(prefix="/api/v1", tags=["API v1"])
 
@@ -842,3 +845,140 @@ async def get_wallet_balance(
         "wallet_expenses": round(wallet_expenses, 2),
         "wallet_balance": round(wallet_balance, 2)
     }
+
+# Receipt schemas and constants
+ALLOWED_CONTENT_TYPES = {"application/pdf", "image/jpeg", "image/png"}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+class ReceiptResponse(BaseModel):
+    id: int
+    expense_id: int
+    stored_filename: str
+    original_name: str
+    content_type: str
+    size_bytes: int
+    uploaded_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Receipt endpoints
+@router.post("/expenses/{expense_id}/receipts", response_model=ReceiptResponse, status_code=status.HTTP_201_CREATED)
+async def upload_receipt(
+    expense_id: int,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Upload a receipt for an expense (supports PDF, JPG, PNG up to 10MB)"""
+    # Verify expense exists and load trip for validation
+    expense = db.query(Expense).join(Trip).filter(Expense.id == expense_id).first()
+    if not expense:
+        raise HTTPException(status_code=404, detail="Expense not found")
+    
+    # Authenticated users (crew/admin) can upload receipts
+    # Admin has full access, crew users are trusted to manage trip data
+    
+    # Validate content type
+    if file.content_type not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=415, 
+            detail="Only PDF, JPG, and PNG files are allowed"
+        )
+    
+    # Read and validate file size
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=413, 
+            detail="File too large (max 10MB)"
+        )
+    
+    # Determine file extension
+    ext_map = {
+        "application/pdf": ".pdf",
+        "image/jpeg": ".jpg",
+        "image/png": ".png"
+    }
+    ext = ext_map.get(file.content_type, ".bin")
+    
+    # Generate unique filename
+    filename = str(uuid.uuid4()) + ext
+    filepath = Path("uploads") / filename
+    
+    # Ensure uploads directory exists
+    Path("uploads").mkdir(exist_ok=True)
+    
+    # Save file
+    filepath.write_bytes(content)
+    
+    # Create receipt record
+    receipt = Receipt(
+        expense_id=expense_id,
+        stored_filename=filename,
+        original_name=file.filename or "unknown",
+        content_type=file.content_type,
+        size_bytes=len(content)
+    )
+    db.add(receipt)
+    db.commit()
+    db.refresh(receipt)
+    
+    return receipt
+
+@router.get("/expenses/{expense_id}/receipts", response_model=List[ReceiptResponse])
+async def list_expense_receipts(
+    expense_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """List all receipts for an expense"""
+    expense = db.query(Expense).join(Trip).filter(Expense.id == expense_id).first()
+    if not expense:
+        raise HTTPException(status_code=404, detail="Expense not found")
+    
+    receipts = db.query(Receipt).filter(Receipt.expense_id == expense_id).order_by(Receipt.uploaded_at.desc()).all()
+    return receipts
+
+@router.get("/receipts/{receipt_id}/download")
+async def download_receipt(
+    receipt_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Download a receipt file"""
+    receipt = db.query(Receipt).join(Expense).join(Trip).filter(Receipt.id == receipt_id).first()
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    filepath = Path("uploads") / receipt.stored_filename
+    
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Receipt file not found on disk")
+    
+    return FileResponse(
+        path=filepath,
+        media_type=receipt.content_type,
+        filename=receipt.original_name
+    )
+
+@router.delete("/receipts/{receipt_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_receipt(
+    receipt_id: int,
+    current_user: dict = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a receipt (admin only)"""
+    receipt = db.query(Receipt).join(Expense).join(Trip).filter(Receipt.id == receipt_id).first()
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    # Delete file from disk
+    filepath = Path("uploads") / receipt.stored_filename
+    if filepath.exists():
+        filepath.unlink()
+    
+    # Delete database record
+    db.delete(receipt)
+    db.commit()
+    return None
