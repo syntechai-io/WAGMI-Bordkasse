@@ -50,11 +50,21 @@ async def create_expense(
     participant_ids: List[int] = Form([]),
     participant_percentages: List[float] = Form([]),
     receipt: Optional[UploadFile] = File(None),
+    clientTempId: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_active_trip(db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Check for duplicate using clientTempId (prevents duplicate entries during sync)
+    if clientTempId:
+        existing_expense = db.query(Expense).filter(
+            Expense.client_temp_id == clientTempId
+        ).first()
+        if existing_expense:
+            # Expense already exists, return success
+            return RedirectResponse(url="/expenses", status_code=303)
     
     if amount <= 0:
         expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
@@ -73,6 +83,7 @@ async def create_expense(
         
         expense = Expense(
             trip_id=active_trip.id,
+            client_temp_id=clientTempId,
             payer_id=payer_id,
             date=date.fromisoformat(expense_date),
             category=category,

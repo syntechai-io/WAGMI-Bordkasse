@@ -88,6 +88,7 @@ class Deposit(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
+    client_temp_id = Column(String(100), nullable=True, index=True, unique=True)
     member_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False, index=True)
     amount = Column(Float, nullable=False)
     currency = Column(SQLEnum(Currency), nullable=False, default=Currency.EUR)
@@ -117,6 +118,7 @@ class Expense(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
+    client_temp_id = Column(String(100), nullable=True, index=True, unique=True)
     payer_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False, index=True)
     date = Column(Date, nullable=False)
     category = Column(String(50), nullable=False)
@@ -181,6 +183,7 @@ class LogbookEntry(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
+    client_temp_id = Column(String(100), nullable=True, index=True, unique=True)
     entry_date = Column(DateTime, nullable=False, index=True)
     entry_date_utc = Column(DateTime, nullable=False)
     latitude = Column(Float, nullable=True)

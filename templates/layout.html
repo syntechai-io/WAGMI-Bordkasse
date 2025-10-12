@@ -211,13 +211,24 @@
             }, duration);
         }
 
-        window.addEventListener('online', () => {
+        window.addEventListener('online', async () => {
             isOnline = true;
             showOfflineIndicator(false);
             if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     type: 'CHECK_ONLINE_STATUS'
                 });
+                
+                // Trigger background sync when back online
+                if ('serviceWorker' in navigator && 'sync' in navigator.serviceWorker) {
+                    try {
+                        const registration = await navigator.serviceWorker.ready;
+                        await registration.sync.register('sync-crew-wallet');
+                        console.log('Background sync triggered on reconnection');
+                    } catch (err) {
+                        console.error('Failed to register background sync:', err);
+                    }
+                }
             }
         });
 
@@ -240,12 +251,16 @@
                     const { success, failed } = event.data;
                     if (success > 0) {
                         showSyncNotification(
-                            `${success} Änderung${success > 1 ? 'en' : ''} erfolgreich synchronisiert`
+                            `✅ ${success} Änderung${success > 1 ? 'en' : ''} erfolgreich synchronisiert`
                         );
+                        // Reload after a short delay to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
                     }
                     if (failed > 0) {
                         showSyncNotification(
-                            `${failed} Änderung${failed > 1 ? 'en' : ''} konnten nicht synchronisiert werden`,
+                            `❌ ${failed} Änderung${failed > 1 ? 'en' : ''} konnten nicht synchronisiert werden`,
                             5000
                         );
                     }

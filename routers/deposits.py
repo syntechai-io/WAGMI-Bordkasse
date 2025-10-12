@@ -8,6 +8,7 @@ from models import Deposit, CrewMember, Currency
 from services.trip import TripService
 from services.currency import CurrencyService
 from datetime import date
+from typing import Optional
 
 router = APIRouter(prefix="/deposits", tags=["deposits"])
 templates = Jinja2Templates(directory="templates")
@@ -35,11 +36,21 @@ async def create_deposit(
     currency: str = Form(Currency.EUR.value),
     deposit_date: str = Form(...),
     note: str = Form(""),
+    clientTempId: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_active_trip(db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Check for duplicate using clientTempId (prevents duplicate entries during sync)
+    if clientTempId:
+        existing_deposit = db.query(Deposit).filter(
+            Deposit.client_temp_id == clientTempId
+        ).first()
+        if existing_deposit:
+            # Deposit already exists, return success
+            return RedirectResponse(url="/deposits", status_code=303)
     
     if amount <= 0:
         deposits = db.query(Deposit).filter(Deposit.trip_id == active_trip.id).order_by(Deposit.date.desc()).all()
@@ -57,6 +68,7 @@ async def create_deposit(
         
         deposit = Deposit(
             trip_id=active_trip.id,
+            client_temp_id=clientTempId,
             member_id=member_id,
             amount=amount,
             currency=currency_enum,

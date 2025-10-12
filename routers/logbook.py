@@ -71,11 +71,21 @@ async def create_entry(
     notes: Optional[str] = Form(None),
     safety_checks: Optional[str] = Form(None),
     crew_on_watch_ids: List[int] = Form([]),
+    clientTempId: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_active_trip(db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Check for duplicate using clientTempId (prevents duplicate entries during sync)
+    if clientTempId:
+        existing_entry = db.query(LogbookEntry).filter(
+            LogbookEntry.client_temp_id == clientTempId
+        ).first()
+        if existing_entry:
+            # Entry already exists, return success
+            return RedirectResponse(url="/logbook", status_code=303)
     
     try:
         # Combine date and time
@@ -89,6 +99,7 @@ async def create_entry(
         
         entry = LogbookEntry(
             trip_id=active_trip.id,
+            client_temp_id=clientTempId,
             entry_date=entry_datetime,
             entry_date_utc=entry_datetime_utc,
             latitude=latitude,
