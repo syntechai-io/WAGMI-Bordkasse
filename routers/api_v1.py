@@ -30,7 +30,7 @@ async def login(credentials: LoginRequest, db: Session = Depends(get_db)):
             detail="Invalid credentials"
         )
     
-    tokens = create_token_pair(user.username, user.role.value)
+    tokens = create_token_pair(str(user.username), user.role.value)
     
     return TokenResponse(
         access_token=tokens["access_token"],
