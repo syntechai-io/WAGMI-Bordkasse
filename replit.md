@@ -78,6 +78,7 @@ The application uses a greedy matching algorithm to calculate net balances for e
 - Database migration (12a376fa962e) adds `client_temp_id` for duplicate prevention
 - Backend duplicate detection in all routers using clientTempId parameter
 - Toast notifications for successful sync
+- **CSRF Token Sync Support** (Oct 2025): Service worker requests CSRF token from client page via postMessage during background sync, extracts token from `fastapi-csrf-token` cookie using substring parsing (preserves base64 padding), and includes token in `X-CSRF-Token` header for all POST/PUT/DELETE sync requests to prevent 403 rejection
 
 **Phase 4: Offline Photo/Receipt Uploads**
 - Base64 conversion for offline photo/receipt storage in IndexedDB
