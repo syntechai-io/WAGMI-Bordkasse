@@ -89,6 +89,7 @@ The application uses a greedy matching algorithm to calculate net balances for e
 - Supports camera capture and file selection while offline
 - Seamless sync of photos with expense data when connection restored
 - **UX Improvements** (Oct 2025): Receipt upload only on expense creation form (removed duplicate from details page). Multiple offline expense entries supported with proper form reset - clears all form data, hides split mode UI sections, removes receipt previews, and shows success notification without page reload
+- **Enhanced Error Handling** (Oct 2025): Comprehensive offline save diagnostics with IndexedDB availability checks, Service Worker readiness validation, detailed error messages in German, quota exceeded detection, and console logging with [SW] prefix for debugging. Errors now show actual failure reason instead of generic messages
 
 ### External Dependencies
 
