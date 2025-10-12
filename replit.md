@@ -60,6 +60,34 @@ The application uses a greedy matching algorithm to calculate net balances for e
 - **Professional PDF Export**: Replaced CSV with ReportLab for maritime-themed PDF exports of trip data.
 - **Mobile Camera/File Upload** (Oct 2025): Dual-button interface for photo/receipt uploads - separate "📷 Kamera" and "📁 Datei" buttons. Uses single hidden file input with dynamic `capture` attribute toggling for iOS Safari compatibility (avoids DataTransfer API issues). Camera button sets `capture="environment"` to trigger rear camera on mobile devices.
 
+#### Offline-First PWA Capabilities (Oct 2025)
+
+**Complete offline functionality** enabling use in areas with poor connectivity:
+
+**Phase 1-2: Cache-First Offline Viewing**
+- IndexedDB storage for logbook entries, expenses, deposits, and crew data
+- Cache-first strategy with "last synced" timestamps
+- Auto-reload on reconnection to show latest data
+- Visual indicators for offline mode and sync status
+
+**Phase 3: Offline Entry Creation & Background Sync**
+- Offline form submission for logbook, expenses, and deposits with optimistic UI
+- Yellow "🔄 Pending" badges for entries awaiting sync
+- Automatic background sync when connection restored
+- Manual sync button in navbar with pending count indicator
+- Database migration (12a376fa962e) adds `client_temp_id` for duplicate prevention
+- Backend duplicate detection in all routers using clientTempId parameter
+- Toast notifications for successful sync
+
+**Phase 4: Offline Photo/Receipt Uploads**
+- Base64 conversion for offline photo/receipt storage in IndexedDB
+- File-to-base64 conversion helper for expense receipts when offline
+- Image preview thumbnail when photo selected offline
+- Service worker base64-to-Blob conversion during sync
+- FormData reconstruction with receipt file for proper backend upload
+- Supports camera capture and file selection while offline
+- Seamless sync of photos with expense data when connection restored
+
 ### External Dependencies
 
 #### Python Packages
