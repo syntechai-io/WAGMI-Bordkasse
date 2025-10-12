@@ -49,7 +49,7 @@ The application uses a greedy matching algorithm to calculate net balances for e
 - **File Upload Validation**: UUID-based filenames, type validation (PDF/JPG/PNG), 10MB size limits for receipt uploads
 - **Input Validation**: Pydantic schemas with type checking and bounds validation
 - **Environment Variables**: SESSION_SECRET, CSRF_SECRET, ADMIN_PASSWORD, CREW_PASSWORD stored securely
-- **Mobile API (October 2025)**: Complete JWT-based REST API at `/api/v1/` for Flutter app with dedicated JWT_SECRET, access/refresh tokens (60min/7day expiry), Bearer authentication, role-based access control, CORS enabled, parallel operation with webapp session auth. Full CRUD operations for trips, crew, deposits, expenses, and settlements with multi-currency support and offline sync capabilities via client_temp_id.
+- **Mobile API (October 2025)**: Complete JWT-based REST API at `/api/v1/` for Flutter app with dedicated JWT_SECRET, access/refresh tokens (60min/7day expiry), Bearer authentication, role-based access control (admin/crew), CORS enabled, parallel operation with webapp session auth. Full CRUD operations for trips, crew, deposits, expenses, settlements, and receipt uploads with multi-currency support and offline sync capabilities via client_temp_id. Receipt upload supports PDF/JPG/PNG files up to 10MB with UUID-based secure storage. **Note**: Current authorization model uses role-based access (admin vs crew) without per-trip scoping - crew users can access all trip data.
 
 #### Frontend Architecture
 
