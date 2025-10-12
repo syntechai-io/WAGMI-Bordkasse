@@ -58,6 +58,7 @@ The application uses a greedy matching algorithm to calculate net balances for e
 - **Maritime UI Theme**: A comprehensive nautical aesthetic with a custom color palette, porthole-style cards, rope dividers, maritime gradient buttons, and ship wheel branding.
 - **PWA Support**: Manifest and service worker enable home screen installation and offline functionality.
 - **Professional PDF Export**: Replaced CSV with ReportLab for maritime-themed PDF exports of trip data.
+- **Mobile Camera/File Upload** (Oct 2025): Dual-button interface for photo/receipt uploads - separate "📷 Kamera" and "📁 Datei" buttons. Uses single hidden file input with dynamic `capture` attribute toggling for iOS Safari compatibility (avoids DataTransfer API issues). Camera button sets `capture="environment"` to trigger rear camera on mobile devices.
 
 ### External Dependencies
 
