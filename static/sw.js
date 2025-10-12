@@ -697,44 +697,67 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'CREATE_OFFLINE_ENTRY') {
     const { storeName, entry } = event.data;
     
-    // Generate temp ID for offline entry
-    const clientTempId = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    console.log('[SW] Creating offline entry for:', storeName, entry);
     
-    const offlineEntry = {
-      ...entry,
-      id: clientTempId,  // Set id = clientTempId for IndexedDB keyPath
-      clientTempId,
-      syncStatus: 'pending',
-      createdAt: Date.now(),
-      cachedAt: Date.now()
-    };
-    
-    // Save to IndexedDB
-    saveToCache(storeName, offlineEntry)
-      .then(() => {
-        // Create a mock request for queueRequest
-        const mockRequest = new Request(entry.endpoint || `/${storeName}/new`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
+    try {
+      // Check if IndexedDB is accessible
+      if (!self.indexedDB) {
+        throw new Error('IndexedDB ist im Service Worker nicht verfügbar');
+      }
+      
+      // Generate temp ID for offline entry
+      const clientTempId = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const offlineEntry = {
+        ...entry,
+        id: clientTempId,  // Set id = clientTempId for IndexedDB keyPath
+        clientTempId,
+        syncStatus: 'pending',
+        createdAt: Date.now(),
+        cachedAt: Date.now()
+      };
+      
+      console.log('[SW] Saving offline entry to cache:', offlineEntry);
+      
+      // Save to IndexedDB
+      saveToCache(storeName, offlineEntry)
+        .then(() => {
+          console.log('[SW] Entry saved to cache, queuing for sync');
+          // Create a mock request for queueRequest
+          const mockRequest = new Request(entry.endpoint || `/${storeName}/new`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          // Add to pending requests for sync using queueRequest
+          return queueRequest(mockRequest, JSON.stringify(offlineEntry));
+        })
+        .then(() => {
+          console.log('[SW] Entry queued for sync successfully');
+          event.ports[0]?.postMessage({ 
+            success: true, 
+            entry: offlineEntry,
+            clientTempId 
+          });
+        })
+        .catch(err => {
+          console.error('[SW] Failed to create offline entry:', err);
+          const errorMessage = err.name === 'QuotaExceededError' 
+            ? 'Speicherplatz voll. Bitte synchronisieren Sie ausstehende Einträge oder löschen Sie alte Daten.'
+            : err.message || 'Unbekannter Fehler beim Speichern';
+          
+          event.ports[0]?.postMessage({ 
+            success: false, 
+            error: errorMessage
+          });
         });
-        
-        // Add to pending requests for sync using queueRequest
-        return queueRequest(mockRequest, JSON.stringify(offlineEntry));
-      })
-      .then(() => {
-        event.ports[0]?.postMessage({ 
-          success: true, 
-          entry: offlineEntry,
-          clientTempId 
-        });
-      })
-      .catch(err => {
-        console.error('Failed to create offline entry:', err);
-        event.ports[0]?.postMessage({ 
-          success: false, 
-          error: err.message 
-        });
+    } catch (err) {
+      console.error('[SW] Exception in CREATE_OFFLINE_ENTRY:', err);
+      event.ports[0]?.postMessage({ 
+        success: false, 
+        error: err.message || 'Service Worker Fehler'
       });
+    }
   }
 
   if (event.data && event.data.type === 'GET_PENDING_COUNT') {

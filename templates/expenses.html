@@ -353,7 +353,19 @@
                 submitBtn.disabled = true;
                 
                 try {
+                    // Check if IndexedDB is available
+                    if (!window.indexedDB) {
+                        throw new Error('IndexedDB nicht verfügbar. Bitte verwenden Sie einen modernen Browser oder deaktivieren Sie den privaten Modus.');
+                    }
+                    
+                    // Check if Service Worker is ready
+                    if (!navigator.serviceWorker.controller) {
+                        throw new Error('Service Worker nicht bereit. Bitte laden Sie die Seite neu.');
+                    }
+                    
+                    console.log('Creating offline expense entry...', expenseData);
                     const result = await window.createOfflineEntry('expenses', expenseData, '/expenses/new');
+                    console.log('Offline entry result:', result);
                     
                     if (result && result.success) {
                         submitBtn.textContent = '✅ Offline gespeichert!';
@@ -397,13 +409,19 @@
                             }, 3000);
                         }, 1000);
                     } else {
-                        throw new Error(result?.error || 'Offline-Speicherung fehlgeschlagen');
+                        const errorMsg = result?.error || 'Unbekannter Fehler - kein Ergebnis vom Service Worker';
+                        console.error('Offline save failed - result:', result);
+                        throw new Error(errorMsg);
                     }
                 } catch (err) {
-                    console.error('Offline save failed:', err);
+                    console.error('Offline save failed - exception:', err);
                     submitBtn.textContent = '❌ Fehler';
                     submitBtn.disabled = false;
-                    alert('Fehler beim Offline-Speichern: ' + err.message);
+                    
+                    // Show detailed error message
+                    const errorDetail = err.message || 'Unbekannter Fehler';
+                    alert('Offline-Speicherung fehlgeschlagen:\n\n' + errorDetail + '\n\nBitte prüfen Sie:\n• Browser unterstützt IndexedDB\n• Kein privater Modus\n• Service Worker aktiv');
+                    
                     setTimeout(() => {
                         submitBtn.textContent = originalText;
                     }, 2000);
