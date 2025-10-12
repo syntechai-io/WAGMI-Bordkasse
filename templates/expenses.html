@@ -167,7 +167,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aktionen</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sky-200">
+                <tbody id="expensesTableBody" class="divide-y divide-sky-200">
                     {% for expense in expenses %}
                     <tr style="transition: background-color 0.2s;" onmouseover="this.style.background='rgba(135, 206, 235, 0.05)'" onmouseout="this.style.background='transparent'">
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.date }}</td>
@@ -350,11 +350,55 @@
                             }
                         }
                     }
+                    
+                    // Render cached expenses
+                    const tbody = document.getElementById('expensesTableBody');
+                    if (tbody && cachedCrew) {
+                        renderCachedExpenses(cachedExpenses, cachedCrew, tbody);
+                    }
                 }
             } catch (err) {
                 console.error('Failed to load cached expenses:', err);
             }
         }
+    }
+    
+    function renderCachedExpenses(expenses, crew, tbody) {
+        const crewMap = {};
+        crew.forEach(member => {
+            crewMap[member.id] = member;
+        });
+        
+        const html = expenses.map(expense => {
+            const payer = crewMap[expense.payer_id] || { code: '?' };
+            const date = new Date(expense.date).toLocaleDateString('de-DE');
+            const isPaidFromWallet = expense.paid_from === 'wallet';
+            
+            return `
+                <tr style="transition: background-color 0.2s;" onmouseover="this.style.background='rgba(135, 206, 235, 0.05)'" onmouseout="this.style.background='transparent'">
+                    <td class="px-6 py-4 whitespace-nowrap">${date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${payer.code}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${expense.category}</td>
+                    <td class="px-6 py-4">${expense.description}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--coral);">
+                        ${expense.currency !== 'EUR' 
+                            ? `${parseFloat(expense.amount).toFixed(2)} ${expense.currency} (≈ ${parseFloat(expense.amount_eur).toFixed(2)} €)`
+                            : `${parseFloat(expense.amount_eur).toFixed(2)} €`
+                        }
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs rounded-full text-white" style="background: ${isPaidFromWallet ? 'linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%)' : 'linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)'};">
+                            ${expense.paid_from}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--ocean-blue); opacity: 0.6;">
+                        📱 Offline
+                    </td>
+                </tr>
+            `;
+        }).join('');
+        
+        tbody.innerHTML = html;
     }
     
     // Load cached data if offline on page load
