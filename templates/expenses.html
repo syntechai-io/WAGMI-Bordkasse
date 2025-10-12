@@ -265,5 +265,36 @@
             document.getElementById('receiptFileName').textContent = '✓ Datei ausgewählt: ' + e.target.files[0].name;
         }
     });
+
+    {% if expenses %}
+    if (window.cacheData) {
+        window.addEventListener('load', () => {
+            const expensesToCache = [
+                {% for expense in expenses %}
+                {
+                    id: {{ expense.id }},
+                    trip_id: {{ expense.trip_id }},
+                    payer_id: {{ expense.payer_id }},
+                    date: {{ expense.date.isoformat() | tojson }},
+                    category: {{ expense.category | tojson }},
+                    description: {{ expense.description | tojson }},
+                    amount: {{ expense.amount | tojson }},
+                    currency: {{ expense.currency.value | tojson }},
+                    amount_eur: {{ expense.amount_eur | tojson }},
+                    paid_from: {{ expense.paid_from.value | tojson }},
+                    split_mode: {{ expense.split_mode.value | tojson }},
+                    syncStatus: 'synced'
+                }{{ ',' if not loop.last else '' }}
+                {% endfor %}
+            ];
+            
+            window.cacheData('expenses', expensesToCache).then(() => {
+                console.log('Expenses cached for offline access');
+            }).catch(err => {
+                console.error('Failed to cache expenses:', err);
+            });
+        });
+    }
+    {% endif %}
 </script>
 {% endblock %}

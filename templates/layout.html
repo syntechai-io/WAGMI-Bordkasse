@@ -292,6 +292,48 @@
         if (!navigator.onLine) {
             showOfflineIndicator(true);
         }
+
+        window.cacheData = async function(storeName, data) {
+            if (!navigator.serviceWorker.controller) {
+                console.warn('No service worker controller, skipping cache');
+                return false;
+            }
+
+            return new Promise((resolve) => {
+                const messageChannel = new MessageChannel();
+                messageChannel.port1.onmessage = (event) => {
+                    resolve(event.data.success);
+                };
+
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'CACHE_DATA',
+                    storeName: storeName,
+                    data: data,
+                    timestamp: Date.now()
+                }, [messageChannel.port2]);
+            });
+        };
+
+        window.getCachedData = async function(storeName, key = null) {
+            if (!navigator.serviceWorker.controller) {
+                return null;
+            }
+
+            return new Promise((resolve) => {
+                const messageChannel = new MessageChannel();
+                messageChannel.port1.onmessage = (event) => {
+                    resolve(event.data.success ? event.data.data : null);
+                };
+
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'GET_CACHED_DATA',
+                    storeName: storeName,
+                    key: key
+                }, [messageChannel.port2]);
+            });
+        };
     </script>
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>

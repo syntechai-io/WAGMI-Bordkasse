@@ -104,3 +104,58 @@
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    {% if deposits %}
+    if (window.cacheData) {
+        window.addEventListener('load', () => {
+            const depositsToCache = [
+                {% for deposit in deposits %}
+                {
+                    id: {{ deposit.id }},
+                    trip_id: {{ deposit.trip_id }},
+                    member_id: {{ deposit.member_id }},
+                    amount: {{ deposit.amount | tojson }},
+                    currency: {{ deposit.currency.value | tojson }},
+                    amount_eur: {{ deposit.amount_eur | tojson }},
+                    date: {{ deposit.date.isoformat() | tojson }},
+                    note: {{ deposit.note | tojson }},
+                    syncStatus: 'synced'
+                }{{ ',' if not loop.last else '' }}
+                {% endfor %}
+            ];
+            
+            window.cacheData('deposits', depositsToCache).then(() => {
+                console.log('Deposits cached for offline access');
+            }).catch(err => {
+                console.error('Failed to cache deposits:', err);
+            });
+        });
+    }
+    {% endif %}
+
+    {% if crew_members %}
+    if (window.cacheData) {
+        window.addEventListener('load', () => {
+            const crewToCache = [
+                {% for member in crew_members %}
+                {
+                    id: {{ member.id }},
+                    trip_id: {{ member.trip_id }},
+                    code: {{ member.code | tojson }},
+                    name: {{ member.name | tojson }}
+                }{{ ',' if not loop.last else '' }}
+                {% endfor %}
+            ];
+            
+            window.cacheData('crewMembers', crewToCache).then(() => {
+                console.log('Crew members cached for offline access');
+            }).catch(err => {
+                console.error('Failed to cache crew members:', err);
+            });
+        });
+    }
+    {% endif %}
+</script>
+{% endblock %}

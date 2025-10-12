@@ -138,3 +138,44 @@
     {% endif %}
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    {% if entries %}
+    if (window.cacheData) {
+        window.addEventListener('load', () => {
+            const entriesToCache = [
+                {% for entry in entries %}
+                {
+                    id: {{ entry.id }},
+                    trip_id: {{ entry.trip_id }},
+                    entry_date: {{ entry.entry_date.isoformat() | tojson }},
+                    entry_date_utc: {{ entry.entry_date_utc.isoformat() | tojson }},
+                    latitude: {{ entry.latitude | tojson }},
+                    longitude: {{ entry.longitude | tojson }},
+                    wind_direction: {{ entry.wind_direction | tojson }},
+                    wind_strength: {{ entry.wind_strength | tojson }},
+                    sea_state: {{ entry.sea_state.value | tojson if entry.sea_state else 'null' }},
+                    visibility: {{ entry.visibility | tojson }},
+                    temperature: {{ entry.temperature | tojson }},
+                    sail_plan: {{ entry.sail_plan | tojson }},
+                    engine_hours: {{ entry.engine_hours | tojson }},
+                    departure: {{ entry.departure | tojson }},
+                    destination: {{ entry.destination | tojson }},
+                    notes: {{ entry.notes | tojson }},
+                    safety_checks_completed: {{ entry.safety_checks_completed | tojson }},
+                    syncStatus: 'synced'
+                }{{ ',' if not loop.last else '' }}
+                {% endfor %}
+            ];
+            
+            window.cacheData('logbookEntries', entriesToCache).then(() => {
+                console.log('Logbook entries cached for offline access');
+            }).catch(err => {
+                console.error('Failed to cache logbook entries:', err);
+            });
+        });
+    }
+    {% endif %}
+</script>
+{% endblock %}

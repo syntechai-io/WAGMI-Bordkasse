@@ -537,6 +537,44 @@ self.addEventListener('message', (event) => {
       broadcastOnlineStatus(false);
     });
   }
+
+  if (event.data && event.data.type === 'CACHE_DATA') {
+    const { storeName, data, timestamp } = event.data;
+    
+    if (Array.isArray(data)) {
+      const enrichedData = data.map(item => ({
+        ...item,
+        syncStatus: 'synced',
+        cachedAt: timestamp || Date.now()
+      }));
+      saveToCache(storeName, enrichedData).catch(err => {
+        console.error(`Failed to cache ${storeName}:`, err);
+      });
+    } else if (data) {
+      const enrichedData = {
+        ...data,
+        syncStatus: 'synced',
+        cachedAt: timestamp || Date.now()
+      };
+      saveToCache(storeName, enrichedData).catch(err => {
+        console.error(`Failed to cache ${storeName}:`, err);
+      });
+    }
+    
+    event.ports[0]?.postMessage({ success: true });
+  }
+
+  if (event.data && event.data.type === 'GET_CACHED_DATA') {
+    const { storeName, key } = event.data;
+    
+    getFromCache(storeName, key)
+      .then(data => {
+        event.ports[0]?.postMessage({ success: true, data });
+      })
+      .catch(err => {
+        event.ports[0]?.postMessage({ success: false, error: err.message });
+      });
+  }
 });
 
 self.addEventListener('online', () => {
