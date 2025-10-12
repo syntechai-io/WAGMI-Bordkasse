@@ -36,7 +36,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                             <a href="/crew/{{ member.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
                             <form action="/crew/{{ member.id }}/delete" method="post" class="inline" onsubmit="return confirm('Wirklich löschen?')">
-                                {{ csrf_token }}
+                                {{ csrf_input | safe }}
                                 <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ Löschen</button>
                             </form>
                         </td>

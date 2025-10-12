@@ -14,7 +14,7 @@
     {% endif %}
     
     <form method="post" class="bg-white porthole-card p-6 space-y-6">
-        {{ csrf_token }}
+        {{ csrf_input | safe }}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">📅 Datum *</label>

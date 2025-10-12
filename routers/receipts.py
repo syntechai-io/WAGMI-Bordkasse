@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException
+from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import FileResponse, RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -8,7 +9,10 @@ from pathlib import Path
 import uuid
 
 router = APIRouter(prefix="/receipts", tags=["receipts"])
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(
+    directory="templates",
+    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
+)
 
 ALLOWED_CONTENT_TYPES = {"application/pdf", "image/jpeg", "image/png"}
 MAX_FILE_SIZE = 10 * 1024 * 1024

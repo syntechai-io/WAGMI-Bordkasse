@@ -65,7 +65,7 @@
             {% endif %}
             
             <form action="/receipts/expenses/{{ expense.id }}/upload" method="post" enctype="multipart/form-data" class="mt-4" id="receiptUploadForm">
-                {{ csrf_token }}
+                {{ csrf_input | safe }}
                 <input type="file" id="fileInput" accept="image/*,.pdf" required class="hidden">
                 <div class="flex gap-3">
                     <button type="button" onclick="activateFileCamera()" 

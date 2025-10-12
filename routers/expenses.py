@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Depends, Form, UploadFile, File
+from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -13,7 +14,10 @@ from pathlib import Path
 import uuid
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(
+    directory="templates",
+    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
+)
 
 CATEGORIES = ["Proviant", "Getränke", "Mooring", "Diesel", "Wasser", "Strom", "Gas", "Taxi/Transfer", "Restaurant", "Eintritte", "Sonstiges"]
 

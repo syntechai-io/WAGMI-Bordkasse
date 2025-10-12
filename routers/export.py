@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Depends
+from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import StreamingResponse, RedirectResponse, HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
@@ -15,7 +16,10 @@ from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
 router = APIRouter(prefix="/export", tags=["export"])
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(
+    directory="templates",
+    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
+)
 
 @router.get("/csv", response_class=HTMLResponse)
 async def export_page(request: Request, db: Session = Depends(get_db)):

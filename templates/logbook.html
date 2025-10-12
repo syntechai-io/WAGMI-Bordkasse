@@ -62,7 +62,7 @@
                                 ✏️ Bearbeiten
                             </a>
                             <form action="/logbook/{{ entry.id }}/delete" method="post" class="inline" onsubmit="return confirm('Eintrag wirklich löschen?')">
-                                {{ csrf_token }}
+                                {{ csrf_input | safe }}
                                 <button type="submit" 
                                         class="text-sm hover:underline touch-action px-3 py-1 rounded" 
                                         style="color: var(--coral);">

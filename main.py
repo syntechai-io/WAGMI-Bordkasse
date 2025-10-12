@@ -70,6 +70,8 @@ csrf_secret = os.getenv("CSRF_SECRET", session_secret)
 app.add_middleware(
     FastAPICSRFJinjaMiddleware,
     secret=csrf_secret,
+    cookie_name="csrftoken",
+    header_name="x-csrftoken",
     sensitive_cookies={"session"}
 )
 

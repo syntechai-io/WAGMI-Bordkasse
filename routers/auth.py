@@ -5,9 +5,13 @@ from sqlalchemy.orm import Session
 from db import get_db
 from models import User
 from limiter_config import limiter
+from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(
+    directory="templates",
+    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
+)
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):

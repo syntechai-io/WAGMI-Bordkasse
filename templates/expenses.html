@@ -23,7 +23,7 @@
     <div class="bg-white porthole-card p-6">
         <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Neue Ausgabe</h2>
         <form method="post" action="/expenses/new" enctype="multipart/form-data" class="space-y-4">
-            {{ csrf_token }}
+            {{ csrf_input | safe }}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 Bezahlt von</label>
@@ -190,7 +190,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                             <a href="/expenses/{{ expense.id }}/edit" class="hover:underline touch-action" onclick="event.stopPropagation()" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
                             <form action="/expenses/{{ expense.id }}/delete" method="post" class="inline" onsubmit="event.stopPropagation(); return confirm('Ausgabe wirklich löschen?')">
-                                {{ csrf_token }}
+                                {{ csrf_input | safe }}
                                 <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ Löschen</button>
                             </form>
                         </td>

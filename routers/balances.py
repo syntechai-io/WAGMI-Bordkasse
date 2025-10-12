@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Depends
+from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -9,7 +10,10 @@ from services.trip import TripService
 from settlement import compute_settlement
 
 router = APIRouter(tags=["balances"])
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(
+    directory="templates",
+    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
+)
 
 def calculate_balances(db: Session, trip_id: int):
     crew_members = db.query(CrewMember).filter(CrewMember.trip_id == trip_id).all()

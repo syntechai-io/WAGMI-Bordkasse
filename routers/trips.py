@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
+from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -7,7 +8,10 @@ from models import Trip, TripStatus
 from datetime import date
 
 router = APIRouter(prefix="/trips", tags=["trips"])
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(
+    directory="templates",
+    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
+)
 
 @router.get("/", response_class=HTMLResponse)
 async def trips_page(request: Request, db: Session = Depends(get_db)):
