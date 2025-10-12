@@ -11,7 +11,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/login",
         "/offline",
         "/static",
-        "/favicon.ico"
+        "/favicon.ico",
+        "/api"
     ]
     
     async def dispatch(self, request, call_next):
