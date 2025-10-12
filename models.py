@@ -167,7 +167,7 @@ class AuditLog(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    user_id = Column(Integer, nullable=True, index=True)
     action = Column(String(50), nullable=False, index=True)
     entity_type = Column(String(50), nullable=False)
     entity_id = Column(Integer, nullable=True)
@@ -176,7 +176,6 @@ class AuditLog(Base):
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     
     trip = relationship("Trip")
-    user = relationship("User")
 
 class LogbookEntry(Base):
     __tablename__ = "logbook_entries"
