@@ -2,16 +2,29 @@
 
 {% block content %}
 <div class="space-y-6">
+    <!-- Header -->
     <div class="flex justify-between items-center">
-        <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">🧭 Dashboard</h1>
+        <h1 class="text-3xl md:text-4xl font-bold maritime-header" style="color: var(--navy-deep);">🧭 Dashboard</h1>
         <div class="text-right">
-            <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">Aktueller Törn:</p>
-            <p class="text-xl font-bold maritime-header" style="color: var(--ocean-blue);">⛵ {{ active_trip.name }}</p>
+            <p class="text-xs md:text-sm" style="color: var(--navy-deep); opacity: 0.7;">Aktueller Törn:</p>
+            <p class="text-lg md:text-xl font-bold maritime-header" style="color: var(--ocean-blue);">⛵ {{ active_trip.name }}</p>
         </div>
     </div>
     
-    <!-- PayPal Pool Link -->
-    <a href="https://www.paypal.com/pool/9j4PpWiLVC?sr=ancr" target="_blank" class="block text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #0070ba 0%, #003087 100%);">
+    <!-- MOBILE: Prominent Help Guide Link (only on mobile) -->
+    <a href="/help" class="block md:hidden text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+        <div class="flex items-center justify-center space-x-3">
+            <div class="text-5xl">📖</div>
+            <div class="text-left">
+                <h3 class="text-2xl font-bold maritime-header">Anleitung lesen</h3>
+                <p class="text-sm opacity-90">Neu hier? Hier gibt's Hilfe!</p>
+            </div>
+            <div class="text-3xl">→</div>
+        </div>
+    </a>
+    
+    <!-- PayPal Pool Link (only on desktop/tablet) -->
+    <a href="https://www.paypal.com/pool/9j4PpWiLVC?sr=ancr" target="_blank" class="hidden md:block text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #0070ba 0%, #003087 100%);">
         <div class="flex items-center justify-center space-x-4">
             <div class="text-5xl">💳</div>
             <div class="text-left">
@@ -22,7 +35,19 @@
         </div>
     </a>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- MOBILE: Simple Wallet Balance (only on mobile) -->
+    <div class="block md:hidden bg-white porthole-card p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium" style="color: var(--navy-deep);">💰 Wallet-Saldo</p>
+                <p class="text-3xl font-bold" style="color: var(--sea-foam);">{{ "%.2f"|format(wallet_balance) }} €</p>
+            </div>
+            <div class="text-6xl">💰</div>
+        </div>
+    </div>
+    
+    <!-- DESKTOP: Detailed Stats Grid (only on desktop/tablet) -->
+    <div class="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white porthole-card p-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -66,7 +91,51 @@
 
     <div class="rope-divider"></div>
 
-    <div class="bg-white porthole-card p-6">
+    <!-- MOBILE: Simple Navigation Cards -->
+    <div class="grid grid-cols-1 gap-4 md:hidden">
+        <a href="/deposits" class="text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #005a8c 100%);">
+            <div class="flex items-center justify-center space-x-3">
+                <div class="text-5xl">💰</div>
+                <div class="text-left">
+                    <h3 class="text-xl font-bold maritime-header">Einzahlung erfassen</h3>
+                    <p class="text-sm opacity-90">Geld ins Wallet einzahlen</p>
+                </div>
+            </div>
+        </a>
+        
+        <a href="/expenses" class="text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+            <div class="flex items-center justify-center space-x-3">
+                <div class="text-5xl">⚓</div>
+                <div class="text-left">
+                    <h3 class="text-xl font-bold maritime-header">Ausgabe erfassen</h3>
+                    <p class="text-sm opacity-90">Einkauf oder Rechnung buchen</p>
+                </div>
+            </div>
+        </a>
+        
+        <a href="/logbook" class="text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+            <div class="flex items-center justify-center space-x-3">
+                <div class="text-5xl">📓</div>
+                <div class="text-left">
+                    <h3 class="text-xl font-bold maritime-header">Logbuch führen</h3>
+                    <p class="text-sm opacity-90">Position & Wetter erfassen</p>
+                </div>
+            </div>
+        </a>
+        
+        <a href="/balances" class="text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
+            <div class="flex items-center justify-center space-x-3">
+                <div class="text-5xl">📊</div>
+                <div class="text-left">
+                    <h3 class="text-xl font-bold maritime-header">Salden anzeigen</h3>
+                    <p class="text-sm opacity-90">Wer zahlt wem wie viel?</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- DESKTOP: Top Categories (only on desktop/tablet) -->
+    <div class="hidden md:block bg-white porthole-card p-6">
         <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">📊 Top Kategorien</h2>
         <div class="space-y-3">
             {% for category, total in top_categories %}
@@ -78,9 +147,10 @@
         </div>
     </div>
 
-    <div class="rope-divider"></div>
+    <div class="hidden md:block rope-divider"></div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- DESKTOP: Large Action Cards (only on desktop/tablet) -->
+    <div class="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4">
         <a href="/crew" class="ocean-gradient text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg">
             <div class="text-6xl mb-3">👥</div>
             <h3 class="text-xl font-bold maritime-header">Crew verwalten</h3>
