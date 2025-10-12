@@ -42,7 +42,7 @@ The application uses a greedy matching algorithm to calculate net balances for e
 #### Security
 
 **Enhanced Security Features** (October 2025):
-- **CSRF Protection**: Starlette-CSRF middleware protects all POST/PUT/DELETE requests with token validation
+- **CSRF Protection**: FastAPI-CSRF-Jinja middleware protects all POST/PUT/DELETE requests with cookie-based CSRF token validation. All routers configured with csrf_token_processor for automatic token injection into forms using `{{ csrf_input | safe }}` template syntax. Supports both form-based and header-based (HTMX) token submission.
 - **Rate Limiting**: SlowAPI with unified limiter instance enforces global limits (200/hour, 50/minute) and login-specific limits (5/minute per IP), returning proper 429 responses with Retry-After headers
 - **Session Security**: 24-hour session timeout, SameSite=Lax cookies, httponly flags for XSS protection
 - **Audit Logging**: AuditLog model tracks all financial transactions (deposits, expenses, settlements) with user attribution and timestamps
@@ -99,7 +99,7 @@ The application uses a greedy matching algorithm to calculate net balances for e
 - **python-dotenv**: Manages environment variables.
 - **ReportLab**: Generates PDF reports.
 - **Alembic**: Database migration management.
-- **starlette-csrf**: CSRF protection middleware.
+- **fastapi-csrf-jinja**: CSRF protection middleware with Jinja2 template integration.
 - **slowapi**: Rate limiting for API endpoints.
 - **werkzeug**: Password hashing utilities.
 
