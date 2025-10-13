@@ -110,6 +110,30 @@
             content: '⛵';
             margin-right: 0.5rem;
         }
+        
+        /* Dropdown Navigation Styles */
+        .nav-dropdown {
+            position: relative;
+        }
+        
+        .nav-dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .dropdown-content {
+            animation: fadeIn 0.2s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
