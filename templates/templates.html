@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📋 Ausgaben-Vorlagen</h1>
+        {% if request.session.get('role') == 'admin' %}
+        <a href="/templates/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
+            ➕ Neu
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg porthole-card">
+        <p class="text-sm">💡 <strong>Tipp:</strong> Verwenden Sie Vorlagen, um häufige Ausgaben schnell zu erfassen. Bei der Erstellung einer Ausgabe wählen Sie einfach eine Vorlage aus und alle Felder werden automatisch ausgefüllt.</p>
+    </div>
+
+    <div class="bg-white porthole-card overflow-hidden">
+        {% if expense_templates %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Kategorie</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Betrag</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Bezahlt von</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aufteilung</th>
+                        {% if request.session.get('role') == 'admin' %}
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aktionen</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-sky-200">
+                    {% for template in expense_templates %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--ocean-blue);">{{ template.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ template.category }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">
+                            {% if template.default_amount %}
+                                {{ "%.2f"|format(template.default_amount) }} {{ template.currency.value }}
+                            {% else %}
+                                <span style="opacity: 0.5;">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">
+                            {% if template.paid_from.value == 'wallet' %}
+                                💰 Bordkasse
+                            {% else %}
+                                👤 Privat
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">
+                            {% if template.split_mode.value == 'equal' %}
+                                ⚖️ Gleichmäßig
+                            {% elif template.split_mode.value == 'participants' %}
+                                👥 Teilnehmer
+                            {% else %}
+                                📊 Prozentsatz
+                            {% endif %}
+                        </td>
+                        {% if request.session.get('role') == 'admin' %}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                            <a href="/templates/{{ template.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
+                            <form action="/templates/{{ template.id }}/delete" method="post" class="inline" onsubmit="return confirm('Vorlage wirklich löschen?')">
+                                {{ csrf_input | safe }}
+                                <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ Löschen</button>
+                            </form>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-8 text-center" style="color: var(--navy-deep); opacity: 0.6;">
+            <p class="text-lg">📋 Keine Vorlagen vorhanden</p>
+            {% if request.session.get('role') == 'admin' %}
+            <p class="text-sm mt-2">Erstellen Sie Ihre erste Vorlage, um Zeit zu sparen!</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

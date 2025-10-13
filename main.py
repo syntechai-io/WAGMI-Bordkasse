@@ -24,6 +24,7 @@ from routers.export import router as export_router
 from routers.auth import router as auth_router
 from routers.trips import router as trips_router
 from routers.logbook import router as logbook_router
+from routers.templates import router as templates_router
 
 app = FastAPI(title="Crew Wallet - Bordkasse")
 
@@ -100,6 +101,7 @@ app.include_router(receipts_router)
 app.include_router(balances_router)
 app.include_router(export_router)
 app.include_router(logbook_router)
+app.include_router(templates_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):

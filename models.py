@@ -229,3 +229,16 @@ class CrewOnWatch(Base):
     
     entry = relationship("LogbookEntry", back_populates="crew_on_watch")
     member = relationship("CrewMember")
+
+class ExpenseTemplate(Base):
+    __tablename__ = "expense_templates"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    category = Column(String(50), nullable=False)
+    default_amount = Column(Float, nullable=True)
+    currency = Column(SQLEnum(Currency), nullable=False, default=Currency.EUR)
+    paid_from = Column(SQLEnum(PaidFromEnum), nullable=False, default=PaidFromEnum.wallet)
+    split_mode = Column(SQLEnum(SplitModeEnum), nullable=False, default=SplitModeEnum.equal)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
