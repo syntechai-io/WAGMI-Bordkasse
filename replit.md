@@ -63,6 +63,7 @@ The application uses a greedy matching algorithm to calculate net balances for e
 - **Professional PDF Export**: ReportLab for maritime-themed PDF exports of trip data.
 - **Mobile Camera/File Upload**: Dual-button interface for photo/receipt uploads - separate "📷 Kamera" and "📁 Datei" buttons. Uses single hidden file input with dynamic `capture` attribute toggling for iOS Safari compatibility. Camera button sets `capture="environment"` to trigger rear camera on mobile devices.
 - **Responsive Dashboard** (Oct 2025): Mobile-friendly landing page with prominent help guide link at top, simplified navigation cards with descriptions, single wallet balance display. Desktop/tablet retains full statistics, PayPal integration, and detailed metrics. Designed to reduce confusion for inexperienced mobile users.
+- **Grouped Navigation** (Oct 2025): Desktop navigation reduced from 11 to 5 items using dropdown menus to eliminate branding overlap. Finanzen dropdown (💰) contains 5 finance-related items (Einzahlungen, Ausgaben, Vorlagen, Salden, Ausgleich). Verwaltung dropdown (📝) contains 3 admin items (Crew, Logbuch, Export). Full accessibility support includes CSS :hover for mouse, :focus-within for keyboard navigation, JavaScript click/touch handlers for touch devices, and ARIA attributes (aria-haspopup, aria-expanded). Mobile hamburger menu remains unchanged with all individual items for simplicity.
 
 ### External Dependencies
 
