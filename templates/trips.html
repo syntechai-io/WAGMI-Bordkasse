@@ -4,6 +4,7 @@
 <div class="space-y-6">
     <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">⛵ Törns verwalten</h1>
     
+    {% if request.session.get('role') == 'admin' %}
     <div class="bg-white porthole-card p-6">
         <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Neuen Törn erstellen</h2>
         <form method="post" action="/trips/new" class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -26,6 +27,7 @@
     </div>
 
     <div class="rope-divider"></div>
+    {% endif %}
 
     <div class="bg-white porthole-card overflow-hidden">
         <div class="p-6 mb-4" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
@@ -51,6 +53,9 @@
                             {% if trip.id == active_trip.id %}
                             <span class="ml-2 text-xs px-2 py-1 rounded-full" style="background: var(--sea-foam); color: white;">AKTIV</span>
                             {% endif %}
+                            {% if trip.is_closed == 1 %}
+                            <span class="ml-2 text-xs px-2 py-1 rounded-full" style="background: var(--coral); color: white;">🔒 GESCHLOSSEN</span>
+                            {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ trip.start_date }}</td>
                         <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ trip.end_date or '-' }}</td>
@@ -62,18 +67,38 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                            {% if trip.status.value == 'archived' %}
-                            <form action="/trips/{{ trip.id }}/activate" method="post" class="inline">
+                            <!-- Select Trip Button -->
+                            <form action="/trips/{{ trip.id }}/select" method="post" class="inline">
                                 {{ csrf_input | safe }}
-                                <button type="submit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✅ Aktivieren</button>
+                                <button type="submit" class="hover:underline touch-action" style="color: var(--ocean-blue);">👁️ Anzeigen</button>
                             </form>
-                            {% elif trip.id != active_trip.id %}
-                            <form action="/trips/{{ trip.id }}/archive" method="post" class="inline" onsubmit="return confirm('Törn wirklich archivieren?')">
-                                {{ csrf_input | safe }}
-                                <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">📦 Archivieren</button>
-                            </form>
-                            {% else %}
-                            <span style="color: var(--sea-foam);">⚓ Aktuell aktiv</span>
+                            
+                            {% if request.session.get('role') == 'admin' %}
+                                <!-- Close/Reopen Trip (Admin Only) -->
+                                {% if trip.is_closed == 0 %}
+                                <form action="/trips/{{ trip.id }}/close" method="post" class="inline">
+                                    {{ csrf_input | safe }}
+                                    <button type="submit" class="hover:underline touch-action" style="color: var(--coral);" title="Für Crew sperren">🔒 Schließen</button>
+                                </form>
+                                {% else %}
+                                <form action="/trips/{{ trip.id }}/reopen" method="post" class="inline">
+                                    {{ csrf_input | safe }}
+                                    <button type="submit" class="hover:underline touch-action" style="color: var(--sea-foam);" title="Für Crew freigeben">🔓 Öffnen</button>
+                                </form>
+                                {% endif %}
+                                
+                                <!-- Activate/Archive Trip (Admin Only) -->
+                                {% if trip.status.value == 'archived' %}
+                                <form action="/trips/{{ trip.id }}/activate" method="post" class="inline">
+                                    {{ csrf_input | safe }}
+                                    <button type="submit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✅ Aktivieren</button>
+                                </form>
+                                {% elif trip.id != active_trip.id %}
+                                <form action="/trips/{{ trip.id }}/archive" method="post" class="inline" onsubmit="return confirm('Törn wirklich archivieren?')">
+                                    {{ csrf_input | safe }}
+                                    <button type="submit" class="hover:underline touch-action" style="color: var(--navy-deep);">📦 Archivieren</button>
+                                </form>
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>
@@ -81,6 +106,21 @@
                 </tbody>
             </table>
         </div>
+    </div>
+    
+    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+        <p class="text-sm font-semibold mb-2" style="color: var(--navy-deep);">💡 Törn-Verwaltung:</p>
+        <ul class="text-sm space-y-1" style="color: var(--navy-deep);">
+            <li><strong>👁️ Anzeigen:</strong> Törn auswählen und anzeigen (alle Benutzer)</li>
+            {% if request.session.get('role') == 'admin' %}
+            <li><strong>🔒 Schließen:</strong> Törn für Crew sperren - nur Admin kann noch Änderungen vornehmen</li>
+            <li><strong>🔓 Öffnen:</strong> Törn wieder für Crew freigeben</li>
+            <li><strong>✅ Aktivieren:</strong> Törn als aktiv setzen (nur ein aktiver Törn möglich)</li>
+            <li><strong>📦 Archivieren:</strong> Törn abschließen und archivieren</li>
+            {% else %}
+            <li><strong>🔒 Geschlossen:</strong> Törn ist gesperrt - nur Admin kann Änderungen vornehmen</li>
+            {% endif %}
+        </ul>
     </div>
 </div>
 {% endblock %}

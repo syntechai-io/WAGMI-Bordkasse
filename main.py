@@ -103,11 +103,13 @@ app.include_router(logbook_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
-    if not active_trip:
+    selected_trip = TripService.get_selected_trip(request, db)
+    if not selected_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    trip_id = active_trip.id
+    trip_id = selected_trip.id
+    user_role = request.session.get("role", "crew")
+    is_editable = TripService.is_trip_editable(selected_trip, user_role)
     
     total_deposits = db.query(func.sum(Deposit.amount_eur)).filter(
         Deposit.trip_id == trip_id
@@ -135,7 +137,8 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
     
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "active_trip": active_trip,
+        "active_trip": selected_trip,
+        "is_editable": is_editable,
         "wallet_balance": round(wallet_balance, 2),
         "total_deposits": round(total_deposits, 2),
         "total_expenses": round(total_expenses, 2),

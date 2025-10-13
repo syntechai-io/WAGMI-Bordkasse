@@ -47,6 +47,11 @@ async def create_deposit(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/deposits", status_code=303)
+    
     # Check for duplicate using clientTempId (prevents duplicate entries during sync)
     if clientTempId:
         existing_deposit = db.query(Deposit).filter(

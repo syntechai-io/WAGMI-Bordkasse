@@ -6,10 +6,23 @@
     <div class="flex justify-between items-center">
         <h1 class="text-3xl md:text-4xl font-bold maritime-header" style="color: var(--navy-deep);">🧭 Dashboard</h1>
         <div class="text-right">
-            <p class="text-xs md:text-sm" style="color: var(--navy-deep); opacity: 0.7;">Aktueller Törn:</p>
+            <p class="text-xs md:text-sm" style="color: var(--navy-deep); opacity: 0.7;">Ausgewählter Törn:</p>
             <p class="text-lg md:text-xl font-bold maritime-header" style="color: var(--ocean-blue);">⛵ {{ active_trip.name }}</p>
         </div>
     </div>
+    
+    <!-- Read-Only Warning for Crew on Closed Trips -->
+    {% if not is_editable and request.session.get('role') == 'crew' %}
+    <div class="bg-orange-50 border-2 border-orange-400 rounded-lg p-4">
+        <div class="flex items-center space-x-3">
+            <div class="text-3xl">🔒</div>
+            <div>
+                <p class="font-bold text-orange-800">Dieser Törn wurde geschlossen</p>
+                <p class="text-sm text-orange-700">Nur der Admin kann noch Änderungen vornehmen. Du kannst alle Daten ansehen, aber keine Einträge hinzufügen oder bearbeiten.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     
     <!-- MOBILE: Prominent Help Guide Link (only on mobile) -->
     <a href="/help" class="block md:hidden text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">

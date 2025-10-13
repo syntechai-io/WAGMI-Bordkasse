@@ -61,6 +61,11 @@ async def create_expense(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/expenses", status_code=303)
+    
     # Check for duplicate using clientTempId (prevents duplicate entries during sync)
     if clientTempId:
         existing_expense = db.query(Expense).filter(

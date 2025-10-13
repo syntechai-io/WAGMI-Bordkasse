@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Trip, TripStatus
+from services.trip import TripService
 from datetime import date
 
 router = APIRouter(prefix="/trips", tags=["trips"])
@@ -89,3 +90,50 @@ async def archive_trip(
     db.commit()
     
     return RedirectResponse(url="/trips", status_code=303)
+
+@router.post("/{trip_id}/close")
+async def close_trip(
+    trip_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Close a trip (admin only - prevents crew from making changes)"""
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    
+    trip.is_closed = 1
+    db.commit()
+    
+    return RedirectResponse(url="/trips", status_code=303)
+
+@router.post("/{trip_id}/reopen")
+async def reopen_trip(
+    trip_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Reopen a trip (admin only - allows crew to make changes again)"""
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    
+    trip.is_closed = 0
+    db.commit()
+    
+    return RedirectResponse(url="/trips", status_code=303)
+
+@router.post("/{trip_id}/select")
+async def select_trip(
+    trip_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Select a trip to view/work with"""
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    
+    TripService.set_selected_trip(request, trip_id)
+    
+    return RedirectResponse(url="/", status_code=303)

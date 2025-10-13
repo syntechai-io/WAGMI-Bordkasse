@@ -54,6 +54,7 @@ class Trip(Base):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=True)
     status = Column(SQLEnum(TripStatus), nullable=False, default=TripStatus.active)
+    is_closed = Column(Integer, nullable=False, default=0)  # 0 = open, 1 = closed (admin only can edit)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     crew_members = relationship("CrewMember", back_populates="trip", cascade="all, delete-orphan")
