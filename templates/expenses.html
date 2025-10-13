@@ -8,6 +8,30 @@
         <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Neue Ausgabe</h2>
         <form method="post" action="/expenses/new" enctype="multipart/form-data" class="space-y-4">
             {{ csrf_input | safe }}
+            
+            {% if expense_templates %}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">
+                    📋 Schnellvorlage wählen (optional)
+                </label>
+                <select id="template_selector" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <option value="">-- Manuelle Eingabe --</option>
+                    {% for template in expense_templates %}
+                    <option value="{{ template.id }}" 
+                            data-category="{{ template.category }}"
+                            data-amount="{{ template.default_amount or '' }}"
+                            data-currency="{{ template.currency.value }}"
+                            data-paid-from="{{ template.paid_from.value }}"
+                            data-split-mode="{{ template.split_mode.value }}">
+                        {{ template.name }} 
+                        {% if template.default_amount %}(~{{ "%.0f"|format(template.default_amount) }} {{ template.currency.value }}){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                <p class="text-xs mt-2" style="color: var(--navy-deep); opacity: 0.7;">💡 Alle Felder können nach Auswahl angepasst werden</p>
+            </div>
+            {% endif %}
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 Bezahlt von</label>
@@ -295,6 +319,60 @@
             reader.onload = () => resolve(reader.result);
             reader.onerror = reject;
             reader.readAsDataURL(file);
+        });
+    }
+    
+    // Template selector auto-fill
+    const templateSelector = document.getElementById('template_selector');
+    if (templateSelector) {
+        templateSelector.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            
+            if (selectedOption.value === '') {
+                // Reset to manual entry - clear all fields
+                return;
+            }
+            
+            // Auto-fill category
+            const category = selectedOption.getAttribute('data-category');
+            const categorySelect = document.querySelector('select[name="category"]');
+            if (categorySelect && category) {
+                categorySelect.value = category;
+            }
+            
+            // Auto-fill amount (if provided)
+            const amount = selectedOption.getAttribute('data-amount');
+            const amountInput = document.querySelector('input[name="amount"]');
+            if (amountInput && amount) {
+                amountInput.value = amount;
+            }
+            
+            // Auto-fill currency
+            const currency = selectedOption.getAttribute('data-currency');
+            const currencySelect = document.querySelector('select[name="currency"]');
+            if (currencySelect && currency) {
+                currencySelect.value = currency;
+            }
+            
+            // Auto-fill paid_from
+            const paidFrom = selectedOption.getAttribute('data-paid-from');
+            const paidFromSelect = document.querySelector('select[name="paid_from"]');
+            if (paidFromSelect && paidFrom) {
+                paidFromSelect.value = paidFrom;
+            }
+            
+            // Auto-fill split_mode
+            const splitMode = selectedOption.getAttribute('data-split-mode');
+            if (splitModeSelect && splitMode) {
+                splitModeSelect.value = splitMode;
+                updateSplitMode();
+            }
+            
+            // Auto-fill description with template name
+            const descriptionInput = document.querySelector('input[name="description"]');
+            if (descriptionInput) {
+                descriptionInput.value = selectedOption.text.split('(')[0].trim();
+            }
         });
     }
 </script>

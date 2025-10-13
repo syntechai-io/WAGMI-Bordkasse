@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from db import get_db
-from models import Expense, ExpenseParticipant, CrewMember, Receipt, PaidFromEnum, SplitModeEnum, Currency
+from models import Expense, ExpenseParticipant, CrewMember, Receipt, PaidFromEnum, SplitModeEnum, Currency, ExpenseTemplate
 from services.trip import TripService
 from services.currency import CurrencyService
 from datetime import date
@@ -32,12 +32,14 @@ async def list_expenses(request: Request, db: Session = Depends(get_db)):
     
     expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
     crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+    expense_templates = db.query(ExpenseTemplate).order_by(ExpenseTemplate.name).all()
     
     return templates.TemplateResponse("expenses.html", {
         "request": request,
         "expenses": expenses,
         "crew_members": crew_members,
-        "categories": CATEGORIES
+        "categories": CATEGORIES,
+        "expense_templates": expense_templates
     })
 
 @router.post("/new")
