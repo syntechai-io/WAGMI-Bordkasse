@@ -116,7 +116,12 @@
             position: relative;
         }
         
-        .nav-dropdown:hover .dropdown-content {
+        /* Show dropdown on hover (desktop mouse) */
+        .nav-dropdown:hover .dropdown-content,
+        /* Show dropdown on focus (keyboard navigation) */
+        .nav-dropdown:focus-within .dropdown-content,
+        /* Show dropdown when active class is added (touch/click) */
+        .nav-dropdown.active .dropdown-content {
             display: block;
         }
         
@@ -155,13 +160,15 @@
                     
                     <!-- Finanzen Dropdown -->
                     <div class="relative nav-dropdown">
-                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center">
+                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center" 
+                                aria-haspopup="true" aria-expanded="false">
                             💰 Finanzen
                             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div class="dropdown-content absolute hidden bg-white text-gray-800 rounded-lg shadow-lg mt-2 py-2 min-w-[200px]" style="z-index: 100;">
+                        <div class="dropdown-content absolute hidden bg-white text-gray-800 rounded-lg shadow-lg mt-2 py-2 min-w-[200px]" 
+                             style="z-index: 100;" role="menu">
                             <a href="/deposits" class="block px-4 py-2 hover:bg-sky-100 transition">💰 Einzahlungen</a>
                             <a href="/expenses" class="block px-4 py-2 hover:bg-sky-100 transition">⚓ Ausgaben</a>
                             <a href="/templates" class="block px-4 py-2 hover:bg-sky-100 transition">📋 Vorlagen</a>
@@ -172,13 +179,15 @@
                     
                     <!-- Verwaltung Dropdown -->
                     <div class="relative nav-dropdown">
-                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center">
+                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center" 
+                                aria-haspopup="true" aria-expanded="false">
                             📝 Verwaltung
                             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div class="dropdown-content absolute hidden bg-white text-gray-800 rounded-lg shadow-lg mt-2 py-2 min-w-[200px]" style="z-index: 100;">
+                        <div class="dropdown-content absolute hidden bg-white text-gray-800 rounded-lg shadow-lg mt-2 py-2 min-w-[200px]" 
+                             style="z-index: 100;" role="menu">
                             <a href="/crew" class="block px-4 py-2 hover:bg-sky-100 transition">👥 Crew</a>
                             <a href="/logbook" class="block px-4 py-2 hover:bg-sky-100 transition">📓 Logbuch</a>
                             <a href="/export/csv" class="block px-4 py-2 hover:bg-sky-100 transition">📋 Export</a>
@@ -232,8 +241,48 @@
     </footer>
 
     <script>
+        // Mobile menu toggle
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+        
+        // Dropdown navigation for touch/click devices
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdowns = document.querySelectorAll('.nav-dropdown');
+            
+            dropdowns.forEach(dropdown => {
+                const button = dropdown.querySelector('button');
+                
+                // Toggle dropdown on click/touch
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isActive = dropdown.classList.contains('active');
+                    
+                    // Close other dropdowns
+                    dropdowns.forEach(other => {
+                        if (other !== dropdown) {
+                            other.classList.remove('active');
+                            other.querySelector('button').setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                    
+                    // Toggle this dropdown
+                    dropdown.classList.toggle('active');
+                    button.setAttribute('aria-expanded', !isActive);
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.nav-dropdown')) {
+                    dropdowns.forEach(dropdown => {
+                        dropdown.classList.remove('active');
+                        dropdown.querySelector('button').setAttribute('aria-expanded', 'false');
+                    });
+                }
+            });
         });
     </script>
 
