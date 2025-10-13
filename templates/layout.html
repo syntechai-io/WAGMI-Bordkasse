@@ -128,14 +128,39 @@
                 <div id="menu" class="hidden lg:flex lg:items-center lg:space-x-6">
                     <a href="/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">🧭 Dashboard</a>
                     <a href="/trips" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⛵ Törns</a>
-                    <a href="/crew" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">👥 Crew</a>
-                    <a href="/logbook" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📓 Logbuch</a>
-                    <a href="/deposits" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">💰 Einzahlungen</a>
-                    <a href="/expenses" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⚓ Ausgaben</a>
-                    <a href="/templates" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📋 Vorlagen</a>
-                    <a href="/balances" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📊 Salden</a>
-                    <a href="/settlement" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⛵ Ausgleich</a>
-                    <a href="/export/csv" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📋 Export</a>
+                    
+                    <!-- Finanzen Dropdown -->
+                    <div class="relative nav-dropdown">
+                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center">
+                            💰 Finanzen
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="dropdown-content absolute hidden bg-white text-gray-800 rounded-lg shadow-lg mt-2 py-2 min-w-[200px]" style="z-index: 100;">
+                            <a href="/deposits" class="block px-4 py-2 hover:bg-sky-100 transition">💰 Einzahlungen</a>
+                            <a href="/expenses" class="block px-4 py-2 hover:bg-sky-100 transition">⚓ Ausgaben</a>
+                            <a href="/templates" class="block px-4 py-2 hover:bg-sky-100 transition">📋 Vorlagen</a>
+                            <a href="/balances" class="block px-4 py-2 hover:bg-sky-100 transition">📊 Salden</a>
+                            <a href="/settlement" class="block px-4 py-2 hover:bg-sky-100 transition">⛵ Ausgleich</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Verwaltung Dropdown -->
+                    <div class="relative nav-dropdown">
+                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center">
+                            📝 Verwaltung
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="dropdown-content absolute hidden bg-white text-gray-800 rounded-lg shadow-lg mt-2 py-2 min-w-[200px]" style="z-index: 100;">
+                            <a href="/crew" class="block px-4 py-2 hover:bg-sky-100 transition">👥 Crew</a>
+                            <a href="/logbook" class="block px-4 py-2 hover:bg-sky-100 transition">📓 Logbuch</a>
+                            <a href="/export/csv" class="block px-4 py-2 hover:bg-sky-100 transition">📋 Export</a>
+                        </div>
+                    </div>
+                    
                     <a href="/help" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📖 Anleitung</a>
                     {% if request.session.get('user_id') %}
                     <div class="border-l border-sky-300 pl-6 ml-2 flex items-center space-x-4">
