@@ -75,7 +75,7 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
             deposit.id,
             sanitize_csv_value(deposit.member.code),
             sanitize_csv_value(deposit.member.name),
-            deposit.amount_eur,
+            sanitize_csv_value(deposit.amount_eur),
             sanitize_csv_value(deposit.date),
             sanitize_csv_value(deposit.note)
         ])
@@ -95,7 +95,7 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
             sanitize_csv_value(expense.date),
             sanitize_csv_value(expense.category),
             sanitize_csv_value(expense.description),
-            expense.amount_eur,
+            sanitize_csv_value(expense.amount_eur),
             sanitize_csv_value(expense.paid_from.value),
             sanitize_csv_value(expense.split_mode.value),
             participants
