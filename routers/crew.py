@@ -16,7 +16,7 @@ templates = Jinja2Templates(
 
 @router.get("", response_class=HTMLResponse)
 async def list_crew(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -28,7 +28,7 @@ async def list_crew(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/new", response_class=HTMLResponse)
 async def new_crew_form(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -45,9 +45,15 @@ async def create_crew(
     iban_or_handle: str = Form(""),
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/crew", status_code=303)
     
     try:
         member = CrewMember(
@@ -73,7 +79,7 @@ async def edit_crew_form(
     member_id: int,
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -95,9 +101,15 @@ async def update_crew(
     iban_or_handle: str = Form(""),
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/crew", status_code=303)
     
     try:
         member = db.query(CrewMember).filter(
@@ -127,9 +139,15 @@ async def delete_crew(
     member_id: int,
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/crew", status_code=303)
     
     member = db.query(CrewMember).filter(
         CrewMember.id == member_id,

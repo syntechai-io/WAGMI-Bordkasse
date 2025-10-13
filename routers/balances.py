@@ -95,7 +95,7 @@ def calculate_balances(db: Session, trip_id: int):
 
 @router.get("/balances", response_class=HTMLResponse)
 async def show_balances(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -118,7 +118,7 @@ async def show_balances(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/settlement", response_class=HTMLResponse)
 async def show_settlement(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     

@@ -26,7 +26,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 @router.get("", response_class=HTMLResponse)
 async def list_expenses(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -57,7 +57,7 @@ async def create_expense(
     clientTempId: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -234,7 +234,7 @@ async def expense_detail(
     expense_id: int,
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -254,7 +254,7 @@ async def edit_expense_form(
     expense_id: int,
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -300,7 +300,7 @@ async def update_expense(
     participant_percentages: List[float] = Form([]),
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -437,7 +437,7 @@ async def delete_expense(
     expense_id: int,
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     

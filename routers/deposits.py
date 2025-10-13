@@ -19,7 +19,7 @@ templates = Jinja2Templates(
 
 @router.get("", response_class=HTMLResponse)
 async def list_deposits(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -43,7 +43,7 @@ async def create_deposit(
     clientTempId: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -105,7 +105,7 @@ async def edit_deposit_form(
     deposit_id: int,
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -142,7 +142,7 @@ async def update_deposit(
     note: str = Form(""),
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -202,7 +202,7 @@ async def delete_deposit(
     deposit_id: int,
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     

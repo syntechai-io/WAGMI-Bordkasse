@@ -23,7 +23,7 @@ templates = Jinja2Templates(
 
 @router.get("/csv", response_class=HTMLResponse)
 async def export_page(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -34,7 +34,7 @@ async def export_page(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/download")
 async def download_csv(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -90,7 +90,7 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/pdf")
 async def download_pdf(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     

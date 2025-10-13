@@ -34,6 +34,9 @@ async def create_trip(
     db: Session = Depends(get_db)
 ):
     """Create a new trip"""
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can create trips")
+    
     trip = Trip(
         name=name,
         start_date=start_date,
@@ -53,9 +56,13 @@ async def create_trip(
 @router.post("/{trip_id}/activate")
 async def activate_trip(
     trip_id: int,
+    request: Request,
     db: Session = Depends(get_db)
 ):
     """Set a trip as active"""
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can activate trips")
+    
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
@@ -76,9 +83,13 @@ async def activate_trip(
 @router.post("/{trip_id}/archive")
 async def archive_trip(
     trip_id: int,
+    request: Request,
     db: Session = Depends(get_db)
 ):
     """Archive a trip"""
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can archive trips")
+    
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
@@ -98,6 +109,9 @@ async def close_trip(
     db: Session = Depends(get_db)
 ):
     """Close a trip (admin only - prevents crew from making changes)"""
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can close trips")
+    
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
@@ -114,6 +128,9 @@ async def reopen_trip(
     db: Session = Depends(get_db)
 ):
     """Reopen a trip (admin only - allows crew to make changes again)"""
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can reopen trips")
+    
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")

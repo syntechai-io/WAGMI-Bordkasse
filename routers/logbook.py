@@ -24,7 +24,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 @router.get("", response_class=HTMLResponse)
 async def list_logbook_entries(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -41,7 +41,7 @@ async def list_logbook_entries(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/new", response_class=HTMLResponse)
 async def new_entry_form(request: Request, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -78,7 +78,7 @@ async def create_entry(
     clientTempId: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -163,7 +163,7 @@ async def create_entry(
 
 @router.get("/{entry_id}", response_class=HTMLResponse)
 async def view_entry(request: Request, entry_id: int, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -183,7 +183,7 @@ async def view_entry(request: Request, entry_id: int, db: Session = Depends(get_
 
 @router.get("/{entry_id}/edit", response_class=HTMLResponse)
 async def edit_entry_form(request: Request, entry_id: int, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -227,7 +227,7 @@ async def update_entry(
     crew_on_watch_ids: List[int] = Form([]),
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -298,7 +298,7 @@ async def update_entry(
 
 @router.post("/{entry_id}/delete")
 async def delete_entry(request: Request, entry_id: int, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -337,7 +337,7 @@ async def upload_photo(
     caption: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -386,7 +386,7 @@ async def upload_photo(
 
 @router.post("/photos/{photo_id}/delete")
 async def delete_photo(request: Request, photo_id: int, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
@@ -423,7 +423,7 @@ async def delete_photo(request: Request, photo_id: int, db: Session = Depends(ge
 
 @router.get("/photos/{photo_id}/view")
 async def view_photo(request: Request, photo_id: int, db: Session = Depends(get_db)):
-    active_trip = TripService.get_active_trip(db)
+    active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         raise HTTPException(status_code=403, detail="No active trip")
     
