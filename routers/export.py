@@ -8,12 +8,27 @@ from models import CrewMember, Deposit, Expense
 from services.trip import TripService
 import io
 import csv
+from typing import Any
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
+
+def sanitize_csv_value(value: Any) -> str:
+    """
+    Sanitize a value for CSV output to prevent formula injection attacks.
+    Prefixes values starting with =, +, -, @, |, % with a single quote.
+    """
+    if value is None:
+        return ""
+    
+    str_value = str(value)
+    # Check if the value starts with potentially dangerous characters
+    if str_value and str_value[0] in ('=', '+', '-', '@', '|', '%'):
+        return "'" + str_value
+    return str_value
 
 router = APIRouter(prefix="/export", tags=["export"])
 templates = Jinja2Templates(
@@ -45,7 +60,12 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
     writer.writerow(["CREW MEMBERS"])
     writer.writerow(["ID", "Code", "Name", "IBAN/Handle"])
     for member in db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all():
-        writer.writerow([member.id, member.code, member.name, member.iban_or_handle if member.iban_or_handle is not None else ""])
+        writer.writerow([
+            member.id,
+            sanitize_csv_value(member.code),
+            sanitize_csv_value(member.name),
+            sanitize_csv_value(member.iban_or_handle)
+        ])
     
     writer.writerow([])
     writer.writerow(["DEPOSITS"])
@@ -53,11 +73,11 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
     for deposit in db.query(Deposit).options(joinedload(Deposit.member)).filter(Deposit.trip_id == active_trip.id).all():
         writer.writerow([
             deposit.id,
-            deposit.member.code,
-            deposit.member.name,
+            sanitize_csv_value(deposit.member.code),
+            sanitize_csv_value(deposit.member.name),
             deposit.amount_eur,
-            deposit.date,
-            deposit.note if deposit.note is not None else ""
+            sanitize_csv_value(deposit.date),
+            sanitize_csv_value(deposit.note)
         ])
     
     writer.writerow([])
@@ -67,17 +87,17 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
         joinedload(Expense.payer),
         joinedload(Expense.participants).joinedload('member')
     ).filter(Expense.trip_id == active_trip.id).all():
-        participants = ", ".join([p.member.code for p in expense.participants])
+        participants = ", ".join([sanitize_csv_value(p.member.code) for p in expense.participants])
         writer.writerow([
             expense.id,
-            expense.payer.code,
-            expense.payer.name,
-            expense.date,
-            expense.category,
-            expense.description,
+            sanitize_csv_value(expense.payer.code),
+            sanitize_csv_value(expense.payer.name),
+            sanitize_csv_value(expense.date),
+            sanitize_csv_value(expense.category),
+            sanitize_csv_value(expense.description),
             expense.amount_eur,
-            expense.paid_from.value,
-            expense.split_mode.value,
+            sanitize_csv_value(expense.paid_from.value),
+            sanitize_csv_value(expense.split_mode.value),
             participants
         ])
     
