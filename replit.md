@@ -23,6 +23,7 @@ Preferred communication style: Simple, everyday language.
 - **Trip Management**: Introduced a `Trip` model to organize expenses and deposits, supporting active and archived trips, with all data scoped to a specific trip. Added trip selection system (Oct 2025) allowing users to switch between any trip via session storage. Implemented trip closure permissions where closed trips are read-only for crew while admin retains full edit access.
 - **Multi-Currency Support**: Integrated ECB API for daily exchange rates to convert DKK, SEK, GBP to EUR for calculations, with rates cached to minimize API calls.
 - **Performance Optimization** (Oct 2025): Eliminated N+1 query problems through pre-aggregation with GROUP BY, eager loading with joinedload(), and database indexes on all foreign keys. Balances calculation reduced from O(n*m) queries to O(1) with 4-5 total queries.
+- **Expense Templates** (Oct 2025): Implemented global expense templates to accelerate data entry for common expenses. Templates include predefined values for category, amount (optional), currency, payment source, and split mode. JavaScript auto-fill applies template values to the expense form while keeping all fields editable. Six default templates seeded: Diesel (€80), Marina (€45), Restaurant, Lebensmittel, Bier/Wein, and Eis (€15). Admin-only template management via dedicated UI.
 
 #### Data Model
 
@@ -31,6 +32,7 @@ Preferred communication style: Simple, everyday language.
 - **Deposit**: Records shared wallet contributions.
 - **Expense**: Tracks spending, specifying `paid_from` (wallet/private) and `split_mode` (equal/participants/percentage).
 - **ExpenseParticipant**: Links expenses to specific crew for custom splits, with optional percentage field for percentage-based splitting.
+- **ExpenseTemplate**: Global templates for quick expense entry with predefined name, category, default_amount (nullable), currency, paid_from, and split_mode. Templates are suggestions - all fields remain editable when applied.
 - **Receipt**: Stores uploaded receipt files with metadata.
 - **Trip**: Organizes all related data for a specific sailing trip. Includes `is_closed` boolean field to control write permissions.
 - **AuditLog**: Records all financial transactions with user attribution (session-based user_id without FK constraint), action type, entity reference, and timestamps for compliance and debugging. Note: user_id is stored as opaque session identifier for tracking purposes.
