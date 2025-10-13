@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum, User, UserRole, Trip, TripStatus, Currency
+from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum, User, UserRole, Trip, TripStatus, Currency, ExpenseTemplate
 from datetime import date, timedelta
 import os
 
@@ -22,6 +22,65 @@ def seed_database(db: Session):
         db.add(crew_user)
         db.commit()
         print("Users seeded: Admin 'Sven' and Crew 'crew'")
+    
+    # Seed default expense templates (global, not trip-specific)
+    existing_template = db.query(ExpenseTemplate).first()
+    if not existing_template:
+        default_templates = [
+            ExpenseTemplate(
+                name="⛽ Diesel tanken",
+                category="Diesel",
+                default_amount=80.00,
+                currency=Currency.EUR,
+                paid_from=PaidFromEnum.wallet,
+                split_mode=SplitModeEnum.equal
+            ),
+            ExpenseTemplate(
+                name="🏖️ Marina Gebühr",
+                category="Mooring",
+                default_amount=45.00,
+                currency=Currency.EUR,
+                paid_from=PaidFromEnum.wallet,
+                split_mode=SplitModeEnum.equal
+            ),
+            ExpenseTemplate(
+                name="🍽️ Restaurant",
+                category="Restaurant",
+                default_amount=None,
+                currency=Currency.EUR,
+                paid_from=PaidFromEnum.wallet,
+                split_mode=SplitModeEnum.equal
+            ),
+            ExpenseTemplate(
+                name="🛒 Lebensmittel",
+                category="Proviant",
+                default_amount=None,
+                currency=Currency.EUR,
+                paid_from=PaidFromEnum.wallet,
+                split_mode=SplitModeEnum.equal
+            ),
+            ExpenseTemplate(
+                name="🍺 Bier & Wein",
+                category="Getränke",
+                default_amount=None,
+                currency=Currency.EUR,
+                paid_from=PaidFromEnum.wallet,
+                split_mode=SplitModeEnum.equal
+            ),
+            ExpenseTemplate(
+                name="🧊 Eis & Wasser",
+                category="Proviant",
+                default_amount=15.00,
+                currency=Currency.EUR,
+                paid_from=PaidFromEnum.wallet,
+                split_mode=SplitModeEnum.equal
+            )
+        ]
+        
+        for template in default_templates:
+            db.add(template)
+        db.commit()
+        print("Default expense templates seeded (6 templates)")
     
     existing_trip = db.query(Trip).first()
     if existing_trip:
