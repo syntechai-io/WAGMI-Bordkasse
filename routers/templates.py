@@ -3,6 +3,7 @@ from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from typing import Optional
 from db import get_db
 from models import ExpenseTemplate, PaidFromEnum, SplitModeEnum, Currency
 
@@ -39,7 +40,7 @@ async def create_template(
     request: Request,
     name: str = Form(...),
     category: str = Form(...),
-    default_amount: float = Form(None),
+    default_amount: Optional[str] = Form(None),
     currency: str = Form(Currency.EUR.value),
     paid_from: str = Form(PaidFromEnum.wallet.value),
     split_mode: str = Form(SplitModeEnum.equal.value),
@@ -49,10 +50,20 @@ async def create_template(
     if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen erstellen")
     
+    # Convert default_amount: empty string or None -> None, otherwise convert to float
+    amount_value = None
+    if default_amount and default_amount.strip():
+        try:
+            amount_value = float(default_amount)
+            if amount_value <= 0:
+                amount_value = None
+        except ValueError:
+            amount_value = None
+    
     template = ExpenseTemplate(
         name=name,
         category=category,
-        default_amount=default_amount if default_amount and default_amount > 0 else None,
+        default_amount=amount_value,
         currency=Currency(currency),
         paid_from=PaidFromEnum(paid_from),
         split_mode=SplitModeEnum(split_mode)
@@ -85,7 +96,7 @@ async def update_template(
     template_id: int,
     name: str = Form(...),
     category: str = Form(...),
-    default_amount: float = Form(None),
+    default_amount: Optional[str] = Form(None),
     currency: str = Form(Currency.EUR.value),
     paid_from: str = Form(PaidFromEnum.wallet.value),
     split_mode: str = Form(SplitModeEnum.equal.value),
@@ -99,9 +110,19 @@ async def update_template(
     if not template:
         return RedirectResponse(url="/templates", status_code=303)
     
+    # Convert default_amount: empty string or None -> None, otherwise convert to float
+    amount_value = None
+    if default_amount and default_amount.strip():
+        try:
+            amount_value = float(default_amount)
+            if amount_value <= 0:
+                amount_value = None
+        except ValueError:
+            amount_value = None
+    
     template.name = name
     template.category = category
-    template.default_amount = default_amount if default_amount and default_amount > 0 else None
+    template.default_amount = amount_value
     template.currency = Currency(currency)
     template.paid_from = PaidFromEnum(paid_from)
     template.split_mode = SplitModeEnum(split_mode)
