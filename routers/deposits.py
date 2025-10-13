@@ -146,6 +146,12 @@ async def update_deposit(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/deposits", status_code=303)
+    
     if amount <= 0:
         deposit = db.query(Deposit).filter(
             Deposit.id == deposit_id,
@@ -205,6 +211,12 @@ async def delete_deposit(
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/deposits", status_code=303)
     
     try:
         deposit = db.query(Deposit).filter(

@@ -231,6 +231,12 @@ async def update_entry(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/logbook", status_code=303)
+    
     entry = db.query(LogbookEntry).filter(LogbookEntry.id == entry_id, LogbookEntry.trip_id == active_trip.id).first()
     if not entry:
         return RedirectResponse(url="/logbook", status_code=303)
@@ -302,6 +308,12 @@ async def delete_entry(request: Request, entry_id: int, db: Session = Depends(ge
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/logbook", status_code=303)
+    
     entry = db.query(LogbookEntry).filter(LogbookEntry.id == entry_id, LogbookEntry.trip_id == active_trip.id).first()
     if not entry:
         return RedirectResponse(url="/logbook", status_code=303)
@@ -340,6 +352,12 @@ async def upload_photo(
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/logbook", status_code=303)
     
     entry = db.query(LogbookEntry).filter(LogbookEntry.id == entry_id, LogbookEntry.trip_id == active_trip.id).first()
     if not entry:
@@ -389,6 +407,12 @@ async def delete_photo(request: Request, photo_id: int, db: Session = Depends(ge
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/logbook", status_code=303)
     
     photo = db.query(LogbookPhoto).join(LogbookEntry).filter(
         LogbookPhoto.id == photo_id,
