@@ -20,7 +20,7 @@ Preferred communication style: Simple, everyday language.
 - **Modular Router Structure**: Enhances maintainability and separation of concerns.
 - **Authentication Model**: Session-based with two roles (Admin, Crew) and environment variable-based secrets for security.
 - **File Upload Security**: UUID-based filenames, type validation (PDF/JPG/PNG), and size limits (10MB) for receipt uploads.
-- **Trip Management**: Introduced a `Trip` model to organize expenses and deposits, supporting active and archived trips, with all data scoped to a specific trip.
+- **Trip Management**: Introduced a `Trip` model to organize expenses and deposits, supporting active and archived trips, with all data scoped to a specific trip. Added trip selection system (Oct 2025) allowing users to switch between any trip via session storage. Implemented trip closure permissions where closed trips are read-only for crew while admin retains full edit access.
 - **Multi-Currency Support**: Integrated ECB API for daily exchange rates to convert DKK, SEK, GBP to EUR for calculations, with rates cached to minimize API calls.
 - **Performance Optimization** (Oct 2025): Eliminated N+1 query problems through pre-aggregation with GROUP BY, eager loading with joinedload(), and database indexes on all foreign keys. Balances calculation reduced from O(n*m) queries to O(1) with 4-5 total queries.
 
@@ -32,7 +32,7 @@ Preferred communication style: Simple, everyday language.
 - **Expense**: Tracks spending, specifying `paid_from` (wallet/private) and `split_mode` (equal/participants/percentage).
 - **ExpenseParticipant**: Links expenses to specific crew for custom splits, with optional percentage field for percentage-based splitting.
 - **Receipt**: Stores uploaded receipt files with metadata.
-- **Trip**: Organizes all related data for a specific sailing trip.
+- **Trip**: Organizes all related data for a specific sailing trip. Includes `is_closed` boolean field to control write permissions.
 - **AuditLog**: Records all financial transactions with user attribution (session-based user_id without FK constraint), action type, entity reference, and timestamps for compliance and debugging. Note: user_id is stored as opaque session identifier for tracking purposes.
 
 #### Settlement Algorithm
@@ -45,6 +45,7 @@ The application uses a greedy matching algorithm to calculate net balances for e
 - **CSRF Protection**: FastAPI-CSRF-Jinja middleware protects all POST/PUT/DELETE requests with cookie-based CSRF token validation. All routers configured with csrf_token_processor for automatic token injection into forms using `{{ csrf_input | safe }}` template syntax. Supports both form-based and header-based (HTMX) token submission.
 - **Rate Limiting**: SlowAPI with unified limiter instance enforces global limits (200/hour, 50/minute) and login-specific limits (5/minute per IP), returning proper 429 responses with Retry-After headers
 - **Session Security**: 24-hour session timeout, SameSite=Lax cookies, httponly flags for XSS protection
+- **Trip Permissions**: TripService.is_trip_editable() enforces closed trip protection across all write operations (14 permission checks total). Admin retains full access to closed trips; crew cannot create/edit/delete any data (deposits, expenses, crew, logbook) on closed trips. All trip management operations (create/activate/archive/close/reopen) require admin role.
 - **Audit Logging**: AuditLog model tracks all financial transactions (deposits, expenses, settlements) with user attribution and timestamps
 - **File Upload Validation**: UUID-based filenames, type validation (PDF/JPG/PNG), 10MB size limits for receipt uploads
 - **Input Validation**: Pydantic schemas with type checking and bounds validation
