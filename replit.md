@@ -6,6 +6,7 @@ Crew Wallet is a minimalist expense tracking and settlement application designed
 
 ### Recent Changes
 
+- **WAGMI Logo Replacement** (Oct 2025): Replaced all app logos and icons with the new WAGMI Bordkasse ship wheel design. Updated navigation bar logo, login page logo, PWA icons (192x192, 512x512), Apple touch icon, and favicon. Changed from circular crop to object-contain to preserve the ship wheel design integrity.
 - **Comprehensive README.md** (Oct 2025): Created detailed commercialization guide covering executive summary, all 12 core features, technical architecture, target markets, revenue models ($136K Year 1 projection), competitive advantages, scalability path, and future roadmap. Designed for consultants to understand business opportunity without seeing the app. PWA section accurately describes manifest-based installation (no offline mode yet - planned for future).
 
 ### User Preferences
