@@ -5,7 +5,7 @@ integrations = ["python_database:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["freetype", "glibcLocales", "libxcrypt"]
+packages = ["freetype", "glibcLocales", "libxcrypt", "imagemagick"]
 
 [workflows]
 runButton = "Project"
