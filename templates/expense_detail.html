@@ -19,7 +19,13 @@
             </div>
             <div>
                 <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👤 Bezahlt von</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.payer.code }} - {{ expense.payer.name }}</p>
+                <p class="text-lg font-semibold" style="color: var(--navy-deep);">
+                    {% if expense.payer %}
+                        {{ expense.payer.code }} - {{ expense.payer.name }}
+                    {% else %}
+                        🌐 External Charge
+                    {% endif %}
+                </p>
             </div>
             <div>
                 <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💵 Betrag</p>

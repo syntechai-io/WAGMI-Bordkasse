@@ -120,7 +120,7 @@ class Expense(Base):
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
     client_temp_id = Column(String(100), nullable=True, index=True, unique=True)
-    payer_id = Column(Integer, ForeignKey("crew_members.id"), nullable=False, index=True)
+    payer_id = Column(Integer, ForeignKey("crew_members.id"), nullable=True, index=True)
     date = Column(Date, nullable=False)
     category = Column(String(50), nullable=False)
     description = Column(String(200), nullable=False)

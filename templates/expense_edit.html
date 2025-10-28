@@ -8,8 +8,9 @@
         {{ csrf_input | safe }}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">👤 Bezahlt von *</label>
-                <select name="payer_id" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">👤 Bezahlt von</label>
+                <select name="payer_id" class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
+                    <option value="" {% if expense and not expense.payer_id %}selected{% endif %}>🌐 External Charge (kein Crew-Mitglied)</option>
                     {% for member in crew_members %}
                     <option value="{{ member.id }}" {% if expense and expense.payer_id == member.id %}selected{% endif %}>
                         {{ member.code }} - {{ member.name }}

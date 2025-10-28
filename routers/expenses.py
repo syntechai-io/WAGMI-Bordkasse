@@ -45,7 +45,7 @@ async def list_expenses(request: Request, db: Session = Depends(get_db)):
 @router.post("/new")
 async def create_expense(
     request: Request,
-    payer_id: int = Form(...),
+    payer_id: str = Form(...),
     expense_date: str = Form(...),
     category: str = Form(...),
     description: str = Form(...),
@@ -92,10 +92,13 @@ async def create_expense(
         currency_enum = Currency(currency)
         amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
         
+        # Handle external charge (payer_id is empty string)
+        payer_id_value = None if payer_id == "" else int(payer_id)
+        
         expense = Expense(
             trip_id=active_trip.id,
             client_temp_id=clientTempId,
-            payer_id=payer_id,
+            payer_id=payer_id_value,
             date=date.fromisoformat(expense_date),
             category=category,
             description=description,
@@ -287,7 +290,7 @@ async def edit_expense_form(
 async def update_expense(
     request: Request,
     expense_id: int,
-    payer_id: int = Form(...),
+    payer_id: str = Form(...),
     expense_date: str = Form(...),
     category: str = Form(...),
     description: str = Form(...),
@@ -344,7 +347,10 @@ async def update_expense(
         currency_enum = Currency(currency)
         amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
         
-        expense.payer_id = payer_id  # type: ignore[assignment]
+        # Handle external charge (payer_id is empty string)
+        payer_id_value = None if payer_id == "" else int(payer_id)
+        
+        expense.payer_id = payer_id_value  # type: ignore[assignment]
         expense.date = date.fromisoformat(expense_date)  # type: ignore[assignment]
         expense.category = category  # type: ignore[assignment]
         expense.description = description  # type: ignore[assignment]

@@ -32,13 +32,15 @@ def calculate_balances(db: Session, trip_id: int):
         deposits_by_member[member_id] = total or 0.0
     
     # Pre-calculate private expenses per member in one query
+    # Note: External charges (payer_id == NULL) won't appear in this sum
     private_expenses_by_member = {}
     private_sums = db.query(
         Expense.payer_id,
         func.sum(Expense.amount_eur).label('total')
     ).filter(
         Expense.trip_id == trip_id,
-        Expense.paid_from == PaidFromEnum.private
+        Expense.paid_from == PaidFromEnum.private,
+        Expense.payer_id.isnot(None)
     ).group_by(Expense.payer_id).all()
     for payer_id, total in private_sums:
         private_expenses_by_member[payer_id] = total or 0.0

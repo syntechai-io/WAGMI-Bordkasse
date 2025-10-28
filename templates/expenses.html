@@ -35,7 +35,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 Bezahlt von</label>
-                    <select name="payer_id" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <select name="payer_id" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                        <option value="">🌐 External Charge (kein Crew-Mitglied)</option>
                         {% for member in crew_members %}
                         <option value="{{ member.id }}">{{ member.code }} - {{ member.name }}</option>
                         {% endfor %}
@@ -180,7 +181,9 @@
                     {% for expense in expenses %}
                     <tr style="transition: background-color 0.2s;" onmouseover="this.style.background='rgba(135, 206, 235, 0.05)'" onmouseout="this.style.background='transparent'">
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.date }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.payer.code }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">
+                            {% if expense.payer %}{{ expense.payer.code }}{% else %}🌐 External{% endif %}
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.category }}</td>
                         <td class="px-6 py-4 cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.description }}</td>
                         <td class="px-6 py-4 whitespace-nowrap font-semibold cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'" style="color: var(--coral);">
