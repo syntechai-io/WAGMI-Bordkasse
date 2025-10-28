@@ -48,14 +48,14 @@
         </div>
     </a>
     
-    <!-- MOBILE: Simple Wallet Balance (only on mobile) -->
+    <!-- MOBILE: Simple Total Spend (only on mobile) -->
     <div class="block md:hidden bg-white porthole-card p-6">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm font-medium" style="color: var(--navy-deep);">💰 Wallet-Saldo</p>
-                <p class="text-3xl font-bold" style="color: var(--sea-foam);">{{ "%.2f"|format(wallet_balance) }} €</p>
+                <p class="text-sm font-medium" style="color: var(--navy-deep);">💸 Gesamt Ausgaben</p>
+                <p class="text-3xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(total_expenses) }} €</p>
             </div>
-            <div class="text-6xl">💰</div>
+            <div class="text-6xl">💸</div>
         </div>
     </div>
     
@@ -64,10 +64,10 @@
         <div class="bg-white porthole-card p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium" style="color: var(--navy-deep);">Wallet-Saldo</p>
-                    <p class="text-2xl font-bold" style="color: var(--sea-foam);">{{ "%.2f"|format(wallet_balance) }} €</p>
+                    <p class="text-sm font-medium" style="color: var(--navy-deep);">Gesamt Ausgaben</p>
+                    <p class="text-2xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(total_expenses) }} €</p>
                 </div>
-                <div class="text-5xl">💰</div>
+                <div class="text-5xl">💸</div>
             </div>
         </div>
         
