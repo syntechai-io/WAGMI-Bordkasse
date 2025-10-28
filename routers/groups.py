@@ -22,10 +22,7 @@ def require_admin(request: Request):
 
 @router.get("/groups", response_class=HTMLResponse)
 async def show_groups(request: Request, db: Session = Depends(get_db)):
-    """Show all settlement groups for the active trip (admin only)"""
-    if request.session.get("role") != "admin":
-        return RedirectResponse(url="/", status_code=303)
-    
+    """Show all settlement groups for the active trip (visible to all users)"""
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
@@ -57,13 +54,15 @@ async def show_groups(request: Request, db: Session = Depends(get_db)):
     
     ungrouped_members = [m for m in crew_members if m.id not in grouped_member_ids]
     
+    user_role = request.session.get("role", "crew")
     return templates.TemplateResponse("groups.html", {
         "request": request,
         "active_trip": active_trip,
         "groups": group_data,
         "crew_members": crew_members,
         "ungrouped_members": ungrouped_members,
-        "is_editable": TripService.is_trip_editable(active_trip, "admin")
+        "is_editable": TripService.is_trip_editable(active_trip, user_role),
+        "is_admin": user_role == "admin"
     })
 
 @router.post("/groups/create")
