@@ -83,9 +83,16 @@ def calculate_balances(db: Session, trip_id: int):
             # Skip equal mode expenses to prevent double-counting (they're handled below)
             if expense.split_mode == SplitModeEnum.equal:
                 continue
-            total_participants = participant_counts.get(expense.id, 0)
-            if total_participants > 0:
-                share_owed += expense.amount_eur / total_participants
+            
+            # For percentage mode, use the actual percentage stored in the participation record
+            if expense.split_mode == SplitModeEnum.percentage:
+                if participation.percentage is not None:
+                    share_owed += expense.amount_eur * (participation.percentage / 100.0)
+            # For participants mode, divide equally among selected participants
+            elif expense.split_mode == SplitModeEnum.participants:
+                total_participants = participant_counts.get(expense.id, 0)
+                if total_participants > 0:
+                    share_owed += expense.amount_eur / total_participants
         
         # Calculate share from "equal" split mode expenses (dynamic calculation)
         for expense in all_expenses:
