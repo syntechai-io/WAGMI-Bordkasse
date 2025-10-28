@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from db import get_db
-from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum
+from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum
 from services.trip import TripService
 from settlement import compute_settlement
 
@@ -18,6 +18,7 @@ templates = Jinja2Templates(
 def calculate_balances(db: Session, trip_id: int):
     crew_members = db.query(CrewMember).filter(CrewMember.trip_id == trip_id).all()
     member_ids = [m.id for m in crew_members]
+    total_crew_count = len(crew_members)
     
     # Pre-calculate deposits per member in one query
     deposits_by_member = {}
@@ -41,6 +42,9 @@ def calculate_balances(db: Session, trip_id: int):
     ).group_by(Expense.payer_id).all()
     for payer_id, total in private_sums:
         private_expenses_by_member[payer_id] = total or 0.0
+    
+    # Get all expenses for this trip
+    all_expenses = db.query(Expense).filter(Expense.trip_id == trip_id).all()
     
     # Pre-calculate participant counts per expense in one query (filtered by trip)
     participant_counts = {}
@@ -73,10 +77,20 @@ def calculate_balances(db: Session, trip_id: int):
         private_paid = private_expenses_by_member.get(member.id, 0.0)
         
         share_owed = 0.0
+        
+        # Calculate share from expenses with specific participants (percentage or participants mode)
         for participation, expense in participations_by_member.get(member.id, []):
+            # Skip equal mode expenses to prevent double-counting (they're handled below)
+            if expense.split_mode == SplitModeEnum.equal:
+                continue
             total_participants = participant_counts.get(expense.id, 0)
             if total_participants > 0:
                 share_owed += expense.amount_eur / total_participants
+        
+        # Calculate share from "equal" split mode expenses (dynamic calculation)
+        for expense in all_expenses:
+            if expense.split_mode == SplitModeEnum.equal and total_crew_count > 0:
+                share_owed += expense.amount_eur / total_crew_count
         
         paid_total = deposits_total + private_paid
         net = paid_total - share_owed

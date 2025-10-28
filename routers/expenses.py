@@ -184,11 +184,8 @@ async def create_expense(
         percentage_per_participant = 100.0 / len(participant_ids)
         for pid in participant_ids:
             db.add(ExpenseParticipant(expense_id=expense.id, member_id=pid, percentage=percentage_per_participant))
-    elif split_mode == "equal":
-        all_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all()
-        percentage_per_member = 100.0 / len(all_members) if all_members else 0
-        for member in all_members:
-            db.add(ExpenseParticipant(expense_id=expense.id, member_id=member.id, percentage=percentage_per_member))
+    # Note: For "equal" split mode, we don't create ExpenseParticipant records.
+    # The balance calculation will handle this dynamically based on current crew members.
     
     db.commit()
     
@@ -419,11 +416,8 @@ async def update_expense(
             percentage_per_participant = 100.0 / len(participant_ids)
             for pid in participant_ids:
                 db.add(ExpenseParticipant(expense_id=expense.id, member_id=pid, percentage=percentage_per_participant))
-        elif split_mode == "equal":
-            all_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all()
-            percentage_per_member = 100.0 / len(all_members) if all_members else 0
-            for member in all_members:
-                db.add(ExpenseParticipant(expense_id=expense.id, member_id=member.id, percentage=percentage_per_member))
+        # Note: For "equal" split mode, we don't create ExpenseParticipant records.
+        # The balance calculation will handle this dynamically based on current crew members.
         
         db.commit()
         return RedirectResponse(url="/expenses", status_code=303)
