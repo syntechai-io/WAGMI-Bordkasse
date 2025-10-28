@@ -149,11 +149,11 @@
         </div>
         {% else %}
         <div class="p-6 text-center" style="color: var(--navy-deep); opacity: 0.7;">
-            <p class="text-lg">📭 No settlement groups yet</p>
+            <p class="text-lg">📭 Noch keine Abrechnungsgruppen</p>
             {% if is_admin %}
-            <p class="text-sm mt-2">Create a group to settle multiple crew members together</p>
+            <p class="text-sm mt-2">Erstellen Sie eine Gruppe, um mehrere Crew-Mitglieder gemeinsam abzurechnen</p>
             {% else %}
-            <p class="text-sm mt-2">No groups have been created for this trip</p>
+            <p class="text-sm mt-2">Für diesen Törn wurden noch keine Gruppen erstellt</p>
             {% endif %}
         </div>
         {% endif %}
@@ -163,7 +163,7 @@
     {% if ungrouped_members %}
     <div class="bg-white porthole-card overflow-hidden">
         <div class="px-6 py-4" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
-            <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ Ungrouped Members</h2>
+            <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ Einzelne Mitglieder</h2>
         </div>
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -180,13 +180,13 @@
 
     <!-- Help Section -->
     <div class="bg-blue-50 border border-blue-200 rounded-lg porthole-card p-6">
-        <h3 class="text-lg font-bold mb-3" style="color: var(--navy-deep);">💡 About Settlement Groups</h3>
+        <h3 class="text-lg font-bold mb-3" style="color: var(--navy-deep);">💡 Über Abrechnungsgruppen</h3>
         <div class="space-y-2 text-sm" style="color: var(--navy-deep);">
-            <p>• <strong>Settlement Groups</strong> combine multiple crew members for final settlement</p>
-            <p>• The <strong>representative</strong> handles the payment/reimbursement for the entire group</p>
-            <p>• Each member can only be in one group at a time</p>
-            <p>• Members in a group cannot be deleted until removed from the group</p>
-            <p>• Perfect for families or couples settling together</p>
+            <p>• <strong>Abrechnungsgruppen</strong> fassen mehrere Crew-Mitglieder für die Endabrechnung zusammen</p>
+            <p>• Der <strong>Vertreter</strong> übernimmt die Zahlung/Erstattung für die gesamte Gruppe</p>
+            <p>• Jedes Mitglied kann nur in einer Gruppe sein</p>
+            <p>• Mitglieder einer Gruppe können nicht gelöscht werden, bis sie aus der Gruppe entfernt wurden</p>
+            <p>• Perfekt für Familien oder Paare, die zusammen abrechnen</p>
         </div>
     </div>
 </div>
@@ -242,44 +242,46 @@
 {% endif %}
 
 <script>
-    // Create Group: Sync checkboxes with hidden input
+    // Create Group: Sync checkboxes with hidden input (only if form exists)
     const memberCheckboxes = document.querySelectorAll('.member-checkbox');
     const memberIdsInput = document.getElementById('member_ids');
     const representativeSelect = document.getElementById('representative_id');
     
-    function updateMemberIds() {
-        const selectedIds = [];
-        memberCheckboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                selectedIds.push(checkbox.value);
-            }
-        });
-        
-        // Always include representative
-        const repId = representativeSelect.value;
-        if (repId && !selectedIds.includes(repId)) {
-            selectedIds.push(repId);
-        }
-        
-        memberIdsInput.value = selectedIds.join(',');
-    }
-    
-    memberCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateMemberIds);
-    });
-    
-    representativeSelect.addEventListener('change', function() {
-        const repId = this.value;
-        if (repId) {
-            // Auto-check the representative
+    if (representativeSelect && memberIdsInput) {
+        function updateMemberIds() {
+            const selectedIds = [];
             memberCheckboxes.forEach(checkbox => {
-                if (checkbox.value === repId) {
-                    checkbox.checked = true;
+                if (checkbox.checked) {
+                    selectedIds.push(checkbox.value);
                 }
             });
+            
+            // Always include representative
+            const repId = representativeSelect.value;
+            if (repId && !selectedIds.includes(repId)) {
+                selectedIds.push(repId);
+            }
+            
+            memberIdsInput.value = selectedIds.join(',');
         }
-        updateMemberIds();
-    });
+        
+        memberCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateMemberIds);
+        });
+        
+        representativeSelect.addEventListener('change', function() {
+            const repId = this.value;
+            if (repId) {
+                // Auto-check the representative
+                memberCheckboxes.forEach(checkbox => {
+                    if (checkbox.value === repId) {
+                        checkbox.checked = true;
+                    }
+                });
+            }
+            updateMemberIds();
+        });
+    }
     
     // Edit Group Modal Functions
     let currentEditGroupId = null;
