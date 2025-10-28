@@ -22,6 +22,16 @@ templates = Jinja2Templates(
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/jpg"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
+# Helper function to convert empty strings to None for optional float fields
+def optional_float(value: str = Form(None)) -> Optional[float]:
+    """Convert empty string to None, otherwise parse as float"""
+    if value == "" or value is None:
+        return None
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return None
+
 @router.get("", response_class=HTMLResponse)
 async def list_logbook_entries(request: Request, db: Session = Depends(get_db)):
     active_trip = TripService.get_selected_trip(request, db)
@@ -61,15 +71,15 @@ async def create_entry(
     request: Request,
     entry_date: str = Form(...),
     entry_time: str = Form("12:00"),
-    latitude: Optional[float] = Form(None),
-    longitude: Optional[float] = Form(None),
+    latitude: Optional[float] = Depends(optional_float),
+    longitude: Optional[float] = Depends(optional_float),
     wind_direction: Optional[str] = Form(None),
     wind_strength: Optional[str] = Form(None),
     sea_state: Optional[str] = Form(None),
     visibility: Optional[str] = Form(None),
-    temperature: Optional[float] = Form(None),
+    temperature: Optional[float] = Depends(optional_float),
     sail_plan: Optional[str] = Form(None),
-    engine_hours: Optional[float] = Form(None),
+    engine_hours: Optional[float] = Depends(optional_float),
     departure: Optional[str] = Form(None),
     destination: Optional[str] = Form(None),
     notes: Optional[str] = Form(None),
@@ -211,15 +221,15 @@ async def update_entry(
     entry_id: int,
     entry_date: str = Form(...),
     entry_time: str = Form("12:00"),
-    latitude: Optional[float] = Form(None),
-    longitude: Optional[float] = Form(None),
+    latitude: Optional[float] = Depends(optional_float),
+    longitude: Optional[float] = Depends(optional_float),
     wind_direction: Optional[str] = Form(None),
     wind_strength: Optional[str] = Form(None),
     sea_state: Optional[str] = Form(None),
     visibility: Optional[str] = Form(None),
-    temperature: Optional[float] = Form(None),
+    temperature: Optional[float] = Depends(optional_float),
     sail_plan: Optional[str] = Form(None),
-    engine_hours: Optional[float] = Form(None),
+    engine_hours: Optional[float] = Depends(optional_float),
     departure: Optional[str] = Form(None),
     destination: Optional[str] = Form(None),
     notes: Optional[str] = Form(None),
