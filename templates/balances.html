@@ -22,9 +22,20 @@
                 </thead>
                 <tbody class="divide-y divide-sky-200">
                     {% for balance in balances %}
-                    <tr>
+                    <tr {% if balance.get('grouped') and not balance.get('is_representative') %}class="opacity-60"{% endif %}>
                         <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--navy-deep);">
-                            {{ balance.member.code }} - {{ balance.member.name }}
+                            <div class="flex items-center space-x-2">
+                                <span>{{ balance.member.code }} - {{ balance.member.name }}</span>
+                                {% if balance.get('is_representative') %}
+                                <span class="px-2 py-1 text-xs rounded-full text-white" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);" title="Representative for {{ balance.get('group_name') }}">
+                                    👑 Rep
+                                </span>
+                                {% elif balance.get('grouped') %}
+                                <span class="px-2 py-1 text-xs rounded-full text-white" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);" title="Settled by {{ balance.get('representative_code') }}">
+                                    👥 {{ balance.get('group_name') }}
+                                </span>
+                                {% endif %}
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ "%.2f"|format(balance.paid_total) }} €</td>
                         <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ "%.2f"|format(balance.share_owed) }} €</td>
@@ -32,12 +43,18 @@
                             {{ "%.2f"|format(balance.net) }} €
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
+                            {% if balance.get('grouped') and not balance.get('is_representative') %}
+                            <span class="px-2 py-1 text-xs rounded-full text-white" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #3498db 100%);">
+                                → {{ balance.get('representative_code') }}
+                            </span>
+                            {% else %}
                             <span class="px-2 py-1 text-xs rounded-full text-white" 
                                 style="background: {% if balance.status == 'receives' %}linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%){% elif balance.status == 'pays' %}linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%){% else %}linear-gradient(135deg, var(--sand) 0%, #c9a961 100%){% endif %}">
                                 {% if balance.status == 'receives' %}⬆️ erhält
                                 {% elif balance.status == 'pays' %}⬇️ zahlt
                                 {% else %}✅ ausgeglichen{% endif %}
                             </span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

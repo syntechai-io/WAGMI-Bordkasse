@@ -31,7 +31,23 @@
                     {% for member in crew_members %}
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--ocean-blue);">{{ member.code }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ member.name }}</td>
+                        <td class="px-6 py-4" style="color: var(--navy-deep);">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span>{{ member.name }}</span>
+                                {% if member.id in member_groups %}
+                                    <span class="px-2 py-1 text-xs rounded-full text-white font-semibold" 
+                                          style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                                        👥 {{ member_groups[member.id].name }}
+                                    </span>
+                                    {% if member_groups[member.id].is_representative %}
+                                    <span class="px-2 py-1 text-xs rounded-full text-white font-semibold" 
+                                          style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                                        👑 Representative
+                                    </span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--navy-deep); opacity: 0.7;">{{ member.iban_or_handle or '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                             <a href="/crew/{{ member.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>

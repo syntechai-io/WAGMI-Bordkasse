@@ -5,8 +5,9 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from db import get_db
-from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum
+from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum, CrewGroup, CrewGroupMember
 from services.trip import TripService
+from services.group import GroupService
 from settlement import compute_settlement
 
 router = APIRouter(tags=["balances"])
@@ -114,7 +115,63 @@ def calculate_balances(db: Session, trip_id: int):
         })
         net_map[member.code] = round(net, 2)
     
-    return balances, net_map
+    # Group aggregation for settlement calculations
+    # Get all groups for this trip
+    groups = GroupService.get_groups_for_trip(db, trip_id)
+    
+    # Create mappings for group members
+    member_to_group = {}  # member_id -> (group, is_representative)
+    for group in groups:
+        for group_member in group.members:
+            is_rep = (group_member.member_id == group.representative_member_id)
+            member_to_group[group_member.member_id] = (group, is_rep)
+    
+    # Mark grouped members in balances list
+    for balance in balances:
+        member = balance["member"]
+        if member.id in member_to_group:
+            group, is_rep = member_to_group[member.id]
+            balance["grouped"] = True
+            balance["is_representative"] = is_rep
+            balance["group_name"] = group.name
+            if not is_rep:
+                # Non-representative members show the representative's code
+                balance["representative_code"] = group.representative.code
+        else:
+            balance["grouped"] = False
+            balance["is_representative"] = False
+    
+    # Create settlement_net_map (only representatives and solo members)
+    settlement_net_map = {}
+    
+    # Calculate aggregated net for each group
+    group_aggregates = {}  # group_id -> total_net
+    for group in groups:
+        total_net = 0.0
+        for group_member in group.members:
+            # Find the member's code
+            member_code = None
+            for member in crew_members:
+                if member.id == group_member.member_id:
+                    member_code = member.code
+                    break
+            if member_code and member_code in net_map:
+                total_net += net_map[member_code]
+        group_aggregates[group.id] = round(total_net, 2)
+    
+    # Build settlement_net_map
+    for member in crew_members:
+        if member.id in member_to_group:
+            group, is_rep = member_to_group[member.id]
+            if is_rep:
+                # Representative gets the aggregated group net
+                settlement_net_map[member.code] = group_aggregates[group.id]
+            # Non-representatives are excluded from settlement
+        else:
+            # Solo member - use individual net
+            settlement_net_map[member.code] = net_map[member.code]
+    
+    return balances, settlement_net_map
 
 @router.get("/balances", response_class=HTMLResponse)
 async def show_balances(request: Request, db: Session = Depends(get_db)):
@@ -145,8 +202,8 @@ async def show_settlement(request: Request, db: Session = Depends(get_db)):
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    balances, net_map = calculate_balances(db, active_trip.id)
-    transfers = compute_settlement(net_map)
+    balances, settlement_net_map = calculate_balances(db, active_trip.id)
+    transfers = compute_settlement(settlement_net_map)
     
     member_map = {m.code: m for m in db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all()}
     

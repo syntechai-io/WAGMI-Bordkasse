@@ -79,6 +79,38 @@ class CrewMember(Base):
     deposits = relationship("Deposit", back_populates="member", cascade="all, delete-orphan")
     paid_expenses = relationship("Expense", foreign_keys="Expense.payer_id", back_populates="payer")
     expense_participations = relationship("ExpenseParticipant", back_populates="member", cascade="all, delete-orphan")
+    group_memberships = relationship("CrewGroupMember", back_populates="member", cascade="all, delete-orphan")
+    representing_groups = relationship("CrewGroup", foreign_keys="CrewGroup.representative_member_id", back_populates="representative")
+
+class CrewGroup(Base):
+    __tablename__ = "crew_groups"
+    __table_args__ = (
+        UniqueConstraint('trip_id', 'name', name='uq_crew_groups_trip_name'),
+    )
+    
+    id = Column(Integer, primary_key=True, index=True)
+    trip_id = Column(Integer, ForeignKey("trips.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(100), nullable=False)
+    representative_member_id = Column(Integer, ForeignKey("crew_members.id", ondelete="RESTRICT"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    trip = relationship("Trip")
+    representative = relationship("CrewMember", foreign_keys=[representative_member_id], back_populates="representing_groups")
+    members = relationship("CrewGroupMember", back_populates="group", cascade="all, delete-orphan")
+
+class CrewGroupMember(Base):
+    __tablename__ = "crew_group_members"
+    __table_args__ = (
+        UniqueConstraint('group_id', 'member_id', name='uq_crew_group_members_group_member'),
+    )
+    
+    id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("crew_groups.id", ondelete="CASCADE"), nullable=False, index=True)
+    member_id = Column(Integer, ForeignKey("crew_members.id", ondelete="RESTRICT"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    group = relationship("CrewGroup", back_populates="members")
+    member = relationship("CrewMember", back_populates="group_memberships")
 
 class Deposit(Base):
     __tablename__ = "deposits"

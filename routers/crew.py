@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from db import get_db
 from models import CrewMember
 from services.trip import TripService
+from services.group import GroupService
 
 router = APIRouter(prefix="/crew", tags=["crew"])
 templates = Jinja2Templates(
@@ -21,9 +22,21 @@ async def list_crew(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse(url="/trips", status_code=303)
     
     crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+    
+    # Fetch group data for each member
+    member_groups = {}
+    for member in crew_members:
+        group = GroupService.get_member_group(db, member.id)
+        if group:
+            member_groups[member.id] = {
+                "name": group.name,
+                "is_representative": group.representative_member_id == member.id
+            }
+    
     return templates.TemplateResponse("crew_list.html", {
         "request": request,
-        "crew_members": crew_members
+        "crew_members": crew_members,
+        "member_groups": member_groups
     })
 
 @router.get("/new", response_class=HTMLResponse)
@@ -157,11 +170,40 @@ async def delete_crew(
     if not member:
         return RedirectResponse(url="/crew", status_code=303)
     
+    # Check if member can be deleted (group validation)
+    can_delete, group_reason = GroupService.can_delete_member(db, member_id)
+    if not can_delete:
+        crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+        # Build member_groups for template
+        member_groups = {}
+        for cm in crew_members:
+            group = GroupService.get_member_group(db, cm.id)
+            if group:
+                member_groups[cm.id] = {
+                    "name": group.name,
+                    "is_representative": group.representative_member_id == cm.id
+                }
+        return templates.TemplateResponse("crew_list.html", {
+            "request": request,
+            "crew_members": crew_members,
+            "member_groups": member_groups,
+            "error": f"'{member.name}' kann nicht gelöscht werden: {group_reason}"
+        }, status_code=400)
+    
     has_deposits = len(member.deposits) > 0
     has_expenses = len(member.paid_expenses) > 0
     
     if has_deposits or has_expenses:
         crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+        # Build member_groups for template
+        member_groups = {}
+        for cm in crew_members:
+            group = GroupService.get_member_group(db, cm.id)
+            if group:
+                member_groups[cm.id] = {
+                    "name": group.name,
+                    "is_representative": group.representative_member_id == cm.id
+                }
         error_msg = f"'{member.name}' kann nicht gelöscht werden, da "
         if has_deposits and has_expenses:
             error_msg += "Einzahlungen und Ausgaben existieren."
@@ -174,6 +216,7 @@ async def delete_crew(
         return templates.TemplateResponse("crew_list.html", {
             "request": request,
             "crew_members": crew_members,
+            "member_groups": member_groups,
             "error": error_msg
         }, status_code=400)
     
@@ -184,8 +227,18 @@ async def delete_crew(
     except IntegrityError:
         db.rollback()
         crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+        # Build member_groups for template
+        member_groups = {}
+        for cm in crew_members:
+            group = GroupService.get_member_group(db, cm.id)
+            if group:
+                member_groups[cm.id] = {
+                    "name": group.name,
+                    "is_representative": group.representative_member_id == cm.id
+                }
         return templates.TemplateResponse("crew_list.html", {
             "request": request,
             "crew_members": crew_members,
+            "member_groups": member_groups,
             "error": f"'{member.name}' kann nicht gelöscht werden. Bitte löschen Sie zuerst alle verknüpften Einträge."
         }, status_code=400)
