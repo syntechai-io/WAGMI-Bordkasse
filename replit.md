@@ -1,134 +1,88 @@
 # Crew Wallet - Bordkasse
 
 ### Overview
-
-Crew Wallet is a minimalist expense tracking and settlement application designed for sailing crew members. It enables secure user authentication, manages up to 12 crew members, tracks deposits into a shared wallet, records expenses with flexible splitting, and automatically calculates optimized settlement transfers. The application supports multi-currency transactions with automatic conversion, provides PWA capabilities for mobile use, and includes professional PDF export functionality for trip documentation.
-
-### Recent Changes
-
-- **Dashboard Total Spend Display** (Oct 28, 2025): Replaced wallet balance with total expenses on dashboard to better serve "pay-as-you-go" usage pattern where crew members pay privately and settle later rather than prefunding a shared wallet. Dashboard now prominently displays cumulative trip spending on both mobile and desktop views.
-- **External Charges Feature** (Oct 28, 2025): Added ability to record expenses that weren't paid by any crew member (e.g., marina fees charged directly to the boat, charter company expenses). Expenses can now have NULL payer_id via "🌐 External Charge" option in expense form. These expenses are included in cost splitting (equal/participants/percentage modes work correctly) but don't credit any crew member with payment. Implementation includes: (1) Made Expense.payer_id nullable via Alembic migration, (2) Updated expense forms to remove required validation for payer selection, (3) Modified routers to handle empty string → NULL conversion, (4) Updated balance calculation to exclude external charges from "paid" totals while including them in "owed" calculations, (5) Updated all expense display templates to show "🌐 External" when payer is NULL.
-- **Dynamic Equal Split Calculation** (Oct 28, 2025): Transformed "equal" split mode from fixed participant snapshots to dynamic calculation based on current crew roster. When a crew member is added to a trip, they are automatically included in ALL previous expenses that used "equal" splitting. Implementation includes: (1) Removed ExpenseParticipant record creation for equal-mode expenses, (2) Modified balance calculation to dynamically divide equal-mode expenses among all current crew members, (3) Added defensive guard to prevent double-counting, (4) Cleaned up legacy data by removing all ExpenseParticipant records for existing equal-mode expenses and all test trips except "Kykladen 2025". This ensures fair cost distribution across the entire trip regardless of when crew members join.
-- **WAGMI Logo Replacement** (Oct 2025): Replaced all app logos and icons with the new WAGMI Bordkasse ship wheel design. Updated navigation bar logo, login page logo, PWA icons (192x192, 512x512), Apple touch icon, and favicon. Changed from circular crop to object-contain to preserve the ship wheel design integrity.
-- **Comprehensive README.md** (Oct 2025): Created detailed commercialization guide covering executive summary, all 12 core features, technical architecture, target markets, revenue models ($136K Year 1 projection), competitive advantages, scalability path, and future roadmap. Designed for consultants to understand business opportunity without seeing the app. PWA section accurately describes manifest-based installation (no offline mode yet - planned for future).
+Crew Wallet is a minimalist expense tracking and settlement application designed for sailing crew members. It provides secure user authentication, manages up to 12 crew members, tracks deposits into a shared wallet, records expenses with flexible splitting, and automatically calculates optimized settlement transfers. The application supports multi-currency transactions with automatic conversion, offers PWA capabilities, and includes professional PDF export functionality for trip documentation. Its business vision is to simplify shared expense management for sailing trips, targeting a market with significant potential for subscription-based revenue.
 
 ### User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ### System Architecture
 
 #### Backend Architecture
-
-**Framework**: FastAPI (Python) for routing and API endpoints, structured with modular routers for different functionalities (crew, deposits, expenses, etc.).
-**Authentication**: Session-based with Admin and Crew roles, using `werkzeug.security` for password hashing. Requires `SESSION_SECRET`, `ADMIN_PASSWORD`, and `CREW_PASSWORD` from environment variables.
-**Template Engine**: Jinja2 for server-side rendering, integrated with HTMX for dynamic interactions.
-**Data Storage**: PostgreSQL with SQLAlchemy ORM, using Replit's managed PostgreSQL database.
+**Framework**: FastAPI (Python) with modular routers.
+**Authentication**: Session-based with Admin and Crew roles, using `werkzeug.security` for password hashing and environment variables for secrets.
+**Template Engine**: Jinja2 for server-side rendering, integrated with HTMX.
+**Data Storage**: PostgreSQL with SQLAlchemy ORM.
 **Key Architectural Decisions**:
-- **Modular Router Structure**: Enhances maintainability and separation of concerns.
-- **Authentication Model**: Session-based with two roles (Admin, Crew) and environment variable-based secrets for security.
-- **File Upload Security**: UUID-based filenames, type validation (PDF/JPG/PNG), and size limits (10MB) for receipt uploads.
-- **Trip Management**: Introduced a `Trip` model to organize expenses and deposits, supporting active and archived trips, with all data scoped to a specific trip. Added trip selection system (Oct 2025) allowing users to switch between any trip via session storage. Implemented trip closure permissions where closed trips are read-only for crew while admin retains full edit access.
-- **Multi-Currency Support**: Integrated ECB API for daily exchange rates to convert DKK, SEK, GBP to EUR for calculations, with rates cached to minimize API calls.
-- **Performance Optimization** (Oct 2025): Eliminated N+1 query problems through pre-aggregation with GROUP BY, eager loading with joinedload(), and database indexes on all foreign keys. Balances calculation reduced from O(n*m) queries to O(1) with 4-5 total queries.
-- **Expense Templates** (Oct 2025): Implemented global expense templates to accelerate data entry for common expenses. Templates include predefined values for category, amount (optional), currency, payment source, and split mode. JavaScript auto-fill applies template values to the expense form while keeping all fields editable. Six default templates seeded: Diesel (€80), Marina (€45), Restaurant, Lebensmittel, Bier/Wein, and Eis (€15). Admin-only template management via dedicated UI.
+- **Modular Router Structure**: For maintainability and separation of concerns.
+- **Authentication Model**: Session-based with two roles and environment variable-based security.
+- **File Upload Security**: UUID-based filenames, type validation (PDF/JPG/PNG), and size limits (10MB).
+- **Trip Management**: `Trip` model organizes all data, supports active/archived/closed trips, with all data scoped to a specific trip. Trip selection system allows switching between trips. Closed trips are read-only for crew, while admin retains full edit access.
+- **Multi-Currency Support**: Integrates ECB API for daily exchange rates, with cached rates.
+- **Performance Optimization**: Eliminated N+1 query problems through pre-aggregation, eager loading, and database indexes. Balance calculation optimized.
+- **Expense Templates**: Global templates accelerate data entry for common expenses, pre-filling category, amount, currency, payment source, and split mode. Admin-only management available.
+- **Settlement Groups**: Comprehensive system to combine crew members for simplified settlement transfers while maintaining individual expense tracking. Supports use cases like couples or families settling together.
 
 #### Data Model
-
 **Core Entities**:
-- **CrewMember**: Stores crew details, unique per trip.
-- **Deposit**: Records shared wallet contributions.
-- **Expense**: Tracks spending, specifying `paid_from` (wallet/private) and `split_mode` (equal/participants/percentage). The `payer_id` field is nullable to support external charges (expenses not paid by any crew member).
-- **ExpenseParticipant**: Links expenses to specific crew for custom splits, with optional percentage field for percentage-based splitting.
-- **ExpenseTemplate**: Global templates for quick expense entry with predefined name, category, default_amount (nullable), currency, paid_from, and split_mode. Templates are suggestions - all fields remain editable when applied.
-- **Receipt**: Stores uploaded receipt files with metadata.
-- **Trip**: Organizes all related data for a specific sailing trip. Includes `is_closed` boolean field to control write permissions.
-- **AuditLog**: Records all financial transactions with user attribution (session-based user_id without FK constraint), action type, entity reference, and timestamps for compliance and debugging. Note: user_id is stored as opaque session identifier for tracking purposes.
+- **CrewMember**: Crew details.
+- **Deposit**: Shared wallet contributions.
+- **Expense**: Spending records, supporting `paid_from`, `split_mode`, and nullable `payer_id` for external charges.
+- **ExpenseParticipant**: Links expenses to crew for custom splits.
+- **ExpenseTemplate**: Global templates for quick expense entry.
+- **CrewGroup**: Settlement groups that combine crew members for simplified settlement. Each group has a name (unique per trip) and representative member.
+- **CrewGroupMember**: Junction table linking crew members to groups. One member can only be in one group.
+- **Receipt**: Uploaded receipt files.
+- **Trip**: Organizes all related data, with an `is_closed` field.
+- **AuditLog**: Records financial transactions with user attribution.
 
 #### Settlement Algorithm
-
-The application uses a greedy matching algorithm to calculate net balances for each crew member and determine the minimal number of transfers required to settle debts, matching the largest debtor with the largest creditor.
+Uses a greedy matching algorithm to calculate net balances and minimize transfers by matching largest debtor with largest creditor.
 
 #### Security
-
-**Enhanced Security Features** (October 2025):
-- **CSRF Protection**: FastAPI-CSRF-Jinja middleware protects all POST/PUT/DELETE requests with cookie-based CSRF token validation. All routers configured with csrf_token_processor for automatic token injection into forms using `{{ csrf_input | safe }}` template syntax. Supports both form-based and header-based (HTMX) token submission.
-- **Rate Limiting**: SlowAPI with unified limiter instance enforces global limits (200/hour, 50/minute) and login-specific limits (5/minute per IP), returning proper 429 responses with Retry-After headers
-- **Session Security**: 24-hour session timeout, SameSite=Lax cookies, httponly flags for XSS protection
-- **Trip Permissions**: TripService.is_trip_editable() enforces closed trip protection across all write operations (14 permission checks total). Admin retains full access to closed trips; crew cannot create/edit/delete any data (deposits, expenses, crew, logbook) on closed trips. All trip management operations (create/activate/archive/close/reopen) require admin role.
-- **Audit Logging**: AuditLog model tracks all financial transactions (deposits, expenses, settlements) with user attribution and timestamps
-- **File Upload Validation**: UUID-based filenames, type validation (PDF/JPG/PNG), 10MB size limits for receipt uploads
-- **Input Validation**: Pydantic schemas with type checking and bounds validation
-- **Environment Variables**: SESSION_SECRET, CSRF_SECRET, ADMIN_PASSWORD, CREW_PASSWORD stored securely
+- **CSRF Protection**: FastAPI-CSRF-Jinja middleware protects all POST/PUT/DELETE requests with cookie-based token validation.
+- **Rate Limiting**: SlowAPI enforces global and login-specific limits.
+- **Session Security**: 24-hour timeout, SameSite=Lax, httponly flags.
+- **Trip Permissions**: `TripService.is_trip_editable()` enforces closed trip protection.
+- **Audit Logging**: Tracks all financial transactions.
+- **File Upload Validation**: UUID-based filenames, type validation, size limits.
+- **Input Validation**: Pydantic schemas.
+- **Environment Variables**: Sensitive data stored securely.
 
 #### Frontend Architecture
-
-**Technology Stack**: Jinja2 for templates, Tailwind CSS (CDN) for styling, HTMX for AJAX interactions.
-
+**Technology Stack**: Jinja2, Tailwind CSS (CDN), HTMX.
 **Design Principles**:
-- **Mobile-First Design**: Touch-optimized interface with responsive elements.
-- **Maritime UI Theme**: A comprehensive nautical aesthetic with a custom color palette, porthole-style cards, rope dividers, maritime gradient buttons, and ship wheel branding.
-- **Professional PDF Export**: ReportLab for maritime-themed PDF exports of trip data.
-- **Mobile Camera/File Upload**: Dual-button interface for photo/receipt uploads - separate "📷 Kamera" and "📁 Datei" buttons. Uses single hidden file input with dynamic `capture` attribute toggling for iOS Safari compatibility. Camera button sets `capture="environment"` to trigger rear camera on mobile devices.
-- **Responsive Dashboard** (Oct 2025): Mobile-friendly landing page with prominent help guide link at top, simplified navigation cards with descriptions, single wallet balance display. Desktop/tablet retains full statistics, PayPal integration, and detailed metrics. Designed to reduce confusion for inexperienced mobile users.
-- **Grouped Navigation** (Oct 2025): Desktop navigation reduced from 11 to 5 items using dropdown menus to eliminate branding overlap. Finanzen dropdown (💰) contains 5 finance-related items (Einzahlungen, Ausgaben, Vorlagen, Salden, Ausgleich). Verwaltung dropdown (📝) contains 3 admin items (Crew, Logbuch, Export). Full accessibility support includes CSS :hover for mouse, :focus-within for keyboard navigation, JavaScript click/touch handlers for touch devices, and ARIA attributes (aria-haspopup, aria-expanded). Mobile hamburger menu remains unchanged with all individual items for simplicity.
+- **Mobile-First Design**: Touch-optimized and responsive.
+- **Maritime UI Theme**: Nautical aesthetic with custom color palette, porthole-style cards, and ship wheel branding.
+- **Professional PDF Export**: ReportLab for maritime-themed PDF exports.
+- **Mobile Camera/File Upload**: Dual-button interface for photo/receipt uploads, with dynamic `capture` attribute for mobile compatibility.
+- **Responsive Dashboard**: Mobile-friendly landing page with simplified navigation.
+- **Grouped Navigation**: Desktop navigation reduced from 11 to 5 items using dropdown menus for better organization and accessibility.
 
 ### External Dependencies
 
 #### Python Packages
-- **FastAPI**: Core web framework.
-- **SQLAlchemy**: ORM for database interactions.
-- **psycopg2-binary**: PostgreSQL adapter for Python.
+- **FastAPI**: Web framework.
+- **SQLAlchemy**: ORM.
+- **psycopg2-binary**: PostgreSQL adapter.
 - **Jinja2**: Template engine.
-- **python-multipart**: Handles file uploads.
-- **python-dotenv**: Manages environment variables.
-- **ReportLab**: Generates PDF reports.
-- **Alembic**: Database migration management.
-- **fastapi-csrf-jinja**: CSRF protection middleware with Jinja2 template integration.
-- **slowapi**: Rate limiting for API endpoints.
-- **werkzeug**: Password hashing utilities.
+- **python-multipart**: File uploads.
+- **python-dotenv**: Environment variables.
+- **ReportLab**: PDF generation.
+- **Alembic**: Database migrations.
+- **fastapi-csrf-jinja**: CSRF protection.
+- **slowapi**: Rate limiting.
+- **werkzeug**: Password hashing.
 
 #### Frontend Libraries (CDN)
-- **Tailwind CSS**: Utility-first CSS framework.
-- **HTMX**: For dynamic HTML interactions.
+- **Tailwind CSS**: CSS framework.
+- **HTMX**: Dynamic HTML.
 
 #### Database
-- **PostgreSQL**: Replit-managed PostgreSQL database (Neon-backed) accessed via the `DATABASE_URL` environment variable.
+- **PostgreSQL**: Replit-managed (Neon-backed).
 
 #### File Storage
-- **Local filesystem**: For receipt uploads in the `/uploads` directory.
+- **Local filesystem**: For receipt uploads in `/uploads`.
 
 #### External Services
-- **ECB (European Central Bank) API**: Used for fetching daily exchange rates for multi-currency support.
-
-### Testing
-
-#### Test Suite
-The application includes a comprehensive E2E test suite (`test_app_e2e.py`) with **100% pass rate (36/36 tests)**.
-
-**Test Coverage**:
-- Authentication & session management (7 tests)
-- Trip management & archiving (4 tests)
-- Crew CRUD operations (4 tests)
-- Deposits with multi-currency support (4 tests)
-- Expenses with flexible splitting (4 tests)
-- Balance calculations & settlement (3 tests)
-- PDF export functionality (3 tests)
-- Edge cases & validation (3 tests)
-
-**Recent Improvements** (Oct 2025):
-- Fixed login failure test to properly follow redirect flow and validate error messages
-- Updated archive trip test to align with automatic archiving behavior when creating new trips
-- Improved PDF validation using PyPDF2 for reliable text extraction from generated PDFs
-- Enhanced SessionHelper with automatic CSRF token extraction and inclusion in POST requests
-- Tests now properly handle CSRF protection and rate limiting (some tests may encounter 429 responses due to strict rate limits)
-
-**Running Tests**:
-```bash
-pytest test_app_e2e.py -v                    # Run all tests
-pytest test_app_e2e.py -v -k "test_auth"     # Run specific test category
-```
-
-**Notes**: 
-- PyPDF2 is currently used for PDF parsing but shows a deprecation warning. Future upgrade to `pypdf` package is recommended.
-- Test suite includes CSRF token handling but may encounter rate limiting (429 responses) during rapid test execution - this is expected behavior demonstrating security features working correctly.
+- **ECB (European Central Bank) API**: For daily exchange rates.
