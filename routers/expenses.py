@@ -300,6 +300,7 @@ async def update_expense(
     split_mode: str = Form(...),
     participant_ids: List[int] = Form([]),
     participant_percentages: List[float] = Form([]),
+    receipt: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)
@@ -425,8 +426,55 @@ async def update_expense(
         # Note: For "equal" split mode, we don't create ExpenseParticipant records.
         # The balance calculation will handle this dynamically based on current crew members.
         
+        # Handle receipt upload if provided
+        receipt_uploaded = False
+        if receipt and receipt.filename:
+            if receipt.content_type in ALLOWED_CONTENT_TYPES:
+                content = await receipt.read()
+                if len(content) <= MAX_FILE_SIZE:
+                    ext_map = {
+                        "application/pdf": ".pdf",
+                        "image/jpeg": ".jpg",
+                        "image/png": ".png"
+                    }
+                    ext = ext_map.get(receipt.content_type, ".bin")
+                    
+                    filename = str(uuid.uuid4()) + ext
+                    filepath = Path("uploads") / filename
+                    
+                    # Ensure uploads directory exists
+                    Path("uploads").mkdir(exist_ok=True)
+                    
+                    filepath.write_bytes(content)
+                    
+                    receipt_record = Receipt(
+                        expense_id=expense.id,
+                        stored_filename=filename,
+                        original_name=receipt.filename or "unknown",
+                        content_type=receipt.content_type,
+                        size_bytes=len(content)
+                    )
+                    db.add(receipt_record)
+                    receipt_uploaded = True
+        
         db.commit()
-        return RedirectResponse(url="/expenses", status_code=303)
+        
+        # Audit log
+        AuditService.log(
+            db=db,
+            request=request,
+            trip_id=active_trip.id,
+            action="update",
+            entity_type="expense",
+            entity_id=expense.id,
+            details=f"Updated expense: {description}"
+        )
+        
+        # Redirect to detail page if receipt was uploaded, otherwise to list
+        if receipt_uploaded:
+            return RedirectResponse(url=f"/expenses/{expense.id}", status_code=303)
+        else:
+            return RedirectResponse(url="/expenses", status_code=303)
     except (IntegrityError, ValueError):
         db.rollback()
         expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()

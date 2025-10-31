@@ -4,7 +4,7 @@
 <div class="max-w-4xl mx-auto">
     <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">✏️ Ausgabe bearbeiten</h1>
     
-    <form method="post" class="bg-white porthole-card p-6 space-y-4">
+    <form method="post" enctype="multipart/form-data" class="bg-white porthole-card p-6 space-y-4">
         {{ csrf_input | safe }}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -118,6 +118,24 @@
                     ⚠️ Die Summe der Prozentsätze beträgt <span id="percentage_sum">0</span>% (sollte 100% sein)
                 </div>
             </div>
+            
+            <div class="md:col-span-2">
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">📎 Beleg (optional)</label>
+                <input type="file" id="receiptInput" accept="image/*,.pdf" class="hidden">
+                <div class="flex gap-3">
+                    <button type="button" onclick="activateReceiptCamera()" 
+                            class="flex-1 text-white px-4 py-3 rounded-lg transition touch-action font-semibold text-center"
+                            style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+                        📷 Kamera
+                    </button>
+                    <button type="button" onclick="activateReceiptFile()" 
+                            class="flex-1 text-white px-4 py-3 rounded-lg transition touch-action font-semibold text-center"
+                            style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
+                        📁 Datei
+                    </button>
+                </div>
+                <p id="receiptFileName" class="text-sm mt-2" style="color: var(--navy-deep); opacity: 0.7;"></p>
+            </div>
         </div>
         
         <div class="rope-divider"></div>
@@ -195,5 +213,28 @@
     });
     
     updateSplitMode();
+    
+    // Handle receipt upload
+    const receiptInput = document.getElementById('receiptInput');
+    
+    function activateReceiptCamera() {
+        receiptInput.setAttribute('capture', 'environment');
+        receiptInput.setAttribute('name', 'receipt');
+        receiptInput.click();
+    }
+    
+    function activateReceiptFile() {
+        receiptInput.removeAttribute('capture');
+        receiptInput.setAttribute('name', 'receipt');
+        receiptInput.click();
+    }
+    
+    receiptInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            const fileName = document.getElementById('receiptFileName');
+            fileName.textContent = '✓ Datei ausgewählt: ' + file.name;
+        }
+    });
 </script>
 {% endblock %}
