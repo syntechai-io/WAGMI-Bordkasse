@@ -64,22 +64,19 @@ class TripService:
     @staticmethod
     def has_admin_permission(request: Request, db: Session, trip: Trip) -> bool:
         """Check if current user has admin permissions (global admin or trip admin)"""
-        user_role = request.session.get("role", "crew")
-        username = request.session.get("username", "")
+        trip_role = request.session.get("trip_role", "crew")
         
-        # Global admin
-        if user_role == "admin":
-            return True
-        
-        # Trip admin for this trip
-        if TripService.is_trip_admin(db, trip.id, username):
-            return True
-        
-        return False
+        # Trip admin for this trip (trip_role is already set based on is_trip_admin)
+        return trip_role == "admin"
     
     @staticmethod
     def can_edit_trip(request: Request, db: Session, trip: Trip) -> bool:
         """Convenience method to check if current user can edit a trip"""
-        user_role = request.session.get("role", "crew")
-        username = request.session.get("username", "")
-        return TripService.is_trip_editable(trip, user_role, db, username)
+        trip_role = request.session.get("trip_role", "crew")
+        
+        # Trip admin can always edit
+        if trip_role == "admin":
+            return True
+        
+        # Regular crew can only edit if trip is not closed
+        return trip.is_closed == 0

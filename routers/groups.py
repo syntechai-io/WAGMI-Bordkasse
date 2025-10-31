@@ -15,11 +15,6 @@ templates = Jinja2Templates(
     context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
 )
 
-def require_admin(request: Request):
-    """Require admin role for group management"""
-    if request.session.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-
 @router.get("/groups", response_class=HTMLResponse)
 async def show_groups(request: Request, db: Session = Depends(get_db)):
     """Show all settlement groups for the active trip (visible to all users)"""
@@ -54,7 +49,7 @@ async def show_groups(request: Request, db: Session = Depends(get_db)):
     
     ungrouped_members = [m for m in crew_members if m.id not in grouped_member_ids]
     
-    user_role = request.session.get("role", "crew")
+    user_role = request.session.get("trip_role", "crew")
     return templates.TemplateResponse("groups.html", {
         "request": request,
         "active_trip": active_trip,
