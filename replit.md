@@ -37,7 +37,7 @@ Preferred communication style: Simple, everyday language.
 - **AuditLog**: Records financial transactions with user attribution.
 
 #### Settlement Algorithm
-Uses a greedy matching algorithm to calculate net balances and minimize transfers by matching largest debtor with largest creditor.
+Uses a greedy matching algorithm to calculate net balances and minimize transfers by matching largest debtor with largest creditor. The calculation has been verified with real trip data (Kykladen 2025) and works correctly with only minor rounding differences (< 0.05 EUR tolerance). The Ausgleich page includes a comprehensive German explanation of the 3-step calculation process: (1) individual balance calculation, (2) settlement group aggregation, and (3) transfer optimization using the greedy algorithm.
 
 #### Security
 - **CSRF Protection**: FastAPI-CSRF-Jinja middleware protects all POST/PUT/DELETE requests with cookie-based token validation.

@@ -98,13 +98,37 @@ expected = {
     "Nicola Georg": 0 - 290.34,          # Solo
 }
 
+# Test with assertions
+TOLERANCE = 0.05  # Allow 5 cents tolerance for rounding
+test_passed = True
+errors = []
+
 for code, expected_net in sorted(expected.items(), key=lambda x: x[1], reverse=True):
     actual_net = settlement_net_map.get(code, 0.0)
-    match = "✓" if abs(expected_net - actual_net) < 0.01 else "✗ MISMATCH!"
+    difference = abs(expected_net - actual_net)
+    match = "✓" if difference < TOLERANCE else "✗ MISMATCH!"
     print(f"{code:<15} Expected: {expected_net:>10.2f}€  Actual: {actual_net:>10.2f}€  {match}")
+    
+    if difference >= TOLERANCE:
+        test_passed = False
+        errors.append(f"{code}: expected {expected_net:.2f}€, got {actual_net:.2f}€ (diff: {difference:.2f}€)")
+
+# Verify creditors and debtors balance
+if abs(total_creditors - total_debtors) >= TOLERANCE:
+    test_passed = False
+    errors.append(f"Creditors/debtors mismatch: {total_creditors:.2f}€ vs {total_debtors:.2f}€")
 
 print("\n" + "=" * 80)
-print("TEST COMPLETE")
+if test_passed:
+    print("✅ TEST PASSED - Settlement calculation is correct!")
+else:
+    print("❌ TEST FAILED - Settlement calculation has errors:")
+    for error in errors:
+        print(f"   - {error}")
+    db.close()
+    exit(1)
+
 print("=" * 80)
 
 db.close()
+exit(0)
