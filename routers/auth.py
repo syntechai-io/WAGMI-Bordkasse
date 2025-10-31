@@ -45,6 +45,11 @@ async def login(
     is_global_admin = TripAuthService.is_global_admin(user.id, db)
     request.session["is_global_admin"] = is_global_admin
     
+    user_trips = TripAuthService.get_user_trips(user.id, db)
+    if user_trips:
+        default_trip = user_trips[0]
+        TripAuthService.update_session_for_trip(request, user.id, default_trip["trip_id"], db)
+    
     return RedirectResponse(url="/", status_code=303)
 
 @router.get("/logout")

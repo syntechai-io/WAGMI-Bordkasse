@@ -156,8 +156,11 @@ async def select_trip(
         raise HTTPException(status_code=404, detail="Trip not found")
     
     user_id = request.session["user_id"]
-    TripAuthService.update_session_for_trip(request, user_id, trip_id, db)
-    TripService.set_selected_trip(request, trip_id)
+    
+    if not TripAuthService.is_user_in_trip(user_id, trip_id, db):
+        raise HTTPException(status_code=403, detail="Not a member of this trip")
+    
+    TripService.set_selected_trip(request, trip_id, db)
     
     return RedirectResponse(url="/", status_code=303)
 

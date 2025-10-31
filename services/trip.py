@@ -17,21 +17,36 @@ class TripService:
     
     @staticmethod
     def get_selected_trip(request: Request, db: Session) -> Optional[Trip]:
-        """Get the trip selected by user (from session) or fall back to active trip"""
-        selected_trip_id = request.session.get("selected_trip_id")
+        """Get the trip selected by user (from session) or fall back to user's first trip"""
+        from services.auth import TripAuthService
+        
+        user_id = request.session.get("user_id")
+        if not user_id:
+            return None
+        
+        selected_trip_id = request.session.get("trip_id")
         
         if selected_trip_id:
             trip = db.query(Trip).filter(Trip.id == selected_trip_id).first()
-            if trip:
+            if trip and TripAuthService.is_user_in_trip(user_id, trip.id, db):
                 return trip
         
-        # Fall back to active trip
-        return TripService.get_active_trip(db)
+        user_trips = TripAuthService.get_user_trips(user_id, db)
+        if user_trips:
+            default_trip = user_trips[0]
+            TripAuthService.update_session_for_trip(request, user_id, default_trip["trip_id"], db)
+            return default_trip["trip"]
+        
+        return None
     
     @staticmethod
-    def set_selected_trip(request: Request, trip_id: int):
-        """Set the selected trip in session"""
-        request.session["selected_trip_id"] = trip_id
+    def set_selected_trip(request: Request, trip_id: int, db: Session):
+        """Set the selected trip in session and update trip-specific role"""
+        from services.auth import TripAuthService
+        
+        user_id = request.session.get("user_id")
+        if user_id:
+            TripAuthService.update_session_for_trip(request, user_id, trip_id, db)
     
     @staticmethod
     def is_trip_admin(db: Session, trip_id: int, username: str) -> bool:
