@@ -16,6 +16,7 @@ Preferred communication style: Simple, everyday language.
 **Key Architectural Decisions**:
 - **Modular Router Structure**: For maintainability and separation of concerns.
 - **Authentication Model**: Session-based with two roles and environment variable-based security.
+- **Trip-Specific Admin Permissions**: Crew members can be designated as trip admins via `is_trip_admin` flag. Trip admins have full management access to their specific trip (expenses, deposits, crew, groups) but cannot access global features (templates, trip creation). Multiple trip admins per trip supported. Trip admins can edit closed trips while regular crew cannot.
 - **File Upload Security**: UUID-based filenames, type validation (PDF/JPG/PNG), and size limits (10MB).
 - **Trip Management**: `Trip` model organizes all data, supports active/archived/closed trips, with all data scoped to a specific trip. Trip selection system allows switching between trips. Closed trips are read-only for crew, while admin retains full edit access.
 - **Multi-Currency Support**: Integrates ECB API for daily exchange rates, with cached rates.
