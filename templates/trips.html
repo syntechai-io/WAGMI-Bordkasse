@@ -74,6 +74,9 @@
                             </form>
                             
                             {% if request.session.get('role') == 'admin' %}
+                                <!-- Edit Trip Button (Admin Only) -->
+                                <a href="/trips/{{ trip.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
+                                
                                 <!-- Close/Reopen Trip (Admin Only) -->
                                 {% if trip.is_closed == 0 %}
                                 <form action="/trips/{{ trip.id }}/close" method="post" class="inline">

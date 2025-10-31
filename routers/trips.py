@@ -154,3 +154,47 @@ async def select_trip(
     TripService.set_selected_trip(request, trip_id)
     
     return RedirectResponse(url="/", status_code=303)
+
+@router.get("/{trip_id}/edit", response_class=HTMLResponse)
+async def edit_trip_form(
+    trip_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Display edit form for a trip"""
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can edit trips")
+    
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    
+    return templates.TemplateResponse("trip_edit.html", {
+        "request": request,
+        "trip": trip
+    })
+
+@router.post("/{trip_id}/edit")
+async def update_trip(
+    trip_id: int,
+    request: Request,
+    name: str = Form(...),
+    start_date: date = Form(...),
+    end_date: date = Form(None),
+    db: Session = Depends(get_db)
+):
+    """Update a trip"""
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can edit trips")
+    
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    
+    trip.name = name
+    trip.start_date = start_date
+    trip.end_date = end_date if end_date else None
+    
+    db.commit()
+    
+    return RedirectResponse(url="/trips", status_code=303)
