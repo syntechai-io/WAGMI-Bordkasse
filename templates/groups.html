@@ -50,7 +50,7 @@
     {% endif %}
 
     <!-- Create Group Form (Admin Only) -->
-    {% if is_admin and is_editable %}
+    {% if has_admin_permission and is_editable %}
     <div class="bg-white porthole-card p-6">
         <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Create Settlement Group</h2>
         <form method="post" action="/groups/create" class="space-y-4">
@@ -118,7 +118,7 @@
                             👑 <strong>Representative:</strong> {{ group.representative }}
                         </p>
                     </div>
-                    {% if is_admin and is_editable %}
+                    {% if has_admin_permission and is_editable %}
                     <div class="flex space-x-2">
                         <button onclick="editGroup({{ group.id }}, '{{ group.name }}', {{ group.member_ids }}, {{ group.representative_id }})" 
                                 class="px-3 py-1 rounded-lg text-sm font-semibold text-white transition hover:scale-105"
@@ -150,7 +150,7 @@
         {% else %}
         <div class="p-6 text-center" style="color: var(--navy-deep); opacity: 0.7;">
             <p class="text-lg">📭 Noch keine Abrechnungsgruppen</p>
-            {% if is_admin %}
+            {% if has_admin_permission %}
             <p class="text-sm mt-2">Erstellen Sie eine Gruppe, um mehrere Crew-Mitglieder gemeinsam abzurechnen</p>
             {% else %}
             <p class="text-sm mt-2">Für diesen Törn wurden noch keine Gruppen erstellt</p>
@@ -192,7 +192,7 @@
 </div>
 
 <!-- Edit Group Modal (Hidden Form - Admin Only) -->
-{% if is_admin %}
+{% if has_admin_permission %}
 <div id="editGroupModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg porthole-card max-w-2xl w-full max-h-screen overflow-y-auto">
         <div class="p-6">

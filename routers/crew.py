@@ -56,15 +56,14 @@ async def create_crew(
     code: str = Form(...),
     name: str = Form(...),
     iban_or_handle: str = Form(""),
+    is_trip_admin: str = Form(""),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    # Check if trip is editable by current user
-    user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.can_edit_trip(request, db, active_trip):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     
@@ -73,7 +72,8 @@ async def create_crew(
             trip_id=active_trip.id,
             code=code,
             name=name,
-            iban_or_handle=iban_or_handle or None
+            iban_or_handle=iban_or_handle or None,
+            is_trip_admin=is_trip_admin == "true"
         )
         db.add(member)
         db.commit()
@@ -112,15 +112,14 @@ async def update_crew(
     code: str = Form(...),
     name: str = Form(...),
     iban_or_handle: str = Form(""),
+    is_trip_admin: str = Form(""),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    # Check if trip is editable by current user
-    user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.can_edit_trip(request, db, active_trip):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     
@@ -132,6 +131,7 @@ async def update_crew(
         member.code = code
         member.name = name
         member.iban_or_handle = iban_or_handle or None
+        member.is_trip_admin = is_trip_admin == "true"
         db.commit()
         return RedirectResponse(url="/crew", status_code=303)
     except IntegrityError:
@@ -156,9 +156,7 @@ async def delete_crew(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    # Check if trip is editable by current user
-    user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.can_edit_trip(request, db, active_trip):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     
