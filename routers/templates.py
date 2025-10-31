@@ -24,7 +24,7 @@ async def list_templates(request: Request, db: Session = Depends(get_db)):
 @router.get("/new", response_class=HTMLResponse)
 async def new_template_form(request: Request):
     # Admin-only check
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen erstellen")
     
     return templates.TemplateResponse("template_form.html", {
@@ -47,7 +47,7 @@ async def create_template(
     db: Session = Depends(get_db)
 ):
     # Admin-only check
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen erstellen")
     
     # Convert default_amount: empty string or None -> None, otherwise convert to float
@@ -75,7 +75,7 @@ async def create_template(
 @router.get("/{template_id}/edit", response_class=HTMLResponse)
 async def edit_template_form(request: Request, template_id: int, db: Session = Depends(get_db)):
     # Admin-only check
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen bearbeiten")
     
     template = db.query(ExpenseTemplate).filter(ExpenseTemplate.id == template_id).first()
@@ -103,7 +103,7 @@ async def update_template(
     db: Session = Depends(get_db)
 ):
     # Admin-only check
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen bearbeiten")
     
     template = db.query(ExpenseTemplate).filter(ExpenseTemplate.id == template_id).first()
@@ -132,7 +132,7 @@ async def update_template(
 @router.post("/{template_id}/delete")
 async def delete_template(request: Request, template_id: int, db: Session = Depends(get_db)):
     # Admin-only check
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen löschen")
     
     template = db.query(ExpenseTemplate).filter(ExpenseTemplate.id == template_id).first()

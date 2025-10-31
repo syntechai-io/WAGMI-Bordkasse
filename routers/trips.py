@@ -35,7 +35,7 @@ async def create_trip(
     db: Session = Depends(get_db)
 ):
     """Create a new trip"""
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Only admin can create trips")
     
     trip = Trip(
@@ -61,7 +61,7 @@ async def activate_trip(
     db: Session = Depends(get_db)
 ):
     """Set a trip as active"""
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Only admin can activate trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
@@ -88,7 +88,7 @@ async def archive_trip(
     db: Session = Depends(get_db)
 ):
     """Archive a trip"""
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Only admin can archive trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
@@ -110,7 +110,7 @@ async def close_trip(
     db: Session = Depends(get_db)
 ):
     """Close a trip (admin only - prevents crew from making changes)"""
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Only admin can close trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
@@ -129,7 +129,7 @@ async def reopen_trip(
     db: Session = Depends(get_db)
 ):
     """Reopen a trip (admin only - allows crew to make changes again)"""
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Only admin can reopen trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
@@ -168,7 +168,7 @@ async def edit_trip_form(
     db: Session = Depends(get_db)
 ):
     """Display edit form for a trip"""
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Only admin can edit trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
@@ -190,7 +190,7 @@ async def update_trip(
     db: Session = Depends(get_db)
 ):
     """Update a trip"""
-    if request.session.get("role") != "admin":
+    if not request.session.get("is_global_admin"):
         raise HTTPException(status_code=403, detail="Only admin can edit trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
