@@ -179,7 +179,7 @@ async def show_balances(request: Request, db: Session = Depends(get_db)):
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    balances, _ = calculate_balances(db, active_trip.id)
+    balances, settlement_net_map = calculate_balances(db, active_trip.id)
     
     total_deposits = db.query(func.sum(Deposit.amount_eur)).filter(
         Deposit.trip_id == active_trip.id
@@ -193,6 +193,7 @@ async def show_balances(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse("balances.html", {
         "request": request,
         "balances": balances,
+        "settlement_net_map": settlement_net_map,
         "wallet_balance": round(wallet_balance, 2)
     })
 

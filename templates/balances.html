@@ -57,6 +57,25 @@
                             {% endif %}
                         </td>
                     </tr>
+                    {% if balance.get('is_representative') %}
+                    <tr class="bg-blue-50">
+                        <td colspan="5" class="px-6 py-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4 text-sm">
+                                    <span class="font-semibold text-blue-900">👥 Ausgleichsgruppe "{{ balance.get('group_name') }}":</span>
+                                    <span class="text-blue-700">Individuell: {{ "%.2f"|format(balance.net) }} €</span>
+                                    <span class="text-blue-900 font-bold">→</span>
+                                    <span class="font-bold px-3 py-1 rounded" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.1) 0%, rgba(135, 206, 235, 0.2) 100%); color: {% if settlement_net_map[balance.member.code] > 0 %}var(--sea-foam){% elif settlement_net_map[balance.member.code] < 0 %}var(--coral){% else %}var(--sand){% endif %};">
+                                        Gruppe gesamt: {{ "%.2f"|format(settlement_net_map[balance.member.code]) }} €
+                                    </span>
+                                </div>
+                                <span class="text-xs text-blue-600 italic">
+                                    (wird beim Ausgleich verwendet)
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
