@@ -98,17 +98,11 @@ def seed_database(db: Session):
     db.commit()
     db.refresh(trip)
     
-    # Get users for linking to crew members
-    admin_user = db.query(User).filter(User.username == "Sven").first()
-    crew_user = db.query(User).filter(User.username == "crew").first()
-    
-    # Create crew members and link to users
-    # Sven is the trip admin
     crew_members = [
-        CrewMember(trip_id=trip.id, user_id=admin_user.id, code="Sven", name="Sven (Admin)", iban_or_handle="DE89370400440532013000", is_trip_admin=True),
-        CrewMember(trip_id=trip.id, code="SN", name="Sarah Nielsen", iban_or_handle="DE89370400440532013001"),
+        CrewMember(trip_id=trip.id, code="SN", name="Sarah Nielsen", iban_or_handle="DE89370400440532013000"),
         CrewMember(trip_id=trip.id, code="AB", name="Alex Berger", iban_or_handle="PayPal: alex.b@email.com"),
-        CrewMember(trip_id=trip.id, code="CD", name="Chris Decker", iban_or_handle="DE89370400440532013002"),
+        CrewMember(trip_id=trip.id, code="CD", name="Chris Decker", iban_or_handle="DE89370400440532013001"),
+        CrewMember(trip_id=trip.id, code="MK", name="Maria Klein", iban_or_handle="Revolut: +49 170 123456"),
     ]
     
     for member in crew_members:
@@ -119,7 +113,7 @@ def seed_database(db: Session):
         db.refresh(member)
     
     deposits = [
-        Deposit(trip_id=trip.id, member_id=crew_members[0].id, amount=500.00, currency=Currency.EUR, amount_eur=500.00, date=today - timedelta(days=7), note="Initial deposit"),
+        Deposit(trip_id=trip.id, member_id=crew_members[0].id, amount=400.00, currency=Currency.EUR, amount_eur=400.00, date=today - timedelta(days=7), note="Initial deposit"),
         Deposit(trip_id=trip.id, member_id=crew_members[1].id, amount=400.00, currency=Currency.EUR, amount_eur=400.00, date=today - timedelta(days=7), note="Initial deposit"),
         Deposit(trip_id=trip.id, member_id=crew_members[2].id, amount=400.00, currency=Currency.EUR, amount_eur=400.00, date=today - timedelta(days=6), note="Initial deposit"),
         Deposit(trip_id=trip.id, member_id=crew_members[3].id, amount=400.00, currency=Currency.EUR, amount_eur=400.00, date=today - timedelta(days=6), note="Initial deposit"),
@@ -187,4 +181,4 @@ def seed_database(db: Session):
         db.add(ExpenseParticipant(expense_id=expense3.id, member_id=crew_members[i].id))
     
     db.commit()
-    print(f"Database seeded: Trip '{trip.name}', 4 crew members (1 admin), 4 deposits, 3 expenses!")
+    print(f"Database seeded: Trip '{trip.name}', 4 crew members, 4 deposits, 3 expenses!")
