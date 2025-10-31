@@ -12,7 +12,7 @@
     </div>
     
     <!-- Read-Only Warning for Crew on Closed Trips -->
-    {% if not is_editable and request.session.get('role') == 'crew' %}
+    {% if not is_editable and request.session.get('trip_role') == 'crew' %}
     <div class="bg-orange-50 border-2 border-orange-400 rounded-lg p-4">
         <div class="flex items-center space-x-3">
             <div class="text-3xl">🔒</div>
