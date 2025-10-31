@@ -15,7 +15,8 @@ Preferred communication style: Simple, everyday language.
 **Data Storage**: PostgreSQL with SQLAlchemy ORM.
 **Key Architectural Decisions**:
 - **Modular Router Structure**: For maintainability and separation of concerns.
-- **Authentication Model**: Session-based with two roles and environment variable-based security.
+- **Authentication Model**: Session-based with two roles and environment variable-based security. Each crew member has their own user account with username (matching crew code) and password. Admins set passwords when creating/editing crew, and crew can change their own passwords via `/change-password`. Password minimum 6 characters enforced server-side.
+- **Individual User Accounts**: Each `CrewMember` is automatically linked to a `User` account upon creation. Username matches crew code for simplicity. User.role syncs with `is_trip_admin` flag (trip admin → admin role, regular crew → crew role). Passwords required for new crew creation. Migration script provided for existing crew members.
 - **Trip-Specific Admin Permissions**: Crew members can be designated as trip admins via `is_trip_admin` flag. Trip admins have full management access to their specific trip (expenses, deposits, crew, groups) but cannot access global features (templates, trip creation). Multiple trip admins per trip supported. Trip admins can edit closed trips while regular crew cannot.
 - **File Upload Security**: UUID-based filenames, type validation (PDF/JPG/PNG), and size limits (10MB).
 - **Trip Management**: `Trip` model organizes all data, supports active/archived/closed trips, with all data scoped to a specific trip. Trip selection system allows switching between trips. Closed trips are read-only for crew, while admin retains full edit access.
