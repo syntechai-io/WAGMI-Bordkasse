@@ -142,7 +142,9 @@ async def create_entry(
             crew_watch = CrewOnWatch(entry_id=entry.id, member_id=crew_id)
             db.add(crew_watch)
         
-        # Audit log (before commit to include in same transaction)
+        db.commit()
+        
+        # Audit log
         AuditService.log(
             db=db,
             request=request,
@@ -152,8 +154,6 @@ async def create_entry(
             entity_id=entry.id,
             details=f"Created logbook entry for {entry_date}"
         )
-        
-        db.commit()
         
         return RedirectResponse(url=f"/logbook/{entry.id}", status_code=303)
         
@@ -281,7 +281,9 @@ async def update_entry(
             crew_watch = CrewOnWatch(entry_id=entry.id, member_id=crew_id)
             db.add(crew_watch)
         
-        # Audit log (before commit to include in same transaction)
+        db.commit()
+        
+        # Audit log
         AuditService.log(
             db=db,
             request=request,
@@ -291,8 +293,6 @@ async def update_entry(
             entity_id=entry.id,
             details=f"Updated logbook entry for {entry_date}"
         )
-        
-        db.commit()
         
         return RedirectResponse(url=f"/logbook/{entry.id}", status_code=303)
         
@@ -390,9 +390,9 @@ async def upload_photo(
         size_bytes=len(content)
     )
     db.add(photo_record)
-    db.flush()  # Get photo_record.id for audit log
+    db.commit()
     
-    # Audit log (before commit to include in same transaction)
+    # Audit log
     AuditService.log(
         db=db,
         request=request,
@@ -402,8 +402,6 @@ async def upload_photo(
         entity_id=photo_record.id,
         details=f"Uploaded photo to logbook entry {entry_id}"
     )
-    
-    db.commit()
     
     return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
 

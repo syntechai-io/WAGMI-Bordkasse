@@ -3,11 +3,6 @@
 ### Overview
 Crew Wallet is a minimalist expense tracking and settlement application designed for sailing crew members. It provides secure user authentication, manages up to 12 crew members, tracks deposits into a shared wallet, records expenses with flexible splitting, and automatically calculates optimized settlement transfers. The application supports multi-currency transactions with automatic conversion, offers PWA capabilities, and includes professional PDF export functionality for trip documentation. Its business vision is to simplify shared expense management for sailing trips, targeting a market with significant potential for subscription-based revenue.
 
-### Recent Changes (October 31, 2025)
-- **Trip Editing**: Added full trip editing capability for admins via `/trips/{trip_id}/edit`. Admins can now edit trip names, start dates, and end dates through a dedicated form.
-- **Database Schema Fix**: Resolved missing `role` column in `users` table. The column was added and existing users were assigned appropriate roles (admin/crew).
-- **Application Status**: All systems running successfully with no errors.
-
 ### User Preferences
 Preferred communication style: Simple, everyday language.
 
@@ -20,9 +15,7 @@ Preferred communication style: Simple, everyday language.
 **Data Storage**: PostgreSQL with SQLAlchemy ORM.
 **Key Architectural Decisions**:
 - **Modular Router Structure**: For maintainability and separation of concerns.
-- **Authentication Model**: Session-based with two roles and environment variable-based security. Each crew member has their own user account with username (matching crew code) and password. Admins set passwords when creating/editing crew, and crew can change their own passwords via `/change-password`. Password minimum 6 characters enforced server-side.
-- **Individual User Accounts**: Each `CrewMember` is automatically linked to a `User` account upon creation. Username matches crew code for simplicity. User.role syncs with `is_trip_admin` flag (trip admin → admin role, regular crew → crew role). Passwords required for new crew creation. Migration script provided for existing crew members.
-- **Trip-Specific Admin Permissions**: Crew members can be designated as trip admins via `is_trip_admin` flag. Trip admins have full management access to their specific trip (expenses, deposits, crew, groups) but cannot access global features (templates, trip creation). Multiple trip admins per trip supported. Trip admins can edit closed trips while regular crew cannot.
+- **Authentication Model**: Session-based with two roles and environment variable-based security.
 - **File Upload Security**: UUID-based filenames, type validation (PDF/JPG/PNG), and size limits (10MB).
 - **Trip Management**: `Trip` model organizes all data, supports active/archived/closed trips, with all data scoped to a specific trip. Trip selection system allows switching between trips. Closed trips are read-only for crew, while admin retains full edit access.
 - **Multi-Currency Support**: Integrates ECB API for daily exchange rates, with cached rates.

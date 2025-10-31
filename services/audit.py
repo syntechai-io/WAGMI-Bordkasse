@@ -43,7 +43,7 @@ class AuditService:
         )
         
         db.add(audit_log)
-        # Note: Caller is responsible for db.commit() to include audit in same transaction
+        db.commit()
     
     @staticmethod
     def get_logs(

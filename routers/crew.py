@@ -5,10 +5,9 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from db import get_db
-from models import CrewMember, User, UserRole
+from models import CrewMember
 from services.trip import TripService
 from services.group import GroupService
-from typing import Optional
 
 router = APIRouter(prefix="/crew", tags=["crew"])
 templates = Jinja2Templates(
@@ -58,7 +57,6 @@ async def create_crew(
     name: str = Form(...),
     iban_or_handle: str = Form(""),
     is_trip_admin: str = Form(""),
-    password: str = Form(""),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)
@@ -69,43 +67,9 @@ async def create_crew(
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     
-    # Password is REQUIRED for new crew members
-    if not password:
-        return templates.TemplateResponse("crew_form.html", {
-            "request": request,
-            "member": None,
-            "error": "Passwort ist erforderlich. Bitte geben Sie ein Passwort ein."
-        }, status_code=400)
-    
-    # Validate password length
-    if len(password) < 6:
-        return templates.TemplateResponse("crew_form.html", {
-            "request": request,
-            "member": None,
-            "error": "Passwort muss mindestens 6 Zeichen lang sein."
-        }, status_code=400)
-    
     try:
-        # Check if username (code) already exists
-        existing_user = db.query(User).filter(User.username == code).first()
-        if existing_user:
-            return templates.TemplateResponse("crew_form.html", {
-                "request": request,
-                "member": None,
-                "error": f"Der Benutzername '{code}' existiert bereits. Bitte wählen Sie einen anderen Code."
-            }, status_code=400)
-        
-        # Create user account (always required for new crew)
-        user_role = UserRole.admin if is_trip_admin == "true" else UserRole.crew
-        user = User(username=code, role=user_role)
-        user.set_password(password)
-        db.add(user)
-        db.flush()  # Get user.id before creating crew member
-        
-        # Create crew member
         member = CrewMember(
             trip_id=active_trip.id,
-            user_id=user.id if user else None,
             code=code,
             name=name,
             iban_or_handle=iban_or_handle or None,
@@ -149,7 +113,6 @@ async def update_crew(
     name: str = Form(...),
     iban_or_handle: str = Form(""),
     is_trip_admin: str = Form(""),
-    password: str = Form(""),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)
@@ -160,56 +123,15 @@ async def update_crew(
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     
-    # Validate password if provided
-    if password and len(password) < 6:
-        member = db.query(CrewMember).filter(
-            CrewMember.id == member_id,
-            CrewMember.trip_id == active_trip.id
-        ).first()
-        return templates.TemplateResponse("crew_form.html", {
-            "request": request,
-            "member": member,
-            "error": "Passwort muss mindestens 6 Zeichen lang sein."
-        }, status_code=400)
-    
     try:
         member = db.query(CrewMember).filter(
             CrewMember.id == member_id,
             CrewMember.trip_id == active_trip.id
         ).first()
-        
-        # Check if username changed and conflicts
-        if code != member.code:
-            existing_user = db.query(User).filter(User.username == code).first()
-            if existing_user and (not member.user or existing_user.id != member.user.id):
-                return templates.TemplateResponse("crew_form.html", {
-                    "request": request,
-                    "member": member,
-                    "error": f"Der Benutzername '{code}' existiert bereits. Bitte wählen Sie einen anderen Code."
-                }, status_code=400)
-        
-        # Update or create user account
-        is_admin = is_trip_admin == "true"
-        if member.user:
-            # Update existing user
-            member.user.username = code
-            member.user.role = UserRole.admin if is_admin else UserRole.crew
-            if password:
-                member.user.set_password(password)
-        elif password:
-            # Create new user if password provided
-            user_role = UserRole.admin if is_admin else UserRole.crew
-            user = User(username=code, role=user_role)
-            user.set_password(password)
-            db.add(user)
-            db.flush()
-            member.user_id = user.id
-        
-        # Update crew member
         member.code = code
         member.name = name
         member.iban_or_handle = iban_or_handle or None
-        member.is_trip_admin = is_admin
+        member.is_trip_admin = is_trip_admin == "true"
         db.commit()
         return RedirectResponse(url="/crew", status_code=303)
     except IntegrityError:
@@ -297,11 +219,6 @@ async def delete_crew(
         }, status_code=400)
     
     try:
-        # Delete associated user account if exists
-        if member.user:
-            user_to_delete = member.user
-            db.delete(user_to_delete)
-        
         db.delete(member)
         db.commit()
         return RedirectResponse(url="/crew", status_code=303)

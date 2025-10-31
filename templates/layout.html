@@ -207,9 +207,6 @@
                     {% if request.session.get('user_id') %}
                     <div class="border-l border-sky-300 pl-6 ml-2 flex items-center space-x-4">
                         <span class="text-sm">👤 {{ request.session.get('username', 'User') }}</span>
-                        <a href="/change-password" class="px-4 py-2 rounded-lg text-sm font-semibold transition hover:scale-105" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #0056b3 100%);">
-                            🔐 Passwort
-                        </a>
                         <a href="/logout" class="px-4 py-2 rounded-lg text-sm font-semibold transition hover:scale-105" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
                             🚪 Logout
                         </a>
@@ -233,9 +230,6 @@
                 {% if request.session.get('user_id') %}
                 <div class="border-t border-sky-300 pt-4 mt-4">
                     <div class="text-sm mb-2">👤 Angemeldet als: <strong>{{ request.session.get('username', 'User') }}</strong></div>
-                    <a href="/change-password" class="block px-4 py-2 mb-2 rounded-lg text-center font-semibold transition" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #0056b3 100%);">
-                        🔐 Passwort ändern
-                    </a>
                     <a href="/logout" class="block px-4 py-2 rounded-lg text-center font-semibold transition" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
                         🚪 Logout
                     </a>

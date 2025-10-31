@@ -70,7 +70,6 @@ class CrewMember(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     code = Column(String(20), nullable=False, index=True)
     name = Column(String(100), nullable=False)
     iban_or_handle = Column(String(100), nullable=True)
@@ -78,7 +77,6 @@ class CrewMember(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     trip = relationship("Trip", back_populates="crew_members")
-    user = relationship("User", backref="crew_members")
     deposits = relationship("Deposit", back_populates="member", cascade="all, delete-orphan")
     paid_expenses = relationship("Expense", foreign_keys="Expense.payer_id", back_populates="payer")
     expense_participations = relationship("ExpenseParticipant", back_populates="member", cascade="all, delete-orphan")

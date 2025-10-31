@@ -454,7 +454,9 @@ async def update_expense(
                     db.add(receipt_record)
                     receipt_uploaded = True
         
-        # Audit log (before commit to include in same transaction)
+        db.commit()
+        
+        # Audit log
         AuditService.log(
             db=db,
             request=request,
@@ -464,8 +466,6 @@ async def update_expense(
             entity_id=expense.id,
             details=f"Updated expense: {description}"
         )
-        
-        db.commit()
         
         # Redirect to detail page if receipt was uploaded, otherwise to list
         if receipt_uploaded:
