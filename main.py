@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session
 from models import Deposit, Expense, PaidFromEnum, Trip
 from seed_data import seed_database
 from services.trip import TripService
-from services.auth import TripAuthService
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from limiter_config import limiter
@@ -113,12 +112,8 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse(url="/trips", status_code=303)
     
     trip_id = selected_trip.id
-    
-    if "trip_role" not in request.session and "user_id" in request.session:
-        TripAuthService.update_session_for_trip(request, request.session["user_id"], trip_id, db)
-    
-    trip_role = request.session.get("trip_role", "crew")
-    is_editable = TripService.is_trip_editable(selected_trip, trip_role)
+    user_role = request.session.get("role", "crew")
+    is_editable = TripService.is_trip_editable(selected_trip, user_role)
     
     total_deposits = db.query(func.sum(Deposit.amount_eur)).filter(
         Deposit.trip_id == trip_id

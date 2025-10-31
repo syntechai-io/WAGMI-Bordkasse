@@ -4,7 +4,7 @@
 <div class="space-y-6">
     <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📋 Ausgaben-Vorlagen</h1>
-        {% if request.session.get('is_global_admin') %}
+        {% if request.session.get('role') == 'admin' %}
         <a href="/templates/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
             ➕ Neu
         </a>
@@ -26,7 +26,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Betrag</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Bezahlt von</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aufteilung</th>
-                        {% if request.session.get('is_global_admin') %}
+                        {% if request.session.get('role') == 'admin' %}
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aktionen</th>
                         {% endif %}
                     </tr>
@@ -59,7 +59,7 @@
                                 📊 Prozentsatz
                             {% endif %}
                         </td>
-                        {% if request.session.get('is_global_admin') %}
+                        {% if request.session.get('role') == 'admin' %}
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                             <a href="/templates/{{ template.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
                             <form action="/templates/{{ template.id }}/delete" method="post" class="inline" onsubmit="return confirm('Vorlage wirklich löschen?')">
@@ -76,7 +76,7 @@
         {% else %}
         <div class="p-8 text-center" style="color: var(--navy-deep); opacity: 0.6;">
             <p class="text-lg">📋 Keine Vorlagen vorhanden</p>
-            {% if request.session.get('is_global_admin') %}
+            {% if request.session.get('role') == 'admin' %}
             <p class="text-sm mt-2">Erstellen Sie Ihre erste Vorlage, um Zeit zu sparen!</p>
             {% endif %}
         </div>

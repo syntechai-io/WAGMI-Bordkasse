@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from db import get_db
 from models import ExpenseTemplate, PaidFromEnum, SplitModeEnum, Currency
-from services.auth import TripAuthService
 
 router = APIRouter(prefix="/templates", tags=["templates"])
 templates = Jinja2Templates(
@@ -23,9 +22,10 @@ async def list_templates(request: Request, db: Session = Depends(get_db)):
     })
 
 @router.get("/new", response_class=HTMLResponse)
-async def new_template_form(request: Request, db: Session = Depends(get_db)):
-    # Global admin-only check (templates are global, not trip-specific)
-    TripAuthService.require_global_admin(request, db)
+async def new_template_form(request: Request):
+    # Admin-only check
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen erstellen")
     
     return templates.TemplateResponse("template_form.html", {
         "request": request,
@@ -46,8 +46,9 @@ async def create_template(
     split_mode: str = Form(SplitModeEnum.equal.value),
     db: Session = Depends(get_db)
 ):
-    # Global admin-only check (templates are global, not trip-specific)
-    TripAuthService.require_global_admin(request, db)
+    # Admin-only check
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen erstellen")
     
     # Convert default_amount: empty string or None -> None, otherwise convert to float
     amount_value = None
@@ -73,8 +74,9 @@ async def create_template(
 
 @router.get("/{template_id}/edit", response_class=HTMLResponse)
 async def edit_template_form(request: Request, template_id: int, db: Session = Depends(get_db)):
-    # Global admin-only check (templates are global, not trip-specific)
-    TripAuthService.require_global_admin(request, db)
+    # Admin-only check
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen bearbeiten")
     
     template = db.query(ExpenseTemplate).filter(ExpenseTemplate.id == template_id).first()
     if not template:
@@ -100,8 +102,9 @@ async def update_template(
     split_mode: str = Form(SplitModeEnum.equal.value),
     db: Session = Depends(get_db)
 ):
-    # Global admin-only check (templates are global, not trip-specific)
-    TripAuthService.require_global_admin(request, db)
+    # Admin-only check
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen bearbeiten")
     
     template = db.query(ExpenseTemplate).filter(ExpenseTemplate.id == template_id).first()
     if not template:
@@ -128,8 +131,9 @@ async def update_template(
 
 @router.post("/{template_id}/delete")
 async def delete_template(request: Request, template_id: int, db: Session = Depends(get_db)):
-    # Global admin-only check (templates are global, not trip-specific)
-    TripAuthService.require_global_admin(request, db)
+    # Admin-only check
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Nur der Admin kann Vorlagen löschen")
     
     template = db.query(ExpenseTemplate).filter(ExpenseTemplate.id == template_id).first()
     if template:

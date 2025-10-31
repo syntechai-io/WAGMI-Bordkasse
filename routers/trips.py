@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from db import get_db
 from models import Trip, TripStatus
 from services.trip import TripService
-from services.auth import TripAuthService
 from datetime import date
 
 router = APIRouter(prefix="/trips", tags=["trips"])
@@ -34,8 +33,9 @@ async def create_trip(
     start_date: date = Form(...),
     db: Session = Depends(get_db)
 ):
-    """Create a new trip (global admin only)"""
-    TripAuthService.require_global_admin(request, db)
+    """Create a new trip"""
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can create trips")
     
     trip = Trip(
         name=name,
@@ -59,15 +59,8 @@ async def activate_trip(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Set a trip as active (global admin or trip admin)"""
-    if "user_id" not in request.session:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
-    user_id = request.session["user_id"]
-    is_global_admin = TripAuthService.is_global_admin(user_id, db)
-    is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
-    
-    if not (is_global_admin or is_trip_admin):
+    """Set a trip as active"""
+    if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can activate trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
@@ -93,15 +86,8 @@ async def archive_trip(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Archive a trip (global admin or trip admin)"""
-    if "user_id" not in request.session:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
-    user_id = request.session["user_id"]
-    is_global_admin = TripAuthService.is_global_admin(user_id, db)
-    is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
-    
-    if not (is_global_admin or is_trip_admin):
+    """Archive a trip"""
+    if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can archive trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
@@ -122,15 +108,8 @@ async def close_trip(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Close a trip (global admin or trip admin - prevents crew from making changes)"""
-    if "user_id" not in request.session:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
-    user_id = request.session["user_id"]
-    is_global_admin = TripAuthService.is_global_admin(user_id, db)
-    is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
-    
-    if not (is_global_admin or is_trip_admin):
+    """Close a trip (admin only - prevents crew from making changes)"""
+    if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can close trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
@@ -148,15 +127,8 @@ async def reopen_trip(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Reopen a trip (global admin or trip admin - allows crew to make changes again)"""
-    if "user_id" not in request.session:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
-    user_id = request.session["user_id"]
-    is_global_admin = TripAuthService.is_global_admin(user_id, db)
-    is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
-    
-    if not (is_global_admin or is_trip_admin):
+    """Reopen a trip (admin only - allows crew to make changes again)"""
+    if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can reopen trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
@@ -175,17 +147,11 @@ async def select_trip(
     db: Session = Depends(get_db)
 ):
     """Select a trip to view/work with"""
-    if "user_id" not in request.session:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     
-    user_id = request.session["user_id"]
-    
     TripService.set_selected_trip(request, trip_id)
-    TripAuthService.update_session_for_trip(request, user_id, trip_id, db)
     
     return RedirectResponse(url="/", status_code=303)
 
@@ -195,15 +161,8 @@ async def edit_trip_form(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Display edit form for a trip (global admin or trip admin)"""
-    if "user_id" not in request.session:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
-    user_id = request.session["user_id"]
-    is_global_admin = TripAuthService.is_global_admin(user_id, db)
-    is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
-    
-    if not (is_global_admin or is_trip_admin):
+    """Display edit form for a trip"""
+    if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can edit trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
@@ -224,15 +183,8 @@ async def update_trip(
     end_date: date = Form(None),
     db: Session = Depends(get_db)
 ):
-    """Update a trip (global admin or trip admin)"""
-    if "user_id" not in request.session:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
-    user_id = request.session["user_id"]
-    is_global_admin = TripAuthService.is_global_admin(user_id, db)
-    is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
-    
-    if not (is_global_admin or is_trip_admin):
+    """Update a trip"""
+    if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can edit trips")
     
     trip = db.query(Trip).filter(Trip.id == trip_id).first()

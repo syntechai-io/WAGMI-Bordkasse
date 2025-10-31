@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from db import get_db
-from models import CrewMember, User
+from models import CrewMember, User, UserRole
 from services.trip import TripService
 from services.group import GroupService
 from typing import Optional
@@ -69,45 +69,38 @@ async def create_crew(
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     
+    # Password is REQUIRED for new crew members
+    if not password:
+        return templates.TemplateResponse("crew_form.html", {
+            "request": request,
+            "member": None,
+            "error": "Passwort ist erforderlich. Bitte geben Sie ein Passwort ein."
+        }, status_code=400)
+    
+    # Validate password length
+    if len(password) < 6:
+        return templates.TemplateResponse("crew_form.html", {
+            "request": request,
+            "member": None,
+            "error": "Passwort muss mindestens 6 Zeichen lang sein."
+        }, status_code=400)
+    
     try:
         # Check if username (code) already exists
         existing_user = db.query(User).filter(User.username == code).first()
-        
         if existing_user:
-            # Link to existing user across multiple trips
-            user = existing_user
-            
-            # Optionally update password if provided
-            if password:
-                if len(password) < 6:
-                    return templates.TemplateResponse("crew_form.html", {
-                        "request": request,
-                        "member": None,
-                        "error": "Passwort muss mindestens 6 Zeichen lang sein."
-                    }, status_code=400)
-                user.set_password(password)
-        else:
-            # Create new user - password is REQUIRED
-            if not password:
-                return templates.TemplateResponse("crew_form.html", {
-                    "request": request,
-                    "member": None,
-                    "error": "Passwort ist erforderlich für neue Benutzer."
-                }, status_code=400)
-            
-            # Validate password length
-            if len(password) < 6:
-                return templates.TemplateResponse("crew_form.html", {
-                    "request": request,
-                    "member": None,
-                    "error": "Passwort muss mindestens 6 Zeichen lang sein."
-                }, status_code=400)
-            
-            # Create user account
-            user = User(username=code)
-            user.set_password(password)
-            db.add(user)
-            db.flush()  # Get user.id before creating crew member
+            return templates.TemplateResponse("crew_form.html", {
+                "request": request,
+                "member": None,
+                "error": f"Der Benutzername '{code}' existiert bereits. Bitte wählen Sie einen anderen Code."
+            }, status_code=400)
+        
+        # Create user account (always required for new crew)
+        user_role = UserRole.admin if is_trip_admin == "true" else UserRole.crew
+        user = User(username=code, role=user_role)
+        user.set_password(password)
+        db.add(user)
+        db.flush()  # Get user.id before creating crew member
         
         # Create crew member
         member = CrewMember(
@@ -185,18 +178,10 @@ async def update_crew(
             CrewMember.trip_id == active_trip.id
         ).first()
         
-        # Code/username cannot be changed if user account exists (affects all trips)
-        if member.user and code != member.code:
-            return templates.TemplateResponse("crew_form.html", {
-                "request": request,
-                "member": member,
-                "error": "Der Code kann nicht geändert werden, da ein Benutzerkonto verknüpft ist."
-            }, status_code=400)
-        
-        # Check if username changed and conflicts (for members without user accounts)
+        # Check if username changed and conflicts
         if code != member.code:
             existing_user = db.query(User).filter(User.username == code).first()
-            if existing_user:
+            if existing_user and (not member.user or existing_user.id != member.user.id):
                 return templates.TemplateResponse("crew_form.html", {
                     "request": request,
                     "member": member,
@@ -206,12 +191,15 @@ async def update_crew(
         # Update or create user account
         is_admin = is_trip_admin == "true"
         if member.user:
-            # Update existing user password only (username is immutable)
+            # Update existing user
+            member.user.username = code
+            member.user.role = UserRole.admin if is_admin else UserRole.crew
             if password:
                 member.user.set_password(password)
         elif password:
             # Create new user if password provided
-            user = User(username=code)
+            user_role = UserRole.admin if is_admin else UserRole.crew
+            user = User(username=code, role=user_role)
             user.set_password(password)
             db.add(user)
             db.flush()

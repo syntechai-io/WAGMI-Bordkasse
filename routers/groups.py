@@ -16,9 +16,8 @@ templates = Jinja2Templates(
 )
 
 def require_admin(request: Request):
-    """Require trip admin role for group management (deprecated - use trip_role check instead)"""
-    trip_role = request.session.get("trip_role", "crew")
-    if trip_role != "admin":
+    """Require admin role for group management"""
+    if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
 
 @router.get("/groups", response_class=HTMLResponse)
@@ -55,7 +54,7 @@ async def show_groups(request: Request, db: Session = Depends(get_db)):
     
     ungrouped_members = [m for m in crew_members if m.id not in grouped_member_ids]
     
-    trip_role = request.session.get("trip_role", "crew")
+    user_role = request.session.get("role", "crew")
     return templates.TemplateResponse("groups.html", {
         "request": request,
         "active_trip": active_trip,
@@ -63,7 +62,7 @@ async def show_groups(request: Request, db: Session = Depends(get_db)):
         "crew_members": crew_members,
         "ungrouped_members": ungrouped_members,
         "is_editable": TripService.can_edit_trip(request, db, active_trip),
-        "is_admin": trip_role == "admin",
+        "is_admin": user_role == "admin",
         "has_admin_permission": TripService.has_admin_permission(request, db, active_trip)
     })
 
