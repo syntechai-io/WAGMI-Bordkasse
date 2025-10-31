@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from db import get_db
 from models import Trip, TripStatus
 from services.trip import TripService
+from services.auth import TripAuthService
 from datetime import date
 
 router = APIRouter(prefix="/trips", tags=["trips"])
@@ -147,11 +148,17 @@ async def select_trip(
     db: Session = Depends(get_db)
 ):
     """Select a trip to view/work with"""
+    if "user_id" not in request.session:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     
+    user_id = request.session["user_id"]
+    
     TripService.set_selected_trip(request, trip_id)
+    TripAuthService.update_session_for_trip(request, user_id, trip_id, db)
     
     return RedirectResponse(url="/", status_code=303)
 
