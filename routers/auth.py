@@ -6,7 +6,6 @@ from db import get_db
 from models import User
 from limiter_config import limiter
 from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
-from services.auth import TripAuthService
 
 router = APIRouter()
 templates = Jinja2Templates(
@@ -42,13 +41,7 @@ async def login(
     
     request.session["user_id"] = user.id
     request.session["username"] = user.username
-    is_global_admin = TripAuthService.is_global_admin(user.id, db)
-    request.session["is_global_admin"] = is_global_admin
-    
-    user_trips = TripAuthService.get_user_trips(user.id, db)
-    if user_trips:
-        default_trip = user_trips[0]
-        TripAuthService.update_session_for_trip(request, user.id, default_trip["trip_id"], db)
+    request.session["role"] = user.role.value
     
     return RedirectResponse(url="/", status_code=303)
 

@@ -15,9 +15,9 @@ Preferred communication style: Simple, everyday language.
 **Data Storage**: PostgreSQL with SQLAlchemy ORM.
 **Key Architectural Decisions**:
 - **Modular Router Structure**: For maintainability and separation of concerns.
-- **Authentication Model**: Session-based with trip-specific roles and environment variable-based security. Each crew member has their own user account with username (matching crew code) and password. Admins set passwords when creating/editing crew, and crew can change their own passwords via `/change-password`. Password minimum 6 characters enforced server-side.
-- **Individual User Accounts**: Each `CrewMember` is automatically linked to a `User` account upon creation. Username matches crew code for simplicity. Users can participate in multiple trips with different roles per trip. Passwords required for new crew creation. Migration script provided for existing crew members.
-- **Trip-Specific Role System**: Roles are determined per trip via the `is_trip_admin` flag on `CrewMember`. Session stores `trip_role` (admin/crew for current trip) and `is_global_admin` (true if user is admin on any trip). Trip admins have full management access to their specific trip (expenses, deposits, crew, groups) but cannot access global features (templates, trip creation). Multiple trip admins per trip supported. Same user can be admin on Trip A and crew on Trip B. Trip admins can edit closed trips while regular crew cannot.
+- **Authentication Model**: Session-based with two roles and environment variable-based security. Each crew member has their own user account with username (matching crew code) and password. Admins set passwords when creating/editing crew, and crew can change their own passwords via `/change-password`. Password minimum 6 characters enforced server-side.
+- **Individual User Accounts**: Each `CrewMember` is automatically linked to a `User` account upon creation. Username matches crew code for simplicity. User.role syncs with `is_trip_admin` flag (trip admin → admin role, regular crew → crew role). Passwords required for new crew creation. Migration script provided for existing crew members.
+- **Trip-Specific Admin Permissions**: Crew members can be designated as trip admins via `is_trip_admin` flag. Trip admins have full management access to their specific trip (expenses, deposits, crew, groups) but cannot access global features (templates, trip creation). Multiple trip admins per trip supported. Trip admins can edit closed trips while regular crew cannot.
 - **File Upload Security**: UUID-based filenames, type validation (PDF/JPG/PNG), and size limits (10MB).
 - **Trip Management**: `Trip` model organizes all data, supports active/archived/closed trips, with all data scoped to a specific trip. Trip selection system allows switching between trips. Closed trips are read-only for crew, while admin retains full edit access.
 - **Multi-Currency Support**: Integrates ECB API for daily exchange rates, with cached rates.
@@ -45,8 +45,6 @@ Uses a greedy matching algorithm to calculate net balances and minimize transfer
 - **CSRF Protection**: FastAPI-CSRF-Jinja middleware protects all POST/PUT/DELETE requests with cookie-based token validation.
 - **Rate Limiting**: SlowAPI enforces global and login-specific limits.
 - **Session Security**: 24-hour timeout, SameSite=Lax, httponly flags.
-- **Session Synchronization**: Critical security pattern - `TripAuthService.update_session_for_trip()` MUST be called whenever trip context changes (login, trip selection, fallback). This synchronizes `trip_id`, `trip_role`, and `is_global_admin` together to prevent privilege escalation. Never update `trip_id` alone without updating `trip_role`.
-- **Trip Access Control**: `TripAuthService.is_user_in_trip()` validates trip membership before granting access. Trip selection validates membership to prevent unauthorized access.
 - **Trip Permissions**: `TripService.is_trip_editable()` enforces closed trip protection.
 - **Audit Logging**: Tracks all financial transactions.
 - **File Upload Validation**: UUID-based filenames, type validation, size limits.

@@ -14,16 +14,16 @@ def login_required(func: Callable):
     return wrapper
 
 def admin_required(func: Callable):
-    """Decorator to require trip admin role for a route"""
+    """Decorator to require admin role for a route"""
     @wraps(func)
     async def wrapper(request: Request, *args, **kwargs):
         user_id = request.session.get("user_id")
-        trip_role = request.session.get("trip_role")
+        role = request.session.get("role")
         
         if not user_id:
             return RedirectResponse(url="/login", status_code=303)
         
-        if trip_role != "admin":
+        if role != "admin":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Admin-Rechte erforderlich"
@@ -37,8 +37,7 @@ def get_current_user(request: Request) -> dict:
     return {
         "id": request.session.get("user_id"),
         "username": request.session.get("username"),
-        "trip_role": request.session.get("trip_role"),
-        "is_global_admin": request.session.get("is_global_admin", False),
+        "role": request.session.get("role"),
         "is_authenticated": request.session.get("user_id") is not None,
-        "is_trip_admin": request.session.get("trip_role") == "admin"
+        "is_admin": request.session.get("role") == "admin"
     }

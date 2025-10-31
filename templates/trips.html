@@ -4,7 +4,7 @@
 <div class="space-y-6">
     <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">⛵ Törns verwalten</h1>
     
-    {% if request.session.get('is_global_admin') %}
+    {% if request.session.get('role') == 'admin' %}
     <div class="bg-white porthole-card p-6">
         <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Neuen Törn erstellen</h2>
         <form method="post" action="/trips/new" class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -73,7 +73,7 @@
                                 <button type="submit" class="hover:underline touch-action" style="color: var(--ocean-blue);">👁️ Anzeigen</button>
                             </form>
                             
-                            {% if request.session.get('is_global_admin') %}
+                            {% if request.session.get('role') == 'admin' %}
                                 <!-- Edit Trip Button (Admin Only) -->
                                 <a href="/trips/{{ trip.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
                                 
@@ -115,7 +115,7 @@
         <p class="text-sm font-semibold mb-2" style="color: var(--navy-deep);">💡 Törn-Verwaltung:</p>
         <ul class="text-sm space-y-1" style="color: var(--navy-deep);">
             <li><strong>👁️ Anzeigen:</strong> Törn auswählen und anzeigen (alle Benutzer)</li>
-            {% if request.session.get('is_global_admin') %}
+            {% if request.session.get('role') == 'admin' %}
             <li><strong>🔒 Schließen:</strong> Törn für Crew sperren - nur Admin kann noch Änderungen vornehmen</li>
             <li><strong>🔓 Öffnen:</strong> Törn wieder für Crew freigeben</li>
             <li><strong>✅ Aktivieren:</strong> Törn als aktiv setzen (nur ein aktiver Törn möglich)</li>

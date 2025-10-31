@@ -35,6 +35,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
     password_hash = Column(String(200), nullable=False)
+    role = Column(SQLEnum(UserRole), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     def set_password(self, password: str):

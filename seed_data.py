@@ -12,10 +12,10 @@ def seed_database(db: Session):
         if not admin_password or not crew_password:
             raise RuntimeError("ADMIN_PASSWORD and CREW_PASSWORD environment variables are required!")
         
-        admin_user = User(username="Sven")
+        admin_user = User(username="Sven", role=UserRole.admin)
         admin_user.set_password(admin_password)
         
-        crew_user = User(username="crew")
+        crew_user = User(username="crew", role=UserRole.crew)
         crew_user.set_password(crew_password)
         
         db.add(admin_user)
