@@ -47,7 +47,8 @@ async def create_deposit(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    if not TripService.can_edit_trip(request, db, active_trip):
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/deposits", status_code=303)
     
@@ -145,7 +146,9 @@ async def update_deposit(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    if not TripService.can_edit_trip(request, db, active_trip):
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/deposits", status_code=303)
     
@@ -209,7 +212,9 @@ async def delete_deposit(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
-    if not TripService.can_edit_trip(request, db, active_trip):
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/deposits", status_code=303)
     

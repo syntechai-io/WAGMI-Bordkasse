@@ -34,12 +34,6 @@
                         <td class="px-6 py-4" style="color: var(--navy-deep);">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span>{{ member.name }}</span>
-                                {% if member.is_trip_admin %}
-                                <span class="px-2 py-1 text-xs rounded-full text-white font-semibold" 
-                                      style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);" title="Trip Admin">
-                                    👑 Admin
-                                </span>
-                                {% endif %}
                                 {% if member.id in member_groups %}
                                     <span class="px-2 py-1 text-xs rounded-full text-white font-semibold" 
                                           style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">

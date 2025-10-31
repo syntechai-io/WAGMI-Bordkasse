@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint, Text, Boolean
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -73,7 +73,6 @@ class CrewMember(Base):
     code = Column(String(20), nullable=False, index=True)
     name = Column(String(100), nullable=False)
     iban_or_handle = Column(String(100), nullable=True)
-    is_trip_admin = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     trip = relationship("Trip", back_populates="crew_members")

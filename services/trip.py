@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import Trip, TripStatus, CrewMember
+from models import Trip, TripStatus
 from typing import Optional
 from fastapi import Request
 
@@ -34,52 +34,11 @@ class TripService:
         request.session["selected_trip_id"] = trip_id
     
     @staticmethod
-    def is_trip_admin(db: Session, trip_id: int, username: str) -> bool:
-        """Check if a user is a trip admin for a specific trip"""
-        # Find crew member by username (code) for this trip
-        crew_member = db.query(CrewMember).filter(
-            CrewMember.trip_id == trip_id,
-            CrewMember.code == username
-        ).first()
-        
-        if crew_member and crew_member.is_trip_admin:
-            return True
-        
-        return False
-    
-    @staticmethod
-    def is_trip_editable(trip: Trip, user_role: str, db: Session = None, username: str = None) -> bool:
+    def is_trip_editable(trip: Trip, user_role: str) -> bool:
         """Check if a trip is editable by the current user"""
-        # Global admin can always edit
+        # Admin can always edit
         if user_role == "admin":
             return True
         
-        # Check if user is trip admin for this specific trip
-        if db and username and TripService.is_trip_admin(db, trip.id, username):
-            return True
-        
-        # Regular crew can only edit if trip is not closed
+        # Crew can only edit if trip is not closed
         return trip.is_closed == 0
-    
-    @staticmethod
-    def has_admin_permission(request: Request, db: Session, trip: Trip) -> bool:
-        """Check if current user has admin permissions (global admin or trip admin)"""
-        user_role = request.session.get("role", "crew")
-        username = request.session.get("username", "")
-        
-        # Global admin
-        if user_role == "admin":
-            return True
-        
-        # Trip admin for this trip
-        if TripService.is_trip_admin(db, trip.id, username):
-            return True
-        
-        return False
-    
-    @staticmethod
-    def can_edit_trip(request: Request, db: Session, trip: Trip) -> bool:
-        """Convenience method to check if current user can edit a trip"""
-        user_role = request.session.get("role", "crew")
-        username = request.session.get("username", "")
-        return TripService.is_trip_editable(trip, user_role, db, username)
