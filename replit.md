@@ -3,6 +3,11 @@
 ### Overview
 Crew Wallet is a minimalist expense tracking and settlement application designed for sailing crew members. It provides secure user authentication, manages up to 12 crew members, tracks deposits into a shared wallet, records expenses with flexible splitting, and automatically calculates optimized settlement transfers. The application supports multi-currency transactions with automatic conversion, offers PWA capabilities, and includes professional PDF export functionality for trip documentation. Its business vision is to simplify shared expense management for sailing trips, targeting a market with significant potential for subscription-based revenue.
 
+### Recent Changes (October 31, 2025)
+- **Trip Editing**: Added full trip editing capability for admins via `/trips/{trip_id}/edit`. Admins can now edit trip names, start dates, and end dates through a dedicated form.
+- **Database Schema Fix**: Resolved missing `role` column in `users` table. The column was added and existing users were assigned appropriate roles (admin/crew).
+- **Application Status**: All systems running successfully with no errors.
+
 ### User Preferences
 Preferred communication style: Simple, everyday language.
 
