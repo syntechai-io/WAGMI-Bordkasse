@@ -45,6 +45,8 @@ Uses a greedy matching algorithm to calculate net balances and minimize transfer
 - **CSRF Protection**: FastAPI-CSRF-Jinja middleware protects all POST/PUT/DELETE requests with cookie-based token validation.
 - **Rate Limiting**: SlowAPI enforces global and login-specific limits.
 - **Session Security**: 24-hour timeout, SameSite=Lax, httponly flags.
+- **Session Synchronization**: Critical security pattern - `TripAuthService.update_session_for_trip()` MUST be called whenever trip context changes (login, trip selection, fallback). This synchronizes `trip_id`, `trip_role`, and `is_global_admin` together to prevent privilege escalation. Never update `trip_id` alone without updating `trip_role`.
+- **Trip Access Control**: `TripAuthService.is_user_in_trip()` validates trip membership before granting access. Trip selection validates membership to prevent unauthorized access.
 - **Trip Permissions**: `TripService.is_trip_editable()` enforces closed trip protection.
 - **Audit Logging**: Tracks all financial transactions.
 - **File Upload Validation**: UUID-based filenames, type validation, size limits.
