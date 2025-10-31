@@ -79,10 +79,13 @@ class TripAuthService:
             raise HTTPException(status_code=403, detail="Admin access required")
     
     @staticmethod
-    def require_global_admin(request: Request):
+    def require_global_admin(request: Request, db: Session):
         """
-        Verify user is admin on at least one trip.
+        Verify user is admin on at least one trip (checked fresh from database).
         Used for global features like trip creation and template management.
+        
+        SECURITY: Always checks database in real-time to prevent stale session cache
+        from allowing revoked admins to retain privileges.
         
         Raises:
             HTTPException: If user not logged in or not an admin
@@ -90,7 +93,8 @@ class TripAuthService:
         if "user_id" not in request.session:
             raise HTTPException(status_code=401, detail="Not authenticated")
         
-        if not request.session.get("is_global_admin"):
+        user_id = request.session["user_id"]
+        if not TripAuthService.is_global_admin(user_id, db):
             raise HTTPException(status_code=403, detail="Admin access required")
     
     @staticmethod

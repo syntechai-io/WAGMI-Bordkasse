@@ -35,8 +35,7 @@ async def create_trip(
     db: Session = Depends(get_db)
 ):
     """Create a new trip (global admin only)"""
-    if not request.session.get("is_global_admin"):
-        raise HTTPException(status_code=403, detail="Only admin can create trips")
+    TripAuthService.require_global_admin(request, db)
     
     trip = Trip(
         name=name,
@@ -65,7 +64,7 @@ async def activate_trip(
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     user_id = request.session["user_id"]
-    is_global_admin = request.session.get("is_global_admin", False)
+    is_global_admin = TripAuthService.is_global_admin(user_id, db)
     is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
     
     if not (is_global_admin or is_trip_admin):
@@ -99,7 +98,7 @@ async def archive_trip(
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     user_id = request.session["user_id"]
-    is_global_admin = request.session.get("is_global_admin", False)
+    is_global_admin = TripAuthService.is_global_admin(user_id, db)
     is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
     
     if not (is_global_admin or is_trip_admin):
@@ -128,7 +127,7 @@ async def close_trip(
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     user_id = request.session["user_id"]
-    is_global_admin = request.session.get("is_global_admin", False)
+    is_global_admin = TripAuthService.is_global_admin(user_id, db)
     is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
     
     if not (is_global_admin or is_trip_admin):
@@ -154,7 +153,7 @@ async def reopen_trip(
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     user_id = request.session["user_id"]
-    is_global_admin = request.session.get("is_global_admin", False)
+    is_global_admin = TripAuthService.is_global_admin(user_id, db)
     is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
     
     if not (is_global_admin or is_trip_admin):
@@ -201,7 +200,7 @@ async def edit_trip_form(
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     user_id = request.session["user_id"]
-    is_global_admin = request.session.get("is_global_admin", False)
+    is_global_admin = TripAuthService.is_global_admin(user_id, db)
     is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
     
     if not (is_global_admin or is_trip_admin):
@@ -230,7 +229,7 @@ async def update_trip(
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     user_id = request.session["user_id"]
-    is_global_admin = request.session.get("is_global_admin", False)
+    is_global_admin = TripAuthService.is_global_admin(user_id, db)
     is_trip_admin = TripAuthService.is_trip_admin(user_id, trip_id, db)
     
     if not (is_global_admin or is_trip_admin):
