@@ -7,10 +7,6 @@ import enum
 
 Base = declarative_base()
 
-class UserRole(str, enum.Enum):
-    admin = "admin"
-    crew = "crew"
-
 class TripStatus(str, enum.Enum):
     active = "active"
     archived = "archived"

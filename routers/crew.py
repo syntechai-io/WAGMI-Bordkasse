@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from db import get_db
-from models import CrewMember, User, UserRole
+from models import CrewMember, User
 from services.trip import TripService
 from services.group import GroupService
 from typing import Optional
@@ -104,8 +104,7 @@ async def create_crew(
                 }, status_code=400)
             
             # Create user account
-            user_role = UserRole.admin if is_trip_admin == "true" else UserRole.crew
-            user = User(username=code, role=user_role)
+            user = User(username=code)
             user.set_password(password)
             db.add(user)
             db.flush()  # Get user.id before creating crew member
@@ -212,8 +211,7 @@ async def update_crew(
                 member.user.set_password(password)
         elif password:
             # Create new user if password provided
-            user_role = UserRole.admin if is_admin else UserRole.crew
-            user = User(username=code, role=user_role)
+            user = User(username=code)
             user.set_password(password)
             db.add(user)
             db.flush()
