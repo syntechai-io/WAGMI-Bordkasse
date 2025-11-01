@@ -59,8 +59,8 @@
             <div>
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">💰 Bezahlt aus *</label>
                 <select name="paid_from" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
+                    <option value="private" {% if not expense or expense.paid_from.value == 'private' %}selected{% endif %}>Privat</option>
                     <option value="wallet" {% if expense and expense.paid_from.value == 'wallet' %}selected{% endif %}>Wallet (gemeinsame Kasse)</option>
-                    <option value="private" {% if expense and expense.paid_from.value == 'private' %}selected{% endif %}>Privat</option>
                 </select>
             </div>
             
