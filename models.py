@@ -101,6 +101,7 @@ class CrewMember(Base):
     code = Column(String(20), nullable=False, index=True)
     name = Column(String(100), nullable=False)
     iban_or_handle = Column(String(100), nullable=True)
+    paypal_me = Column(String(100), nullable=True)
     is_trip_admin = Column(Integer, nullable=False, default=0)  # 0 = regular crew, 1 = trip admin
     created_at = Column(DateTime, default=datetime.utcnow)
     
