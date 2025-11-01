@@ -10,14 +10,15 @@ Preferred communication style: Simple, everyday language.
 
 #### Backend Architecture
 **Framework**: FastAPI (Python) with modular routers.
-**Authentication**: Session-based with Admin and Crew roles, using `werkzeug.security` for password hashing and environment variables for secrets.
+**Authentication**: Session-based with three role levels (Global Admin, Trip Admin, Crew), using `werkzeug.security` for password hashing and environment variables for secrets.
 **Template Engine**: Jinja2 for server-side rendering, integrated with HTMX.
 **Data Storage**: PostgreSQL with SQLAlchemy ORM.
 **Key Architectural Decisions**:
 - **Modular Router Structure**: For maintainability and separation of concerns.
-- **Authentication Model**: Session-based with two roles and environment variable-based security.
+- **Authentication Model**: Session-based with three role levels and environment variable-based security. Trip admins have scoped permissions for their assigned trip only.
 - **File Upload Security**: UUID-based filenames, type validation (PDF/JPG/PNG), and size limits (10MB).
-- **Trip Management**: `Trip` model organizes all data, supports active/archived/closed trips, with all data scoped to a specific trip. Trip selection system allows switching between trips. Closed trips are read-only for crew, while admin retains full edit access.
+- **Trip Management**: `Trip` model organizes all data, supports active/archived/closed trips, with all data scoped to a specific trip. Trip selection system allows switching between trips. Closed trips are read-only for crew, while admin and trip admins retain full edit access for their respective trips.
+- **Trip Admin System**: Up to 2 trip admins per trip, designated via checkbox in crew management. Trip admins can manage their assigned trip (even when closed), but cannot access password management or designate other trip admins. Session-based tracking via `trip_admin_trip_id`.
 - **Multi-Currency Support**: Integrates ECB API for daily exchange rates, with cached rates.
 - **Performance Optimization**: Eliminated N+1 query problems through pre-aggregation, eager loading, and database indexes. Balance calculation optimized.
 - **Expense Templates**: Global templates accelerate data entry for common expenses, pre-filling category, amount, currency, payment source, and split mode. Admin-only management available.
@@ -25,7 +26,7 @@ Preferred communication style: Simple, everyday language.
 
 #### Data Model
 **Core Entities**:
-- **CrewMember**: Crew details.
+- **CrewMember**: Crew details. Includes `is_trip_admin` flag and `trip_admin_password_hash` for trip admin authentication.
 - **Deposit**: Shared wallet contributions.
 - **Expense**: Spending records, supporting `paid_from`, `split_mode`, and nullable `payer_id` for external charges.
 - **ExpenseParticipant**: Links expenses to crew for custom splits.
@@ -43,7 +44,8 @@ Uses a greedy matching algorithm to calculate net balances and minimize transfer
 - **CSRF Protection**: FastAPI-CSRF-Jinja middleware protects all POST/PUT/DELETE requests with cookie-based token validation.
 - **Rate Limiting**: SlowAPI enforces global and login-specific limits.
 - **Session Security**: 24-hour timeout, SameSite=Lax, httponly flags.
-- **Trip Permissions**: `TripService.is_trip_editable()` enforces closed trip protection.
+- **Trip Permissions**: `TripService.is_trip_editable()` enforces closed trip protection. `TripService.is_admin_or_trip_admin()` enforces admin/trip-admin authorization for crew management.
+- **Role-Based Authorization**: Three role levels (Global Admin, Trip Admin, Crew) with server-side authorization checks on all GET and POST routes to prevent privilege escalation.
 - **Audit Logging**: Tracks all financial transactions.
 - **File Upload Validation**: UUID-based filenames, type validation, size limits.
 - **Input Validation**: Pydantic schemas.
