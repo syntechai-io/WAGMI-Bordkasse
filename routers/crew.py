@@ -64,7 +64,7 @@ async def create_crew(
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     
@@ -120,7 +120,7 @@ async def update_crew(
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     
@@ -158,7 +158,7 @@ async def delete_crew(
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     

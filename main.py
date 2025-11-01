@@ -113,7 +113,7 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
     
     trip_id = selected_trip.id
     user_role = request.session.get("role", "crew")
-    is_editable = TripService.is_trip_editable(selected_trip, user_role)
+    is_editable = TripService.is_trip_editable(selected_trip, user_role, request)
     
     total_deposits = db.query(func.sum(Deposit.amount_eur)).filter(
         Deposit.trip_id == trip_id

@@ -34,11 +34,31 @@ class TripService:
         request.session["selected_trip_id"] = trip_id
     
     @staticmethod
-    def is_trip_editable(trip: Trip, user_role: str) -> bool:
-        """Check if a trip is editable by the current user"""
-        # Admin can always edit
+    def is_trip_editable(trip: Trip, user_role: str, request: Optional[Request] = None) -> bool:
+        """
+        Check if a trip is editable by the current user.
+        
+        Args:
+            trip: The trip to check
+            user_role: User's role ("admin" or "crew")
+            request: Optional Request object to check trip admin status
+            
+        Returns:
+            True if user can edit this trip, False otherwise
+        """
+        # Global admin can always edit everything
         if user_role == "admin":
             return True
         
-        # Crew can only edit if trip is not closed
-        return trip.is_closed == 0
+        # Trip is open - anyone can edit
+        if trip.is_closed == 0:
+            return True
+        
+        # Check if user is a trip admin for this specific trip
+        if request:
+            trip_admin_trip_id = request.session.get("trip_admin_trip_id")
+            if trip_admin_trip_id and trip_admin_trip_id == trip.id:
+                return True
+        
+        # Closed trip, not admin, not trip admin
+        return False

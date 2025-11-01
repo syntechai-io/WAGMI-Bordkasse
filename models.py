@@ -55,12 +55,40 @@ class Trip(Base):
     end_date = Column(Date, nullable=True)
     status = Column(SQLEnum(TripStatus), nullable=False, default=TripStatus.active)
     is_closed = Column(Integer, nullable=False, default=0)  # 0 = open, 1 = closed (admin only can edit)
+    trip_admin_password_hash = Column(String(200), nullable=True)  # Password for trip admins
+    crew_password_hash = Column(String(200), nullable=True)  # Password for regular crew members
     created_at = Column(DateTime, default=datetime.utcnow)
     
     crew_members = relationship("CrewMember", back_populates="trip", cascade="all, delete-orphan")
     deposits = relationship("Deposit", back_populates="trip", cascade="all, delete-orphan")
     expenses = relationship("Expense", back_populates="trip", cascade="all, delete-orphan")
     logbook_entries = relationship("LogbookEntry", back_populates="trip", cascade="all, delete-orphan")
+    
+    def set_trip_admin_password(self, password: str):
+        """Hash and set trip admin password"""
+        if password:
+            self.trip_admin_password_hash = generate_password_hash(password)
+        else:
+            self.trip_admin_password_hash = None
+    
+    def check_trip_admin_password(self, password: str) -> bool:
+        """Verify trip admin password against hash"""
+        if not self.trip_admin_password_hash or not password:
+            return False
+        return check_password_hash(str(self.trip_admin_password_hash), password)
+    
+    def set_crew_password(self, password: str):
+        """Hash and set crew password"""
+        if password:
+            self.crew_password_hash = generate_password_hash(password)
+        else:
+            self.crew_password_hash = None
+    
+    def check_crew_password(self, password: str) -> bool:
+        """Verify crew password against hash"""
+        if not self.crew_password_hash or not password:
+            return False
+        return check_password_hash(str(self.crew_password_hash), password)
 
 class CrewMember(Base):
     __tablename__ = "crew_members"
@@ -73,6 +101,7 @@ class CrewMember(Base):
     code = Column(String(20), nullable=False, index=True)
     name = Column(String(100), nullable=False)
     iban_or_handle = Column(String(100), nullable=True)
+    is_trip_admin = Column(Integer, nullable=False, default=0)  # 0 = regular crew, 1 = trip admin
     created_at = Column(DateTime, default=datetime.utcnow)
     
     trip = relationship("Trip", back_populates="crew_members")

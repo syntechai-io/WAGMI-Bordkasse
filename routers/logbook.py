@@ -93,7 +93,7 @@ async def create_entry(
         return RedirectResponse(url="/trips", status_code=303)
     
     user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/logbook", status_code=303)
     
@@ -243,7 +243,7 @@ async def update_entry(
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/logbook", status_code=303)
     
@@ -320,7 +320,7 @@ async def delete_entry(request: Request, entry_id: int, db: Session = Depends(ge
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/logbook", status_code=303)
     
@@ -365,7 +365,7 @@ async def upload_photo(
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/logbook", status_code=303)
     
@@ -420,7 +420,7 @@ async def delete_photo(request: Request, photo_id: int, db: Session = Depends(ge
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
-    if not TripService.is_trip_editable(active_trip, user_role):
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/logbook", status_code=303)
     

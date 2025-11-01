@@ -61,7 +61,7 @@ async def show_groups(request: Request, db: Session = Depends(get_db)):
         "groups": group_data,
         "crew_members": crew_members,
         "ungrouped_members": ungrouped_members,
-        "is_editable": TripService.is_trip_editable(active_trip, user_role),
+        "is_editable": TripService.is_trip_editable(active_trip, user_role, request),
         "is_admin": user_role == "admin"
     })
 
@@ -82,7 +82,7 @@ async def create_group(
         return RedirectResponse(url="/trips", status_code=303)
     
     # Check if trip is editable
-    if not TripService.is_trip_editable(active_trip, "admin"):
+    if not TripService.is_trip_editable(active_trip, "admin", request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
     
     try:
@@ -125,7 +125,7 @@ async def update_group(
         return RedirectResponse(url="/trips", status_code=303)
     
     # Check if trip is editable
-    if not TripService.is_trip_editable(active_trip, "admin"):
+    if not TripService.is_trip_editable(active_trip, "admin", request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
     
     try:
@@ -162,7 +162,7 @@ async def change_representative(
         return RedirectResponse(url="/trips", status_code=303)
     
     # Check if trip is editable
-    if not TripService.is_trip_editable(active_trip, "admin"):
+    if not TripService.is_trip_editable(active_trip, "admin", request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
     
     try:
@@ -191,7 +191,7 @@ async def delete_group(
         return RedirectResponse(url="/trips", status_code=303)
     
     # Check if trip is editable
-    if not TripService.is_trip_editable(active_trip, "admin"):
+    if not TripService.is_trip_editable(active_trip, "admin", request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
     
     try:

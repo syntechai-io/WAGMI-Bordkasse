@@ -14,7 +14,7 @@
     <form method="post" class="bg-white porthole-card p-6 space-y-4">
         {{ csrf_input | safe }}
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 Code *</label>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 Benutzername *</label>
             <input type="text" name="code" value="{% if member %}{{ member.code }}{% endif %}" required maxlength="20"
                 class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);">
         </div>
