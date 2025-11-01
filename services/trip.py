@@ -62,3 +62,31 @@ class TripService:
         
         # Closed trip, not admin, not trip admin
         return False
+    
+    @staticmethod
+    def is_admin_or_trip_admin(request: Request, trip_id: int = None) -> bool:
+        """
+        Check if current user is global admin or trip admin for specified trip.
+        
+        Args:
+            request: Request object with session data
+            trip_id: Trip ID to check (if None, uses selected trip from session)
+        
+        Returns:
+            True if user is global admin or trip admin for the trip, False otherwise
+        """
+        # Check if global admin
+        if request.session.get("role") == "admin":
+            return True
+        
+        # Check if trip admin for this specific trip
+        trip_admin_trip_id = request.session.get("trip_admin_trip_id")
+        if trip_admin_trip_id:
+            if trip_id is None:
+                # Use selected trip from session
+                selected_trip_id = request.session.get("selected_trip_id")
+                return trip_admin_trip_id == selected_trip_id
+            else:
+                return trip_admin_trip_id == trip_id
+        
+        return False

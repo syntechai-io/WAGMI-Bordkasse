@@ -132,6 +132,24 @@
                         placeholder="••••••••">
                 </div>
                 
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
+                        ⛵ Törn (optional für Admin, erforderlich für Crew)
+                    </label>
+                    <select 
+                        name="trip_id" 
+                        class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none focus:border-ocean-blue transition" 
+                        style="border-color: var(--sky-blue);">
+                        <option value="">-- Kein Törn ausgewählt --</option>
+                        {% for trip in trips %}
+                        <option value="{{ trip.id }}">{{ trip.name }} ({{ trip.start_date }})</option>
+                        {% endfor %}
+                    </select>
+                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.6;">
+                        Global-Admin: Leer lassen | Törn-Admin/Crew: Törn auswählen
+                    </p>
+                </div>
+                
                 <button 
                     type="submit" 
                     class="w-full ocean-gradient text-white font-bold py-4 px-4 rounded-lg text-lg transition transform hover:scale-105">

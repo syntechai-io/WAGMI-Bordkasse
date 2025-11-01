@@ -31,6 +31,25 @@
                 class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);">
         </div>
         
+        {% if request.session.get('role') == 'admin' and not request.session.get('trip_admin_trip_id') %}
+        <div class="rope-divider"></div>
+        
+        <div class="bg-amber-50 border-2 border-amber-200 rounded-lg p-4">
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" name="is_trip_admin" value="1" 
+                       {% if member and member.is_trip_admin %}checked{% endif %}
+                       class="mt-1 w-5 h-5 text-amber-600 border-amber-300 rounded focus:ring-amber-500">
+                <div>
+                    <span class="block font-semibold text-amber-900">⚓ Törn-Admin berechtigen</span>
+                    <span class="block text-sm text-amber-700 mt-1">
+                        Törn-Admins können diesen Törn auch nach Abschluss bearbeiten. Max. 2 Törn-Admins pro Törn.
+                        <br><strong>Hinweis:</strong> Nur Global-Admin kann Törn-Admins berechtigen.
+                    </span>
+                </div>
+            </label>
+        </div>
+        {% endif %}
+        
         <div class="rope-divider"></div>
         
         <div class="flex gap-4">

@@ -7,14 +7,63 @@
     <div class="bg-white porthole-card p-8 prose max-w-none">
         <div style="color: var(--navy-deep);">
             
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">🔐 Login</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">🔐 Login & Benutzerrollen</h2>
             <div class="mb-6">
-                <p class="mb-2"><strong>Zugangsdaten:</strong></p>
-                <ul class="list-disc ml-6 mb-4">
-                    <li><strong>Benutzername:</strong> crew</li>
-                    <li><strong>Passwort:</strong> Bitte beim Skipper erfragen</li>
-                </ul>
-                <p class="text-sm opacity-75">Der Skipper (Sven) hat Admin-Zugang mit erweiterten Rechten.</p>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">So loggst du dich ein:</h3>
+                <ol class="list-decimal ml-6 space-y-2 mb-4">
+                    <li><strong>Benutzername:</strong> Dein Crew-Benutzername (vom Admin vergeben)</li>
+                    <li><strong>Passwort:</strong> Crew-Passwort für diesen Törn (beim Admin erfragen)</li>
+                    <li><strong>Törn auswählen:</strong> Wähle den Törn aus, für den du dich anmelden möchtest</li>
+                    <li>Klicke auf <strong>"⛵ Einloggen"</strong></li>
+                </ol>
+
+                <h3 class="text-xl font-semibold mb-3 mt-6" style="color: var(--navy-deep);">🎯 Benutzerrollen im System</h3>
+                <p class="mb-4">Es gibt drei verschiedene Rollen mit unterschiedlichen Rechten:</p>
+
+                <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 mb-4">
+                    <h4 class="font-bold text-blue-900 mb-2">👑 Global-Admin (z.B. Sven)</h4>
+                    <ul class="list-disc ml-6 text-sm space-y-1">
+                        <li><strong>Volle Berechtigung</strong> für alle Törns ohne Einschränkungen</li>
+                        <li>Kann neue Törns erstellen, archivieren und schließen</li>
+                        <li>Kann alle Crew-Mitglieder verwalten</li>
+                        <li>Kann Törn-Admins berechtigen (max. 2 pro Törn)</li>
+                        <li>Kann Passwörter für Törn-Admins und Crew setzen</li>
+                        <li><strong>Login:</strong> Admin-Benutzername + Admin-Passwort (ohne Törn-Auswahl)</li>
+                    </ul>
+                </div>
+
+                <div class="bg-amber-50 p-4 rounded-lg border-2 border-amber-200 mb-4">
+                    <h4 class="font-bold text-amber-900 mb-2">⚓ Törn-Admin (max. 2 pro Törn)</h4>
+                    <ul class="list-disc ml-6 text-sm space-y-1">
+                        <li><strong>Erweiterte Rechte</strong> für einen bestimmten Törn</li>
+                        <li>Kann den zugewiesenen Törn auch nach Abschluss bearbeiten</li>
+                        <li>Perfekt für Crew-Mitglieder, die bei der Verwaltung helfen (z.B. Robert, Mario)</li>
+                        <li>Wird vom Global-Admin in der Crew-Verwaltung berechtigt (Checkbox "⚓ Törn-Admin berechtigen")</li>
+                        <li><strong>Login:</strong> Crew-Benutzername + Törn-Admin-Passwort + Törn auswählen</li>
+                    </ul>
+                </div>
+
+                <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200 mb-4">
+                    <h4 class="font-bold text-green-900 mb-2">👥 Crew (reguläre Mitglieder)</h4>
+                    <ul class="list-disc ml-6 text-sm space-y-1">
+                        <li><strong>Standard-Berechtigung</strong> für einen bestimmten Törn</li>
+                        <li>Kann Ausgaben erfassen, Einzahlungen verwalten, Logbuch führen</li>
+                        <li>Kann Salden und Ausgleichszahlungen einsehen</li>
+                        <li><strong>Einschränkung:</strong> Kann geschlossene Törns nicht mehr bearbeiten</li>
+                        <li><strong>Login:</strong> Crew-Benutzername + Crew-Passwort + Törn auswählen</li>
+                    </ul>
+                </div>
+
+                <div class="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
+                    <h4 class="font-bold text-yellow-900 mb-2">💡 Wichtige Hinweise:</h4>
+                    <ul class="list-disc ml-6 text-sm space-y-1">
+                        <li>Passwörter sind <strong>törn-spezifisch</strong> und können pro Törn unterschiedlich sein</li>
+                        <li>Der Global-Admin setzt die Passwörter unter <strong>"🔐 Passwörter"</strong> (im Menü "Verwaltung")</li>
+                        <li>Maximal <strong>2 Törn-Admins</strong> pro Törn erlaubt</li>
+                        <li>Törn-Admins behalten ihre Rechte auch nach Törn-Abschluss</li>
+                        <li>Crew-Mitglieder können auf geschlossene Törns nur lesend zugreifen</li>
+                    </ul>
+                </div>
             </div>
 
             <div class="rope-divider"></div>

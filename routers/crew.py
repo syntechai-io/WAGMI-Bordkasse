@@ -45,6 +45,11 @@ async def new_crew_form(request: Request, db: Session = Depends(get_db)):
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    # Only admin or trip admin can add crew members
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        request.session["error"] = "Nur Admins können Crew-Mitglieder hinzufügen."
+        return RedirectResponse(url="/crew", status_code=303)
+    
     return templates.TemplateResponse("crew_form.html", {
         "request": request,
         "member": None
@@ -56,11 +61,17 @@ async def create_crew(
     code: str = Form(...),
     name: str = Form(...),
     iban_or_handle: str = Form(""),
+    is_trip_admin: int = Form(0),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Only admin or trip admin can add crew members
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        request.session["error"] = "Nur Admins können Crew-Mitglieder hinzufügen."
+        return RedirectResponse(url="/crew", status_code=303)
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
@@ -68,12 +79,30 @@ async def create_crew(
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     
+    # Only global admin (not trip admin) can set trip admin status
+    if is_trip_admin and (user_role != "admin" or request.session.get("trip_admin_trip_id")):
+        is_trip_admin = 0
+    
+    # Check max 2 trip admins limit
+    if is_trip_admin:
+        current_admins = db.query(CrewMember).filter(
+            CrewMember.trip_id == active_trip.id,
+            CrewMember.is_trip_admin == 1
+        ).count()
+        if current_admins >= 2:
+            return templates.TemplateResponse("crew_form.html", {
+                "request": request,
+                "member": None,
+                "error": "Maximal 2 Törn-Admins pro Törn erlaubt. Bitte entfernen Sie zuerst einen bestehenden Törn-Admin."
+            }, status_code=400)
+    
     try:
         member = CrewMember(
             trip_id=active_trip.id,
             code=code,
             name=name,
-            iban_or_handle=iban_or_handle or None
+            iban_or_handle=iban_or_handle or None,
+            is_trip_admin=is_trip_admin
         )
         db.add(member)
         db.commit()
@@ -96,6 +125,11 @@ async def edit_crew_form(
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    # Only admin or trip admin can edit crew members
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        request.session["error"] = "Nur Admins können Crew-Mitglieder bearbeiten."
+        return RedirectResponse(url="/crew", status_code=303)
+    
     member = db.query(CrewMember).filter(
         CrewMember.id == member_id,
         CrewMember.trip_id == active_trip.id
@@ -112,11 +146,17 @@ async def update_crew(
     code: str = Form(...),
     name: str = Form(...),
     iban_or_handle: str = Form(""),
+    is_trip_admin: int = Form(0),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Only admin or trip admin can edit crew members
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        request.session["error"] = "Nur Admins können Crew-Mitglieder bearbeiten."
+        return RedirectResponse(url="/crew", status_code=303)
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
@@ -124,14 +164,34 @@ async def update_crew(
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/crew", status_code=303)
     
+    member = db.query(CrewMember).filter(
+        CrewMember.id == member_id,
+        CrewMember.trip_id == active_trip.id
+    ).first()
+    
+    # Only global admin (not trip admin) can modify trip admin status
+    if user_role != "admin" or request.session.get("trip_admin_trip_id"):
+        is_trip_admin = member.is_trip_admin
+    
+    # Check max 2 trip admins limit (if changing from non-admin to admin)
+    if is_trip_admin and not member.is_trip_admin:
+        current_admins = db.query(CrewMember).filter(
+            CrewMember.trip_id == active_trip.id,
+            CrewMember.is_trip_admin == 1,
+            CrewMember.id != member_id
+        ).count()
+        if current_admins >= 2:
+            return templates.TemplateResponse("crew_form.html", {
+                "request": request,
+                "member": member,
+                "error": "Maximal 2 Törn-Admins pro Törn erlaubt. Bitte entfernen Sie zuerst einen bestehenden Törn-Admin."
+            }, status_code=400)
+    
     try:
-        member = db.query(CrewMember).filter(
-            CrewMember.id == member_id,
-            CrewMember.trip_id == active_trip.id
-        ).first()
         member.code = code
         member.name = name
         member.iban_or_handle = iban_or_handle or None
+        member.is_trip_admin = is_trip_admin
         db.commit()
         return RedirectResponse(url="/crew", status_code=303)
     except IntegrityError:
@@ -155,6 +215,11 @@ async def delete_crew(
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
+    
+    # Only admin or trip admin can delete crew members
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        request.session["error"] = "Nur Admins können Crew-Mitglieder löschen."
+        return RedirectResponse(url="/crew", status_code=303)
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")

@@ -198,6 +198,9 @@
                              style="z-index: 100;" role="menu">
                             <a href="/crew" class="block px-4 py-2 hover:bg-sky-100 transition">👥 Crew</a>
                             <a href="/groups" class="block px-4 py-2 hover:bg-sky-100 transition">🔗 Gruppen</a>
+                            {% if request.session.get('role') == 'admin' %}
+                            <a href="/trips/passwords" class="block px-4 py-2 hover:bg-sky-100 transition">🔐 Passwörter</a>
+                            {% endif %}
                             <a href="/logbook" class="block px-4 py-2 hover:bg-sky-100 transition">📓 Logbuch</a>
                             <a href="/export/csv" class="block px-4 py-2 hover:bg-sky-100 transition">📋 Export</a>
                         </div>
@@ -219,6 +222,9 @@
                 <a href="/trips" class="block py-2 hover:text-sky-200 transition touch-action">⛵ Törns</a>
                 <a href="/crew" class="block py-2 hover:text-sky-200 transition touch-action">👥 Crew</a>
                 <a href="/groups" class="block py-2 hover:text-sky-200 transition touch-action">🔗 Gruppen</a>
+                {% if request.session.get('role') == 'admin' %}
+                <a href="/trips/passwords" class="block py-2 hover:text-sky-200 transition touch-action">🔐 Passwörter</a>
+                {% endif %}
                 <a href="/logbook" class="block py-2 hover:text-sky-200 transition touch-action">📓 Logbuch</a>
                 <a href="/deposits" class="block py-2 hover:text-sky-200 transition touch-action">💰 Einzahlungen</a>
                 <a href="/expenses" class="block py-2 hover:text-sky-200 transition touch-action">⚓ Ausgaben</a>

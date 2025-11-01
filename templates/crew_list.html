@@ -23,6 +23,7 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Benutzername</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Rolle</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">IBAN/Handle</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aktionen</th>
                     </tr>
@@ -47,6 +48,16 @@
                                     {% endif %}
                                 {% endif %}
                             </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if member.is_trip_admin %}
+                            <span class="px-3 py-1 text-xs rounded-full text-white font-semibold" 
+                                  style="background: linear-gradient(135deg, #8b4513 0%, #d2691e 100%);">
+                                ⚓ Törn-Admin
+                            </span>
+                            {% else %}
+                            <span class="text-sm" style="color: var(--navy-deep); opacity: 0.5;">Crew</span>
+                            {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--navy-deep); opacity: 0.7;">{{ member.iban_or_handle or '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
