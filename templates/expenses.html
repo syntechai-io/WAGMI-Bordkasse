@@ -325,6 +325,14 @@
         });
     }
     
+    // Set default paid_from to 'private' on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const paidFromSelect = document.querySelector('select[name="paid_from"]');
+        if (paidFromSelect && !paidFromSelect.value) {
+            paidFromSelect.value = 'private';
+        }
+    });
+    
     // Template selector auto-fill
     const templateSelector = document.getElementById('template_selector');
     if (templateSelector) {
