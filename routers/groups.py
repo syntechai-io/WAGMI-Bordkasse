@@ -15,11 +15,6 @@ templates = Jinja2Templates(
     context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
 )
 
-def require_admin(request: Request):
-    """Require admin role for group management"""
-    if request.session.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-
 @router.get("/groups", response_class=HTMLResponse)
 async def show_groups(request: Request, db: Session = Depends(get_db)):
     """Show all settlement groups for the active trip (visible to all users)"""
@@ -55,6 +50,7 @@ async def show_groups(request: Request, db: Session = Depends(get_db)):
     ungrouped_members = [m for m in crew_members if m.id not in grouped_member_ids]
     
     user_role = request.session.get("role", "crew")
+    is_admin_or_trip_admin = TripService.is_admin_or_trip_admin(request, active_trip.id)
     return templates.TemplateResponse("groups.html", {
         "request": request,
         "active_trip": active_trip,
@@ -62,7 +58,7 @@ async def show_groups(request: Request, db: Session = Depends(get_db)):
         "crew_members": crew_members,
         "ungrouped_members": ungrouped_members,
         "is_editable": TripService.is_trip_editable(active_trip, user_role, request),
-        "is_admin": user_role == "admin"
+        "is_admin": is_admin_or_trip_admin
     })
 
 @router.post("/groups/create")
@@ -73,16 +69,18 @@ async def create_group(
     representative_id: int = Form(...),
     member_ids: Optional[str] = Form(None)
 ):
-    """Create a new settlement group (admin only)"""
-    if request.session.get("role") != "admin":
-        return RedirectResponse(url="/", status_code=303)
-    
+    """Create a new settlement group (admin or trip admin)"""
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    # Only admin or trip admin can create groups
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        return RedirectResponse(url="/groups", status_code=303)
+    
     # Check if trip is editable
-    if not TripService.is_trip_editable(active_trip, "admin", request):
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
     
     try:
@@ -116,16 +114,18 @@ async def update_group(
     db: Session = Depends(get_db),
     member_ids: Optional[str] = Form(None)
 ):
-    """Update group membership (admin only)"""
-    if request.session.get("role") != "admin":
-        return RedirectResponse(url="/", status_code=303)
-    
+    """Update group membership (admin or trip admin)"""
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    # Only admin or trip admin can update groups
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        return RedirectResponse(url="/groups", status_code=303)
+    
     # Check if trip is editable
-    if not TripService.is_trip_editable(active_trip, "admin", request):
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
     
     try:
@@ -153,16 +153,18 @@ async def change_representative(
     db: Session = Depends(get_db),
     new_representative_id: int = Form(...)
 ):
-    """Change group representative (admin only)"""
-    if request.session.get("role") != "admin":
-        return RedirectResponse(url="/", status_code=303)
-    
+    """Change group representative (admin or trip admin)"""
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    # Only admin or trip admin can change representatives
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        return RedirectResponse(url="/groups", status_code=303)
+    
     # Check if trip is editable
-    if not TripService.is_trip_editable(active_trip, "admin", request):
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
     
     try:
@@ -182,16 +184,18 @@ async def delete_group(
     group_id: int,
     db: Session = Depends(get_db)
 ):
-    """Delete a settlement group (admin only)"""
-    if request.session.get("role") != "admin":
-        return RedirectResponse(url="/", status_code=303)
-    
+    """Delete a settlement group (admin or trip admin)"""
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
     
+    # Only admin or trip admin can delete groups
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        return RedirectResponse(url="/groups", status_code=303)
+    
     # Check if trip is editable
-    if not TripService.is_trip_editable(active_trip, "admin", request):
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role, request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
     
     try:
