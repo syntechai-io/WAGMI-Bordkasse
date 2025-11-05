@@ -138,7 +138,8 @@ Du kannst Einzahlungen und Ausgaben **bearbeiten** oder **löschen**:
 1. **Belege fotografieren:** Immer direkt den Kassenzettel abfotografieren, wenn du was kaufst
 2. **Sofort erfassen:** Ausgaben direkt eintragen, damit nichts vergessen wird
 3. **Richtige Aufteilung:** Überlege, ob wirklich alle mitzahlen (z.B. persönliche Snacks → private)
-4. **PayPal Pool nutzen:** Einfach und jeder kann mit Karte einzahlen
+4. **Crew deaktivieren:** Wenn jemand früher abreist, sofort deaktivieren - die App schließt die Person automatisch von neuen Ausgaben aus
+5. **PayPal Pool nutzen:** Einfach und jeder kann mit Karte einzahlen
 
 ## ❓ Fragen?
 
