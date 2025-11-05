@@ -83,6 +83,22 @@ app.add_middleware(
     cookie_domain=None  # Let browser determine correct domain
 )
 
+# Cache control middleware to prevent browser caching of HTML pages
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+
+class CacheControlMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        # Only apply cache-control to HTML responses, not static files
+        if isinstance(response, Response) and response.headers.get("content-type", "").startswith("text/html"):
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
+
+app.add_middleware(CacheControlMiddleware)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 from template_helpers import create_templates
