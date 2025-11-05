@@ -185,6 +185,7 @@ class Expense(Base):
     client_temp_id = Column(String(100), nullable=True, index=True, unique=True)
     payer_id = Column(Integer, ForeignKey("crew_members.id"), nullable=True, index=True)
     date = Column(Date, nullable=False)
+    occurred_at = Column(DateTime, nullable=False, index=True)  # When expense actually occurred (with time)
     category = Column(String(50), nullable=False)
     description = Column(String(200), nullable=False)
     amount = Column(Float, nullable=False)
