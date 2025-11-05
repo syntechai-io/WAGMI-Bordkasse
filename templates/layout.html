@@ -164,7 +164,7 @@
                 </button>
                 <div id="menu" class="hidden lg:flex lg:items-center lg:space-x-6">
                     <a href="/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">🧭 Dashboard</a>
-                    <a href="/trips" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⛵ Törns</a>
+                    <a href="/trips/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⛵ Törns</a>
                     
                     <!-- Trip Selector (Admin Only) -->
                     {% if request.session.get('role') == 'admin' and all_trips %}
@@ -244,7 +244,7 @@
             </div>
             <div id="mobile-menu" class="hidden lg:hidden pb-4 overflow-y-auto" style="max-height: calc(100vh - 64px);">
                 <a href="/" class="block py-2 hover:text-sky-200 transition touch-action">🧭 Dashboard</a>
-                <a href="/trips" class="block py-2 hover:text-sky-200 transition touch-action">⛵ Törns</a>
+                <a href="/trips/" class="block py-2 hover:text-sky-200 transition touch-action">⛵ Törns</a>
                 <a href="/crew" class="block py-2 hover:text-sky-200 transition touch-action">👥 Crew</a>
                 <a href="/groups" class="block py-2 hover:text-sky-200 transition touch-action">🔗 Gruppen</a>
                 {% if request.session.get('role') == 'admin' %}

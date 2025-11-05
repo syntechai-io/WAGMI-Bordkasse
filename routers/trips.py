@@ -51,7 +51,7 @@ async def create_trip(
     db.add(trip)
     db.commit()
     
-    return RedirectResponse(url="/trips", status_code=303)
+    return RedirectResponse(url="/trips/", status_code=303)
 
 @router.post("/{trip_id}/activate")
 async def activate_trip(
@@ -78,7 +78,7 @@ async def activate_trip(
     
     db.commit()
     
-    return RedirectResponse(url="/trips", status_code=303)
+    return RedirectResponse(url="/trips/", status_code=303)
 
 @router.post("/{trip_id}/archive")
 async def archive_trip(
@@ -100,7 +100,7 @@ async def archive_trip(
     
     db.commit()
     
-    return RedirectResponse(url="/trips", status_code=303)
+    return RedirectResponse(url="/trips/", status_code=303)
 
 @router.post("/{trip_id}/close")
 async def close_trip(
@@ -119,7 +119,7 @@ async def close_trip(
     trip.is_closed = 1
     db.commit()
     
-    return RedirectResponse(url="/trips", status_code=303)
+    return RedirectResponse(url="/trips/", status_code=303)
 
 @router.post("/{trip_id}/reopen")
 async def reopen_trip(
@@ -138,7 +138,7 @@ async def reopen_trip(
     trip.is_closed = 0
     db.commit()
     
-    return RedirectResponse(url="/trips", status_code=303)
+    return RedirectResponse(url="/trips/", status_code=303)
 
 @router.post("/{trip_id}/select")
 async def select_trip(
@@ -163,7 +163,7 @@ async def passwords_page(request: Request, db: Session = Depends(get_db)):
     
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
-        return RedirectResponse(url="/trips", status_code=303)
+        return RedirectResponse(url="/trips/", status_code=303)
     
     # Get trip admins for this trip
     trip_admins = db.query(CrewMember).filter(
@@ -197,7 +197,7 @@ async def update_passwords(
     
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
-        return RedirectResponse(url="/trips", status_code=303)
+        return RedirectResponse(url="/trips/", status_code=303)
     
     try:
         # Update trip admin password if provided
