@@ -26,7 +26,7 @@ Preferred communication style: Simple, everyday language.
 
 #### Data Model
 **Core Entities**:
-- **CrewMember**: Crew details. Includes `is_trip_admin` flag and `trip_admin_password_hash` for trip admin authentication.
+- **CrewMember**: Crew details. Includes `is_trip_admin` flag, `trip_admin_password_hash` for trip admin authentication, and `departed_at` timestamp for mid-trip departures.
 - **Deposit**: Shared wallet contributions.
 - **Expense**: Spending records, supporting `paid_from`, `split_mode`, and nullable `payer_id` for external charges.
 - **ExpenseParticipant**: Links expenses to crew for custom splits.
@@ -39,6 +39,8 @@ Preferred communication style: Simple, everyday language.
 
 #### Settlement Algorithm
 Uses a greedy matching algorithm to calculate net balances and minimize transfers by matching largest debtor with largest creditor. The calculation has been verified with real trip data (Kykladen 2025) and works correctly with only minor rounding differences (< 0.05 EUR tolerance). The Ausgleich page includes a comprehensive German explanation of the 3-step calculation process: (1) individual balance calculation, (2) settlement group aggregation, and (3) transfer optimization using the greedy algorithm.
+
+**Crew Departure Handling**: The settlement calculation includes ALL crew members (even departed ones) to account for all financial activity during the trip. For equal-split expenses, crew members are considered active from the trip start until their departure date. Equal-split expenses divide by the count of crew who were active on each expense's date, excluding crew who had already departed. This allows crew to be added to the system retroactively while maintaining correct expense splits based on actual presence during the trip.
 
 #### Security
 - **CSRF Protection**: FastAPI-CSRF-Jinja middleware protects all POST/PUT/DELETE requests with cookie-based token validation.
