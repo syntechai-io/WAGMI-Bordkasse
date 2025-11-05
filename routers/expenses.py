@@ -114,7 +114,7 @@ async def create_expense(
         
         if expense_date_obj == today:
             # Real-time expense: use current timestamp for accurate crew filtering
-            occurred_timestamp = datetime.utcnow()
+            occurred_timestamp = datetime.now()
         else:
             # Backdated expense: use start of day so crew active that day are included
             occurred_timestamp = datetime.combine(expense_date_obj, datetime.min.time())
