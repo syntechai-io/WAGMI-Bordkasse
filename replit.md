@@ -49,6 +49,8 @@ Uses a greedy matching algorithm to calculate net balances and minimize transfer
 
 **Crew Departure Handling**: The settlement calculation includes ALL crew members (even departed ones) to account for all financial activity during the trip. For equal-split expenses, crew members are considered active from the trip start until their departure date. Equal-split expenses divide by the count of crew who were active on each expense's date, excluding crew who had already departed. This allows crew to be added to the system retroactively while maintaining correct expense splits based on actual presence during the trip.
 
+**Timezone Handling**: All datetime fields (expense `occurred_at`, crew `departed_at`) use naive local datetime (not UTC) for consistency. This ensures accurate comparisons when filtering crew participation based on departure times.
+
 #### Security
 - **CSRF Protection**: FastAPI-CSRF-Jinja middleware protects all POST/PUT/DELETE requests with cookie-based token validation.
 - **Rate Limiting**: SlowAPI enforces global and login-specific limits.
