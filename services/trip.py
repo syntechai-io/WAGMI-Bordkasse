@@ -17,7 +17,7 @@ class TripService:
     
     @staticmethod
     def get_selected_trip(request: Request, db: Session) -> Optional[Trip]:
-        """Get the trip selected by user (from session) or fall back to active trip"""
+        """Get the trip selected by user from session (no automatic fallback)"""
         selected_trip_id = request.session.get("selected_trip_id")
         
         if selected_trip_id:
@@ -25,8 +25,8 @@ class TripService:
             if trip:
                 return trip
         
-        # Fall back to active trip
-        return TripService.get_active_trip(db)
+        # No fallback - require explicit trip selection
+        return None
     
     @staticmethod
     def set_selected_trip(request: Request, trip_id: int):

@@ -6,6 +6,7 @@ from db import get_db
 from models import User, CrewMember, Trip, TripStatus
 from limiter_config import limiter
 from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
+from services.trip import TripService
 
 router = APIRouter()
 templates = Jinja2Templates(
@@ -59,6 +60,12 @@ async def login(
         request.session["user_id"] = user.id
         request.session["username"] = user.username
         request.session["role"] = user.role.value
+        
+        # Auto-select active trip for admin (smooth UX, can switch later)
+        active_trip = TripService.get_active_trip(db)
+        if active_trip:
+            TripService.set_selected_trip(request, active_trip.id)
+        
         return RedirectResponse(url="/", status_code=303)
     
     # Check 2 & 3: Trip Admin or Crew login (CrewMember table)
@@ -83,6 +90,7 @@ async def login(
                 request.session["username"] = crew_member.code
                 request.session["role"] = "crew"
                 request.session["trip_admin_trip_id"] = trip_id_int  # Mark as trip admin for this trip
+                TripService.set_selected_trip(request, trip_id_int)  # Set selected trip
                 return RedirectResponse(url="/", status_code=303)
             
             # Check if crew password matches
@@ -92,6 +100,7 @@ async def login(
                 request.session["crew_member_id"] = crew_member.id
                 request.session["username"] = crew_member.code
                 request.session["role"] = "crew"
+                TripService.set_selected_trip(request, trip_id_int)  # Set selected trip
                 return RedirectResponse(url="/", status_code=303)
     
     # Login failed

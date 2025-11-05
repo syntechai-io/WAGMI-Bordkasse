@@ -166,6 +166,31 @@
                     <a href="/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">🧭 Dashboard</a>
                     <a href="/trips" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⛵ Törns</a>
                     
+                    <!-- Trip Selector (Admin Only) -->
+                    {% if request.session.get('role') == 'admin' and all_trips %}
+                    <div class="relative nav-dropdown">
+                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center text-sm" 
+                                aria-haspopup="true" aria-expanded="false">
+                            🎯 {{ selected_trip.name if selected_trip else 'Törn wählen' }}
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="dropdown-content absolute hidden bg-white text-gray-800 rounded-lg shadow-lg mt-2 py-2 min-w-[250px]" 
+                             style="z-index: 100;" role="menu">
+                            {% for trip in all_trips %}
+                            <form action="/trips/{{ trip.id }}/select" method="POST" class="m-0">
+                                <input type="hidden" name="csrftoken" value="{{ request.session.get('csrftoken', '') }}">
+                                <button type="submit" class="w-full text-left px-4 py-2 hover:bg-sky-100 transition {% if selected_trip and selected_trip.id == trip.id %}bg-sky-50 font-semibold{% endif %}">
+                                    {% if selected_trip and selected_trip.id == trip.id %}✓{% endif %} {{ trip.name }}
+                                    <span class="text-xs text-gray-500 block">{{ trip.start_date.strftime('%d.%m.%Y') }}</span>
+                                </button>
+                            </form>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
                     <!-- Finanzen Dropdown -->
                     <div class="relative nav-dropdown">
                         <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center" 
@@ -220,6 +245,23 @@
             <div id="mobile-menu" class="hidden lg:hidden pb-4">
                 <a href="/" class="block py-2 hover:text-sky-200 transition touch-action">🧭 Dashboard</a>
                 <a href="/trips" class="block py-2 hover:text-sky-200 transition touch-action">⛵ Törns</a>
+                
+                <!-- Trip Selector Mobile (Admin Only) -->
+                {% if request.session.get('role') == 'admin' and all_trips %}
+                <div class="border-t border-sky-300 mt-2 pt-2">
+                    <div class="text-xs text-sky-200 mb-2 px-2">🎯 Aktueller Törn: {{ selected_trip.name if selected_trip else 'Keiner ausgewählt' }}</div>
+                    {% for trip in all_trips %}
+                    <form action="/trips/{{ trip.id }}/select" method="POST" class="m-0">
+                        <input type="hidden" name="csrftoken" value="{{ request.session.get('csrftoken', '') }}">
+                        <button type="submit" class="w-full text-left py-2 px-4 hover:text-sky-200 transition touch-action {% if selected_trip and selected_trip.id == trip.id %}bg-sky-900 bg-opacity-30{% endif %}">
+                            {% if selected_trip and selected_trip.id == trip.id %}✓{% endif %} {{ trip.name }}
+                        </button>
+                    </form>
+                    {% endfor %}
+                    <div class="border-b border-sky-300 mt-2"></div>
+                </div>
+                {% endif %}
+                
                 <a href="/crew" class="block py-2 hover:text-sky-200 transition touch-action">👥 Crew</a>
                 <a href="/groups" class="block py-2 hover:text-sky-200 transition touch-action">🔗 Gruppen</a>
                 {% if request.session.get('role') == 'admin' %}
