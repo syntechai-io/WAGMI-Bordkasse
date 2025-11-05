@@ -17,12 +17,12 @@ templates = Jinja2Templates(
 )
 
 def calculate_balances(db: Session, trip_id: int):
+    # Get ALL crew members for the trip (including departed) for settlement calculations
+    # This ensures we account for all financial activity during the trip
     crew_members = db.query(CrewMember).filter(
-        CrewMember.trip_id == trip_id,
-        CrewMember.departed_at.is_(None)
+        CrewMember.trip_id == trip_id
     ).all()
     member_ids = [m.id for m in crew_members]
-    total_crew_count = len(crew_members)
     
     # Pre-calculate deposits per member in one query
     deposits_by_member = {}
@@ -102,8 +102,25 @@ def calculate_balances(db: Session, trip_id: int):
         
         # Calculate share from "equal" split mode expenses (dynamic calculation)
         for expense in all_expenses:
-            if expense.split_mode == SplitModeEnum.equal and total_crew_count > 0:
-                share_owed += expense.amount_eur / total_crew_count
+            if expense.split_mode == SplitModeEnum.equal:
+                # Count crew members who were active at the time of this expense
+                # A member was active if they had not departed yet OR departed after the expense
+                from datetime import datetime, time
+                expense_datetime = datetime.combine(expense.date, time(23, 59, 59))
+                active_at_expense = [
+                    m for m in crew_members 
+                    if m.departed_at is None or m.departed_at > expense_datetime
+                ]
+                expense_crew_count = len(active_at_expense)
+                
+                # Only include this member in the split if they were active at the time
+                member_was_active = (
+                    member.departed_at is None or 
+                    member.departed_at > expense_datetime
+                )
+                
+                if expense_crew_count > 0 and member_was_active:
+                    share_owed += expense.amount_eur / expense_crew_count
         
         paid_total = deposits_total + private_paid
         net = paid_total - share_owed
@@ -209,9 +226,10 @@ async def show_settlement(request: Request, db: Session = Depends(get_db)):
     balances, settlement_net_map = calculate_balances(db, active_trip.id)
     transfers = compute_settlement(settlement_net_map)
     
+    # Include ALL crew members (even departed) for settlement display
+    # since they may have financial balances to settle
     member_map = {m.code: m for m in db.query(CrewMember).filter(
-        CrewMember.trip_id == active_trip.id,
-        CrewMember.departed_at.is_(None)
+        CrewMember.trip_id == active_trip.id
     ).all()}
     
     settlement_data = []
