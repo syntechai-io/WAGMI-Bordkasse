@@ -57,6 +57,41 @@ Du kannst direkt beim Erfassen einer Ausgabe einen Beleg hochladen:
 
 Oder später auf der Ausgaben-Detail-Seite nachträglich hinzufügen.
 
+## 👋 Crew-Mitglieder deaktivieren (Mid-Trip Departure)
+
+Wenn jemand während des Törns früher abreist, kann der Admin dieses Crew-Mitglied deaktivieren:
+
+### Wie funktioniert das?
+
+1. **Nur Admin/Törn-Admin** kann Crew-Mitglieder deaktivieren
+2. Gehe zu **"👥 Crew"**
+3. Bei dem entsprechenden Crew-Mitglied: **"🚪 Deaktivieren"** klicken
+4. **Abreise-Zeitpunkt** eingeben (Datum & Uhrzeit)
+5. Bestätigen
+
+### Was passiert automatisch?
+
+Die App behandelt abgereiste Crew-Mitglieder intelligent:
+
+**Neue Ausgaben (ab jetzt):**
+- Person wird **automatisch ausgeschlossen** von allen zukünftigen Ausgaben
+- Beispiel: Tom reist um 10:00 Uhr ab → Diesel-Ausgabe um 10:30 Uhr → Tom zahlt **nicht** mit
+
+**Rückdatierte Ausgaben (aus der Vergangenheit):**
+- Person wird **eingeschlossen**, wenn sie zu dem Zeitpunkt noch an Bord war
+- Beispiel: Tom reist heute um 10:00 Uhr ab → Ausgabe von vorgestern eingeben → Tom zahlt **mit**
+
+**In den Salden:**
+- Abgereiste Crew-Mitglieder bleiben sichtbar mit ihren Salden
+- Status zeigt "Abgereist" mit Datum/Uhrzeit
+- Beim Ausgleich werden sie normal eingerechnet (bezahlen ihren Anteil wie alle anderen)
+
+### Person wieder aktivieren
+
+Falls versehentlich deaktiviert:
+- Bei dem Crew-Mitglied: **"🔄 Reaktivieren"** klicken
+- Person ist dann wieder aktiv für neue Ausgaben
+
 ## 📊 Übersicht & Salden
 
 ### Dashboard (Startseite)
