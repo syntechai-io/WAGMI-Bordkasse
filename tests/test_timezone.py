@@ -64,6 +64,8 @@ class TestCrewDepartureFiltering:
             date=date(2025, 11, 5),
             occurred_at=datetime(2025, 11, 5, 10, 30, 0),
             category="Diesel",
+            description="Test diesel expense",
+            amount=1000.0,
             amount_eur=1000.0,
             paid_from=PaidFromEnum.wallet,
             split_mode=SplitModeEnum.equal,
@@ -73,7 +75,7 @@ class TestCrewDepartureFiltering:
         db_session.commit()
         
         # Calculate balances
-        balances = calculate_balances(db_session, test_trip.id)
+        balances, settlement_net_map = calculate_balances(db_session, test_trip.id)
         
         # Alice should have no share (she departed before expense)
         alice_balance = next(b for b in balances if b['member'].id == test_crew[0].id)
@@ -96,6 +98,8 @@ class TestCrewDepartureFiltering:
             date=date(2025, 11, 5),
             occurred_at=datetime(2025, 11, 5, 9, 30, 0),
             category="Diesel",
+            description="Test diesel expense",
+            amount=1000.0,
             amount_eur=1000.0,
             paid_from=PaidFromEnum.wallet,
             split_mode=SplitModeEnum.equal,
@@ -105,7 +109,7 @@ class TestCrewDepartureFiltering:
         db_session.commit()
         
         # Calculate balances
-        balances = calculate_balances(db_session, test_trip.id)
+        balances, settlement_net_map = calculate_balances(db_session, test_trip.id)
         
         # All 4 crew members should split equally: 1000/4 = 250.00
         for i in range(4):
@@ -128,6 +132,8 @@ class TestBackdatedExpenses:
             date=date(2025, 11, 3),
             occurred_at=datetime(2025, 11, 3, 0, 0, 0),  # Midnight
             category="Proviant",
+            description="Test proviant expense",
+            amount=400.0,
             amount_eur=400.0,
             paid_from=PaidFromEnum.wallet,
             split_mode=SplitModeEnum.equal,
@@ -137,7 +143,7 @@ class TestBackdatedExpenses:
         db_session.commit()
         
         # Calculate balances
-        balances = calculate_balances(db_session, test_trip.id)
+        balances, settlement_net_map = calculate_balances(db_session, test_trip.id)
         
         # All 4 crew members should be included (Charlie was aboard on Nov 3)
         for i in range(4):
@@ -157,6 +163,8 @@ class TestBackdatedExpenses:
             date=date.today(),
             occurred_at=datetime.utcnow(),
             category="Diesel",
+            description="Test diesel expense",
+            amount=600.0,
             amount_eur=600.0,
             paid_from=PaidFromEnum.wallet,
             split_mode=SplitModeEnum.equal,
@@ -166,7 +174,7 @@ class TestBackdatedExpenses:
         db_session.commit()
         
         # Calculate balances
-        balances = calculate_balances(db_session, test_trip.id)
+        balances, settlement_net_map = calculate_balances(db_session, test_trip.id)
         
         # Diana should have no share (she departed before expense)
         diana_balance = next(b for b in balances if b['member'].id == test_crew[3].id)

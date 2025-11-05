@@ -5,18 +5,17 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
-import os
 
-from db import Base, get_db
+from db import Base
 from models import Trip, CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum
 
-# Use test database URL
-TEST_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost/test")
+# Use in-memory SQLite database for testing (isolated from development DB)
+TEST_DATABASE_URL = "sqlite:///:memory:"
 
 @pytest.fixture(scope="function")
 def db_session():
-    """Create a fresh database session for each test."""
-    engine = create_engine(TEST_DATABASE_URL)
+    """Create a fresh in-memory database session for each test."""
+    engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
     
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -24,9 +23,9 @@ def db_session():
     
     try:
         yield session
+        session.commit()
     finally:
         session.close()
-        Base.metadata.drop_all(engine)
 
 @pytest.fixture
 def test_trip(db_session):
