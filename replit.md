@@ -3,6 +3,12 @@
 ### Overview
 Crew Wallet is a minimalist expense tracking and settlement application designed for sailing crew members. It provides secure user authentication, manages up to 12 crew members, tracks deposits into a shared wallet, records expenses with flexible splitting, and automatically calculates optimized settlement transfers. The application supports multi-currency transactions with automatic conversion, offers PWA capabilities, and includes professional PDF export functionality for trip documentation. Its business vision is to simplify shared expense management for sailing trips, targeting a market with significant potential for subscription-based revenue.
 
+### Recent Changes (November 5, 2025)
+- **Trip Switching System**: Fixed redirect loop when admin logs in with no active trip. Admin login now redirects to trips page if no active trip exists, otherwise auto-selects active trip.
+- **CSRF Token Fix**: Fixed trip selector dropdown forms (desktop and mobile) to use proper `{{ csrf_input | safe }}` pattern instead of manually accessing session token.
+- **Database Session Management**: Fixed potential session leak in `trip_context_processor` by properly closing database sessions in finally block.
+- **Session-Based Trip Selection**: `TripService.get_selected_trip()` no longer falls back to active trip - requires explicit selection via session.
+
 ### User Preferences
 Preferred communication style: Simple, everyday language.
 
