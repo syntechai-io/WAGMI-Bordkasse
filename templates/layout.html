@@ -245,23 +245,6 @@
             <div id="mobile-menu" class="hidden lg:hidden pb-4 overflow-y-auto" style="max-height: calc(100vh - 64px);">
                 <a href="/" class="block py-2 hover:text-sky-200 transition touch-action">🧭 Dashboard</a>
                 <a href="/trips" class="block py-2 hover:text-sky-200 transition touch-action">⛵ Törns</a>
-                
-                <!-- Trip Selector Mobile (Admin Only) -->
-                {% if request.session.get('role') == 'admin' and all_trips %}
-                <div class="border-t border-sky-300 mt-2 pt-2">
-                    <div class="text-xs text-sky-200 mb-2 px-2">🎯 Aktueller Törn: {{ selected_trip.name if selected_trip else 'Keiner ausgewählt' }}</div>
-                    {% for trip in all_trips %}
-                    <form action="/trips/{{ trip.id }}/select" method="POST" class="m-0">
-                        {{ csrf_input | safe }}
-                        <button type="submit" class="w-full text-left py-2 px-4 hover:text-sky-200 transition touch-action {% if selected_trip and selected_trip.id == trip.id %}bg-sky-900 bg-opacity-30{% endif %}">
-                            {% if selected_trip and selected_trip.id == trip.id %}✓{% endif %} {{ trip.name }}
-                        </button>
-                    </form>
-                    {% endfor %}
-                    <div class="border-b border-sky-300 mt-2"></div>
-                </div>
-                {% endif %}
-                
                 <a href="/crew" class="block py-2 hover:text-sky-200 transition touch-action">👥 Crew</a>
                 <a href="/groups" class="block py-2 hover:text-sky-200 transition touch-action">🔗 Gruppen</a>
                 {% if request.session.get('role') == 'admin' %}
