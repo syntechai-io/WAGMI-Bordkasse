@@ -105,9 +105,9 @@ def calculate_balances(db: Session, trip_id: int):
             if expense.split_mode == SplitModeEnum.equal:
                 # Count crew members who were active at the time of this expense
                 # All crew members are assumed active from trip start unless they departed
-                # A member was active if they had not departed yet OR the expense was created before their departure
+                # A member was active if they had not departed yet OR the expense occurred before their departure
                 # This allows crew to be added to the list retroactively while maintaining correct splits
-                expense_timestamp = expense.created_at
+                expense_timestamp = expense.occurred_at
                 active_at_expense = [
                     m for m in crew_members 
                     if m.departed_at is None or expense_timestamp < m.departed_at

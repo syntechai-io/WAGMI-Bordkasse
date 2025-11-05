@@ -113,6 +113,7 @@ async def create_expense(
             client_temp_id=clientTempId,
             payer_id=payer_id_value,
             date=date.fromisoformat(expense_date),
+            occurred_at=datetime.utcnow(),  # Expense occurred now (can be adjusted later if needed)
             category=category,
             description=description,
             amount=amount,
