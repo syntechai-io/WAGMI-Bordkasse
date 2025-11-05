@@ -313,7 +313,8 @@ async def deactivate_crew(
     request: Request,
     member_id: int,
     db: Session = Depends(get_db),
-    departed_at: str = Form(...)
+    departed_at: str = Form(...),
+    timezone_offset: int = Form(...)
 ):
     """Deactivate a crew member with departure timestamp"""
     active_trip = TripService.get_selected_trip(request, db)
@@ -340,10 +341,16 @@ async def deactivate_crew(
         return RedirectResponse(url="/crew", status_code=303)
     
     try:
-        # Parse the datetime string (format: YYYY-MM-DDTHH:MM)
-        from datetime import datetime
-        departed_datetime = datetime.fromisoformat(departed_at)
-        member.departed_at = departed_datetime
+        # Parse the datetime string (format: YYYY-MM-DDTHH:MM) from browser's local time
+        from datetime import datetime, timedelta
+        local_datetime = datetime.fromisoformat(departed_at)
+        
+        # Convert from local time to UTC using the timezone offset
+        # timezone_offset is in minutes (negative for timezones ahead of UTC)
+        # e.g., CET (UTC+1) has offset=-60, so we add -60 (subtract 60) to get UTC
+        utc_datetime = local_datetime + timedelta(minutes=timezone_offset)
+        
+        member.departed_at = utc_datetime
         db.commit()
         return RedirectResponse(url="/crew?success=deactivated", status_code=303)
     except ValueError:

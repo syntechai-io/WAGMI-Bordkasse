@@ -114,6 +114,7 @@
         </p>
         <form id="deactivateForm" method="post" action="" class="space-y-4">
             {{ csrf_input | safe }}
+            <input type="hidden" name="timezone_offset" id="timezone_offset_input">
             <div>
                 <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 Abreise Datum & Uhrzeit</label>
                 <input type="datetime-local" 
@@ -156,11 +157,18 @@ function showDeactivateModal(memberId, memberName) {
     // Set member name
     nameSpan.textContent = memberName;
     
-    // Set current datetime as default
+    // Set current datetime as default (datetime-local uses local time directly)
     const now = new Date();
-    const offset = now.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(now - offset)).toISOString().slice(0, 16);
-    dateInput.value = localISOTime;
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    dateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    // Set timezone offset (in minutes) for server-side conversion
+    const timezoneOffsetInput = document.getElementById('timezone_offset_input');
+    timezoneOffsetInput.value = now.getTimezoneOffset();
     
     // Show modal
     modal.classList.remove('hidden');

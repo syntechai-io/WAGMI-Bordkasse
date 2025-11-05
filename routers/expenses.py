@@ -109,14 +109,15 @@ async def create_expense(
         payer_id_value = None if payer_id == "" else int(payer_id)
         
         # Set occurred_at based on whether this is a real-time or backdated expense
+        # All timestamps are stored in UTC for consistency
         expense_date_obj = date.fromisoformat(expense_date)
         today = date.today()
         
         if expense_date_obj == today:
-            # Real-time expense: use current timestamp for accurate crew filtering
-            occurred_timestamp = datetime.now()
+            # Real-time expense: use current UTC timestamp for accurate crew filtering
+            occurred_timestamp = datetime.utcnow()
         else:
-            # Backdated expense: use start of day so crew active that day are included
+            # Backdated expense: use start of day UTC so crew active that day are included
             occurred_timestamp = datetime.combine(expense_date_obj, datetime.min.time())
         
         expense = Expense(
