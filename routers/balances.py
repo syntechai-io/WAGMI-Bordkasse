@@ -17,7 +17,10 @@ templates = Jinja2Templates(
 )
 
 def calculate_balances(db: Session, trip_id: int):
-    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == trip_id).all()
+    crew_members = db.query(CrewMember).filter(
+        CrewMember.trip_id == trip_id,
+        CrewMember.departed_at.is_(None)
+    ).all()
     member_ids = [m.id for m in crew_members]
     total_crew_count = len(crew_members)
     
@@ -206,7 +209,10 @@ async def show_settlement(request: Request, db: Session = Depends(get_db)):
     balances, settlement_net_map = calculate_balances(db, active_trip.id)
     transfers = compute_settlement(settlement_net_map)
     
-    member_map = {m.code: m for m in db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).all()}
+    member_map = {m.code: m for m in db.query(CrewMember).filter(
+        CrewMember.trip_id == active_trip.id,
+        CrewMember.departed_at.is_(None)
+    ).all()}
     
     settlement_data = []
     for from_code, to_code, amount in transfers:

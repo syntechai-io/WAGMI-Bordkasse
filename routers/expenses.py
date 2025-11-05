@@ -8,10 +8,19 @@ from db import get_db
 from models import Expense, ExpenseParticipant, CrewMember, Receipt, PaidFromEnum, SplitModeEnum, Currency, ExpenseTemplate
 from services.trip import TripService
 from services.currency import CurrencyService
-from datetime import date
+from datetime import date, datetime
 from typing import List, Optional
 from pathlib import Path
 import uuid
+
+def get_active_crew_at_datetime(db: Session, trip_id: int, expense_datetime: datetime) -> List[CrewMember]:
+    """Get crew members who were active at the given datetime"""
+    all_crew = db.query(CrewMember).filter(CrewMember.trip_id == trip_id).all()
+    active_crew = [
+        member for member in all_crew 
+        if member.departed_at is None or member.departed_at > expense_datetime
+    ]
+    return active_crew
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 templates = Jinja2Templates(
@@ -31,7 +40,11 @@ async def list_expenses(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse(url="/trips", status_code=303)
     
     expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
-    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.code).all()
+    # Show only currently active crew members (not departed) for new expense forms
+    crew_members = db.query(CrewMember).filter(
+        CrewMember.trip_id == active_trip.id,
+        CrewMember.departed_at == None
+    ).order_by(CrewMember.code).all()
     expense_templates = db.query(ExpenseTemplate).order_by(ExpenseTemplate.name).all()
     
     return templates.TemplateResponse("expenses.html", {

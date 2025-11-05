@@ -103,6 +103,7 @@ class CrewMember(Base):
     iban_or_handle = Column(String(100), nullable=True)
     paypal_me = Column(String(100), nullable=True)
     is_trip_admin = Column(Integer, nullable=False, default=0)  # 0 = regular crew, 1 = trip admin
+    departed_at = Column(DateTime, nullable=True)  # Timestamp when crew member departed
     created_at = Column(DateTime, default=datetime.utcnow)
     
     trip = relationship("Trip", back_populates="crew_members")

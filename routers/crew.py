@@ -307,3 +307,79 @@ async def delete_crew(
             "member_groups": member_groups,
             "error": f"'{member.name}' kann nicht gelöscht werden. Bitte löschen Sie zuerst alle verknüpften Einträge."
         }, status_code=400)
+
+@router.post("/{member_id}/deactivate")
+async def deactivate_crew(
+    request: Request,
+    member_id: int,
+    db: Session = Depends(get_db),
+    departed_at: str = Form(...)
+):
+    """Deactivate a crew member with departure timestamp"""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    # Only admin or trip admin can deactivate crew members
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        request.session["error"] = "Nur Admins können Crew-Mitglieder deaktivieren."
+        return RedirectResponse(url="/crew", status_code=303)
+    
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role, request):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/crew", status_code=303)
+    
+    member = db.query(CrewMember).filter(
+        CrewMember.id == member_id,
+        CrewMember.trip_id == active_trip.id
+    ).first()
+    
+    if not member:
+        return RedirectResponse(url="/crew", status_code=303)
+    
+    try:
+        # Parse the datetime string (format: YYYY-MM-DDTHH:MM)
+        from datetime import datetime
+        departed_datetime = datetime.fromisoformat(departed_at)
+        member.departed_at = departed_datetime
+        db.commit()
+        return RedirectResponse(url="/crew?success=deactivated", status_code=303)
+    except ValueError:
+        request.session["error"] = "Ungültiges Datum-/Zeitformat."
+        return RedirectResponse(url="/crew", status_code=303)
+
+@router.post("/{member_id}/reactivate")
+async def reactivate_crew(
+    request: Request,
+    member_id: int,
+    db: Session = Depends(get_db)
+):
+    """Reactivate a departed crew member"""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    # Only admin or trip admin can reactivate crew members
+    if not TripService.is_admin_or_trip_admin(request, active_trip.id):
+        request.session["error"] = "Nur Admins können Crew-Mitglieder reaktivieren."
+        return RedirectResponse(url="/crew", status_code=303)
+    
+    # Check if trip is editable by current user
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role, request):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/crew", status_code=303)
+    
+    member = db.query(CrewMember).filter(
+        CrewMember.id == member_id,
+        CrewMember.trip_id == active_trip.id
+    ).first()
+    
+    if not member:
+        return RedirectResponse(url="/crew", status_code=303)
+    
+    member.departed_at = None
+    db.commit()
+    return RedirectResponse(url="/crew?success=reactivated", status_code=303)

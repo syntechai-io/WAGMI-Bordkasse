@@ -24,13 +24,14 @@
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Benutzername</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Name</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Rolle</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">IBAN/Handle</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aktionen</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-sky-200">
                     {% for member in crew_members %}
-                    <tr>
+                    <tr style="{% if member.departed_at %}opacity: 0.6; background-color: rgba(200, 200, 200, 0.1);{% endif %}">
                         <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--ocean-blue);">{{ member.code }}</td>
                         <td class="px-6 py-4" style="color: var(--navy-deep);">
                             <div class="flex items-center gap-2 flex-wrap">
@@ -59,13 +60,41 @@
                             <span class="text-sm" style="color: var(--navy-deep); opacity: 0.5;">Crew</span>
                             {% endif %}
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if member.departed_at %}
+                            <div class="flex flex-col gap-1">
+                                <span class="px-2 py-1 text-xs rounded-full text-white font-semibold inline-block w-fit" 
+                                      style="background: linear-gradient(135deg, #666 0%, #999 100%);">
+                                    🚪 Abgereist
+                                </span>
+                                <span class="text-xs" style="color: var(--navy-deep); opacity: 0.7;">
+                                    {{ member.departed_at.strftime('%d.%m.%Y %H:%M') }}
+                                </span>
+                            </div>
+                            {% else %}
+                            <span class="px-2 py-1 text-xs rounded-full text-white font-semibold" 
+                                  style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                                ✅ Aktiv
+                            </span>
+                            {% endif %}
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--navy-deep); opacity: 0.7;">{{ member.iban_or_handle or '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                            <a href="/crew/{{ member.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
-                            <form action="/crew/{{ member.id }}/delete" method="post" class="inline" onsubmit="return confirm('Wirklich löschen?')">
-                                {{ csrf_input | safe }}
-                                <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ Löschen</button>
-                            </form>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm space-y-2">
+                            <div class="flex gap-2 flex-wrap">
+                                <a href="/crew/{{ member.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
+                                {% if member.departed_at %}
+                                <form action="/crew/{{ member.id }}/reactivate" method="post" class="inline" onsubmit="return confirm('{{ member.name }} wieder aktivieren?')">
+                                    {{ csrf_input | safe }}
+                                    <button type="submit" class="hover:underline touch-action" style="color: var(--sea-foam);">🔄 Reaktivieren</button>
+                                </form>
+                                {% else %}
+                                <button onclick="showDeactivateModal({{ member.id }}, '{{ member.name }}')" class="hover:underline touch-action" style="color: #ff9800;">🚪 Deaktivieren</button>
+                                {% endif %}
+                                <form action="/crew/{{ member.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ member.name }} wirklich löschen?')">
+                                    {{ csrf_input | safe }}
+                                    <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ Löschen</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -74,4 +103,76 @@
         </div>
     </div>
 </div>
+
+<!-- Deactivate Modal -->
+<div id="deactivateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" onclick="hideDeactivateModal(event)">
+    <div class="bg-white porthole-card p-6 max-w-md w-full mx-4" onclick="event.stopPropagation()">
+        <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">🚪 Crew-Mitglied deaktivieren</h2>
+        <p class="mb-4" style="color: var(--navy-deep);">
+            <span id="deactivateMemberName" class="font-semibold"></span> wird deaktiviert.
+            Bitte geben Sie das Datum und die Uhrzeit der Abreise an:
+        </p>
+        <form id="deactivateForm" method="post" action="" class="space-y-4">
+            {{ csrf_input | safe }}
+            <div>
+                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 Abreise Datum & Uhrzeit</label>
+                <input type="datetime-local" 
+                       name="departed_at" 
+                       id="departed_at_input"
+                       required 
+                       class="w-full px-3 py-2 border rounded-lg" 
+                       style="border-color: var(--sky-blue);">
+                <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">
+                    💡 Das Mitglied wird ab diesem Zeitpunkt nicht mehr in zukünftige Ausgaben-Aufteilungen einbezogen.
+                </p>
+            </div>
+            <div class="flex gap-3 justify-end">
+                <button type="button" 
+                        onclick="hideDeactivateModal()" 
+                        class="px-4 py-2 rounded-lg border" 
+                        style="border-color: var(--sky-blue); color: var(--navy-deep);">
+                    Abbrechen
+                </button>
+                <button type="submit" 
+                        class="px-4 py-2 rounded-lg text-white" 
+                        style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">
+                    🚪 Deaktivieren
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showDeactivateModal(memberId, memberName) {
+    const modal = document.getElementById('deactivateModal');
+    const form = document.getElementById('deactivateForm');
+    const nameSpan = document.getElementById('deactivateMemberName');
+    const dateInput = document.getElementById('departed_at_input');
+    
+    // Set form action
+    form.action = `/crew/${memberId}/deactivate`;
+    
+    // Set member name
+    nameSpan.textContent = memberName;
+    
+    // Set current datetime as default
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(now - offset)).toISOString().slice(0, 16);
+    dateInput.value = localISOTime;
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function hideDeactivateModal(event) {
+    if (!event || event.target.id === 'deactivateModal') {
+        const modal = document.getElementById('deactivateModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+</script>
 {% endblock %}
