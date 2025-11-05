@@ -65,8 +65,10 @@ async def login(
         active_trip = TripService.get_active_trip(db)
         if active_trip:
             TripService.set_selected_trip(request, active_trip.id)
-        
-        return RedirectResponse(url="/", status_code=303)
+            return RedirectResponse(url="/", status_code=303)
+        else:
+            # No active trip - send admin to trips page to select/create one
+            return RedirectResponse(url="/trips/", status_code=303)
     
     # Check 2 & 3: Trip Admin or Crew login (CrewMember table)
     if trip_id_int:

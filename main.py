@@ -109,7 +109,7 @@ app.include_router(groups_router)
 async def dashboard(request: Request, db: Session = Depends(get_db)):
     selected_trip = TripService.get_selected_trip(request, db)
     if not selected_trip:
-        return RedirectResponse(url="/trips", status_code=303)
+        return RedirectResponse(url="/trips/", status_code=303)
     
     trip_id = selected_trip.id
     user_role = request.session.get("role", "crew")
