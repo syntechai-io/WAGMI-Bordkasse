@@ -108,12 +108,23 @@ async def create_expense(
         # Handle external charge (payer_id is empty string)
         payer_id_value = None if payer_id == "" else int(payer_id)
         
+        # Set occurred_at based on whether this is a real-time or backdated expense
+        expense_date_obj = date.fromisoformat(expense_date)
+        today = date.today()
+        
+        if expense_date_obj == today:
+            # Real-time expense: use current timestamp for accurate crew filtering
+            occurred_timestamp = datetime.utcnow()
+        else:
+            # Backdated expense: use start of day so crew active that day are included
+            occurred_timestamp = datetime.combine(expense_date_obj, datetime.min.time())
+        
         expense = Expense(
             trip_id=active_trip.id,
             client_temp_id=clientTempId,
             payer_id=payer_id_value,
-            date=date.fromisoformat(expense_date),
-            occurred_at=datetime.utcnow(),  # Expense occurred now (can be adjusted later if needed)
+            date=expense_date_obj,
+            occurred_at=occurred_timestamp,  # Expense occurred on the selected date at noon
             category=category,
             description=description,
             amount=amount,
