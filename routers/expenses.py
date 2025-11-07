@@ -37,7 +37,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 async def list_expenses(request: Request, db: Session = Depends(get_db)):
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
-        return RedirectResponse(url="/trips", status_code=303)
+        return RedirectResponse(url="/trips/", status_code=303)
     
     expenses = db.query(Expense).filter(Expense.trip_id == active_trip.id).order_by(Expense.date.desc()).all()
     # Show only currently active crew members (not departed) for new expense forms
@@ -74,7 +74,7 @@ async def create_expense(
 ):
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
-        return RedirectResponse(url="/trips", status_code=303)
+        return RedirectResponse(url="/trips/", status_code=303)
     
     user_role = request.session.get("role", "crew")
     if not TripService.is_trip_editable(active_trip, user_role, request):
@@ -264,7 +264,7 @@ async def expense_detail(
 ):
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
-        return RedirectResponse(url="/trips", status_code=303)
+        return RedirectResponse(url="/trips/", status_code=303)
     
     expense = db.query(Expense).filter(
         Expense.id == expense_id,
@@ -284,7 +284,7 @@ async def edit_expense_form(
 ):
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
-        return RedirectResponse(url="/trips", status_code=303)
+        return RedirectResponse(url="/trips/", status_code=303)
     
     expense = db.query(Expense).filter(
         Expense.id == expense_id,
@@ -331,7 +331,7 @@ async def update_expense(
 ):
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
-        return RedirectResponse(url="/trips", status_code=303)
+        return RedirectResponse(url="/trips/", status_code=303)
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
@@ -485,16 +485,20 @@ async def update_expense(
         
         db.commit()
         
-        # Audit log
-        AuditService.log(
-            db=db,
-            request=request,
-            trip_id=active_trip.id,
-            action="update",
-            entity_type="expense",
-            entity_id=expense.id,
-            details=f"Updated expense: {description}"
-        )
+        # Audit log (wrapped in try-except to prevent errors from breaking the request)
+        try:
+            AuditService.log(
+                db=db,
+                request=request,
+                trip_id=active_trip.id,
+                action="update",
+                entity_type="expense",
+                entity_id=expense.id,
+                details=f"Updated expense: {description}"
+            )
+        except Exception as e:
+            # Log the error but don't fail the request since expense was already saved
+            print(f"Warning: Failed to log audit entry for expense {expense.id}: {e}")
         
         # Redirect to detail page if receipt was uploaded, otherwise to list
         if receipt_uploaded:
@@ -521,7 +525,7 @@ async def delete_expense(
 ):
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
-        return RedirectResponse(url="/trips", status_code=303)
+        return RedirectResponse(url="/trips/", status_code=303)
     
     # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
