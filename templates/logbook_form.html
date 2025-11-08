@@ -59,11 +59,38 @@
             </div>
         </div>
         
-        <button type="button" id="gps-button" 
-                class="text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm" 
-                style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-            📍 GPS-Position abrufen
-        </button>
+        <div class="flex gap-2">
+            <button type="button" id="gps-button" 
+                    class="flex-1 text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm" 
+                    style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                📍 GPS-Position abrufen
+            </button>
+            <button type="button" id="gps-tracking-toggle" 
+                    class="flex-1 text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm" 
+                    style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%);">
+                🎯 GPS-Tracking starten
+            </button>
+        </div>
+        
+        <!-- GPS Tracking Banner (hidden by default) -->
+        <div id="gps-tracking-banner" class="hidden mt-3 p-3 rounded-lg porthole-card" 
+             style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%); border: 2px solid var(--sea-foam);">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="animate-pulse">
+                        <span class="text-2xl">🛰️</span>
+                    </div>
+                    <div>
+                        <div class="font-bold" style="color: var(--navy-deep);">GPS-Tracking aktiv</div>
+                        <div class="text-sm" style="color: var(--navy-deep);" id="gps-status-text">Position wird aktualisiert...</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs" style="color: var(--navy-deep);" id="gps-accuracy">Genauigkeit: --m</div>
+                    <div class="text-xs" style="color: var(--navy-deep);" id="gps-update-time">Letztes Update: --</div>
+                </div>
+            </div>
+        </div>
         
         <div class="rope-divider"></div>
         
@@ -484,8 +511,9 @@
     </form>
 </div>
 
+<script src="/static/js/logbook-gps.js"></script>
 <script>
-// Phase A: Motor Toggle Buttons
+// Phase A: Motor Toggle Buttons with Auto-Calculation
 document.getElementById('motor-on-btn').addEventListener('click', function() {
     const now = new Date();
     const localISOString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
@@ -495,6 +523,9 @@ document.getElementById('motor-on-btn').addEventListener('click', function() {
     setTimeout(() => {
         this.textContent = '▶️ Motor AN';
     }, 2000);
+    
+    // Trigger motor hours calculation
+    calculateMotorHours();
 });
 
 document.getElementById('motor-off-btn').addEventListener('click', function() {
@@ -506,7 +537,49 @@ document.getElementById('motor-off-btn').addEventListener('click', function() {
     setTimeout(() => {
         this.textContent = '⏸️ Motor AUS';
     }, 2000);
+    
+    // Trigger motor hours calculation
+    calculateMotorHours();
 });
+
+// Motor Hours Auto-Calculation
+function calculateMotorHours() {
+    const engineOnInput = document.getElementById('engine_on_time');
+    const engineOffInput = document.getElementById('engine_off_time');
+    const engHoursTotalInput = document.querySelector('input[name="eng_hours_total"]');
+    
+    if (!engineOnInput.value || !engineOffInput.value) {
+        return; // Need both times to calculate
+    }
+    
+    const onTime = new Date(engineOnInput.value);
+    const offTime = new Date(engineOffInput.value);
+    
+    if (offTime <= onTime) {
+        console.log('Motor off time must be after on time');
+        return;
+    }
+    
+    // Calculate duration in hours
+    const durationMs = offTime - onTime;
+    const durationHours = (durationMs / (1000 * 60 * 60)).toFixed(1);
+    
+    // If eng_hours_total is empty or this is first entry, just show calculated duration
+    // User can manually adjust if they know the previous total
+    if (!engHoursTotalInput.value || engHoursTotalInput.value === '0') {
+        console.log(`Motor ran for ${durationHours} hours`);
+        // Don't auto-fill total - let user enter starting hours manually
+    } else {
+        // Add duration to existing total (user can override)
+        const currentTotal = parseFloat(engHoursTotalInput.value) || 0;
+        const newTotal = (currentTotal + parseFloat(durationHours)).toFixed(1);
+        engHoursTotalInput.value = newTotal;
+    }
+}
+
+// Watch for manual changes to engine times
+document.getElementById('engine_on_time').addEventListener('change', calculateMotorHours);
+document.getElementById('engine_off_time').addEventListener('change', calculateMotorHours);
 
 // Phase A: In-Mast Furling Slider
 const furlSlider = document.getElementById('main_furl_slider');
@@ -633,6 +706,19 @@ document.getElementById('gps-button').addEventListener('click', async function()
         (position) => {
             document.querySelector('input[name="latitude"]').value = position.coords.latitude.toFixed(6);
             document.querySelector('input[name="longitude"]').value = position.coords.longitude.toFixed(6);
+            
+            // Auto-fill SOG (Speed Over Ground) - convert m/s to knots
+            if (position.coords.speed !== null && position.coords.speed >= 0) {
+                const speedKnots = (position.coords.speed * 1.94384).toFixed(1);
+                document.querySelector('input[name="sog_kn"]').value = speedKnots;
+            }
+            
+            // Auto-fill COG (Course Over Ground) - heading in degrees
+            if (position.coords.heading !== null && position.coords.heading >= 0) {
+                const heading = Math.round(position.coords.heading);
+                document.querySelector('input[name="cog_deg"]').value = heading;
+            }
+            
             button.textContent = '✅ Position abgerufen!';
             setTimeout(() => {
                 button.textContent = '📍 GPS-Position abrufen';
@@ -670,6 +756,51 @@ document.getElementById('gps-button').addEventListener('click', async function()
         },
         options
     );
+});
+
+// GPS Tracking Toggle
+const trackingToggleBtn = document.getElementById('gps-tracking-toggle');
+const trackingBanner = document.getElementById('gps-tracking-banner');
+const statusText = document.getElementById('gps-status-text');
+const accuracyText = document.getElementById('gps-accuracy');
+const updateTimeText = document.getElementById('gps-update-time');
+
+trackingToggleBtn.addEventListener('click', function() {
+    const tracker = window.logbookGPSTracker;
+    
+    if (tracker.isTracking) {
+        tracker.stop();
+    } else {
+        tracker.start();
+    }
+});
+
+// Handle GPS tracking events
+document.addEventListener('gps-tracking-started', () => {
+    trackingToggleBtn.textContent = '⏸️ GPS-Tracking stoppen';
+    trackingToggleBtn.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+    trackingBanner.classList.remove('hidden');
+    statusText.textContent = 'Warte auf GPS-Signal...';
+});
+
+document.addEventListener('gps-tracking-stopped', () => {
+    trackingToggleBtn.textContent = '🎯 GPS-Tracking starten';
+    trackingToggleBtn.style.background = 'linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%)';
+    trackingBanner.classList.add('hidden');
+});
+
+document.addEventListener('gps-position-update', (event) => {
+    const position = event.detail.position;
+    const accuracy = position.coords.accuracy;
+    const now = new Date();
+    
+    statusText.textContent = `Position ${position.coords.latitude.toFixed(4)}°, ${position.coords.longitude.toFixed(4)}°`;
+    accuracyText.textContent = `Genauigkeit: ${Math.round(accuracy)}m`;
+    updateTimeText.textContent = `Letztes Update: ${now.toLocaleTimeString('de-DE')}`;
+});
+
+document.addEventListener('gps-position-error', (event) => {
+    statusText.textContent = `Fehler: ${event.detail.errorMessage}`;
 });
 
 // CSRF Token Refresh - Prevent stale tokens on long-form sessions
