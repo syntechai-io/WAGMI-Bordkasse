@@ -8,6 +8,7 @@ from reportlab.pdfgen import canvas
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 import io
+import os
 
 def render_logbook_pdf(
     entries: List[Any],
@@ -15,7 +16,9 @@ def render_logbook_pdf(
     scope: str,
     outfile: Any,
     meta: Optional[Dict[str, Any]] = None,
-    summary: Optional[Dict[str, Any]] = None
+    summary: Optional[Dict[str, Any]] = None,
+    entry_id: Optional[int] = None,
+    trip_name: Optional[str] = None
 ) -> None:
     """
     Render official German/European standard logbook PDF export.
@@ -27,6 +30,8 @@ def render_logbook_pdf(
         outfile: File-like object or path to write PDF
         meta: Optional metadata (creator, title, subject)
         summary: Optional summary statistics (total_nm, total_engine_hours, etc.)
+        entry_id: Optional entry ID for navigation link (single entry exports)
+        trip_name: Optional trip name for display
     """
     
     doc = SimpleDocTemplate(
@@ -329,8 +334,26 @@ def render_logbook_pdf(
     
     story.append(Spacer(1, 10*mm))
     
-    footer_text = f"Erstellt am / Generated: {datetime.now().strftime('%d.%m.%Y %H:%M')}"
-    story.append(Paragraph(footer_text, small_style))
+    # Build navigation footer with link back to app
+    footer_lines = []
+    footer_lines.append(f"Erstellt am / Generated: {datetime.now().strftime('%d.%m.%Y %H:%M')}")
+    
+    if trip_name:
+        footer_lines.append(f"Reise / Trip: {trip_name}")
+    
+    # Get base URL from environment for navigation link
+    replit_domain = os.environ.get('REPLIT_DOMAINS', '')
+    if replit_domain and entry_id:
+        base_url = f"https://{replit_domain}"
+        entry_url = f"{base_url}/logbook/{entry_id}"
+        footer_lines.append(f'<link href="{entry_url}" color="blue">📱 Zurück zum Logbuch / Back to Logbook: {entry_url}</link>')
+    elif replit_domain:
+        base_url = f"https://{replit_domain}"
+        logbook_url = f"{base_url}/logbook"
+        footer_lines.append(f'<link href="{logbook_url}" color="blue">📱 Zurück zum Logbuch / Back to Logbook: {logbook_url}</link>')
+    
+    for line in footer_lines:
+        story.append(Paragraph(line, small_style))
     
     story.append(Spacer(1, 5*mm))
     

@@ -332,7 +332,7 @@
             <div>
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏁 Von (Abfahrt)</label>
                 <input type="text" name="departure" 
-                       value="{% if entry and entry.departure %}{{ entry.departure }}{% endif %}" 
+                       value="{% if entry and entry.departure %}{{ entry.departure }}{% else %}Fredericia DK{% endif %}" 
                        placeholder="z.B. Rostock" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
                        style="border-color: var(--sky-blue);">
@@ -667,10 +667,19 @@ Firefox:
 }
 
 document.getElementById('gps-button').addEventListener('click', async function() {
+    console.log('=== GPS DEBUG START ===');
+    console.log('🔍 Current URL:', window.location.href);
+    console.log('🔒 Protocol:', window.location.protocol);
+    console.log('🌐 Is HTTPS:', window.location.protocol === 'https:');
+    console.log('🏠 Is Localhost:', window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    console.log('🖼️ In iframe:', window.self !== window.top);
+    
     if (!('geolocation' in navigator)) {
+        console.error('❌ Geolocation API not available');
         alert('❌ Geolocation wird von diesem Browser nicht unterstützt.\n\nBitte verwende einen modernen Browser wie Chrome, Firefox, Safari oder Edge.');
         return;
     }
+    console.log('✅ Geolocation API available');
     
     const button = this;
     button.textContent = '⏳ GPS-Position wird abgerufen...';
@@ -680,8 +689,10 @@ document.getElementById('gps-button').addEventListener('click', async function()
     if (navigator.permissions) {
         try {
             const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+            console.log('📋 Permission state:', permissionStatus.state);
             
             if (permissionStatus.state === 'denied') {
+                console.error('🚫 Permission explicitly denied');
                 const instructions = getPermissionInstructions();
                 alert(`🚫 Standort-Zugriff blockiert!\n\n${instructions}`);
                 button.textContent = '🔒 Standort gesperrt - Einstellungen prüfen';
@@ -692,8 +703,11 @@ document.getElementById('gps-button').addEventListener('click', async function()
                 return;
             }
         } catch (e) {
-            console.log('Permission API not fully supported, continuing with geolocation request');
+            console.warn('⚠️ Permission API error:', e.message);
+            console.log('Continuing with geolocation request...');
         }
+    } else {
+        console.log('⚠️ Permissions API not available in this browser');
     }
     
     const options = {
@@ -704,6 +718,15 @@ document.getElementById('gps-button').addEventListener('click', async function()
     
     navigator.geolocation.getCurrentPosition(
         (position) => {
+            console.log('✅ GPS SUCCESS!');
+            console.log('📍 Latitude:', position.coords.latitude);
+            console.log('📍 Longitude:', position.coords.longitude);
+            console.log('🎯 Accuracy:', position.coords.accuracy, 'm');
+            console.log('⏱️ Timestamp:', new Date(position.timestamp).toISOString());
+            console.log('🚢 Speed (m/s):', position.coords.speed);
+            console.log('🧭 Heading (deg):', position.coords.heading);
+            console.log('📏 Altitude:', position.coords.altitude);
+            
             document.querySelector('input[name="latitude"]').value = position.coords.latitude.toFixed(6);
             document.querySelector('input[name="longitude"]').value = position.coords.longitude.toFixed(6);
             
@@ -711,14 +734,21 @@ document.getElementById('gps-button').addEventListener('click', async function()
             if (position.coords.speed !== null && position.coords.speed >= 0) {
                 const speedKnots = (position.coords.speed * 1.94384).toFixed(1);
                 document.querySelector('input[name="sog_kn"]').value = speedKnots;
+                console.log('✅ SOG auto-filled:', speedKnots, 'knots');
+            } else {
+                console.log('⚠️ Speed not available (null or negative)');
             }
             
             // Auto-fill COG (Course Over Ground) - heading in degrees
             if (position.coords.heading !== null && position.coords.heading >= 0) {
                 const heading = Math.round(position.coords.heading);
                 document.querySelector('input[name="cog_deg"]').value = heading;
+                console.log('✅ COG auto-filled:', heading, '°');
+            } else {
+                console.log('⚠️ Heading not available (null or negative)');
             }
             
+            console.log('=== GPS DEBUG END (SUCCESS) ===');
             button.textContent = '✅ Position abgerufen!';
             setTimeout(() => {
                 button.textContent = '📍 GPS-Position abrufen';
@@ -726,27 +756,45 @@ document.getElementById('gps-button').addEventListener('click', async function()
             }, 2000);
         },
         (error) => {
+            console.error('❌ GPS ERROR!');
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
+            console.error('Error details:', error);
+            
             let errorMessage = '';
+            let debugInfo = `\n\nDEBUG INFO:\n`;
+            debugInfo += `• Protocol: ${window.location.protocol}\n`;
+            debugInfo += `• HTTPS: ${window.location.protocol === 'https:' ? 'YES' : 'NO'}\n`;
+            debugInfo += `• In iframe: ${window.self !== window.top ? 'YES' : 'NO'}\n`;
+            debugInfo += `• Error code: ${error.code}\n`;
             
             switch(error.code) {
                 case error.PERMISSION_DENIED:
+                    console.error('🚫 Permission denied - possible causes:');
+                    console.error('  - User clicked "Block" on permission prompt');
+                    console.error('  - Not HTTPS (required for geolocation in production)');
+                    console.error('  - Blocked in iframe by browser policy');
                     const instructions = getPermissionInstructions();
-                    errorMessage = `🚫 Standort-Zugriff verweigert!\n\n${instructions}`;
+                    errorMessage = `🚫 Standort-Zugriff verweigert!\n\n${instructions}${debugInfo}`;
                     button.textContent = '🔒 Zugriff verweigert';
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    errorMessage = `📡 GPS-Signal nicht verfügbar!\n\nMögliche Lösungen:\n• Gehe nach draußen für besseren GPS-Empfang\n• Prüfe ob Standortdienste aktiviert sind\n• Versuche es in ein paar Sekunden erneut`;
+                    console.error('📡 Position unavailable - GPS signal issues');
+                    errorMessage = `📡 GPS-Signal nicht verfügbar!\n\nMögliche Lösungen:\n• Gehe nach draußen für besseren GPS-Empfang\n• Prüfe ob Standortdienste aktiviert sind\n• Versuche es in ein paar Sekunden erneut${debugInfo}`;
                     button.textContent = '📡 Kein Signal';
                     break;
                 case error.TIMEOUT:
-                    errorMessage = `⏱️ GPS-Timeout!\n\nDie Position konnte nicht schnell genug ermittelt werden.\n\n• Prüfe deine GPS-Verbindung\n• Versuche es erneut`;
+                    console.error('⏱️ Timeout - GPS took too long (>10s)');
+                    errorMessage = `⏱️ GPS-Timeout!\n\nDie Position konnte nicht schnell genug ermittelt werden.\n\n• Prüfe deine GPS-Verbindung\n• Versuche es erneut${debugInfo}`;
                     button.textContent = '⏱️ Timeout';
                     break;
                 default:
-                    errorMessage = `❌ GPS-Fehler: ${error.message}\n\nBitte versuche es erneut oder gib die Position manuell ein.`;
+                    console.error('❌ Unknown error:', error.message);
+                    errorMessage = `❌ GPS-Fehler: ${error.message}\n\nBitte versuche es erneut oder gib die Position manuell ein.${debugInfo}`;
                     button.textContent = '❌ Fehler';
             }
             
+            console.log('=== GPS DEBUG END (ERROR) ===');
             alert(errorMessage);
             
             setTimeout(() => {
