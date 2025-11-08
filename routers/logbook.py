@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Depends, Form, UploadFile, File, HTTPException
 from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
-from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse
+from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
@@ -8,10 +8,12 @@ from db import get_db
 from models import LogbookEntry, LogbookPhoto, CrewOnWatch, CrewMember, SeaStateEnum
 from services.trip import TripService
 from services.audit import AuditService
-from datetime import datetime
+from datetime import datetime, date
 from typing import List, Optional
 from pathlib import Path
 import uuid
+import io
+from logbook_pdf_template import render_logbook_pdf
 
 router = APIRouter(prefix="/logbook", tags=["logbook"])
 templates = Jinja2Templates(
@@ -691,3 +693,145 @@ async def view_photo(request: Request, photo_id: int, db: Session = Depends(get_
         raise HTTPException(status_code=404, detail="Photo file not found")
     
     return FileResponse(str(filepath), media_type=photo.content_type)
+
+@router.get("/export/pdf/entry/{entry_id}")
+async def export_single_entry_pdf(request: Request, entry_id: int, db: Session = Depends(get_db)):
+    """Export single logbook entry as official German/European standard PDF"""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        raise HTTPException(status_code=403, detail="No active trip")
+    
+    entry = db.query(LogbookEntry).options(
+        joinedload(LogbookEntry.crew_on_watch).joinedload(CrewOnWatch.member)
+    ).filter(
+        LogbookEntry.id == entry_id,
+        LogbookEntry.trip_id == active_trip.id
+    ).first()
+    
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    
+    vessel_info = {
+        'name': active_trip.name or 'Unbekannt',
+        'home_port': getattr(active_trip, 'home_port', '-'),
+        'call_sign': getattr(active_trip, 'call_sign', '-'),
+        'imo_mmsi': getattr(active_trip, 'imo_mmsi', '-')
+    }
+    
+    pdf_buffer = io.BytesIO()
+    
+    try:
+        render_logbook_pdf(
+            entries=[entry],
+            vessel=vessel_info,
+            scope='single_entry',
+            outfile=pdf_buffer,
+            meta={
+                'title': f'Logbuch-Eintrag {entry.entry_date.strftime("%Y-%m-%d %H:%M")}',
+                'creator': 'WAGMI Bordkasse'
+            }
+        )
+        
+        pdf_buffer.seek(0)
+        
+        filename = f"logbuch_eintrag_{entry.entry_date.strftime('%Y%m%d_%H%M')}.pdf"
+        
+        AuditService.log(
+            db=db,
+            request=request,
+            trip_id=active_trip.id,
+            action="export_pdf",
+            entity_type="logbook_entry",
+            entity_id=entry.id,
+            details=f"PDF export: {filename}"
+        )
+        
+        return StreamingResponse(
+            pdf_buffer,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
+
+@router.get("/export/pdf/daily")
+async def export_daily_pdf(
+    request: Request,
+    export_date: str,
+    db: Session = Depends(get_db)
+):
+    """Export all logbook entries for a specific date as PDF"""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        raise HTTPException(status_code=403, detail="No active trip")
+    
+    try:
+        target_date = datetime.strptime(export_date, '%Y-%m-%d').date()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+    
+    entries = db.query(LogbookEntry).options(
+        joinedload(LogbookEntry.crew_on_watch).joinedload(CrewOnWatch.member)
+    ).filter(
+        LogbookEntry.trip_id == active_trip.id,
+        LogbookEntry.entry_date >= datetime.combine(target_date, datetime.min.time()),
+        LogbookEntry.entry_date < datetime.combine(target_date, datetime.max.time())
+    ).order_by(LogbookEntry.entry_date.asc()).all()
+    
+    if not entries:
+        raise HTTPException(status_code=404, detail=f"No logbook entries found for {export_date}")
+    
+    vessel_info = {
+        'name': active_trip.name or 'Unbekannt',
+        'home_port': getattr(active_trip, 'home_port', '-'),
+        'call_sign': getattr(active_trip, 'call_sign', '-'),
+        'imo_mmsi': getattr(active_trip, 'imo_mmsi', '-')
+    }
+    
+    total_dist = sum(e.dist_day_nm for e in entries if e.dist_day_nm is not None)
+    total_eng_hours = sum(e.eng_hours_total for e in entries if e.eng_hours_total is not None)
+    
+    summary = {
+        'total_nm': total_dist if total_dist > 0 else None,
+        'total_engine_hours': total_eng_hours if total_eng_hours > 0 else None,
+        'entry_count': len(entries)
+    }
+    
+    pdf_buffer = io.BytesIO()
+    
+    try:
+        render_logbook_pdf(
+            entries=entries,
+            vessel=vessel_info,
+            scope='daily',
+            outfile=pdf_buffer,
+            meta={
+                'title': f'Tageslogbuch {target_date.strftime("%d.%m.%Y")}',
+                'creator': 'WAGMI Bordkasse'
+            },
+            summary=summary
+        )
+        
+        pdf_buffer.seek(0)
+        
+        filename = f"tageslogbuch_{target_date.strftime('%Y%m%d')}.pdf"
+        
+        AuditService.log(
+            db=db,
+            request=request,
+            trip_id=active_trip.id,
+            action="export_pdf",
+            entity_type="logbook_daily",
+            entity_id=None,
+            details=f"Daily PDF export: {filename} ({len(entries)} entries)"
+        )
+        
+        return StreamingResponse(
+            pdf_buffer,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
