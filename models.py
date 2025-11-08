@@ -248,6 +248,7 @@ class LogbookEntry(Base):
     id = Column(Integer, primary_key=True, index=True)
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
     client_temp_id = Column(String(100), nullable=True, index=True, unique=True)
+    watch_leader_id = Column(Integer, ForeignKey("crew_members.id"), nullable=True, index=True)
     entry_date = Column(DateTime, nullable=False, index=True)
     entry_date_utc = Column(DateTime, nullable=False)
     latitude = Column(Float, nullable=True)
@@ -302,6 +303,7 @@ class LogbookEntry(Base):
     trip = relationship("Trip", back_populates="logbook_entries")
     photos = relationship("LogbookPhoto", back_populates="entry", cascade="all, delete-orphan")
     crew_on_watch = relationship("CrewOnWatch", back_populates="entry", cascade="all, delete-orphan")
+    watch_leader = relationship("CrewMember", foreign_keys=[watch_leader_id])
     
     # Self-referential relationship for addendums
     parent = relationship("LogbookEntry", remote_side=[id], foreign_keys=[parent_id], backref="addendums")

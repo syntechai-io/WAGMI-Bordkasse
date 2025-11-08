@@ -294,7 +294,7 @@
             </div>
             
             <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🔧 Motorstunden (veraltet - nutze "Motor & Antrieb")</label>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🔧 Motorstunden Gesamt</label>
                 <input type="number" name="engine_hours" step="0.1" 
                        value="{% if entry and entry.engine_hours %}{{ entry.engine_hours }}{% endif %}" 
                        placeholder="z.B. 1234.5" 
@@ -361,12 +361,15 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">🎐 Vorsegel / Fock</label>
-                        <input type="text" name="headsail" 
-                               value="{% if entry and entry.headsail %}{{ entry.headsail }}{% endif %}" 
-                               placeholder="z.B. Genua 1, Fock, gerefft" 
-                               class="w-full px-4 py-3 border rounded-lg text-lg" 
-                               style="border-color: var(--sky-blue);">
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">🎐 Genua</label>
+                        <select name="headsail" 
+                                class="w-full px-4 py-3 border rounded-lg text-lg" 
+                                style="border-color: var(--sky-blue);">
+                            <option value="">-- Bitte wählen --</option>
+                            <option value="Genua gesetzt" {% if entry and entry.headsail == 'Genua gesetzt' %}selected{% endif %}>Genua gesetzt</option>
+                            <option value="Genua teilweise" {% if entry and entry.headsail == 'Genua teilweise' %}selected{% endif %}>Genua teilweise</option>
+                            <option value="Genua geborgen" {% if entry and entry.headsail == 'Genua geborgen' %}selected{% endif %}>Genua geborgen</option>
+                        </select>
                     </div>
                     
                     <div>
@@ -417,6 +420,20 @@
         <div class="rope-divider"></div>
         
         <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">👥 Crew & Notizen</h3>
+        
+        <div class="mb-4">
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">⚓ Wachführer (Watch Leader)</label>
+            <select name="watch_leader_id" 
+                    class="w-full px-4 py-3 border rounded-lg text-lg" 
+                    style="border-color: var(--sky-blue);">
+                <option value="">-- Bitte wählen --</option>
+                {% for member in crew_members %}
+                <option value="{{ member.id }}" {% if entry and entry.watch_leader_id == member.id %}selected{% endif %}>
+                    {{ member.code }} - {{ member.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
         
         <div>
             <label class="block font-medium mb-2" style="color: var(--navy-deep);">👥 Wache (Mehrfachauswahl)</label>
@@ -727,6 +744,7 @@ form.addEventListener('submit', async function(e) {
             notes: formData.get('notes') || null,
             safety_checks_completed: formData.get('safety_checks') || null,
             crew_on_watch_ids: formData.getAll('crew_on_watch_ids').map(id => parseInt(id)),
+            watch_leader_id: formData.get('watch_leader_id') ? parseInt(formData.get('watch_leader_id')) : null,
             // Phase A: Navigation
             cog_deg: formData.get('cog_deg') ? parseInt(formData.get('cog_deg')) : null,
             sog_kn: formData.get('sog_kn') ? parseFloat(formData.get('sog_kn')) : null,

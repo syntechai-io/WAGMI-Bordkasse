@@ -102,6 +102,7 @@ async def create_entry(
     notes: Optional[str] = Form(None),
     safety_checks: Optional[str] = Form(None),
     crew_on_watch_ids: List[int] = Form([]),
+    watch_leader_id: Optional[int] = Depends(optional_int),
     clientTempId: Optional[str] = Form(None),
     # Phase A: Navigation fields
     cog_deg: Optional[int] = Depends(optional_int),
@@ -162,6 +163,7 @@ async def create_entry(
         entry = LogbookEntry(
             trip_id=active_trip.id,
             client_temp_id=clientTempId,
+            watch_leader_id=watch_leader_id,
             entry_date=entry_datetime,
             entry_date_utc=entry_datetime_utc,
             latitude=latitude,
