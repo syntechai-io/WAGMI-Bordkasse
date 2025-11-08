@@ -1,0 +1,210 @@
+Verstanden. Hier ist ein kompakter, umsetzbarer Replit-Agent-Plan für die vollständige Logbuch-Funktion in deiner Bordkasse-Web-App — bewusst leichtgewichtig gehalten und an iOS-/Replit-Limits angepasst. Besonderheit berücksichtigt: Rollgroß (In-Mast-Furling) → kein Reff 1/2/3, sondern „Rolltiefe %“ und „Ein/Aus“.
+
+Zielbild (kurz)
+	•	Einträge in Echtzeit (Zeit/Position/Wetter/Navigation/Motor/Segel/Watch/Sicherheit/Ereignisse).
+	•	Auto-Erfassung von GPS (SOG/COG) im Vordergrund.
+	•	PWA Offline: IndexedDB-Queue, Service Worker, späterer Sync.
+	•	Rechts- & revisionssicher: Append-only, Nachträge statt Edit, Audit-Trail, PDF/CSV-Export.
+	•	Einfaches UI mit Quick-Actions (Motor, Segel „ein/aus“/„Rolltiefe“).
+
+⸻
+
+Technische Leitplanken
+	•	Hosting/Backend: Replit (Flask oder FastAPI), HTTPS aktiviert.
+	•	Frontend: Vanilla JS + vorhandenes CSS/HTML (keine großen Frameworks).
+	•	PWA: Service Worker + Manifest + IndexedDB (ohne externe Libs).
+	•	iOS: Tracking nur im Vordergrund zuverlässig; kein Background-GPS.
+
+⸻
+
+Datenmodell (SQL + IndexedDB-Spiegel)
+
+Tabelle log_entry (Append-only):
+
+id UUID PK
+trip_id UUID NULL
+ts_utc DATETIME, ts_local DATETIME, tz TEXT
+lat DECIMAL(9,6), lon DECIMAL(9,6)
+sog_kn DECIMAL(4,1) NULL, cog_deg SMALLINT NULL
+log_kn DECIMAL(4,1) NULL           -- optional Logspeed
+dist_day_nm DECIMAL(6,1) NULL
+wind_dir TEXT NULL, wind_bft SMALLINT NULL, sea_state TEXT NULL, visibility_km DECIMAL(4,1) NULL
+temp_c DECIMAL(4,1) NULL, pressure_hpa SMALLINT NULL, pressure_trend TEXT NULL, weather_source TEXT NULL
+sail_plan TEXT NULL                 -- z.B. „Groß eingerollt 40% + Genua“
+main_furl_pct SMALLINT NULL         -- 0–100 (In-Mast-Furling)
+headsail TEXT NULL                  -- Genua/Großvorsegel/Kutter etc.
+sail_action TEXT NULL               -- Ein/Aus/Wechsel + Grund
+engine_on BOOL NULL, eng_hours_total DECIMAL(7,1) NULL
+engine_on_time DATETIME NULL, engine_off_time DATETIME NULL
+fuel_level_l DECIMAL(6,1) NULL
+from_port TEXT NULL, to_port TEXT NULL
+watch_on TEXT NULL, watch_off TEXT NULL, officer_initials TEXT NOT NULL
+safety_checks JSONB NULL            -- strukturierte Häkchen
+event_category TEXT NULL, event_details TEXT NULL
+photo_keys JSONB NULL
+created_by UUID, created_at DATETIME
+is_superseded BOOL DEFAULT FALSE
+parent_id UUID NULL, change_note TEXT NULL
+
+Audit:
+
+log_entry_audit(id, entry_id, actor, action, delta_json, ts)
+
+IndexedDB (Client) Stores:
+	•	log_queue (wartende POSTs), log_cache (lokale Anzeige), samples (Positions-Serie für Distanz).
+
+⸻
+
+API-Endpunkte (Backend)
+	•	POST /api/log/entries → create (append-only).
+	•	POST /api/log/entries/{id}/addendum → Nachtrag (parent bleibt; change_note Pflicht).
+	•	GET  /api/log/entries?date=…&trip=… → Liste/Filter.
+	•	GET  /api/log/summary/daily?date=… → Tageswerte (nm, Motorh, Durchschnitts-Wind).
+	•	GET  /api/log/export/pdf?date=…|trip=… → PDF (ReportLab), Seitenzahlen, Signaturfeld Skipper.
+	•	GET  /api/log/export/csv?date=…|trip=… → CSV/XLSX (gern CSV).
+	•	POST /api/upload/photo → kleine JPG/HEIC annehmen, Schlüssel zurückgeben.
+	•	Optional: POST /api/log/start → Törn anlegen & ersten Fix speichern.
+
+⸻
+
+Frontend – Form & Quick-Actions
+
+Erweitere das bestehende Formular um folgende Felder/Buttons, ohne das UI zu überladen:
+	1.	Navigation (auto-gefüllt/ableitbar)
+	•	COG (°), SOG (kn), Distanz-Tag (nm, aus Track), optional Logspeed.
+	•	Buttons: „Wende“, „Halse“, „Kursänderung“ → füllt event_category + Zeit.
+	2.	Wetter
+	•	Luftdruck (hPa) + Trend (↗/→/↘), Quelle (Freitext), vorhandene Felder weiter nutzen.
+	3.	Maschine
+	•	Toggles „Motor AN“ / „Motor AUS“ → setzt engine_on_time/engine_off_time; rechnet Motor-Intervall in Tagesreport ein.
+	•	eng_hours_total (Ablesewert), fuel_level_l optional.
+	4.	Segel (In-Mast-Furling!)
+	•	main_furl_pct (Slider 0–100 %).
+	•	Buttons „Groß einrollen“ / „Groß ausrollen“ (setzt sail_action mit Zeit).
+	•	headsail (Dropdown: Genua/aus/andere).
+	•	sail_plan generieren („Groß 40 % + Genua“).
+	5.	Wache
+	•	„Wache an/ab“ (Zeit), Verantwortlich (Initialen Pflicht), vorhandene Multi-Select-Crew beibehalten.
+	6.	Sicherheit & Ereignisse
+	•	Sicherheitscheck (Checkbox-Gruppe: Rettungsmittel ok, Bilge trocken, Seeventile offen, UKW getestet).
+	•	Ereignisse: Kategorie (Technik/Wetter/Verkehr/SAR/Behörde/Manöver) + Details.
+	•	Foto anhängen (input file; mehrfache Dateien).
+	7.	Compliance
+	•	Nach Speichern: Eintrag sperren (read-only). Button „Nachtrag“ erzeugt neues Kind mit parent_id + change_note.
+	•	Einträge zeigen „Nachtrag vorhanden“ + Zeitlinie (Audit).
+
+⸻
+
+Auto-Erfassung & PWA (leichtgewichtig)
+	1.	GPS-Watch (foreground)
+	•	navigator.geolocation.watchPosition({ enableHighAccuracy:true }).
+	•	Aus aufeinanderfolgenden Fixes SOG/COG berechnen; Distanz summieren (NM).
+	•	Bei iOS nur aktiv, solange die Seite vorn ist.
+	2.	Code-Module (public/js)
+
+	•	geo.js: startTurn(), stopTurn(), onFix(), haversineNm(), bearingDeg().
+	•	queue.js: IndexedDB (open, put, getAll), Online-Listener, retry-Sync.
+	•	actions.js: motorToggle(), setMainFurl(pct), setHeadsail(), quickEvent(type).
+	•	Auto-fill: UTC/Local, GPS, SOG/COG; Auto-Save Draft (30 s).
+
+	3.	PWA
+
+	•	manifest.json (Name, Icons).
+	•	service-worker.js (App-Shell cachen; bei Offline → lesen aus log_cache; log_queue zum Sync).
+	•	Hinweisbanner: „Standort wird für Logbuch erfasst; Tracking beenden“ (Stopp-Button).
+
+⸻
+
+Exporte
+	•	PDF Tagesbericht (A4): Kopf (Boot/Datum/Skipper), Tabelle (Zeit, Pos, Kurs, SOG, Segel, Motor, Wetter-Kern, Ereignisse), Fuß: Seiten x/y, „Erstellt am …“, Signaturfeld.
+	•	Törnbericht: Summen (nm, Motorh), Häfenliste, Ereignisliste.
+	•	CSV: alle Felder roh.
+(Optional später: Mini-Track-Plot als PNG.)
+
+⸻
+
+Sicherheit & Rollen
+	•	Rollen: skipper (create/addendum/export), crew (create begrenzt), viewer.
+	•	CSRF-Token für Form-Posts, simple Rate-Limit für Uploads.
+
+⸻
+
+Migration (sanft)
+	•	SQL-Migration: neue Spalten an log_entry anhängen (s. Modell).
+	•	Vorhandene Einträge behalten; fehlende Werte auf NULL/Defaults.
+	•	UI: Bestehende Felder unverändert anzeigen; neue Sektionen als einklappbare Blöcke.
+
+⸻
+
+Akzeptanzkriterien (Checkliste)
+	•	Eintrag anlegen → nach Speichern read-only.
+	•	„Nachtrag“ erzeugt neuen Datensatz mit Bezug und Änderungsnotiz.
+	•	GPS-Watch füllt Position/SOG/COG, solange Tab vorn ist.
+	•	Motor-Toggle zeichnet An/Aus-Zeitpunkte auf, Tages-Motorstunden im Summary korrekt.
+	•	In-Mast-Furling: Slider 0–100 % + Quick „ein/aus“, kein Reff 1/2/3 irgendwo sichtbar.
+	•	PWA installierbar; Offline-Erfassung → Online-Sync funktioniert.
+	•	PDF Tagesexport mit Seitenzahlen & Signaturfeld; CSV-Export vorhanden.
+	•	Audit-Trail sichtbar (Timeline mit Aktionen).
+	•	iPhone (Safari/PWA) Feldtests ≥30 min stabil.
+
+⸻
+
+Replit-Agent-Prompt (zum Kopieren)
+
+Upgrade the existing WAGMI Bordkasse web app with a complete Logbook module.
+
+Constraints:
+- Keep it lightweight (vanilla JS, existing UI/CSS). Flask/FastAPI backend. HTTPS.
+- iOS friendly: GPS only in foreground. Provide a Start/Stop tracking control.
+- Boat uses in-mast furling mainsail: implement "main_furl_pct (0–100%)" and quick actions (roll in/out). Do NOT add reef 1/2/3.
+
+Deliver:
+1) DB migration (see schema below) and new API routes:
+   POST /api/log/entries (append-only)
+   POST /api/log/entries/{id}/addendum
+   GET  /api/log/entries
+   GET  /api/log/summary/daily
+   GET  /api/log/export/pdf
+   GET  /api/log/export/csv
+   POST /api/upload/photo
+
+2) Frontend:
+   - Extend log form with sections:
+     Navigation (COG/SOG/Distanz), Wetter (pressure_hpa/trend/source),
+     Engine (AN/AUS toggles with timestamps, eng_hours_total, fuel_level_l),
+     Sails (main_furl_pct slider, headsail dropdown, sail_action),
+     Watch (on/off + officer_initials required),
+     Safety checks (checkboxes) and Events (category + details + photos).
+   - After save: lock entry (read-only) and show "Add addendum" button.
+
+3) Auto-capture & PWA:
+   - geo.js: watchPosition + SOG/COG + distance.
+   - queue.js: IndexedDB queue/cache + sync on reconnect.
+   - actions.js: quick actions for engine/sails/events.
+   - manifest.json + service-worker.js (cache app shell; offline fallback).
+
+4) Exports:
+   - PDF daily report (ReportLab) with header/footer, page numbers, skipper signature box.
+   - CSV export.
+
+5) Security & audit:
+   - Audit table writes on create/addendum.
+   - CSRF token on forms.
+
+Schema additions:
+[use the "Datenmodell" section above]
+
+Acceptance tests:
+- Entry lock + addendum flow works.
+- GPS auto-fill (foreground) OK; distance accumulates.
+- Engine toggles produce correct intervals.
+- main_furl_pct slider (0–100%), quick roll-in/out actions recorded.
+- PWA offline capture + online sync OK.
+- PDF/CSV exports OK.
+
+
+⸻
+
+Hinweis zur Praxis: Auf iPhone/iPad die App als PWA zum Home-Screen hinzufügen → stabileres Vollbild und bessere Offline-Nutzung.
+
+Safety Reminder: Trotz Auto-Erfassung bleiben bewusste Einträge (Kursänderungen, Segel-Handlungen, Sicherheitschecks) Pflicht.
