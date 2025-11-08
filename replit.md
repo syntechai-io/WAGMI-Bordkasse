@@ -9,6 +9,10 @@ Crew Wallet is a minimalist expense tracking and settlement application designed
 - **Watch Leader System**: Added watch_leader_id field to LogbookEntry with crew selection dropdown for designating Wachführer on each entry.
 - **Vessel-Specific Sail Config**: Simplified headsail configuration to dropdown with only "Genua gesetzt/teilweise/geborgen" options, reflecting vessel inventory (mainsail with in-mast furling + genua only).
 - **Photo Upload**: Confirmed existing POST /{entry_id}/photos/upload endpoint for logbook photo uploads with LogbookPhoto model.
+- **GPS Auto-Pull Features**: Enhanced GPS button to extract SOG (speed in knots, converted from m/s via 1.94384 multiplier) and COG (heading 0-359°) in addition to lat/lon. Handles null speed/heading gracefully.
+- **Continuous GPS Tracking**: Implemented `static/js/logbook-gps.js` module with LogbookGPSTracker class for foreground-only tracking (iOS restriction). Provides start/stop controls, active banner with live updates (position, accuracy, last update time), 5-second update frequency, position history buffer (last 10), and event-driven architecture.
+- **Motor Hours Auto-Calculation**: JavaScript logic calculates engine runtime duration from on/off timestamps, adds to existing eng_hours_total if present. Quick action buttons (Motor AN/AUS) auto-set current time and trigger calculation. Manual override always available.
+- **Comprehensive Testing**: Created test_logbook_autopull.py (17 tests passing) for GPS conversion formulas, motor hours logic, and offline storage validation. Created TESTING_AUTOPULL.md manual testing guide with 5 test suites covering GPS single/continuous, motor hours, offline, and end-to-end scenarios.
 
 ### Previous Changes (November 5, 2025)
 - **Expense Timestamp Precision**: Added `occurred_at` DateTime field to Expense model for accurate crew departure filtering.
