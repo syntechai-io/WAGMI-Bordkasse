@@ -67,6 +67,50 @@
         
         <div class="rope-divider"></div>
         
+        <!-- Phase A: Navigation Section -->
+        <details class="porthole-card p-4 mb-4 cursor-pointer">
+            <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
+                🧭 Navigation (optional)
+            </summary>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📐 COG - Course Over Ground (°)</label>
+                    <input type="number" name="cog_deg" min="0" max="359" step="1"
+                           value="{% if entry and entry.cog_deg %}{{ entry.cog_deg }}{% endif %}" 
+                           placeholder="z.B. 045" 
+                           class="w-full px-4 py-3 border rounded-lg text-lg" 
+                           style="border-color: var(--sky-blue);">
+                </div>
+                
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">⏱️ SOG - Speed Over Ground (kn)</label>
+                    <input type="number" name="sog_kn" min="0" step="0.1"
+                           value="{% if entry and entry.sog_kn %}{{ entry.sog_kn }}{% endif %}" 
+                           placeholder="z.B. 6.5" 
+                           class="w-full px-4 py-3 border rounded-lg text-lg" 
+                           style="border-color: var(--sky-blue);">
+                </div>
+                
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📏 Log Speed (kn)</label>
+                    <input type="number" name="log_kn" min="0" step="0.1"
+                           value="{% if entry and entry.log_kn %}{{ entry.log_kn }}{% endif %}" 
+                           placeholder="z.B. 6.2" 
+                           class="w-full px-4 py-3 border rounded-lg text-lg" 
+                           style="border-color: var(--sky-blue);">
+                </div>
+                
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📊 Distance Today (nm)</label>
+                    <input type="number" name="dist_day_nm" min="0" step="0.1"
+                           value="{% if entry and entry.dist_day_nm %}{{ entry.dist_day_nm }}{% endif %}" 
+                           placeholder="z.B. 42.3" 
+                           class="w-full px-4 py-3 border rounded-lg text-lg" 
+                           style="border-color: var(--sky-blue);">
+                </div>
+            </div>
+        </details>
+        
         <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">🌤️ Wetter & Bedingungen</h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -127,6 +171,114 @@
             </div>
         </div>
         
+        <!-- Phase A: Enhanced Weather Section -->
+        <details class="porthole-card p-4 mb-4 mt-4 cursor-pointer">
+            <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
+                ⛅ Erweiterte Wetterdaten (optional)
+            </summary>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📊 Luftdruck (hPa)</label>
+                    <input type="number" name="pressure_hpa" min="900" max="1100" step="1"
+                           value="{% if entry and entry.pressure_hpa %}{{ entry.pressure_hpa }}{% endif %}" 
+                           placeholder="z.B. 1013" 
+                           class="w-full px-4 py-3 border rounded-lg text-lg" 
+                           style="border-color: var(--sky-blue);">
+                </div>
+                
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📈 Luftdruck-Trend</label>
+                    <select name="pressure_trend" 
+                            class="w-full px-4 py-3 border rounded-lg text-lg" 
+                            style="border-color: var(--sky-blue);">
+                        <option value="">-- Bitte wählen --</option>
+                        <option value="steigend" {% if entry and entry.pressure_trend == 'steigend' %}selected{% endif %}>↗ Steigend</option>
+                        <option value="gleichbleibend" {% if entry and entry.pressure_trend == 'gleichbleibend' %}selected{% endif %}>→ Gleichbleibend</option>
+                        <option value="fallend" {% if entry and entry.pressure_trend == 'fallend' %}selected{% endif %}>↘ Fallend</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📡 Wetterquelle</label>
+                    <input type="text" name="weather_source" 
+                           value="{% if entry and entry.weather_source %}{{ entry.weather_source }}{% endif %}" 
+                           placeholder="z.B. Seewetterbericht, DWD" 
+                           class="w-full px-4 py-3 border rounded-lg text-lg" 
+                           style="border-color: var(--sky-blue);">
+                </div>
+            </div>
+        </details>
+        
+        <div class="rope-divider"></div>
+        
+        <!-- Phase A: Engine Section with Motor Toggle Buttons -->
+        <details class="porthole-card p-4 mb-4 cursor-pointer">
+            <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
+                🔧 Motor & Antrieb (optional)
+            </summary>
+            <div class="mt-4 space-y-4">
+                <div class="flex gap-2 mb-4">
+                    <button type="button" id="motor-on-btn" 
+                            class="flex-1 text-white font-bold py-3 px-4 rounded-lg transition touch-action" 
+                            style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%);">
+                        ▶️ Motor AN
+                    </button>
+                    <button type="button" id="motor-off-btn" 
+                            class="flex-1 text-white font-bold py-3 px-4 rounded-lg transition touch-action" 
+                            style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                        ⏸️ Motor AUS
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">🟢 Motor läuft?</label>
+                        <select name="engine_on" id="engine_on" 
+                                class="w-full px-4 py-3 border rounded-lg text-lg" 
+                                style="border-color: var(--sky-blue);">
+                            <option value="">-- Unbekannt --</option>
+                            <option value="1" {% if entry and entry.engine_on %}selected{% endif %}>✅ Ja, Motor läuft</option>
+                            <option value="0" {% if entry and entry.engine_on == False %}selected{% endif %}>❌ Nein, Motor aus</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">🔧 Motorstunden gesamt (Betriebsstunden)</label>
+                        <input type="number" name="eng_hours_total" min="0" step="0.1"
+                               value="{% if entry and entry.eng_hours_total %}{{ entry.eng_hours_total }}{% endif %}" 
+                               placeholder="z.B. 1234.5" 
+                               class="w-full px-4 py-3 border rounded-lg text-lg" 
+                               style="border-color: var(--sky-blue);">
+                    </div>
+                    
+                    <div>
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">⏰ Motor AN um (Zeitpunkt)</label>
+                        <input type="datetime-local" name="engine_on_time" id="engine_on_time"
+                               value="{% if entry and entry.engine_on_time %}{{ entry.engine_on_time.strftime('%Y-%m-%dT%H:%M') }}{% endif %}" 
+                               class="w-full px-4 py-3 border rounded-lg text-lg" 
+                               style="border-color: var(--sky-blue);">
+                    </div>
+                    
+                    <div>
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">⏰ Motor AUS um (Zeitpunkt)</label>
+                        <input type="datetime-local" name="engine_off_time" id="engine_off_time"
+                               value="{% if entry and entry.engine_off_time %}{{ entry.engine_off_time.strftime('%Y-%m-%dT%H:%M') }}{% endif %}" 
+                               class="w-full px-4 py-3 border rounded-lg text-lg" 
+                               style="border-color: var(--sky-blue);">
+                    </div>
+                    
+                    <div>
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">⛽ Kraftstoffstand (Liter)</label>
+                        <input type="number" name="fuel_level_l" min="0" step="1"
+                               value="{% if entry and entry.fuel_level_l %}{{ entry.fuel_level_l }}{% endif %}" 
+                               placeholder="z.B. 80" 
+                               class="w-full px-4 py-3 border rounded-lg text-lg" 
+                               style="border-color: var(--sky-blue);">
+                    </div>
+                </div>
+            </div>
+        </details>
+        
         <div class="rope-divider"></div>
         
         <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">⛵ Schiffsdaten</h3>
@@ -142,7 +294,7 @@
             </div>
             
             <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🔧 Motorstunden</label>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🔧 Motorstunden (veraltet - nutze "Motor & Antrieb")</label>
                 <input type="number" name="engine_hours" step="0.1" 
                        value="{% if entry and entry.engine_hours %}{{ entry.engine_hours }}{% endif %}" 
                        placeholder="z.B. 1234.5" 
@@ -168,6 +320,99 @@
                        style="border-color: var(--sky-blue);">
             </div>
         </div>
+        
+        <div class="rope-divider"></div>
+        
+        <!-- Phase A: Sails Section with In-Mast Furling -->
+        <details class="porthole-card p-4 mb-4 cursor-pointer">
+            <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
+                ⛵ Segel & Rigg (optional)
+            </summary>
+            <div class="mt-4 space-y-4">
+                <!-- In-Mast Furling Slider: 0-100% NO REEFS -->
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
+                        🎚️ Großsegel Rollprozent (Inmast-Rollanlage): <span id="main-furl-display">{% if entry and entry.main_furl_pct %}{{ entry.main_furl_pct }}%{% else %}0%{% endif %}</span>
+                    </label>
+                    <input type="range" name="main_furl_pct" id="main_furl_slider" min="0" max="100" step="5"
+                           value="{% if entry and entry.main_furl_pct %}{{ entry.main_furl_pct }}{% else %}0{% endif %}"
+                           class="w-full h-3 rounded-lg appearance-none cursor-pointer"
+                           style="background: linear-gradient(to right, var(--sea-foam) 0%, var(--navy-deep) 100%);">
+                    <div class="flex justify-between text-xs mt-1" style="color: var(--navy-deep);">
+                        <span>0% (eingerollt)</span>
+                        <span>50%</span>
+                        <span>100% (voll gesetzt)</span>
+                    </div>
+                </div>
+                
+                <!-- Quick Action Buttons for Furling -->
+                <div class="flex gap-2 mb-4">
+                    <button type="button" id="furl-in-btn" 
+                            class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition touch-action text-sm" 
+                            style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%);">
+                        ⬅️ Groß einrollen (0%)
+                    </button>
+                    <button type="button" id="furl-out-btn" 
+                            class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition touch-action text-sm" 
+                            style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                        ➡️ Groß ausrollen (100%)
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">🎐 Vorsegel / Fock</label>
+                        <input type="text" name="headsail" 
+                               value="{% if entry and entry.headsail %}{{ entry.headsail }}{% endif %}" 
+                               placeholder="z.B. Genua 1, Fock, gerefft" 
+                               class="w-full px-4 py-3 border rounded-lg text-lg" 
+                               style="border-color: var(--sky-blue);">
+                    </div>
+                    
+                    <div>
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">⚙️ Segelaktion</label>
+                        <input type="text" name="sail_action" 
+                               value="{% if entry and entry.sail_action %}{{ entry.sail_action }}{% endif %}" 
+                               placeholder="z.B. Segel gesetzt, gerefft, geborgen" 
+                               class="w-full px-4 py-3 border rounded-lg text-lg" 
+                               style="border-color: var(--sky-blue);">
+                    </div>
+                </div>
+            </div>
+        </details>
+        
+        <div class="rope-divider"></div>
+        
+        <!-- Phase A: Events Section -->
+        <details class="porthole-card p-4 mb-4 cursor-pointer">
+            <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
+                📋 Ereignisse & Besonderheiten (optional)
+            </summary>
+            <div class="grid grid-cols-1 gap-4 mt-4">
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏷️ Ereignis-Kategorie</label>
+                    <select name="event_category" 
+                            class="w-full px-4 py-3 border rounded-lg text-lg" 
+                            style="border-color: var(--sky-blue);">
+                        <option value="">-- Bitte wählen --</option>
+                        <option value="Manöver" {% if entry and entry.event_category == 'Manöver' %}selected{% endif %}>⚓ Manöver</option>
+                        <option value="Wetterwechsel" {% if entry and entry.event_category == 'Wetterwechsel' %}selected{% endif %}>🌦️ Wetterwechsel</option>
+                        <option value="Sichtung" {% if entry and entry.event_category == 'Sichtung' %}selected{% endif %}>👁️ Sichtung</option>
+                        <option value="Reparatur" {% if entry and entry.event_category == 'Reparatur' %}selected{% endif %}>🔧 Reparatur</option>
+                        <option value="Notfall" {% if entry and entry.event_category == 'Notfall' %}selected{% endif %}>🚨 Notfall</option>
+                        <option value="Sonstiges" {% if entry and entry.event_category == 'Sonstiges' %}selected{% endif %}>📌 Sonstiges</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 Ereignis-Details</label>
+                    <textarea name="event_details" rows="3" 
+                              placeholder="Detaillierte Beschreibung des Ereignisses..." 
+                              class="w-full px-4 py-3 border rounded-lg text-lg" 
+                              style="border-color: var(--sky-blue);">{% if entry and entry.event_details %}{{ entry.event_details }}{% endif %}</textarea>
+                </div>
+            </div>
+        </details>
         
         <div class="rope-divider"></div>
         
@@ -223,6 +468,56 @@
 </div>
 
 <script>
+// Phase A: Motor Toggle Buttons
+document.getElementById('motor-on-btn').addEventListener('click', function() {
+    const now = new Date();
+    const localISOString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+    document.getElementById('engine_on_time').value = localISOString;
+    document.getElementById('engine_on').value = '1';
+    this.textContent = '✅ Motor AN gesetzt!';
+    setTimeout(() => {
+        this.textContent = '▶️ Motor AN';
+    }, 2000);
+});
+
+document.getElementById('motor-off-btn').addEventListener('click', function() {
+    const now = new Date();
+    const localISOString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+    document.getElementById('engine_off_time').value = localISOString;
+    document.getElementById('engine_on').value = '0';
+    this.textContent = '✅ Motor AUS gesetzt!';
+    setTimeout(() => {
+        this.textContent = '⏸️ Motor AUS';
+    }, 2000);
+});
+
+// Phase A: In-Mast Furling Slider
+const furlSlider = document.getElementById('main_furl_slider');
+const furlDisplay = document.getElementById('main-furl-display');
+
+furlSlider.addEventListener('input', function() {
+    furlDisplay.textContent = this.value + '%';
+});
+
+// Phase A: In-Mast Furling Quick Buttons
+document.getElementById('furl-in-btn').addEventListener('click', function() {
+    furlSlider.value = 0;
+    furlDisplay.textContent = '0%';
+    this.textContent = '✅ Eingerollt!';
+    setTimeout(() => {
+        this.textContent = '⬅️ Groß einrollen (0%)';
+    }, 2000);
+});
+
+document.getElementById('furl-out-btn').addEventListener('click', function() {
+    furlSlider.value = 100;
+    furlDisplay.textContent = '100%';
+    this.textContent = '✅ Ausgerollt!';
+    setTimeout(() => {
+        this.textContent = '➡️ Groß ausrollen (100%)';
+    }, 2000);
+});
+
 function getPermissionInstructions() {
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
     const isAndroid = /Android/.test(navigator.userAgent);
@@ -431,7 +726,29 @@ form.addEventListener('submit', async function(e) {
             destination: formData.get('destination') || null,
             notes: formData.get('notes') || null,
             safety_checks_completed: formData.get('safety_checks') || null,
-            crew_on_watch_ids: formData.getAll('crew_on_watch_ids').map(id => parseInt(id))
+            crew_on_watch_ids: formData.getAll('crew_on_watch_ids').map(id => parseInt(id)),
+            // Phase A: Navigation
+            cog_deg: formData.get('cog_deg') ? parseInt(formData.get('cog_deg')) : null,
+            sog_kn: formData.get('sog_kn') ? parseFloat(formData.get('sog_kn')) : null,
+            log_kn: formData.get('log_kn') ? parseFloat(formData.get('log_kn')) : null,
+            dist_day_nm: formData.get('dist_day_nm') ? parseFloat(formData.get('dist_day_nm')) : null,
+            // Phase A: Weather
+            pressure_hpa: formData.get('pressure_hpa') ? parseInt(formData.get('pressure_hpa')) : null,
+            pressure_trend: formData.get('pressure_trend') || null,
+            weather_source: formData.get('weather_source') || null,
+            // Phase A: Engine
+            engine_on: formData.get('engine_on') ? (formData.get('engine_on') === '1') : null,
+            engine_on_time: formData.get('engine_on_time') || null,
+            engine_off_time: formData.get('engine_off_time') || null,
+            eng_hours_total: formData.get('eng_hours_total') ? parseFloat(formData.get('eng_hours_total')) : null,
+            fuel_level_l: formData.get('fuel_level_l') ? parseFloat(formData.get('fuel_level_l')) : null,
+            // Phase A: Sails
+            main_furl_pct: formData.get('main_furl_pct') ? parseInt(formData.get('main_furl_pct')) : null,
+            headsail: formData.get('headsail') || null,
+            sail_action: formData.get('sail_action') || null,
+            // Phase A: Events
+            event_category: formData.get('event_category') || null,
+            event_details: formData.get('event_details') || null
         };
         
         const submitBtn = form.querySelector('button[type="submit"]');
