@@ -3,12 +3,19 @@
 ### Overview
 Crew Wallet is a minimalist expense tracking and settlement application designed for sailing crew members. It provides secure user authentication, manages up to 12 crew members, tracks deposits into a shared wallet, records expenses with flexible splitting, and automatically calculates optimized settlement transfers. The application supports multi-currency transactions with automatic conversion, offers PWA capabilities, and includes professional PDF export functionality for trip documentation. Its business vision is to simplify shared expense management for sailing trips, targeting a market with significant potential for subscription-based revenue.
 
-### Recent Changes (November 5, 2025)
-- **Expense Timestamp Precision**: Added `occurred_at` DateTime field to Expense model for accurate crew departure filtering. Real-time expenses (today) use current timestamp to exclude departed crew immediately. Backdated expenses (past dates) use start-of-day to include crew active that day. This fixes the issue where crew members departed at 10:00 AM were incorrectly included in expenses created at 10:02 AM.
-- **Trip Switching System**: Fixed redirect loop when admin logs in with no active trip. Admin login now redirects to trips page if no active trip exists, otherwise auto-selects active trip.
-- **CSRF Token Fix**: Fixed trip selector dropdown forms (desktop and mobile) to use proper `{{ csrf_input | safe }}` pattern instead of manually accessing session token.
-- **Database Session Management**: Fixed potential session leak in `trip_context_processor` by properly closing database sessions in finally block.
-- **Session-Based Trip Selection**: `TripService.get_selected_trip()` no longer falls back to active trip - requires explicit selection via session.
+### Recent Changes (November 8, 2025)
+- **Logbook Phase A Complete**: Enhanced LogbookEntry with 20+ fields including navigation (COG, SOG, log speed, distance), advanced weather (pressure, trend, source), engine tracking (on/off times, total hours, fuel), in-mast furling (0-100% slider, NO reef options), events (category, details), and append-only compliance (parent_id, is_superseded, change_note). All fields are nullable and optional.
+- **PDF Export System**: Added ReportLab-based PDF generation for German/European official logbook standards with two endpoints: single entry export (GET /logbook/export/pdf/entry/{id}) and daily export (GET /logbook/export/pdf/daily?export_date=YYYY-MM-DD). Maritime-themed with bilingual labels and signature fields.
+- **Watch Leader System**: Added watch_leader_id field to LogbookEntry with crew selection dropdown for designating Wachführer on each entry.
+- **Vessel-Specific Sail Config**: Simplified headsail configuration to dropdown with only "Genua gesetzt/teilweise/geborgen" options, reflecting vessel inventory (mainsail with in-mast furling + genua only).
+- **Photo Upload**: Confirmed existing POST /{entry_id}/photos/upload endpoint for logbook photo uploads with LogbookPhoto model.
+
+### Previous Changes (November 5, 2025)
+- **Expense Timestamp Precision**: Added `occurred_at` DateTime field to Expense model for accurate crew departure filtering.
+- **Trip Switching System**: Fixed redirect loop when admin logs in with no active trip.
+- **CSRF Token Fix**: Fixed trip selector dropdown forms to use proper `{{ csrf_input | safe }}` pattern.
+- **Database Session Management**: Fixed potential session leak in `trip_context_processor`.
+- **Session-Based Trip Selection**: `TripService.get_selected_trip()` no longer falls back to active trip.
 
 ### User Preferences
 Preferred communication style: Simple, everyday language.
