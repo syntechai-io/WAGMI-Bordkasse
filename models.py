@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint, Text
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint, Text, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -263,12 +263,48 @@ class LogbookEntry(Base):
     destination = Column(String(100), nullable=True)
     notes = Column(Text, nullable=True)
     safety_checks_completed = Column(String(500), nullable=True)
+    
+    # Navigation data (Phase A enhancement)
+    cog_deg = Column(Integer, nullable=True)
+    sog_kn = Column(Float, nullable=True)
+    log_kn = Column(Float, nullable=True)
+    dist_day_nm = Column(Float, nullable=True)
+    
+    # Weather data (Phase A enhancement)
+    pressure_hpa = Column(Integer, nullable=True)
+    pressure_trend = Column(String(20), nullable=True)
+    weather_source = Column(String(100), nullable=True)
+    
+    # Engine tracking (Phase A enhancement)
+    engine_on = Column(Boolean, nullable=True)
+    engine_on_time = Column(DateTime, nullable=True)
+    engine_off_time = Column(DateTime, nullable=True)
+    eng_hours_total = Column(Float, nullable=True)
+    fuel_level_l = Column(Float, nullable=True)
+    
+    # Sails - In-mast furling (Phase A enhancement)
+    main_furl_pct = Column(Integer, nullable=True)
+    headsail = Column(String(100), nullable=True)
+    sail_action = Column(String(200), nullable=True)
+    
+    # Events (Phase A enhancement)
+    event_category = Column(String(100), nullable=True)
+    event_details = Column(Text, nullable=True)
+    
+    # Append-only compliance (Phase A enhancement)
+    parent_id = Column(Integer, ForeignKey("logbook_entries.id"), nullable=True, index=True)
+    is_superseded = Column(Boolean, default=False, nullable=False)
+    change_note = Column(Text, nullable=True)
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     trip = relationship("Trip", back_populates="logbook_entries")
     photos = relationship("LogbookPhoto", back_populates="entry", cascade="all, delete-orphan")
     crew_on_watch = relationship("CrewOnWatch", back_populates="entry", cascade="all, delete-orphan")
+    
+    # Self-referential relationship for addendums
+    parent = relationship("LogbookEntry", remote_side=[id], foreign_keys=[parent_id], backref="addendums")
 
 class LogbookPhoto(Base):
     __tablename__ = "logbook_photos"

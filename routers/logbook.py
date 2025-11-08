@@ -22,7 +22,7 @@ templates = Jinja2Templates(
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/jpg"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
-# Helper function to convert empty strings to None for optional float fields
+# Helper functions to convert empty strings to None for optional fields
 def optional_float(value: str = Form(None)) -> Optional[float]:
     """Convert empty string to None, otherwise parse as float"""
     if value == "" or value is None:
@@ -31,6 +31,21 @@ def optional_float(value: str = Form(None)) -> Optional[float]:
         return float(value)
     except (ValueError, TypeError):
         return None
+
+def optional_int(value: str = Form(None)) -> Optional[int]:
+    """Convert empty string to None, otherwise parse as int"""
+    if value == "" or value is None:
+        return None
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return None
+
+def optional_bool(value: str = Form(None)) -> Optional[bool]:
+    """Convert string to bool"""
+    if value == "" or value is None:
+        return None
+    return value.lower() in ("true", "1", "yes", "on")
 
 @router.get("", response_class=HTMLResponse)
 async def list_logbook_entries(request: Request, db: Session = Depends(get_db)):
@@ -86,6 +101,28 @@ async def create_entry(
     safety_checks: Optional[str] = Form(None),
     crew_on_watch_ids: List[int] = Form([]),
     clientTempId: Optional[str] = Form(None),
+    # Phase A: Navigation fields
+    cog_deg: Optional[int] = Depends(optional_int),
+    sog_kn: Optional[float] = Depends(optional_float),
+    log_kn: Optional[float] = Depends(optional_float),
+    dist_day_nm: Optional[float] = Depends(optional_float),
+    # Phase A: Weather fields
+    pressure_hpa: Optional[int] = Depends(optional_int),
+    pressure_trend: Optional[str] = Form(None),
+    weather_source: Optional[str] = Form(None),
+    # Phase A: Engine fields
+    engine_on: Optional[bool] = Depends(optional_bool),
+    engine_on_time: Optional[str] = Form(None),
+    engine_off_time: Optional[str] = Form(None),
+    eng_hours_total: Optional[float] = Depends(optional_float),
+    fuel_level_l: Optional[float] = Depends(optional_float),
+    # Phase A: Sails fields (in-mast furling)
+    main_furl_pct: Optional[int] = Depends(optional_int),
+    headsail: Optional[str] = Form(None),
+    sail_action: Optional[str] = Form(None),
+    # Phase A: Events fields
+    event_category: Optional[str] = Form(None),
+    event_details: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)
@@ -116,6 +153,10 @@ async def create_entry(
         # Parse sea state enum
         sea_state_enum = SeaStateEnum(sea_state) if sea_state else None
         
+        # Parse engine timestamps
+        engine_on_dt = datetime.fromisoformat(engine_on_time) if engine_on_time else None
+        engine_off_dt = datetime.fromisoformat(engine_off_time) if engine_off_time else None
+        
         entry = LogbookEntry(
             trip_id=active_trip.id,
             client_temp_id=clientTempId,
@@ -133,7 +174,29 @@ async def create_entry(
             departure=departure,
             destination=destination,
             notes=notes,
-            safety_checks_completed=safety_checks
+            safety_checks_completed=safety_checks,
+            # Phase A: Navigation
+            cog_deg=cog_deg,
+            sog_kn=sog_kn,
+            log_kn=log_kn,
+            dist_day_nm=dist_day_nm,
+            # Phase A: Weather
+            pressure_hpa=pressure_hpa,
+            pressure_trend=pressure_trend,
+            weather_source=weather_source,
+            # Phase A: Engine
+            engine_on=engine_on,
+            engine_on_time=engine_on_dt,
+            engine_off_time=engine_off_dt,
+            eng_hours_total=eng_hours_total,
+            fuel_level_l=fuel_level_l,
+            # Phase A: Sails (in-mast furling)
+            main_furl_pct=main_furl_pct,
+            headsail=headsail,
+            sail_action=sail_action,
+            # Phase A: Events
+            event_category=event_category,
+            event_details=event_details
         )
         db.add(entry)
         db.flush()
@@ -235,6 +298,28 @@ async def update_entry(
     notes: Optional[str] = Form(None),
     safety_checks: Optional[str] = Form(None),
     crew_on_watch_ids: List[int] = Form([]),
+    # Phase A: Navigation fields
+    cog_deg: Optional[int] = Depends(optional_int),
+    sog_kn: Optional[float] = Depends(optional_float),
+    log_kn: Optional[float] = Depends(optional_float),
+    dist_day_nm: Optional[float] = Depends(optional_float),
+    # Phase A: Weather fields
+    pressure_hpa: Optional[int] = Depends(optional_int),
+    pressure_trend: Optional[str] = Form(None),
+    weather_source: Optional[str] = Form(None),
+    # Phase A: Engine fields
+    engine_on: Optional[bool] = Depends(optional_bool),
+    engine_on_time: Optional[str] = Form(None),
+    engine_off_time: Optional[str] = Form(None),
+    eng_hours_total: Optional[float] = Depends(optional_float),
+    fuel_level_l: Optional[float] = Depends(optional_float),
+    # Phase A: Sails fields (in-mast furling)
+    main_furl_pct: Optional[int] = Depends(optional_int),
+    headsail: Optional[str] = Form(None),
+    sail_action: Optional[str] = Form(None),
+    # Phase A: Events fields
+    event_category: Optional[str] = Form(None),
+    event_details: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)
@@ -260,6 +345,10 @@ async def update_entry(
         # Parse sea state enum
         sea_state_enum = SeaStateEnum(sea_state) if sea_state else None
         
+        # Parse engine timestamps
+        engine_on_dt = datetime.fromisoformat(engine_on_time) if engine_on_time else None
+        engine_off_dt = datetime.fromisoformat(engine_off_time) if engine_off_time else None
+        
         # Update entry fields
         entry.entry_date = entry_datetime
         entry.entry_date_utc = entry_datetime_utc
@@ -276,6 +365,28 @@ async def update_entry(
         entry.destination = destination
         entry.notes = notes
         entry.safety_checks_completed = safety_checks
+        # Phase A: Navigation
+        entry.cog_deg = cog_deg
+        entry.sog_kn = sog_kn
+        entry.log_kn = log_kn
+        entry.dist_day_nm = dist_day_nm
+        # Phase A: Weather
+        entry.pressure_hpa = pressure_hpa
+        entry.pressure_trend = pressure_trend
+        entry.weather_source = weather_source
+        # Phase A: Engine
+        entry.engine_on = engine_on
+        entry.engine_on_time = engine_on_dt
+        entry.engine_off_time = engine_off_dt
+        entry.eng_hours_total = eng_hours_total
+        entry.fuel_level_l = fuel_level_l
+        # Phase A: Sails (in-mast furling)
+        entry.main_furl_pct = main_furl_pct
+        entry.headsail = headsail
+        entry.sail_action = sail_action
+        # Phase A: Events
+        entry.event_category = event_category
+        entry.event_details = event_details
         entry.updated_at = datetime.utcnow()
         
         # Update crew on watch
@@ -350,6 +461,111 @@ async def delete_entry(request: Request, entry_id: int, db: Session = Depends(ge
     db.commit()
     
     return RedirectResponse(url="/logbook", status_code=303)
+
+@router.post("/{entry_id}/addendum")
+async def create_addendum(
+    request: Request,
+    entry_id: int,
+    change_note: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    """Create an addendum to an existing logbook entry (append-only compliance)"""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips/", status_code=303)
+    
+    # Check permissions
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role, request):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/logbook", status_code=303)
+    
+    # Get the parent entry
+    parent_entry = db.query(LogbookEntry).filter(
+        LogbookEntry.id == entry_id,
+        LogbookEntry.trip_id == active_trip.id
+    ).first()
+    
+    if not parent_entry:
+        return RedirectResponse(url="/logbook", status_code=303)
+    
+    # Validate change note is provided
+    if not change_note or change_note.strip() == "":
+        request.session["error"] = "Änderungsnotiz ist erforderlich für einen Nachtrag."
+        return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
+    
+    try:
+        # Mark parent as superseded
+        parent_entry.is_superseded = True
+        
+        # Create a copy of the parent entry with the same data but as a new entry
+        # Users will later be able to modify this in the frontend form
+        addendum_entry = LogbookEntry(
+            trip_id=active_trip.id,
+            parent_id=parent_entry.id,
+            change_note=change_note,
+            # Copy all fields from parent
+            entry_date=parent_entry.entry_date,
+            entry_date_utc=parent_entry.entry_date_utc,
+            latitude=parent_entry.latitude,
+            longitude=parent_entry.longitude,
+            wind_direction=parent_entry.wind_direction,
+            wind_strength=parent_entry.wind_strength,
+            sea_state=parent_entry.sea_state,
+            visibility=parent_entry.visibility,
+            temperature=parent_entry.temperature,
+            sail_plan=parent_entry.sail_plan,
+            engine_hours=parent_entry.engine_hours,
+            departure=parent_entry.departure,
+            destination=parent_entry.destination,
+            notes=parent_entry.notes,
+            safety_checks_completed=parent_entry.safety_checks_completed,
+            cog_deg=parent_entry.cog_deg,
+            sog_kn=parent_entry.sog_kn,
+            log_kn=parent_entry.log_kn,
+            dist_day_nm=parent_entry.dist_day_nm,
+            pressure_hpa=parent_entry.pressure_hpa,
+            pressure_trend=parent_entry.pressure_trend,
+            weather_source=parent_entry.weather_source,
+            engine_on=parent_entry.engine_on,
+            engine_on_time=parent_entry.engine_on_time,
+            engine_off_time=parent_entry.engine_off_time,
+            eng_hours_total=parent_entry.eng_hours_total,
+            fuel_level_l=parent_entry.fuel_level_l,
+            main_furl_pct=parent_entry.main_furl_pct,
+            headsail=parent_entry.headsail,
+            sail_action=parent_entry.sail_action,
+            event_category=parent_entry.event_category,
+            event_details=parent_entry.event_details
+        )
+        db.add(addendum_entry)
+        db.flush()
+        
+        # Copy crew on watch
+        for crew_watch in parent_entry.crew_on_watch:
+            new_crew_watch = CrewOnWatch(entry_id=addendum_entry.id, member_id=crew_watch.member_id)
+            db.add(new_crew_watch)
+        
+        db.commit()
+        
+        # Audit log
+        AuditService.log(
+            db=db,
+            request=request,
+            trip_id=active_trip.id,
+            action="addendum",
+            entity_type="logbook_entry",
+            entity_id=addendum_entry.id,
+            details=f"Created addendum for entry {entry_id}: {change_note}"
+        )
+        
+        request.session["success"] = f"Nachtrag erfolgreich erstellt"
+        return RedirectResponse(url=f"/logbook/{addendum_entry.id}/edit", status_code=303)
+        
+    except Exception as e:
+        db.rollback()
+        request.session["error"] = f"Fehler beim Erstellen des Nachtrags: {str(e)}"
+        return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
 
 @router.post("/{entry_id}/photos/upload")
 async def upload_photo(
