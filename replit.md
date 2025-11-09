@@ -4,10 +4,18 @@
 Crew Wallet is a minimalist expense tracking and settlement application for sailing crew members. It offers secure authentication, manages up to 12 crew members, tracks deposits and expenses with flexible splitting, and automatically calculates optimized settlement transfers. Key features include multi-currency support with automatic conversion, PWA capabilities, and professional PDF export for trip documentation. The project aims to simplify shared expense management for sailing trips, targeting a subscription-based revenue model.
 
 ### Recent Changes (November 9, 2025)
+- **Quick Start Törn (NEW)**: Implemented one-click trip creation for single-handed sailing workflow. Features:
+  - New `UserPreferences` model storing default skipper, boat, home port, coordinates, and currency
+  - Seeded with Sven's defaults: WAGMI boat, Fredericia Denmark (55.553611°N, 9.730556°E), DKK currency
+  - `TripQuickStartService` creates trip with auto-generated name (WAGMI - DD.MM.YYYY), adds skipper as crew+admin, and generates first logbook departure entry with motor running from home port
+  - Prominent "⚡ Quick Start WAGMI" buttons on dashboard and trips page for instant trip creation
+  - POST /trips/quick-start endpoint with admin-only security, auto-archives previous active trip, and redirects to new trip detail
+  - Optimized for solo sailor who primarily uses WAGMI from Fredericia
+- **Settlement Export Enhancement**: Added settlement transfer calculations to both PDF and CSV exports showing optimized payment transfers (who owes whom). Changed from StreamingResponse to Response for better navigation after download.
 - **Quick Entry System (Phase B)**: Added maneuver type field to LogbookEntry model with 7 types: departure, sail_change, motor, anchor, weather, arrival, and full entry. Implemented button-based maneuver selector in logbook form with icons (🚢⛵🔧⚓🌤️🏁📝) and visual feedback. JavaScript manages button selection and stores selected type. Enables fast logging of specific maneuver types during sailing. All fields remain visible for all maneuver types (user can categorize entries).
 - **Daily Logbook View**: Created /logbook/daily route displaying all entries for a selected date in chronological timeline format. Features date navigation (prev/next buttons + date picker), summary statistics (entry count, total distance, engine hours delta, route: departure → destination), maneuver type icons for each entry, and link to daily PDF export. German date formatting with proper weekday/month names. Engine hours calculated as delta (max - min) only when 2+ readings exist.
 - **Enhanced Daily Navigation**: Main logbook list now groups entries by date with clickable date headers linking to daily view. Each date shows "📖 Tagesansicht →" badge for easy access to full day timeline. Individual entries indented under date headers with time-only display and maneuver type icons.
-- **Quick Fill Feature**: Added prominent "⚡ Quick Fill" button to logbook form that auto-populates all data in one tap: current date/time, GPS position (lat/lon/SOG/COG), and weather data (temperature, wind direction/strength, pressure). Features loading spinner, success/error notifications, and seamless integration with hybrid dropdown/manual fields. Optimized for mobile use with large touch target and visual feedback.
+- **Quick Fill Feature**: Added prominent "⚡ Quick Fill" button to logbook form that auto-populates all data in one tap: current date/time, GPS position (lat/lon/SOG/COG), and weather data (temperature, wind, pressure). Features loading spinner, success/error notifications, and seamless integration with hybrid dropdown/manual fields. Optimized for mobile use with large touch target and visual feedback.
 - **PDF Export Redesign**: Completely redesigned PDF exports to match traditional maritime logbook format with grid-based table layout. Changed from portrait to landscape orientation. All entries now displayed in a single table with 11 columns (Zeit, Position, Kurs, Fahrt, Log, Wind, Wetter, Motor, Segel, Wache, Bemerkungen). Features black grid lines, alternating row backgrounds, compact 7pt font, and professional appearance matching official maritime documentation. Fixed coordinate bug (0° equator/meridian now render correctly). Multiple entries fit on one page in scannable grid format.
 
 ### User Preferences
@@ -51,6 +59,7 @@ Preferred communication style: Simple, everyday language.
 - **AuditLog**: Records financial transactions.
 - **LogbookEntry**: Detailed records of trip events, including navigation, weather, engine, and events.
 - **LogbookPhoto**: Photos associated with logbook entries.
+- **UserPreferences**: Stores per-user defaults for quick trip creation (skipper, boat, home port, coordinates, currency).
 
 #### Settlement Algorithm
 Uses a greedy matching algorithm to minimize transfers between debtors and creditors, verified for accuracy. The calculation process includes individual balance calculation, settlement group aggregation, and optimized transfer generation.

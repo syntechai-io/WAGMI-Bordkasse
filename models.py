@@ -347,3 +347,20 @@ class ExpenseTemplate(Base):
     split_mode = Column(SQLEnum(SplitModeEnum), nullable=False, default=SplitModeEnum.equal)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class UserPreferences(Base):
+    __tablename__ = "user_preferences"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True, index=True)
+    skipper_name = Column(String(100), nullable=True)
+    skipper_code = Column(String(20), nullable=True)
+    boat_name = Column(String(100), nullable=True)
+    home_port = Column(String(100), nullable=True)
+    home_lat = Column(Float, nullable=True)
+    home_lon = Column(Float, nullable=True)
+    default_currency = Column(SQLEnum(Currency), nullable=False, default=Currency.EUR)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    user = relationship("User")

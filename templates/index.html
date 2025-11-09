@@ -24,8 +24,25 @@
     </div>
     {% endif %}
     
+    <!-- Quick Start Button (Admin only) -->
+    {% if request.session.get('role') == 'admin' %}
+    <form method="post" action="/trips/quick-start" class="block">
+        {{ csrf_input | safe }}
+        <button type="submit" class="w-full text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+            <div class="flex items-center justify-center space-x-3">
+                <div class="text-5xl">⚡</div>
+                <div class="text-left">
+                    <h3 class="text-2xl font-bold maritime-header">Quick Start WAGMI</h3>
+                    <p class="text-sm opacity-90">Neuen Törn ab Fredericia starten!</p>
+                </div>
+                <div class="text-3xl">→</div>
+            </div>
+        </button>
+    </form>
+    {% endif %}
+    
     <!-- MOBILE: Prominent Help Guide Link (only on mobile) -->
-    <a href="/help" class="block md:hidden text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+    <a href="/help" class="block md:hidden text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
         <div class="flex items-center justify-center space-x-3">
             <div class="text-5xl">📖</div>
             <div class="text-left">

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from db import get_db
 from models import Trip, TripStatus, CrewMember
 from services.trip import TripService
+from services.quick_start import TripQuickStartService
 from datetime import date
 
 router = APIRouter(prefix="/trips", tags=["trips"])
@@ -25,6 +26,32 @@ async def trips_page(request: Request, db: Session = Depends(get_db)):
         "trips": trips,
         "active_trip": active_trip
     })
+
+@router.post("/quick-start")
+async def quick_start_trip(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Create a quick start trip with user's defaults and first logbook entry"""
+    if request.session.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can create trips")
+    
+    user_id = request.session.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    current_active = db.query(Trip).filter(Trip.status == TripStatus.active).first()
+    if current_active:
+        current_active.status = TripStatus.archived
+        if not current_active.end_date:
+            current_active.end_date = date.today()
+        db.commit()
+    
+    trip = TripQuickStartService.create_quick_start_trip(db, user_id)
+    
+    TripService.set_selected_trip(request, trip.id)
+    
+    return RedirectResponse(url=f"/trips/{trip.id}", status_code=303)
 
 @router.post("/new")
 async def create_trip(

@@ -6,7 +6,20 @@
     
     {% if request.session.get('role') == 'admin' %}
     <div class="bg-white porthole-card p-6">
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Neuen Törn erstellen</h2>
+        <div class="flex flex-col md:flex-row gap-4 mb-4">
+            <div class="flex-1">
+                <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">➕ Neuen Törn erstellen</h2>
+            </div>
+            <div>
+                <form method="post" action="/trips/quick-start" class="inline">
+                    {{ csrf_input | safe }}
+                    <button type="submit" class="w-full md:w-auto text-white px-6 py-3 rounded-lg transition touch-action font-bold text-lg shadow-lg hover:shadow-xl" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                        ⚡ Quick Start WAGMI
+                    </button>
+                </form>
+                <p class="text-xs mt-1 text-center" style="color: var(--navy-deep); opacity: 0.7;">Sofort lossegeln!</p>
+            </div>
+        </div>
         <form method="post" action="/trips/new" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             {{ csrf_input | safe }}
             <div>
