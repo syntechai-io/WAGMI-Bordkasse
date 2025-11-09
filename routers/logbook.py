@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Request, Depends, Form, UploadFile, File, HTTPException
+from fastapi import APIRouter, Request, Depends, Form, UploadFile, File, HTTPException, Query
 from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
-from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse, StreamingResponse
+from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse, StreamingResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
@@ -14,6 +14,7 @@ from pathlib import Path
 import uuid
 import io
 from logbook_pdf_template import render_logbook_pdf
+from weather_service import WeatherService
 
 router = APIRouter(prefix="/logbook", tags=["logbook"])
 templates = Jinja2Templates(
@@ -695,6 +696,35 @@ async def view_photo(request: Request, photo_id: int, db: Session = Depends(get_
         raise HTTPException(status_code=404, detail="Photo file not found")
     
     return FileResponse(str(filepath), media_type=photo.content_type)
+
+@router.get("/weather")
+async def get_weather(
+    request: Request,
+    lat: float = Query(..., description="Latitude"),
+    lon: float = Query(..., description="Longitude"),
+    db: Session = Depends(get_db)
+):
+    """Fetch weather data from Open-Meteo API for given coordinates"""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        raise HTTPException(status_code=403, detail="No active trip")
+    
+    weather_data = WeatherService.fetch_weather_data(lat, lon)
+    
+    if weather_data is None:
+        raise HTTPException(status_code=500, detail="Failed to fetch weather data")
+    
+    wind_direction_compass = weather_data.get('wind_direction_compass', '')
+    wind_speed_kn = weather_data.get('wind_speed_kn')
+    wind_strength_beaufort = WeatherService.wind_speed_to_beaufort(wind_speed_kn) if wind_speed_kn else ''
+    
+    return JSONResponse({
+        'temperature': weather_data.get('temperature'),
+        'wind_direction': wind_direction_compass,
+        'wind_strength': wind_strength_beaufort,
+        'pressure_hpa': weather_data.get('pressure_hpa'),
+        'timestamp': weather_data.get('timestamp')
+    })
 
 @router.get("/export/pdf/entry/{entry_id}")
 async def export_single_entry_pdf(request: Request, entry_id: int, db: Session = Depends(get_db)):
