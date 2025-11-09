@@ -212,41 +212,100 @@
 
             <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📓 Logbuch führen</h2>
             <div class="mb-6">
-                <p class="mb-4">Das digitale Logbuch dokumentiert euren Törn mit allen wichtigen Details:</p>
+                <p class="mb-4">Das digitale Logbuch dokumentiert euren Törn mit allen wichtigen Details für offizielle maritime Logbücher:</p>
                 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">So erstellt du einen Eintrag:</h3>
-                <ol class="list-decimal ml-6 space-y-2 mb-4">
-                    <li>Gehe zu <strong>"📓 Logbuch"</strong></li>
-                    <li>Klicke <strong>"Neuer Eintrag"</strong></li>
-                    <li><strong>📍 GPS-Position:</strong> Klicke auf "GPS-Position abrufen" - erlaubt Standortzugriff wenn gefragt
-                        <ul class="list-disc ml-6 mt-2">
-                            <li><strong>iPhone/iPad:</strong> Einstellungen → Safari → Ortungsdienste erlauben</li>
-                            <li><strong>Android:</strong> Chrome erlaubt automatisch Zugriff</li>
-                            <li>Oder Position manuell eingeben (Breiten-/Längengrad)</li>
-                        </ul>
-                    </li>
-                    <li><strong>🌤️ Wetter & Bedingungen:</strong>
-                        <ul class="list-disc ml-6 mt-2">
-                            <li>Windrichtung & Windstärke (Beaufort)</li>
-                            <li>Seegang (ruhig bis sehr rau)</li>
-                            <li>Sichtweite & Temperatur</li>
-                        </ul>
-                    </li>
-                    <li><strong>⛵ Navigation & Technik:</strong>
-                        <ul class="list-disc ml-6 mt-2">
-                            <li>Segelstellung (z.B. "Groß + Fock")</li>
-                            <li>Motorstunden</li>
-                            <li>Abfahrts- und Zielhafen</li>
-                        </ul>
-                    </li>
-                    <li><strong>👥 Wache:</strong> Crew-Mitglieder auf Wache auswählen</li>
-                    <li><strong>📝 Notizen:</strong> Besondere Vorkommnisse, Beobachtungen</li>
-                    <li><strong>📸 Fotos:</strong> Nachträglich Fotos zum Eintrag hinzufügen</li>
-                </ol>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">⚡ Quick Fill - Der schnellste Weg (empfohlen!):</h3>
+                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border-2 border-blue-300 mb-4">
+                    <p class="font-semibold mb-2">🎯 Alles mit einem Klick erfassen:</p>
+                    <ol class="list-decimal ml-6 space-y-2">
+                        <li>Gehe zu <strong>"📓 Logbuch"</strong> → <strong>"Neuer Eintrag"</strong></li>
+                        <li>Klicke auf den großen <strong>"⚡ Quick Fill"</strong> Button oben im Formular</li>
+                        <li>Automatisch ausgefüllt werden:
+                            <ul class="list-disc ml-6 mt-2">
+                                <li><strong>📅 Datum & Uhrzeit:</strong> Aktuelle Zeit</li>
+                                <li><strong>📍 GPS-Position:</strong> Latitude, Longitude, SOG (Speed over Ground), COG (Course over Ground)</li>
+                                <li><strong>🌤️ Wetter-Daten:</strong> Temperatur, Windrichtung, Windstärke, Luftdruck (via Open-Meteo API)</li>
+                            </ul>
+                        </li>
+                        <li>Ergänze nur noch fehlende Details (z.B. Motorstunden, Segel, Bemerkungen)</li>
+                        <li><strong>"💾 Eintrag speichern"</strong> klicken</li>
+                    </ol>
+                    <p class="text-sm mt-3 opacity-75"><strong>Hinweis:</strong> GPS funktioniert auch ohne Internet! Wetter-Daten benötigen jedoch eine aktive Verbindung.</p>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🎯 Manöver-Typen für schnelle Einträge:</h3>
+                <p class="mb-3">Wähle einen Manöver-Typ aus, um deinen Eintrag zu kategorisieren:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                    <div class="bg-blue-50 p-3 rounded border border-blue-200">
+                        <p class="font-bold">🚢 Departure (Abfahrt)</p>
+                        <p class="text-sm">Beginn des Törns, Ablegen vom Hafen</p>
+                    </div>
+                    <div class="bg-green-50 p-3 rounded border border-green-200">
+                        <p class="font-bold">⛵ Sail Change (Segelwechsel)</p>
+                        <p class="text-sm">Änderung der Segelstellung</p>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded border border-amber-200">
+                        <p class="font-bold">🔧 Motor (Motorstatus)</p>
+                        <p class="text-sm">Motor an/aus, Motorstunden erfassen</p>
+                    </div>
+                    <div class="bg-cyan-50 p-3 rounded border border-cyan-200">
+                        <p class="font-bold">⚓ Anchor (Ankern)</p>
+                        <p class="text-sm">Anker setzen oder lichten</p>
+                    </div>
+                    <div class="bg-sky-50 p-3 rounded border border-sky-200">
+                        <p class="font-bold">🌤️ Weather (Wetter-Update)</p>
+                        <p class="text-sm">Wetteränderungen dokumentieren</p>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded border border-purple-200">
+                        <p class="font-bold">🏁 Arrival (Ankunft)</p>
+                        <p class="text-sm">Festmachen im Zielhafen</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                        <p class="font-bold">📝 Full Entry (Vollständiger Eintrag)</p>
+                        <p class="text-sm">Detaillierter Eintrag mit allen Feldern</p>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📋 Erfasste Daten im Logbuch:</h3>
+                <ul class="list-disc ml-6 space-y-2 mb-4">
+                    <li><strong>📍 Navigation:</strong> GPS-Position (Breite/Länge), SOG, COG, Kurs, Fahrt, Log, Abfahrts-/Zielhafen</li>
+                    <li><strong>🌤️ Wetter:</strong> Temperatur, Windrichtung, Windstärke (Beaufort), Seegang, Sichtweite, Luftdruck</li>
+                    <li><strong>⛵ Segel:</strong> Segelstellung (z.B. "Groß + Fock", "Genua + Besan")</li>
+                    <li><strong>🔧 Motor:</strong> Motorstunden mit Auto-Berechnung (Start/Stop-Zeit → Laufzeit wird automatisch ermittelt)</li>
+                    <li><strong>👥 Wache:</strong> Crew-Mitglieder auf Wache</li>
+                    <li><strong>📝 Ereignisse:</strong> Besondere Vorkommnisse, Beobachtungen, Bemerkungen</li>
+                    <li><strong>📸 Fotos:</strong> Bis zu 10 Fotos pro Eintrag (nachträglich hinzufügen)</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📖 Tagesansicht & Navigation:</h3>
+                <p class="mb-3">Das Logbuch bietet eine professionelle Timeline-Ansicht:</p>
+                <ul class="list-disc ml-6 space-y-2 mb-4">
+                    <li><strong>Nach Datum gruppiert:</strong> Einträge werden automatisch nach Tagen sortiert</li>
+                    <li><strong>Tagesansicht:</strong> Klicke auf ein Datum, um alle Einträge des Tages chronologisch zu sehen</li>
+                    <li><strong>Statistiken:</strong> Anzahl Einträge, Gesamtstrecke, Motorstunden (Delta: Max - Min), Route (Abfahrt → Ankunft)</li>
+                    <li><strong>Navigation:</strong> Vor/Zurück-Buttons oder Datum-Picker für schnelles Springen</li>
+                    <li><strong>PDF-Export:</strong> Kompletter Tagestag als maritimes Logbuch-PDF exportierbar</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🔧 Motor-Stunden Auto-Berechnung:</h3>
+                <div class="bg-amber-50 p-4 rounded-lg border-2 border-amber-200 mb-4">
+                    <p class="mb-2"><strong>Intelligente Berechnung der Motorlaufzeit:</strong></p>
+                    <ol class="list-decimal ml-6 space-y-1 text-sm">
+                        <li>Erfasse <strong>"Motor an"</strong> mit Startzeitpunkt (z.B. 10:00 Uhr)</li>
+                        <li>Erfasse <strong>"Motor aus"</strong> mit Endzeitpunkt (z.B. 12:30 Uhr)</li>
+                        <li>Die App berechnet automatisch: <strong>2,5 Stunden Laufzeit</strong></li>
+                        <li>Motorstunden werden im Logbuch angezeigt und in PDFs dokumentiert</li>
+                    </ol>
+                </div>
 
                 <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 mt-4">
-                    <p class="font-semibold mb-2">💡 Tipp: GPS funktioniert auch ohne Internet!</p>
-                    <p>Die GPS-Position kann auch ohne Internetverbindung abgerufen werden. Das Speichern des Eintrags erfordert jedoch eine aktive Verbindung.</p>
+                    <p class="font-semibold mb-2">💡 Pro-Tipps für effizientes Loggen:</p>
+                    <ul class="list-disc ml-6 text-sm space-y-1">
+                        <li><strong>Quick Fill nutzen:</strong> Spart 90% der Eingabezeit - ein Klick erfasst Position + Wetter</li>
+                        <li><strong>Manöver-Typen verwenden:</strong> Kategorisiert Einträge für bessere Übersicht</li>
+                        <li><strong>Regelmäßig loggen:</strong> Alle 2-4 Stunden einen Eintrag für lückenloses Logbuch</li>
+                        <li><strong>Tagesansicht prüfen:</strong> Am Ende des Tages die Timeline kontrollieren</li>
+                    </ul>
                 </div>
             </div>
 
@@ -254,18 +313,65 @@
 
             <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⛵ Törns verwalten</h2>
             <div class="mb-6">
-                <p class="mb-4">Die App organisiert alles nach Törns:</p>
+                <p class="mb-4">Die App organisiert alles nach Törns und bietet intelligente Schnellstart-Optionen:</p>
+                
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">⚡ Quick Start WAGMI (nur für Sven):</h3>
+                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border-2 border-blue-300 mb-4">
+                    <p class="font-semibold mb-2">🚀 Törn mit einem Klick starten:</p>
+                    <ol class="list-decimal ml-6 space-y-2 text-sm">
+                        <li>Klicke auf <strong>"⚡ Quick Start WAGMI"</strong> auf Dashboard oder Törn-Seite</li>
+                        <li>Automatisch erstellt wird:
+                            <ul class="list-disc ml-6 mt-2">
+                                <li><strong>Törn-Name:</strong> "WAGMI - [Datum]" (z.B. "WAGMI - 09.11.2025")</li>
+                                <li><strong>Boot & Heimathafen:</strong> WAGMI aus Fredericia, Dänemark</li>
+                                <li><strong>Währung:</strong> DKK (Dänische Kronen)</li>
+                                <li><strong>Crew:</strong> Sven als Skipper und Crew mit Admin-Rechten</li>
+                                <li><strong>Erster Logbuch-Eintrag:</strong> Abfahrt von Fredericia (55°33.2'N, 9°43.8'E) mit Motor an</li>
+                            </ul>
+                        </li>
+                        <li>Alter aktiver Törn wird automatisch archiviert</li>
+                        <li>Sofort einsatzbereit - GPS, Wetter, Ausgaben direkt erfassbar!</li>
+                    </ol>
+                    <p class="text-sm mt-3 opacity-75"><strong>Perfekt für:</strong> Solo-Segeln mit WAGMI von Fredericia aus</p>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🧑‍✈️ Solo-Sailing Modus:</h3>
+                <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200 mb-4">
+                    <p class="mb-2">Bei <strong>"Neuer Törn"</strong> Formular:</p>
+                    <ul class="list-disc ml-6 text-sm space-y-1">
+                        <li>Checkbox <strong>"Solo-Sailing"</strong> aktivieren</li>
+                        <li>Du wirst automatisch als Skipper und Crew mit Admin-Rechten hinzugefügt</li>
+                        <li>Spart Crew-Erstellung und Berechtigungen manuell zu setzen</li>
+                        <li>Skipper-Name und Code werden aus deinen Einstellungen geladen</li>
+                    </ul>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📋 Normale Törn-Verwaltung:</h3>
                 <ul class="list-disc ml-6 space-y-2 mb-4">
                     <li><strong>Aktueller Törn:</strong> Alle Daten (Crew, Einzahlungen, Ausgaben, Logbuch) gehören zum aktiven Törn</li>
-                    <li><strong>Neuen Törn starten:</strong> 
+                    <li><strong>Neuen Törn manuell starten:</strong> 
                         <ul class="list-disc ml-6 mt-2">
-                            <li>Unter <strong>"⛵ Törns"</strong> → "Neuer Törn"</li>
+                            <li>Unter <strong>"⛵ Törns"</strong> → <strong>"Neuer Törn"</strong></li>
+                            <li>Törn-Name, Boot, Heimathafen, Koordinaten, Währung eingeben</li>
+                            <li>Optional: Solo-Sailing Checkbox für automatische Crew-Erstellung</li>
                             <li>Alter Törn wird automatisch archiviert</li>
                             <li>Du startest mit leerem Wallet und neuer Crew</li>
                         </ul>
                     </li>
+                    <li><strong>Törn bearbeiten:</strong> Törn-Details (Name, Boot, Heimathafen, etc.) nachträglich ändern</li>
                     <li><strong>Archivierte Törns:</strong> Bleiben als Backup gespeichert und können angeschaut werden</li>
+                    <li><strong>Törn schließen:</strong> Abgeschlossene Törns werden für normale Crew-Mitglieder read-only</li>
                 </ul>
+
+                <div class="bg-purple-50 p-4 rounded-lg border-2 border-purple-200">
+                    <p class="font-semibold mb-2">💡 Törn-Tipps:</p>
+                    <ul class="list-disc ml-6 text-sm space-y-1">
+                        <li><strong>Quick Start nutzen:</strong> Für WAGMI-Törns von Fredericia - spart 2-3 Minuten Einrichtungszeit</li>
+                        <li><strong>Solo-Sailing aktivieren:</strong> Bei Ein-Mann-Segeln für automatische Crew-Setup</li>
+                        <li><strong>Heimathafen-Koordinaten:</strong> Werden für ersten Logbuch-Eintrag bei Quick Start verwendet</li>
+                        <li><strong>Törns archivieren:</strong> Alter Törn wird automatisch archiviert, kein manueller Schritt nötig</li>
+                    </ul>
+                </div>
             </div>
 
             <div class="rope-divider"></div>
@@ -324,17 +430,63 @@
 
             <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📋 Daten exportieren</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">CSV Export:</h3>
-                <p class="mb-2">Unter <strong>"📋 Export"</strong> kannst du alle Daten als CSV-Datei herunterladen für deine eigenen Unterlagen.</p>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📊 Bordkasse Export (Einzahlungen & Ausgaben):</h3>
                 
-                <h3 class="text-xl font-semibold mb-3 mt-4" style="color: var(--navy-deep);">PDF Export:</h3>
-                <p class="mb-2">Erstelle einen professionellen PDF-Bericht mit:</p>
-                <ul class="list-disc ml-6 mb-4">
-                    <li>Kompletter Übersicht aller Einzahlungen und Ausgaben</li>
-                    <li>Salden und Ausgleichsberechnungen</li>
-                    <li>Maritimem Design mit WAGMI-Branding</li>
-                    <li>Perfekt für die Endabrechnung nach dem Törn</li>
-                </ul>
+                <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 mb-4">
+                    <h4 class="font-bold mb-2">CSV Export:</h4>
+                    <p class="mb-2">Unter <strong>"📋 Export"</strong> kannst du alle Bordkasse-Daten als CSV-Datei herunterladen:</p>
+                    <ul class="list-disc ml-6 text-sm">
+                        <li>Alle Einzahlungen und Ausgaben mit Details</li>
+                        <li>Importierbar in Excel oder Google Sheets</li>
+                        <li>Ideal für eigene Auswertungen</li>
+                    </ul>
+                </div>
+
+                <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200 mb-4">
+                    <h4 class="font-bold mb-2">PDF Export:</h4>
+                    <p class="mb-2">Erstelle einen professionellen PDF-Bericht der Bordkasse mit:</p>
+                    <ul class="list-disc ml-6 text-sm">
+                        <li>Kompletter Übersicht aller Einzahlungen und Ausgaben</li>
+                        <li>Salden und optimierte Ausgleichsberechnungen</li>
+                        <li>Maritimem Design mit WAGMI-Branding</li>
+                        <li>Perfekt für die Endabrechnung nach dem Törn</li>
+                    </ul>
+                </div>
+                
+                <h3 class="text-xl font-semibold mb-3 mt-6" style="color: var(--navy-deep);">📓 Logbuch PDF Export:</h3>
+                <p class="mb-3">Das Logbuch kann in professionellem maritimen Format exportiert werden - ideal für offizielle Dokumentation:</p>
+                
+                <div class="bg-amber-50 p-4 rounded-lg border-2 border-amber-200 mb-3">
+                    <h4 class="font-bold mb-2">📄 Einzelner Eintrag als PDF:</h4>
+                    <ul class="list-disc ml-6 text-sm space-y-1">
+                        <li>In der Logbuch-Liste: Bei jedem Eintrag auf <strong>"📄 PDF"</strong> klicken</li>
+                        <li>Generiert eine einzelne Seite im Querformat mit Grid-Layout</li>
+                        <li>Zeigt Skipper, Crew-Roster und alle Eintragsdaten</li>
+                        <li>Traditionelles maritimes Tabellenformat</li>
+                    </ul>
+                </div>
+
+                <div class="bg-cyan-50 p-4 rounded-lg border-2 border-cyan-200 mb-3">
+                    <h4 class="font-bold mb-2">📖 Tages-Logbuch als PDF:</h4>
+                    <ul class="list-disc ml-6 text-sm space-y-1">
+                        <li>In der Tagesansicht: <strong>"📄 Tages-PDF"</strong> Button nutzen</li>
+                        <li>Alle Einträge eines Tages in einem Dokument</li>
+                        <li>Querformat mit 11 Spalten (Zeit, Position, Kurs, Fahrt, Log, Wind, Wetter, Motor, Segel, Wache, Bemerkungen)</li>
+                        <li>Kompakte Darstellung - mehrere Einträge pro Seite</li>
+                        <li>Entspricht offiziellen maritimen Logbuch-Standards</li>
+                    </ul>
+                </div>
+
+                <div class="bg-purple-50 p-4 rounded-lg border-2 border-purple-200">
+                    <h4 class="font-bold mb-2">✨ PDF-Features:</h4>
+                    <ul class="list-disc ml-6 text-sm space-y-1">
+                        <li><strong>Skipper & Crew-Roster:</strong> Automatisch in jedem PDF enthalten</li>
+                        <li><strong>Schiffs-Informationen:</strong> Boot-Name, Heimathafen, Rufzeichen (falls vorhanden)</li>
+                        <li><strong>Koordinaten-Format:</strong> GPS-Position in Grad/Minuten (z.B. 55°33.2'N, 9°43.8'E)</li>
+                        <li><strong>Grid-Layout:</strong> Schwarze Gitterlinien für professionelles Erscheinungsbild</li>
+                        <li><strong>Druckfertig:</strong> Optimiert für A4 Querformat</li>
+                    </ul>
+                </div>
             </div>
 
             <div class="rope-divider"></div>
