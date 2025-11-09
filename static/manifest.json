@@ -1,7 +1,7 @@
 {
-  "name": "WAGMI Bordkasse",
+  "name": "WAGMI CrewLog",
   "short_name": "WAGMI",
-  "description": "Crew Wallet - Bordkasse für Segelcrew zum Verwalten von Ausgaben, Logbuch und Abrechnung",
+  "description": "Maritime Crew Logbook und Bordkasse für Segelcrew zum Verwalten von Ausgaben, Logbuch und Abrechnung",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
