@@ -59,6 +59,9 @@ class Trip(Base):
     crew_password_hash = Column(String(200), nullable=True)  # Password for regular crew members
     skipper_name = Column(String(100), nullable=True)  # Skipper name for logbook PDFs
     skipper_code = Column(String(20), nullable=True)  # Skipper code for logbook PDFs
+    home_port = Column(String(100), nullable=True)  # Vessel home port for logbook PDFs
+    call_sign = Column(String(50), nullable=True)  # Vessel call sign for logbook PDFs
+    imo_mmsi = Column(String(50), nullable=True)  # Vessel IMO/MMSI number for logbook PDFs
     created_at = Column(DateTime, default=datetime.utcnow)
     
     crew_members = relationship("CrewMember", back_populates="trip", cascade="all, delete-orphan")

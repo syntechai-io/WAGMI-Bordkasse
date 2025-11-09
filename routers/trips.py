@@ -79,9 +79,11 @@ async def create_trip(
         if user_id:
             prefs = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
         
-        # Always set skipper defaults, using preferences if available
+        # Always set skipper and vessel defaults from preferences
+        # Note: call_sign and imo_mmsi are not in UserPreferences, must be set manually
         trip.skipper_name = (prefs.skipper_name if prefs and prefs.skipper_name else "Skipper")
         trip.skipper_code = (prefs.skipper_code if prefs and prefs.skipper_code else "SK")
+        trip.home_port = (prefs.home_port if prefs and prefs.home_port else None)
     
     current_active = db.query(Trip).filter(Trip.status == TripStatus.active).first()
     if current_active:

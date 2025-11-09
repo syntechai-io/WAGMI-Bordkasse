@@ -37,7 +37,10 @@ class TripQuickStartService:
             start_date=today,
             end_date=None,
             status=TripStatus.active,
-            is_closed=0
+            is_closed=0,
+            skipper_name=prefs.skipper_name or "Skipper",
+            skipper_code=prefs.skipper_code or "SK",
+            home_port=prefs.home_port or "Home Port"
         )
         db.add(trip)
         db.flush()
