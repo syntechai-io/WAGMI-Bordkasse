@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session, joinedload
 from db import get_db
 from models import CrewMember, Deposit, Expense
 from services.trip import TripService
+from settlement import compute_settlement
+from routers.balances import calculate_balances
 import io
 import csv
 from typing import Any
@@ -101,9 +103,30 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
             participants
         ])
     
+    # Add settlement transfers
+    balances, settlement_net_map = calculate_balances(db, active_trip.id)
+    transfers = compute_settlement(settlement_net_map)
+    
+    writer.writerow([])
+    writer.writerow(["SETTLEMENT TRANSFERS / AUSGLEICH"])
+    writer.writerow(["From Code", "From Name", "To Code", "To Name", "Amount EUR"])
+    
+    member_map = {m.code: m for m in db.query(CrewMember).filter(
+        CrewMember.trip_id == active_trip.id
+    ).all()}
+    
+    for from_code, to_code, amount in transfers:
+        writer.writerow([
+            sanitize_csv_value(from_code),
+            sanitize_csv_value(member_map[from_code].name),
+            sanitize_csv_value(to_code),
+            sanitize_csv_value(member_map[to_code].name),
+            f"{amount:.2f}"
+        ])
+    
     output.seek(0)
-    return StreamingResponse(
-        iter([output.getvalue()]),
+    return Response(
+        content=output.getvalue(),
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=crew_wallet_export.csv"}
     )
@@ -223,6 +246,44 @@ async def download_pdf(request: Request, db: Session = Depends(get_db)):
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
     ]))
     elements.append(expense_table)
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # Settlement Transfers
+    balances, settlement_net_map = calculate_balances(db, active_trip.id)
+    transfers = compute_settlement(settlement_net_map)
+    
+    elements.append(Paragraph("💸 Settlement Transfers / Ausgleich", section_style))
+    
+    if transfers:
+        settlement_data = [["From Code", "From Name", "To Code", "To Name", "Amount EUR"]]
+        
+        member_map = {m.code: m for m in db.query(CrewMember).filter(
+            CrewMember.trip_id == active_trip.id
+        ).all()}
+        
+        for from_code, to_code, amount in transfers:
+            settlement_data.append([
+                str(from_code),
+                str(member_map[from_code].name),
+                str(to_code),
+                str(member_map[to_code].name),
+                f"€{amount:.2f}"
+            ])
+        
+        settlement_table = Table(settlement_data, colWidths=[0.8*inch, 2*inch, 0.8*inch, 2*inch, 1*inch])
+        settlement_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#27ae60')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        elements.append(settlement_table)
+    else:
+        elements.append(Paragraph("All settled! No transfers needed.", styles['Normal']))
     
     # Build PDF
     doc.build(elements)
