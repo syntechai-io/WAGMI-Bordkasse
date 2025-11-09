@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Depends, Form, UploadFile, File, HTTPException, Query
 from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
-from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse, StreamingResponse, JSONResponse
+from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse, StreamingResponse, JSONResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
@@ -867,8 +867,8 @@ async def export_single_entry_pdf(request: Request, entry_id: int, db: Session =
             details=f"PDF export: {filename}"
         )
         
-        return StreamingResponse(
-            pdf_buffer,
+        return Response(
+            content=pdf_buffer.read(),
             media_type="application/pdf",
             headers={"Content-Disposition": f"attachment; filename={filename}"}
         )
@@ -949,8 +949,8 @@ async def export_daily_pdf(
             details=f"Daily PDF export: {filename} ({len(entries)} entries)"
         )
         
-        return StreamingResponse(
-            pdf_buffer,
+        return Response(
+            content=pdf_buffer.read(),
             media_type="application/pdf",
             headers={"Content-Disposition": f"attachment; filename={filename}"}
         )
