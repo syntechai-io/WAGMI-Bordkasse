@@ -26,6 +26,7 @@ from routers.trips import router as trips_router
 from routers.logbook import router as logbook_router
 from routers.templates import router as templates_router
 from routers.groups import router as groups_router
+from routers.api import router as api_router
 
 app = FastAPI(title="Crew Wallet - Bordkasse")
 
@@ -110,6 +111,7 @@ with next(get_db()) as db:
     seed_database(db)
 
 app.include_router(auth_router)
+app.include_router(api_router, prefix="/api")
 app.include_router(trips_router)
 app.include_router(crew_router)
 app.include_router(deposits_router)

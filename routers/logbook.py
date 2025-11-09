@@ -784,35 +784,6 @@ async def view_photo(request: Request, photo_id: int, db: Session = Depends(get_
     
     return FileResponse(str(filepath), media_type=photo.content_type)
 
-@router.get("/weather")
-async def get_weather(
-    request: Request,
-    lat: float = Query(..., description="Latitude"),
-    lon: float = Query(..., description="Longitude"),
-    db: Session = Depends(get_db)
-):
-    """Fetch weather data from Open-Meteo API for given coordinates"""
-    active_trip = TripService.get_selected_trip(request, db)
-    if not active_trip:
-        raise HTTPException(status_code=403, detail="No active trip")
-    
-    weather_data = WeatherService.fetch_weather_data(lat, lon)
-    
-    if weather_data is None:
-        raise HTTPException(status_code=500, detail="Failed to fetch weather data")
-    
-    wind_direction_compass = weather_data.get('wind_direction_compass', '')
-    wind_speed_kn = weather_data.get('wind_speed_kn')
-    wind_strength_beaufort = WeatherService.wind_speed_to_beaufort(wind_speed_kn) if wind_speed_kn else ''
-    
-    return JSONResponse({
-        'temperature': weather_data.get('temperature'),
-        'wind_direction': wind_direction_compass,
-        'wind_strength': wind_strength_beaufort,
-        'pressure_hpa': weather_data.get('pressure_hpa'),
-        'timestamp': weather_data.get('timestamp')
-    })
-
 @router.get("/export/pdf/entry/{entry_id}")
 async def export_single_entry_pdf(request: Request, entry_id: int, db: Session = Depends(get_db)):
     """Export single logbook entry as official German/European standard PDF"""

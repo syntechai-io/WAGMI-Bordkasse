@@ -164,7 +164,7 @@ async function fillWeatherData() {
     }
 
     try {
-        const response = await fetch(`/logbook/weather?lat=${lat}&lon=${lon}`);
+        const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
         if (!response.ok) {
             throw new Error('Wetter-API Fehler');
         }
