@@ -4,12 +4,18 @@
 Crew Wallet is a minimalist expense tracking and settlement application for sailing crew members. It offers secure authentication, manages up to 12 crew members, tracks deposits and expenses with flexible splitting, and automatically calculates optimized settlement transfers. Key features include multi-currency support with automatic conversion, PWA capabilities, and professional PDF export for trip documentation. The project aims to simplify shared expense management for sailing trips, targeting a subscription-based revenue model.
 
 ### Recent Changes (November 9, 2025)
-- **Quick Start Törn (NEW)**: Implemented one-click trip creation for single-handed sailing workflow. Features:
+- **Dashboard Redesign (NEW)**: Reorganized dashboard to focus on core workflows with two-column desktop layout:
+  - Left column: Logbook section with logbook entry action + crew management
+  - Right column: Bordkasse section with total expenses display + expense entry + settlement
+  - Mobile layout simplified with single-column card stack prioritizing logbook and expense entry
+  - Removed detailed stats (deposits, wallet/private expenses breakdown, top categories) to reduce clutter
+  - Added timezone capture using device's Intl.DateTimeFormat API, stored in sessionStorage for consistent local time handling
+- **Quick Start Törn**: Implemented one-click trip creation for single-handed sailing workflow. Features:
   - New `UserPreferences` model storing default skipper, boat, home port, coordinates, and currency
   - Seeded with Sven's defaults: WAGMI boat, Fredericia Denmark (55.553611°N, 9.730556°E), DKK currency
   - `TripQuickStartService` creates trip with auto-generated name (WAGMI - DD.MM.YYYY), adds skipper as crew+admin, and generates first logbook departure entry with motor running from home port
   - Prominent "⚡ Quick Start WAGMI" buttons on dashboard and trips page for instant trip creation
-  - POST /trips/quick-start endpoint with admin-only security, auto-archives previous active trip, and redirects to new trip detail
+  - POST /trips/quick-start endpoint with admin-only security, auto-archives previous active trip, and redirects to dashboard
   - Optimized for solo sailor who primarily uses WAGMI from Fredericia
 - **Settlement Export Enhancement**: Added settlement transfer calculations to both PDF and CSV exports showing optimized payment transfers (who owes whom). Changed from StreamingResponse to Response for better navigation after download.
 - **Quick Entry System (Phase B)**: Added maneuver type field to LogbookEntry model with 7 types: departure, sail_change, motor, anchor, weather, arrival, and full entry. Implemented button-based maneuver selector in logbook form with icons (🚢⛵🔧⚓🌤️🏁📝) and visual feedback. JavaScript manages button selection and stores selected type. Enables fast logging of specific maneuver types during sailing. All fields remain visible for all maneuver types (user can categorize entries).
