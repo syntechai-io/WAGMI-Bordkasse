@@ -18,7 +18,9 @@ def render_logbook_pdf(
     meta: Optional[Dict[str, Any]] = None,
     summary: Optional[Dict[str, Any]] = None,
     entry_id: Optional[int] = None,
-    trip_name: Optional[str] = None
+    trip_name: Optional[str] = None,
+    crew_list: Optional[List[Dict[str, str]]] = None,
+    skipper: Optional[Dict[str, str]] = None
 ) -> None:
     """
     Render official German/European standard logbook PDF export in traditional grid format.
@@ -32,6 +34,8 @@ def render_logbook_pdf(
         summary: Optional summary statistics (total_nm, total_engine_hours, etc.)
         entry_id: Optional entry ID for navigation link (single entry exports)
         trip_name: Optional trip name for display
+        crew_list: Optional list of crew members (code and name)
+        skipper: Optional skipper info (code and name)
     """
     
     # Use landscape orientation for wider table
@@ -109,6 +113,29 @@ def render_logbook_pdf(
         alignment=TA_CENTER
     ))
     story.append(vessel_para)
+    
+    # Skipper and crew roster
+    if skipper or crew_list:
+        crew_parts = []
+        if skipper and skipper.get('name') and skipper.get('name') != '-':
+            crew_parts.append(f"<b>Skipper:</b> {skipper.get('name')} ({skipper.get('code', '-')})")
+        
+        if crew_list:
+            crew_names = [f"{c.get('name')} ({c.get('code')})" for c in crew_list]
+            if crew_names:
+                crew_parts.append(f"<b>Crew:</b> {', '.join(crew_names)}")
+        
+        if crew_parts:
+            crew_info_text = "  |  ".join(crew_parts)
+            crew_para = Paragraph(crew_info_text, ParagraphStyle(
+                'CrewInfo',
+                parent=styles['Normal'],
+                fontSize=7,
+                textColor=colors.HexColor('#555555'),
+                alignment=TA_CENTER
+            ))
+            story.append(crew_para)
+    
     story.append(Spacer(1, 4*mm))
     
     # Build logbook table with all entries

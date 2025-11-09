@@ -808,6 +808,20 @@ async def export_single_entry_pdf(request: Request, entry_id: int, db: Session =
         'imo_mmsi': getattr(active_trip, 'imo_mmsi', '-')
     }
     
+    # Get crew roster (exclude departed crew)
+    crew_members = db.query(CrewMember).filter(
+        CrewMember.trip_id == active_trip.id,
+        CrewMember.departed_at.is_(None)
+    ).order_by(CrewMember.code).all()
+    
+    crew_list = [{'code': member.code, 'name': member.name} for member in crew_members]
+    
+    # Get skipper info
+    skipper_info = {
+        'name': active_trip.skipper_name or '-',
+        'code': active_trip.skipper_code or '-'
+    }
+    
     pdf_buffer = io.BytesIO()
     
     try:
@@ -821,7 +835,9 @@ async def export_single_entry_pdf(request: Request, entry_id: int, db: Session =
                 'creator': 'WAGMI Bordkasse'
             },
             entry_id=entry.id,
-            trip_name=active_trip.name
+            trip_name=active_trip.name,
+            crew_list=crew_list,
+            skipper=skipper_info
         )
         
         pdf_buffer.seek(0)
@@ -881,6 +897,20 @@ async def export_daily_pdf(
         'imo_mmsi': getattr(active_trip, 'imo_mmsi', '-')
     }
     
+    # Get crew roster (exclude departed crew)
+    crew_members = db.query(CrewMember).filter(
+        CrewMember.trip_id == active_trip.id,
+        CrewMember.departed_at.is_(None)
+    ).order_by(CrewMember.code).all()
+    
+    crew_list = [{'code': member.code, 'name': member.name} for member in crew_members]
+    
+    # Get skipper info
+    skipper_info = {
+        'name': active_trip.skipper_name or '-',
+        'code': active_trip.skipper_code or '-'
+    }
+    
     total_dist = sum(e.dist_day_nm for e in entries if e.dist_day_nm is not None)
     total_eng_hours = sum(e.eng_hours_total for e in entries if e.eng_hours_total is not None)
     
@@ -903,7 +933,9 @@ async def export_daily_pdf(
                 'creator': 'WAGMI Bordkasse'
             },
             summary=summary,
-            trip_name=active_trip.name
+            trip_name=active_trip.name,
+            crew_list=crew_list,
+            skipper=skipper_info
         )
         
         pdf_buffer.seek(0)
