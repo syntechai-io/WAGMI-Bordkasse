@@ -67,6 +67,87 @@ async def list_logbook_entries(request: Request, db: Session = Depends(get_db)):
         "active_trip": active_trip
     })
 
+@router.get("/daily", response_class=HTMLResponse)
+async def daily_logbook_view(request: Request, date: Optional[str] = None, db: Session = Depends(get_db)):
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+    
+    # Parse selected date or use today
+    if date:
+        try:
+            selected_date = datetime.strptime(date, "%Y-%m-%d").date()
+        except ValueError:
+            selected_date = datetime.now().date()
+    else:
+        selected_date = datetime.now().date()
+    
+    # Calculate prev/next dates
+    from datetime import timedelta
+    prev_date = (selected_date - timedelta(days=1)).strftime("%Y-%m-%d")
+    next_date = (selected_date + timedelta(days=1)).strftime("%Y-%m-%d")
+    
+    # Get entries for this day
+    start_datetime = datetime.combine(selected_date, datetime.min.time())
+    end_datetime = datetime.combine(selected_date, datetime.max.time())
+    
+    entries = db.query(LogbookEntry).options(
+        joinedload(LogbookEntry.watch_leader)
+    ).filter(
+        LogbookEntry.trip_id == active_trip.id,
+        LogbookEntry.entry_date >= start_datetime,
+        LogbookEntry.entry_date <= end_datetime
+    ).order_by(LogbookEntry.entry_date.asc()).all()
+    
+    # Calculate summary stats
+    summary = {
+        "total_entries": len(entries),
+        "total_distance": sum(e.dist_day_nm for e in entries if e.dist_day_nm),
+        "total_engine_hours": None,
+        "route": None
+    }
+    
+    # Calculate engine hours from entries (delta for the day)
+    engine_hours = []
+    for entry in entries:
+        if entry.eng_hours_total is not None:
+            engine_hours.append(entry.eng_hours_total)
+    if len(engine_hours) >= 2:
+        # Calculate delta: last reading - first reading
+        summary["total_engine_hours"] = max(engine_hours) - min(engine_hours)
+    else:
+        # Not enough readings to calculate daily delta
+        summary["total_engine_hours"] = None
+    
+    # Get route (first departure -> last destination)
+    departures = [e.departure for e in entries if e.departure]
+    destinations = [e.destination for e in entries if e.destination]
+    if departures and destinations:
+        summary["route"] = f"{departures[0]} → {destinations[-1]}"
+    elif departures:
+        summary["route"] = departures[0]
+    elif destinations:
+        summary["route"] = destinations[-1]
+    
+    # Format date for display
+    selected_date_formatted = selected_date.strftime("%A, %d. %B %Y")
+    # German day and month names
+    day_names = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+    month_names = ["", "Januar", "Februar", "März", "April", "Mai", "Juni", 
+                   "Juli", "August", "September", "Oktober", "November", "Dezember"]
+    selected_date_formatted = f"{day_names[selected_date.weekday()]}, {selected_date.day}. {month_names[selected_date.month]} {selected_date.year}"
+    
+    return templates.TemplateResponse("logbook_daily.html", {
+        "request": request,
+        "entries": entries,
+        "active_trip": active_trip,
+        "selected_date": selected_date.strftime("%Y-%m-%d"),
+        "selected_date_formatted": selected_date_formatted,
+        "prev_date": prev_date,
+        "next_date": next_date,
+        "summary": summary
+    })
+
 @router.get("/new", response_class=HTMLResponse)
 async def new_entry_form(request: Request, db: Session = Depends(get_db)):
     active_trip = TripService.get_selected_trip(request, db)

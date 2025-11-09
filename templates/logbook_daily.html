@@ -1,0 +1,188 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">
+            📅 Tages-Logbuch
+        </h1>
+        <a href="/logbook" class="btn-secondary">
+            ← Zurück zur Übersicht
+        </a>
+    </div>
+    
+    <!-- Date Navigation -->
+    <div class="bg-white porthole-card p-6 mb-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <a href="/logbook/daily?date={{ prev_date }}" 
+                   class="px-4 py-2 rounded-lg transition touch-action" 
+                   style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%); color: white;">
+                    ← Vorheriger Tag
+                </a>
+                <a href="/logbook/daily?date={{ next_date }}" 
+                   class="px-4 py-2 rounded-lg transition touch-action" 
+                   style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%); color: white;">
+                    Nächster Tag →
+                </a>
+            </div>
+            
+            <form method="get" class="flex gap-2 items-center">
+                <label class="font-medium" style="color: var(--navy-deep);">Datum wählen:</label>
+                <input type="date" name="date" value="{{ selected_date }}" 
+                       class="px-4 py-2 border rounded-lg" 
+                       style="border-color: var(--sky-blue);"
+                       onchange="this.form.submit()">
+            </form>
+        </div>
+        
+        <div class="mt-4 text-center">
+            <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">
+                {{ selected_date_formatted }}
+            </h2>
+        </div>
+    </div>
+    
+    {% if entries %}
+    <!-- Daily Summary -->
+    <div class="bg-white porthole-card p-6 mb-6">
+        <h3 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">
+            📊 Zusammenfassung
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
+                <div class="text-sm font-medium" style="color: var(--navy-deep);">Einträge</div>
+                <div class="text-2xl font-bold" style="color: var(--sea-foam);">{{ summary.total_entries }}</div>
+            </div>
+            <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
+                <div class="text-sm font-medium" style="color: var(--navy-deep);">Distanz</div>
+                <div class="text-2xl font-bold" style="color: var(--sea-foam);">
+                    {% if summary.total_distance is not none %}{{ "%.1f"|format(summary.total_distance) }} nm{% else %}--{% endif %}
+                </div>
+            </div>
+            <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
+                <div class="text-sm font-medium" style="color: var(--navy-deep);">Motorstunden</div>
+                <div class="text-2xl font-bold" style="color: var(--sea-foam);">
+                    {% if summary.total_engine_hours is not none %}{{ "%.1f"|format(summary.total_engine_hours) }} h{% else %}--{% endif %}
+                </div>
+            </div>
+            <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
+                <div class="text-sm font-medium" style="color: var(--navy-deep);">Route</div>
+                <div class="text-lg font-bold" style="color: var(--sea-foam);">
+                    {% if summary.route %}{{ summary.route }}{% else %}--{% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4 text-right">
+            <a href="/logbook/export/pdf/daily?export_date={{ selected_date }}" 
+               class="text-white px-6 py-2 rounded-lg transition touch-action inline-block font-semibold"
+               style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
+                📄 Als PDF exportieren
+            </a>
+        </div>
+    </div>
+    
+    <!-- Entries Timeline -->
+    <div class="space-y-4">
+        {% for entry in entries %}
+        <div class="bg-white porthole-card p-6 hover:shadow-xl transition">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <!-- Time and Maneuver Icon -->
+                <div class="flex items-center gap-4">
+                    <div class="text-center">
+                        <div class="text-3xl">
+                            {% if entry.maneuver_type == 'departure' %}🚢
+                            {% elif entry.maneuver_type == 'sail_change' %}⛵
+                            {% elif entry.maneuver_type == 'motor' %}🔧
+                            {% elif entry.maneuver_type == 'anchor' %}⚓
+                            {% elif entry.maneuver_type == 'weather' %}🌤️
+                            {% elif entry.maneuver_type == 'arrival' %}🏁
+                            {% else %}📝{% endif %}
+                        </div>
+                        <div class="text-xs font-medium mt-1" style="color: var(--navy-deep);">
+                            {% if entry.maneuver_type == 'departure' %}Ablegen
+                            {% elif entry.maneuver_type == 'sail_change' %}Segel
+                            {% elif entry.maneuver_type == 'motor' %}Motor
+                            {% elif entry.maneuver_type == 'anchor' %}Ankern
+                            {% elif entry.maneuver_type == 'weather' %}Wetter
+                            {% elif entry.maneuver_type == 'arrival' %}Anlegen
+                            {% else %}Eintrag{% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-2xl font-bold" style="color: var(--navy-deep);">
+                            {{ entry.entry_date.strftime('%H:%M') }} Uhr
+                        </div>
+                        {% if entry.watch_leader %}
+                        <div class="text-sm" style="color: var(--navy-deep);">
+                            Wachführer: {{ entry.watch_leader.name }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Entry Details -->
+                <div class="flex-grow">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                        {% if entry.latitude and entry.longitude %}
+                        <div>
+                            <span class="font-medium">Position:</span> 
+                            {{ "%.4f"|format(entry.latitude) }}°N, {{ "%.4f"|format(entry.longitude) }}°E
+                        </div>
+                        {% endif %}
+                        {% if entry.cog_deg is not none %}
+                        <div><span class="font-medium">COG:</span> {{ entry.cog_deg }}°</div>
+                        {% endif %}
+                        {% if entry.sog_kn %}
+                        <div><span class="font-medium">SOG:</span> {{ "%.1f"|format(entry.sog_kn) }} kn</div>
+                        {% endif %}
+                        {% if entry.wind_direction %}
+                        <div><span class="font-medium">Wind:</span> {{ entry.wind_direction }}</div>
+                        {% endif %}
+                        {% if entry.wind_strength %}
+                        <div><span class="font-medium">Stärke:</span> {{ entry.wind_strength }}</div>
+                        {% endif %}
+                        {% if entry.sail_plan %}
+                        <div><span class="font-medium">Segel:</span> {{ entry.sail_plan }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if entry.notes %}
+                    <div class="mt-2 p-2 rounded" style="background: rgba(52, 152, 219, 0.05);">
+                        <span class="font-medium">Notizen:</span> {{ entry.notes }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Actions -->
+                <div class="flex md:flex-col gap-2">
+                    <a href="/logbook/{{ entry.id }}" 
+                       class="text-sm px-3 py-1 rounded transition whitespace-nowrap"
+                       style="background: var(--sky-blue); color: white;">
+                        Details →
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% else %}
+    <div class="bg-white porthole-card p-12 text-center">
+        <div class="text-6xl mb-4">📭</div>
+        <h3 class="text-2xl font-bold mb-2" style="color: var(--navy-deep);">
+            Keine Einträge für diesen Tag
+        </h3>
+        <p class="text-gray-600 mb-6">
+            Für {{ selected_date_formatted }} wurden noch keine Logbuch-Einträge erstellt.
+        </p>
+        <a href="/logbook/new" 
+           class="btn-primary inline-block">
+            ➕ Neuen Eintrag erstellen
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
