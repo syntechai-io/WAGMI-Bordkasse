@@ -28,7 +28,7 @@
             <div class="flex-grow-0">
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">🕐 Uhrzeit *</label>
                 <input type="time" name="entry_time" 
-                       value="{% if entry }}{{ entry.entry_date.strftime('%H:%M') }}{% else %}12:00{% endif %}" 
+                       value="{% if entry %}{{ entry.entry_date.strftime('%H:%M') }}{% else %}12:00{% endif %}" 
                        required 
                        class="px-4 py-3 border rounded-lg text-lg w-auto" 
                        style="border-color: var(--sky-blue); min-width: 140px;">

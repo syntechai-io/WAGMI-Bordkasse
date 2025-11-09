@@ -11,26 +11,36 @@ from db import Base
 import os
 
 def test_dropdown_fields_exist_in_form():
-    """Test that datalist fields are present in logbook form (allow dropdown + manual entry)"""
+    """Test that hybrid select/manual fields are present in logbook form"""
     from pathlib import Path
     form_html = Path('templates/logbook_form.html').read_text()
     
-    # Changed to datalists (text input + datalist) instead of selects
-    assert 'name="wind_direction" list="wind-direction-list"' in form_html
-    assert 'name="wind_strength" list="wind-strength-list"' in form_html
-    assert 'name="visibility" list="visibility-list"' in form_html
-    assert 'name="sail_plan" list="sail-plan-list"' in form_html
+    # Check for hybrid select dropdowns (default mode)
+    assert 'id="wind_direction_select"' in form_html
+    assert 'id="wind_strength_select"' in form_html
+    assert 'id="visibility_select"' in form_html
+    assert 'id="sail_plan_select"' in form_html
     
-    assert 'datalist id="wind-direction-list"' in form_html
-    assert 'datalist id="wind-strength-list"' in form_html
-    assert 'datalist id="visibility-list"' in form_html
-    assert 'datalist id="sail-plan-list"' in form_html
+    # Check for manual entry inputs (hidden by default)
+    assert 'id="wind_direction_manual"' in form_html
+    assert 'id="wind_strength_manual"' in form_html
+    assert 'id="visibility_manual"' in form_html
+    assert 'id="sail_plan_manual"' in form_html
     
+    # Check for toggle buttons
+    assert 'hybrid-toggle' in form_html
+    assert 'Eigenen Wert eingeben' in form_html
+    
+    # Check option values still exist
     assert 'option value="N"' in form_html
     assert 'option value="SW"' in form_html
     assert '4 Bft (11-16 kn) - Mäßige Brise' in form_html
     assert 'Sehr gut (>10 nm)' in form_html
     assert 'Großsegel + Genua' in form_html
+    
+    # Check for hybrid field JavaScript logic
+    assert 'getHybridFieldControl' in form_html
+    assert 'enableManualMode' in form_html
 
 def test_weather_button_exists():
     """Test that weather fetch button is present"""
