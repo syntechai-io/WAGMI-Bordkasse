@@ -162,17 +162,18 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
-                <div id="menu" class="hidden lg:flex lg:items-center lg:space-x-6">
+                <div id="menu" class="hidden lg:flex lg:items-center lg:space-x-3 text-sm">
                     <a href="/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">🧭 Dashboard</a>
                     <a href="/trips/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⛵ Törns</a>
+                    <a href="/logbook" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📓 Logbuch</a>
                     
                     <!-- Trip Selector (Admin Only) -->
                     {% if request.session.get('role') == 'admin' and all_trips %}
                     <div class="relative nav-dropdown">
-                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center text-sm" 
+                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center text-xs" 
                                 aria-haspopup="true" aria-expanded="false">
                             🎯 {{ selected_trip.name if selected_trip else 'Törn wählen' }}
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
@@ -196,7 +197,7 @@
                         <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center" 
                                 aria-haspopup="true" aria-expanded="false">
                             💰 Finanzen
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
@@ -215,7 +216,7 @@
                         <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center" 
                                 aria-haspopup="true" aria-expanded="false">
                             📝 Verwaltung
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
@@ -226,7 +227,6 @@
                             {% if request.session.get('role') == 'admin' %}
                             <a href="/trips/passwords" class="block px-4 py-2 hover:bg-sky-100 transition">🔐 Passwörter</a>
                             {% endif %}
-                            <a href="/logbook" class="block px-4 py-2 hover:bg-sky-100 transition">📓 Logbuch</a>
                             <a href="/export/csv" class="block px-4 py-2 hover:bg-sky-100 transition">📋 Export</a>
                         </div>
                     </div>
