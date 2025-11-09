@@ -4,7 +4,7 @@
 Crew Wallet is a minimalist expense tracking and settlement application for sailing crew members. It offers secure authentication, manages up to 12 crew members, tracks deposits and expenses with flexible splitting, and automatically calculates optimized settlement transfers. Key features include multi-currency support with automatic conversion, PWA capabilities, and professional PDF export for trip documentation. The project aims to simplify shared expense management for sailing trips, targeting a subscription-based revenue model.
 
 ### Recent Changes (November 9, 2025)
-- **Weather API Bugfix (NEW)**: Fixed Quick Fill weather data fetch in production - corrected API endpoint URL from `/logbook/api/weather` to `/logbook/weather` to match backend router configuration. Weather data now loads correctly via Open-Meteo API integration.
+- **Weather API Bugfix (LATEST)**: Fixed Quick Fill weather data fetch - moved endpoint from `/logbook/weather` to `/api/weather` to bypass authentication middleware. Created new `routers/api.py` for unauthenticated public endpoints. Weather data (temperature, wind, pressure) now loads correctly via Open-Meteo API integration without 303 redirect errors.
 - **Navigation Restructuring**: Reorganized top navigation bar for improved accessibility:
   - **Logbook Promotion**: Moved Logbuch from Verwaltung dropdown to top-level navigation next to Törns for quick access
   - **Compact Layout**: Reduced spacing (space-x-3) and font size (text-sm) to fit all items in one row on desktop
