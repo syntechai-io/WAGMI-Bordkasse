@@ -4,7 +4,13 @@
 Crew Wallet is a minimalist expense tracking and settlement application for sailing crew members. It offers secure authentication, manages up to 12 crew members, tracks deposits and expenses with flexible splitting, and automatically calculates optimized settlement transfers. Key features include multi-currency support with automatic conversion, PWA capabilities, and professional PDF export for trip documentation. The project aims to simplify shared expense management for sailing trips, targeting a subscription-based revenue model.
 
 ### Recent Changes (November 9, 2025)
-- **Mobile Dashboard UX Optimization (NEW)**: Completely redesigned mobile dashboard prioritizing quick logbook entry:
+- **Navigation Restructuring (NEW)**: Reorganized top navigation bar for improved accessibility:
+  - **Logbook Promotion**: Moved Logbuch from Verwaltung dropdown to top-level navigation next to Törns for quick access
+  - **Compact Layout**: Reduced spacing (space-x-3) and font size (text-sm) to fit all items in one row on desktop
+  - **Streamlined Verwaltung**: Simplified dropdown to Crew, Groups, Passwords (admin), and Export only
+  - **Smaller Icons**: Reduced dropdown arrow icons to w-3 h-3 for more compact appearance
+  - **Goal**: Prioritize quick access to Logbook alongside Törns for sailors' primary workflows
+- **Mobile Dashboard UX Optimization**: Completely redesigned mobile dashboard prioritizing quick logbook entry:
   - **Primary CTA**: Prominent "Schnell-Logbuch" button at top with 96px min-height and 24px padding for easy tapping while sailing
   - **Accessibility**: All touch targets meet ≥72px minimum (48dp accessibility guideline)
   - **Visual Hierarchy**: Info cards (e.g., total expenses) visually distinct with border styling vs. action cards
