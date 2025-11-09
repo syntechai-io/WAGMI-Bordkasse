@@ -4,10 +4,11 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
-from models import Trip, TripStatus, CrewMember
+from models import Trip, TripStatus, CrewMember, UserPreferences
 from services.trip import TripService
 from services.quick_start import TripQuickStartService
 from datetime import date
+from typing import Optional
 
 router = APIRouter(prefix="/trips", tags=["trips"])
 templates = Jinja2Templates(
@@ -58,6 +59,7 @@ async def create_trip(
     request: Request,
     name: str = Form(...),
     start_date: date = Form(...),
+    solo_sailing: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     """Create a new trip"""
@@ -70,6 +72,17 @@ async def create_trip(
         status=TripStatus.active
     )
     
+    # If solo sailing, get user preferences once and use for both trip and crew
+    prefs = None
+    if solo_sailing == "true":
+        user_id = request.session.get("user_id")
+        if user_id:
+            prefs = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
+        
+        # Always set skipper defaults, using preferences if available
+        trip.skipper_name = (prefs.skipper_name if prefs and prefs.skipper_name else "Skipper")
+        trip.skipper_code = (prefs.skipper_code if prefs and prefs.skipper_code else "SK")
+    
     current_active = db.query(Trip).filter(Trip.status == TripStatus.active).first()
     if current_active:
         current_active.status = TripStatus.archived
@@ -77,6 +90,21 @@ async def create_trip(
     
     db.add(trip)
     db.commit()
+    db.refresh(trip)
+    
+    # Add crew member if solo sailing (reuse prefs from above)
+    if solo_sailing == "true":
+        crew_code = (prefs.skipper_code if prefs and prefs.skipper_code else "SK")
+        crew_name = (prefs.skipper_name if prefs and prefs.skipper_name else "Skipper")
+        
+        crew_member = CrewMember(
+            trip_id=trip.id,
+            code=crew_code,
+            name=crew_name,
+            is_trip_admin=1
+        )
+        db.add(crew_member)
+        db.commit()
     
     return RedirectResponse(url="/trips/", status_code=303)
 
