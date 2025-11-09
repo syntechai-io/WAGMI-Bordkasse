@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Test Trip Creator for Crew Wallet
+Test Trip Creator for WAGMI CrewLog
 Creates a test trip with crew departures to test the settlement feature
 """
 from datetime import datetime, timedelta, date

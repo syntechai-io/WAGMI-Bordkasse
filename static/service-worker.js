@@ -1,7 +1,7 @@
-// Service Worker for Crew Wallet - Bordkasse PWA
+// Service Worker for WAGMI CrewLog - Maritime Logbook & Bordkasse PWA
 // Version 1.0 - Basic offline support planned for future
 
-const CACHE_NAME = 'crew-wallet-v1';
+const CACHE_NAME = 'wagmi-crewlog-v1';
 const urlsToCache = [
   '/',
   '/static/manifest.json',

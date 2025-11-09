@@ -1,8 +1,8 @@
-# WAGMI Bordkasse - Test Suite Documentation
+# WAGMI CrewLog - Test Suite Documentation
 
 ## Overview
 
-This test suite provides comprehensive end-to-end testing for the WAGMI Bordkasse application. It validates all functionality including authentication, trip management, crew operations, financial transactions, calculations, exports, and PWA features.
+This test suite provides comprehensive end-to-end testing for the WAGMI CrewLog application. It validates all functionality including authentication, trip management, crew operations, logbook entries, financial transactions, calculations, exports, and PWA features.
 
 ## Test Coverage
 

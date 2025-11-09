@@ -28,7 +28,7 @@ from routers.templates import router as templates_router
 from routers.groups import router as groups_router
 from routers.api import router as api_router
 
-app = FastAPI(title="Crew Wallet - Bordkasse")
+app = FastAPI(title="WAGMI CrewLog - Maritime Logbook & Bordkasse")
 
 # Use shared limiter instance
 app.state.limiter = limiter

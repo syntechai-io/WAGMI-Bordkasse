@@ -1,8 +1,8 @@
-# WAGMI Bordkasse - Crew Wallet
+# WAGMI CrewLog - Maritime Logbook & Bordkasse
 
 ## Executive Summary
 
-**WAGMI Bordkasse** (Crew Wallet) is a specialized web-based financial management application designed for sailing crews to track shared expenses, manage deposits, and calculate fair settlements during multi-day or multi-week sailing trips. The application eliminates the complexity of manual expense tracking and settlement calculations, providing automated, transparent, and fair financial management for groups of up to 12 people.
+**WAGMI CrewLog** is a specialized web-based application designed for sailing crews to maintain professional maritime logbooks and track shared expenses (Bordkasse). The application combines comprehensive logbook entries with GPS and weather data alongside automated expense tracking, multi-currency support, and fair settlement calculations for multi-day or multi-week sailing trips.
 
 ### The Problem It Solves
 
@@ -14,7 +14,7 @@ When groups embark on sailing trips, managing shared expenses becomes complex:
 - Disputes arise from unclear expense allocation
 - Paper receipts get lost, and memories fade about who paid what
 
-**WAGMI Bordkasse solves all of these problems** with automated tracking, multi-currency support, receipt management, and optimized settlement calculations.
+**WAGMI CrewLog solves all of these problems** with automated logbook entries, GPS tracking, weather data integration, multi-currency expense support, receipt management, and optimized settlement calculations.
 
 ## Core Features
 
