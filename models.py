@@ -292,6 +292,9 @@ class LogbookEntry(Base):
     event_category = Column(String(100), nullable=True)
     event_details = Column(Text, nullable=True)
     
+    # Quick entry mode (Phase B enhancement)
+    maneuver_type = Column(String(50), nullable=True)
+    
     # Append-only compliance (Phase A enhancement)
     parent_id = Column(Integer, ForeignKey("logbook_entries.id"), nullable=True, index=True)
     is_superseded = Column(Boolean, default=False, nullable=False)

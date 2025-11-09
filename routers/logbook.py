@@ -127,6 +127,8 @@ async def create_entry(
     # Phase A: Events fields
     event_category: Optional[str] = Form(None),
     event_details: Optional[str] = Form(None),
+    # Phase B: Quick Entry
+    maneuver_type: Optional[str] = Form("full"),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)
@@ -201,7 +203,9 @@ async def create_entry(
             sail_action=sail_action,
             # Phase A: Events
             event_category=event_category,
-            event_details=event_details
+            event_details=event_details,
+            # Phase B: Quick Entry
+            maneuver_type=maneuver_type
         )
         db.add(entry)
         db.flush()
@@ -325,6 +329,8 @@ async def update_entry(
     # Phase A: Events fields
     event_category: Optional[str] = Form(None),
     event_details: Optional[str] = Form(None),
+    # Phase B: Quick Entry
+    maneuver_type: Optional[str] = Form("full"),
     db: Session = Depends(get_db)
 ):
     active_trip = TripService.get_selected_trip(request, db)

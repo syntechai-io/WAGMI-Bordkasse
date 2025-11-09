@@ -15,6 +15,47 @@
     
     <form method="post" class="bg-white porthole-card p-6 space-y-6">
         {{ csrf_input | safe }}
+        
+        <!-- Maneuver Type Quick Entry Selector -->
+        <div class="mb-6">
+            <label class="block font-bold text-lg mb-3 maritime-header" style="color: var(--navy-deep);">
+                ⚓ Manöver-Typ (Quick Entry)
+            </label>
+            <input type="hidden" name="maneuver_type" id="maneuver_type_input" value="{% if entry and entry.maneuver_type %}{{ entry.maneuver_type }}{% else %}full{% endif %}">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="departure" style="border-color: var(--sky-blue);">
+                    <div class="text-2xl mb-1">🚢</div>
+                    <div class="text-xs font-semibold">Ablegen</div>
+                </button>
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="sail_change" style="border-color: var(--sky-blue);">
+                    <div class="text-2xl mb-1">⛵</div>
+                    <div class="text-xs font-semibold">Segel setzen</div>
+                </button>
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="motor" style="border-color: var(--sky-blue);">
+                    <div class="text-2xl mb-1">🔧</div>
+                    <div class="text-xs font-semibold">Motor</div>
+                </button>
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="anchor" style="border-color: var(--sky-blue);">
+                    <div class="text-2xl mb-1">⚓</div>
+                    <div class="text-xs font-semibold">Ankern</div>
+                </button>
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="weather" style="border-color: var(--sky-blue);">
+                    <div class="text-2xl mb-1">🌤️</div>
+                    <div class="text-xs font-semibold">Wetter</div>
+                </button>
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="arrival" style="border-color: var(--sky-blue);">
+                    <div class="text-2xl mb-1">🏁</div>
+                    <div class="text-xs font-semibold">Anlegen</div>
+                </button>
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action md:col-span-2" data-type="full" style="border-color: var(--sky-blue);">
+                    <div class="text-2xl mb-1">📝</div>
+                    <div class="text-xs font-semibold">Vollständiger Eintrag</div>
+                </button>
+            </div>
+        </div>
+        
+        <div class="rope-divider"></div>
+        
         <div class="flex flex-wrap gap-4 items-end">
             <div class="flex-grow-0">
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">📅 Datum *</label>
@@ -95,7 +136,7 @@
         <div class="rope-divider"></div>
         
         <!-- Phase A: Navigation Section -->
-        <details class="porthole-card p-4 mb-4 cursor-pointer">
+        <details class="porthole-card p-4 mb-4 cursor-pointer" data-maneuver="full">
             <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
                 🧭 Navigation (optional)
             </summary>
@@ -617,6 +658,7 @@
 </div>
 
 <script src="/static/js/logbook-gps.js"></script>
+<script src="/static/js/logbook-quick-entry.js"></script>
 <script>
 // Phase A: Motor Toggle Buttons with Auto-Calculation
 document.getElementById('motor-on-btn').addEventListener('click', function() {
@@ -1221,7 +1263,9 @@ form.addEventListener('submit', async function(e) {
             sail_action: formData.get('sail_action') || null,
             // Phase A: Events
             event_category: formData.get('event_category') || null,
-            event_details: formData.get('event_details') || null
+            event_details: formData.get('event_details') || null,
+            // Phase B: Quick Entry
+            maneuver_type: formData.get('maneuver_type') || 'full'
         };
         
         const submitBtn = form.querySelector('button[type="submit"]');
