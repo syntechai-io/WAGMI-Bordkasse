@@ -9,11 +9,38 @@
         </a>
     </div>
 
-    <div id="entriesContainer">
     {% if entries %}
-    <div class="space-y-4">
+    <div id="entriesContainer" class="space-y-6">
+        {% set current_date = namespace(value=None) %}
+        {% set date_groups = {} %}
+        
+        {# Group entries by date #}
         {% for entry in entries %}
-        <div class="bg-white porthole-card p-6 hover:shadow-lg transition-shadow">
+            {% set entry_date_str = entry.entry_date.strftime('%Y-%m-%d') %}
+            {% if entry_date_str not in date_groups %}
+                {% set _ = date_groups.update({entry_date_str: []}) %}
+            {% endif %}
+            {% set _ = date_groups[entry_date_str].append(entry) %}
+        {% endfor %}
+        
+        {# Render grouped entries #}
+        {% for date_str, day_entries in date_groups.items() %}
+            <div class="space-y-4">
+                <a href="/logbook/daily?date={{ date_str }}" 
+                   class="block hover:opacity-80 transition touch-action">
+                    <div class="flex items-center gap-3 mb-3">
+                        <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">
+                            📅 {{ day_entries[0].entry_date.strftime('%d.%m.%Y') }}
+                        </h2>
+                        <span class="text-sm px-3 py-1 rounded-full" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.2) 0%, rgba(52, 152, 219, 0.2) 100%); color: var(--ocean-blue);">
+                            📖 Tagesansicht →
+                        </span>
+                    </div>
+                </a>
+                
+                {% for entry in day_entries %}
+            
+        <div class="bg-white porthole-card p-6 hover:shadow-lg transition-shadow ml-4 md:ml-8">
             <div class="flex flex-col md:flex-row gap-4">
                 {% if entry.photos %}
                 <div class="md:w-32 h-32 flex-shrink-0">
@@ -28,7 +55,17 @@
                     <div class="flex justify-between items-start mb-3">
                         <div>
                             <h3 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">
-                                {{ entry.entry_date.strftime('%d.%m.%Y %H:%M') }} Uhr
+                                ⏱️ {{ entry.entry_date.strftime('%H:%M') }} Uhr
+                                {% if entry.maneuver_type %}
+                                    {% if entry.maneuver_type == 'departure' %}🚢
+                                    {% elif entry.maneuver_type == 'sail_change' %}⛵
+                                    {% elif entry.maneuver_type == 'motor' %}🔧
+                                    {% elif entry.maneuver_type == 'anchor' %}⚓
+                                    {% elif entry.maneuver_type == 'weather' %}🌤️
+                                    {% elif entry.maneuver_type == 'arrival' %}🏁
+                                    {% elif entry.maneuver_type == 'full' %}📝
+                                    {% endif %}
+                                {% endif %}
                             </h3>
                             {% if entry.departure or entry.destination %}
                             <p class="text-sm mt-1" style="color: var(--ocean-blue);">
@@ -127,8 +164,10 @@
                 </div>
             </div>
         </div>
-        {% endfor %}
-    </div>
+                {% endfor %} {# End day_entries loop #}
+            </div> {# Close date group #}
+        {% endfor %} {# End date_groups loop #}
+    </div> {# Close entriesContainer #}
     {% else %}
     <div class="bg-white porthole-card p-12 text-center">
         <p class="text-xl maritime-header mb-4" style="color: var(--navy-deep);">📓 Noch keine Logbuch-Einträge</p>
@@ -138,6 +177,5 @@
         </a>
     </div>
     {% endif %}
-    </div>
 </div>
 {% endblock %}

@@ -3,6 +3,12 @@
 ### Overview
 Crew Wallet is a minimalist expense tracking and settlement application for sailing crew members. It offers secure authentication, manages up to 12 crew members, tracks deposits and expenses with flexible splitting, and automatically calculates optimized settlement transfers. Key features include multi-currency support with automatic conversion, PWA capabilities, and professional PDF export for trip documentation. The project aims to simplify shared expense management for sailing trips, targeting a subscription-based revenue model.
 
+### Recent Changes (November 9, 2025)
+- **Quick Entry System (Phase B)**: Added maneuver type field to LogbookEntry model with 7 types: departure, sail_change, motor, anchor, weather, arrival, and full entry. Implemented button-based maneuver selector in logbook form with icons (🚢⛵🔧⚓🌤️🏁📝) and visual feedback. JavaScript manages button selection and stores selected type. Enables fast logging of specific maneuver types during sailing. All fields remain visible for all maneuver types (user can categorize entries).
+- **Daily Logbook View**: Created /logbook/daily route displaying all entries for a selected date in chronological timeline format. Features date navigation (prev/next buttons + date picker), summary statistics (entry count, total distance, engine hours delta, route: departure → destination), maneuver type icons for each entry, and link to daily PDF export. German date formatting with proper weekday/month names. Engine hours calculated as delta (max - min) only when 2+ readings exist.
+- **Enhanced Daily Navigation**: Main logbook list now groups entries by date with clickable date headers linking to daily view. Each date shows "📖 Tagesansicht →" badge for easy access to full day timeline. Individual entries indented under date headers with time-only display and maneuver type icons.
+- **Quick Fill Feature**: Added prominent "⚡ Quick Fill" button to logbook form that auto-populates all data in one tap: current date/time, GPS position (lat/lon/SOG/COG), and weather data (temperature, wind direction/strength, pressure). Features loading spinner, success/error notifications, and seamless integration with hybrid dropdown/manual fields. Optimized for mobile use with large touch target and visual feedback.
+
 ### User Preferences
 Preferred communication style: Simple, everyday language.
 
