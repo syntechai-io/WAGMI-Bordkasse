@@ -15,23 +15,23 @@
     
     <form method="post" class="bg-white porthole-card p-6 space-y-6">
         {{ csrf_input | safe }}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+        <div class="flex flex-wrap gap-4 items-end">
+            <div class="flex-grow-0">
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">📅 Datum *</label>
                 <input type="date" name="entry_date" 
                        value="{% if entry %}{{ entry.entry_date.strftime('%Y-%m-%d') }}{% endif %}" 
                        required 
-                       class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
+                       class="px-4 py-3 border rounded-lg text-lg w-auto" 
+                       style="border-color: var(--sky-blue); min-width: 160px;">
             </div>
             
-            <div>
+            <div class="flex-grow-0">
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">🕐 Uhrzeit *</label>
                 <input type="time" name="entry_time" 
-                       value="{% if entry %}{{ entry.entry_date.strftime('%H:%M') }}{% else %}12:00{% endif %}" 
+                       value="{% if entry }}{{ entry.entry_date.strftime('%H:%M') }}{% else %}12:00{% endif %}" 
                        required 
-                       class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
+                       class="px-4 py-3 border rounded-lg text-lg w-auto" 
+                       style="border-color: var(--sky-blue); min-width: 140px;">
             </div>
         </div>
         
@@ -141,55 +141,81 @@
         <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">🌤️ Wetter & Bedingungen</h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div class="hybrid-field-container">
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">💨 Windrichtung</label>
-                <input type="text" name="wind_direction" list="wind-direction-list"
+                <select name="wind_direction" id="wind_direction_select" 
+                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-select" 
+                        style="border-color: var(--sky-blue);"
+                        data-field="wind_direction">
+                    <option value="">-- Bitte wählen --</option>
+                    <option value="N" {% if entry and entry.wind_direction == 'N' %}selected{% endif %}>N (Nord)</option>
+                    <option value="NNE" {% if entry and entry.wind_direction == 'NNE' %}selected{% endif %}>NNE (Nord-Nordost)</option>
+                    <option value="NE" {% if entry and entry.wind_direction == 'NE' %}selected{% endif %}>NE (Nordost)</option>
+                    <option value="ENE" {% if entry and entry.wind_direction == 'ENE' %}selected{% endif %}>ENE (Ost-Nordost)</option>
+                    <option value="E" {% if entry and entry.wind_direction == 'E' %}selected{% endif %}>E (Ost)</option>
+                    <option value="ESE" {% if entry and entry.wind_direction == 'ESE' %}selected{% endif %}>ESE (Ost-Südost)</option>
+                    <option value="SE" {% if entry and entry.wind_direction == 'SE' %}selected{% endif %}>SE (Südost)</option>
+                    <option value="SSE" {% if entry and entry.wind_direction == 'SSE' %}selected{% endif %}>SSE (Süd-Südost)</option>
+                    <option value="S" {% if entry and entry.wind_direction == 'S' %}selected{% endif %}>S (Süd)</option>
+                    <option value="SSW" {% if entry and entry.wind_direction == 'SSW' %}selected{% endif %}>SSW (Süd-Südwest)</option>
+                    <option value="SW" {% if entry and entry.wind_direction == 'SW' %}selected{% endif %}>SW (Südwest)</option>
+                    <option value="WSW" {% if entry and entry.wind_direction == 'WSW' %}selected{% endif %}>WSW (West-Südwest)</option>
+                    <option value="W" {% if entry and entry.wind_direction == 'W' %}selected{% endif %}>W (West)</option>
+                    <option value="WNW" {% if entry and entry.wind_direction == 'WNW' %}selected{% endif %}>WNW (West-Nordwest)</option>
+                    <option value="NW" {% if entry and entry.wind_direction == 'NW' %}selected{% endif %}>NW (Nordwest)</option>
+                    <option value="NNW" {% if entry and entry.wind_direction == 'NNW' %}selected{% endif %}>NNW (Nord-Nordwest)</option>
+                </select>
+                <input type="text" id="wind_direction_manual" 
                        value="{% if entry and entry.wind_direction %}{{ entry.wind_direction }}{% endif %}" 
-                       placeholder="z.B. NNW (oder wählen)" 
-                       class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
-                <datalist id="wind-direction-list">
-                    <option value="N">N (Nord)</option>
-                    <option value="NNE">NNE (Nord-Nordost)</option>
-                    <option value="NE">NE (Nordost)</option>
-                    <option value="ENE">ENE (Ost-Nordost)</option>
-                    <option value="E">E (Ost)</option>
-                    <option value="ESE">ESE (Ost-Südost)</option>
-                    <option value="SE">SE (Südost)</option>
-                    <option value="SSE">SSE (Süd-Südost)</option>
-                    <option value="S">S (Süd)</option>
-                    <option value="SSW">SSW (Süd-Südwest)</option>
-                    <option value="SW">SW (Südwest)</option>
-                    <option value="WSW">WSW (West-Südwest)</option>
-                    <option value="W">W (West)</option>
-                    <option value="WNW">WNW (West-Nordwest)</option>
-                    <option value="NW">NW (Nordwest)</option>
-                    <option value="NNW">NNW (Nord-Nordwest)</option>
-                </datalist>
+                       placeholder="z.B. NNW" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
+                       style="border-color: var(--sky-blue);"
+                       data-field="wind_direction"
+                       disabled>
+                <button type="button" class="mt-2 text-sm hybrid-toggle" 
+                        data-field="wind_direction"
+                        aria-expanded="false"
+                        aria-controls="wind_direction_manual"
+                        style="color: var(--sea-foam);">
+                    ✏️ Eigenen Wert eingeben
+                </button>
             </div>
             
-            <div>
+            <div class="hybrid-field-container">
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">💨 Windstärke</label>
-                <input type="text" name="wind_strength" list="wind-strength-list"
+                <select name="wind_strength" id="wind_strength_select" 
+                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-select" 
+                        style="border-color: var(--sky-blue);"
+                        data-field="wind_strength">
+                    <option value="">-- Bitte wählen --</option>
+                    <option value="0 Bft (0 kn) - Windstille" {% if entry and entry.wind_strength == '0 Bft (0 kn) - Windstille' %}selected{% endif %}>0 Bft (0 kn) - Windstille</option>
+                    <option value="1 Bft (1-3 kn) - Leiser Zug" {% if entry and entry.wind_strength == '1 Bft (1-3 kn) - Leiser Zug' %}selected{% endif %}>1 Bft (1-3 kn) - Leiser Zug</option>
+                    <option value="2 Bft (4-6 kn) - Leichte Brise" {% if entry and entry.wind_strength == '2 Bft (4-6 kn) - Leichte Brise' %}selected{% endif %}>2 Bft (4-6 kn) - Leichte Brise</option>
+                    <option value="3 Bft (7-10 kn) - Schwache Brise" {% if entry and entry.wind_strength == '3 Bft (7-10 kn) - Schwache Brise' %}selected{% endif %}>3 Bft (7-10 kn) - Schwache Brise</option>
+                    <option value="4 Bft (11-16 kn) - Mäßige Brise" {% if entry and entry.wind_strength == '4 Bft (11-16 kn) - Mäßige Brise' %}selected{% endif %}>4 Bft (11-16 kn) - Mäßige Brise</option>
+                    <option value="5 Bft (17-21 kn) - Frische Brise" {% if entry and entry.wind_strength == '5 Bft (17-21 kn) - Frische Brise' %}selected{% endif %}>5 Bft (17-21 kn) - Frische Brise</option>
+                    <option value="6 Bft (22-27 kn) - Starker Wind" {% if entry and entry.wind_strength == '6 Bft (22-27 kn) - Starker Wind' %}selected{% endif %}>6 Bft (22-27 kn) - Starker Wind</option>
+                    <option value="7 Bft (28-33 kn) - Steifer Wind" {% if entry and entry.wind_strength == '7 Bft (28-33 kn) - Steifer Wind' %}selected{% endif %}>7 Bft (28-33 kn) - Steifer Wind</option>
+                    <option value="8 Bft (34-40 kn) - Stürmischer Wind" {% if entry and entry.wind_strength == '8 Bft (34-40 kn) - Stürmischer Wind' %}selected{% endif %}>8 Bft (34-40 kn) - Stürmischer Wind</option>
+                    <option value="9 Bft (41-47 kn) - Sturm" {% if entry and entry.wind_strength == '9 Bft (41-47 kn) - Sturm' %}selected{% endif %}>9 Bft (41-47 kn) - Sturm</option>
+                    <option value="10 Bft (48-55 kn) - Schwerer Sturm" {% if entry and entry.wind_strength == '10 Bft (48-55 kn) - Schwerer Sturm' %}selected{% endif %}>10 Bft (48-55 kn) - Schwerer Sturm</option>
+                    <option value="11 Bft (56-63 kn) - Orkanartiger Sturm" {% if entry and entry.wind_strength == '11 Bft (56-63 kn) - Orkanartiger Sturm' %}selected{% endif %}>11 Bft (56-63 kn) - Orkanartiger Sturm</option>
+                    <option value="12 Bft (64+ kn) - Orkan" {% if entry and entry.wind_strength == '12 Bft (64+ kn) - Orkan' %}selected{% endif %}>12 Bft (64+ kn) - Orkan</option>
+                </select>
+                <input type="text" id="wind_strength_manual" 
                        value="{% if entry and entry.wind_strength %}{{ entry.wind_strength }}{% endif %}" 
-                       placeholder="z.B. 4 Bft (oder wählen)" 
-                       class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
-                <datalist id="wind-strength-list">
-                    <option value="0 Bft (0 kn) - Windstille">0 Bft (0 kn) - Windstille</option>
-                    <option value="1 Bft (1-3 kn) - Leiser Zug">1 Bft (1-3 kn) - Leiser Zug</option>
-                    <option value="2 Bft (4-6 kn) - Leichte Brise">2 Bft (4-6 kn) - Leichte Brise</option>
-                    <option value="3 Bft (7-10 kn) - Schwache Brise">3 Bft (7-10 kn) - Schwache Brise</option>
-                    <option value="4 Bft (11-16 kn) - Mäßige Brise">4 Bft (11-16 kn) - Mäßige Brise</option>
-                    <option value="5 Bft (17-21 kn) - Frische Brise">5 Bft (17-21 kn) - Frische Brise</option>
-                    <option value="6 Bft (22-27 kn) - Starker Wind">6 Bft (22-27 kn) - Starker Wind</option>
-                    <option value="7 Bft (28-33 kn) - Steifer Wind">7 Bft (28-33 kn) - Steifer Wind</option>
-                    <option value="8 Bft (34-40 kn) - Stürmischer Wind">8 Bft (34-40 kn) - Stürmischer Wind</option>
-                    <option value="9 Bft (41-47 kn) - Sturm">9 Bft (41-47 kn) - Sturm</option>
-                    <option value="10 Bft (48-55 kn) - Schwerer Sturm">10 Bft (48-55 kn) - Schwerer Sturm</option>
-                    <option value="11 Bft (56-63 kn) - Orkanartiger Sturm">11 Bft (56-63 kn) - Orkanartiger Sturm</option>
-                    <option value="12 Bft (64+ kn) - Orkan">12 Bft (64+ kn) - Orkan</option>
-                </datalist>
+                       placeholder="z.B. 4 Bft" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
+                       style="border-color: var(--sky-blue);"
+                       data-field="wind_strength"
+                       disabled>
+                <button type="button" class="mt-2 text-sm hybrid-toggle" 
+                        data-field="wind_strength"
+                        aria-expanded="false"
+                        aria-controls="wind_strength_manual"
+                        style="color: var(--sea-foam);">
+                    ✏️ Eigenen Wert eingeben
+                </button>
             </div>
             
             <div>
@@ -212,20 +238,33 @@
                 </select>
             </div>
             
-            <div>
+            <div class="hybrid-field-container">
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">👁️ Sicht</label>
-                <input type="text" name="visibility" list="visibility-list"
+                <select name="visibility" id="visibility_select" 
+                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-select" 
+                        style="border-color: var(--sky-blue);"
+                        data-field="visibility">
+                    <option value="">-- Bitte wählen --</option>
+                    <option value="Sehr gut (>10 nm)" {% if entry and entry.visibility == 'Sehr gut (>10 nm)' %}selected{% endif %}>Sehr gut (>10 nm)</option>
+                    <option value="Gut (5-10 nm)" {% if entry and entry.visibility == 'Gut (5-10 nm)' %}selected{% endif %}>Gut (5-10 nm)</option>
+                    <option value="Mäßig (2-5 nm)" {% if entry and entry.visibility == 'Mäßig (2-5 nm)' %}selected{% endif %}>Mäßig (2-5 nm)</option>
+                    <option value="Schlecht (<2 nm)" {% if entry and entry.visibility == 'Schlecht (<2 nm)' %}selected{% endif %}>Schlecht (<2 nm)</option>
+                    <option value="Sehr schlecht (<1 nm)" {% if entry and entry.visibility == 'Sehr schlecht (<1 nm)' %}selected{% endif %}>Sehr schlecht (<1 nm)</option>
+                </select>
+                <input type="text" id="visibility_manual" 
                        value="{% if entry and entry.visibility %}{{ entry.visibility }}{% endif %}" 
-                       placeholder="z.B. gut, 5 nm (oder wählen)" 
-                       class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
-                <datalist id="visibility-list">
-                    <option value="Sehr gut (>10 nm)">Sehr gut (>10 nm)</option>
-                    <option value="Gut (5-10 nm)">Gut (5-10 nm)</option>
-                    <option value="Mäßig (2-5 nm)">Mäßig (2-5 nm)</option>
-                    <option value="Schlecht (<2 nm)">Schlecht (<2 nm)</option>
-                    <option value="Sehr schlecht (<1 nm)">Sehr schlecht (<1 nm)</option>
-                </datalist>
+                       placeholder="z.B. gut, 5 nm" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
+                       style="border-color: var(--sky-blue);"
+                       data-field="visibility"
+                       disabled>
+                <button type="button" class="mt-2 text-sm hybrid-toggle" 
+                        data-field="visibility"
+                        aria-expanded="false"
+                        aria-controls="visibility_manual"
+                        style="color: var(--sea-foam);">
+                    ✏️ Eigenen Wert eingeben
+                </button>
             </div>
             
             <div>
@@ -357,20 +396,33 @@
         <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">⛵ Schiffsdaten</h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div class="hybrid-field-container">
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">⛵ Segelplan</label>
-                <input type="text" name="sail_plan" list="sail-plan-list"
+                <select name="sail_plan" id="sail_plan_select" 
+                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-select" 
+                        style="border-color: var(--sky-blue);"
+                        data-field="sail_plan">
+                    <option value="">-- Bitte wählen --</option>
+                    <option value="Motor / keine Segel" {% if entry and entry.sail_plan == 'Motor / keine Segel' %}selected{% endif %}>🚤 Motor / keine Segel</option>
+                    <option value="Großsegel" {% if entry and entry.sail_plan == 'Großsegel' %}selected{% endif %}>⛵ Großsegel</option>
+                    <option value="Genua" {% if entry and entry.sail_plan == 'Genua' %}selected{% endif %}>🎐 Genua</option>
+                    <option value="Großsegel + Genua" {% if entry and entry.sail_plan == 'Großsegel + Genua' %}selected{% endif %}>⛵ Großsegel + Genua</option>
+                    <option value="Keine Segel" {% if entry and entry.sail_plan == 'Keine Segel' %}selected{% endif %}>⚓ Keine Segel</option>
+                </select>
+                <input type="text" id="sail_plan_manual" 
                        value="{% if entry and entry.sail_plan %}{{ entry.sail_plan }}{% endif %}" 
-                       placeholder="z.B. Groß + Genua (oder wählen)" 
-                       class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
-                <datalist id="sail-plan-list">
-                    <option value="Motor / keine Segel">🚤 Motor / keine Segel</option>
-                    <option value="Großsegel">⛵ Großsegel</option>
-                    <option value="Genua">🎐 Genua</option>
-                    <option value="Großsegel + Genua">⛵ Großsegel + Genua</option>
-                    <option value="Keine Segel">⚓ Keine Segel</option>
-                </datalist>
+                       placeholder="z.B. Groß + Genua" 
+                       class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
+                       style="border-color: var(--sky-blue);"
+                       data-field="sail_plan"
+                       disabled>
+                <button type="button" class="mt-2 text-sm hybrid-toggle" 
+                        data-field="sail_plan"
+                        aria-expanded="false"
+                        aria-controls="sail_plan_manual"
+                        style="color: var(--sea-foam);">
+                    ✏️ Eigenen Wert eingeben
+                </button>
             </div>
             
             <div>
@@ -719,6 +771,107 @@ Firefox:
     }
 }
 
+// Hybrid Field Toggle Logic (Select/Manual Entry)
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle all hybrid toggle buttons
+    document.querySelectorAll('.hybrid-toggle').forEach(toggleBtn => {
+        const fieldName = toggleBtn.dataset.field;
+        const selectEl = document.getElementById(`${fieldName}_select`);
+        const manualEl = document.getElementById(`${fieldName}_manual`);
+        
+        // Auto-detect legacy values on page load
+        if (selectEl && manualEl) {
+            const currentValue = manualEl.value.trim();
+            if (currentValue) {
+                // Check if value exists in select options
+                const optionExists = Array.from(selectEl.options).some(opt => opt.value === currentValue);
+                if (!optionExists && currentValue !== '') {
+                    // Legacy value not in dropdown - auto-enable manual mode
+                    enableManualMode(fieldName);
+                }
+            }
+        }
+        
+        // Toggle button click handler
+        toggleBtn.addEventListener('click', function() {
+            const isManual = this.getAttribute('aria-expanded') === 'true';
+            if (isManual) {
+                // Switch back to select mode
+                disableManualMode(fieldName);
+            } else {
+                // Switch to manual mode
+                enableManualMode(fieldName);
+            }
+        });
+    });
+    
+    function enableManualMode(fieldName) {
+        const selectEl = document.getElementById(`${fieldName}_select`);
+        const manualEl = document.getElementById(`${fieldName}_manual`);
+        const toggleBtn = document.querySelector(`.hybrid-toggle[data-field="${fieldName}"]`);
+        
+        if (!selectEl || !manualEl || !toggleBtn) return;
+        
+        // Copy current value from select to manual input
+        if (selectEl.value) {
+            manualEl.value = selectEl.value;
+        }
+        
+        // Hide select, show manual input
+        selectEl.classList.add('hidden');
+        selectEl.removeAttribute('name');
+        selectEl.disabled = true;
+        
+        manualEl.classList.remove('hidden');
+        manualEl.setAttribute('name', fieldName);
+        manualEl.disabled = false;
+        manualEl.focus();
+        
+        // Update toggle button
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        toggleBtn.textContent = '📋 Dropdown verwenden';
+    }
+    
+    function disableManualMode(fieldName) {
+        const selectEl = document.getElementById(`${fieldName}_select`);
+        const manualEl = document.getElementById(`${fieldName}_manual`);
+        const toggleBtn = document.querySelector(`.hybrid-toggle[data-field="${fieldName}"]`);
+        
+        if (!selectEl || !manualEl || !toggleBtn) return;
+        
+        // Copy value from manual to select if it exists as an option
+        const manualValue = manualEl.value;
+        const optionExists = Array.from(selectEl.options).some(opt => opt.value === manualValue);
+        if (optionExists) {
+            selectEl.value = manualValue;
+        }
+        
+        // Show select, hide manual input
+        manualEl.classList.add('hidden');
+        manualEl.removeAttribute('name');
+        manualEl.disabled = true;
+        
+        selectEl.classList.remove('hidden');
+        selectEl.setAttribute('name', fieldName);
+        selectEl.disabled = false;
+        
+        // Update toggle button
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.textContent = '✏️ Eigenen Wert eingeben';
+    }
+    
+    // Helper function to get active control (select or manual)
+    window.getHybridFieldControl = function(fieldName) {
+        const selectEl = document.getElementById(`${fieldName}_select`);
+        const manualEl = document.getElementById(`${fieldName}_manual`);
+        
+        if (manualEl && !manualEl.classList.contains('hidden')) {
+            return manualEl; // Manual mode active
+        }
+        return selectEl; // Select mode active
+    };
+});
+
 // Weather Data Fetch Button Handler
 document.getElementById('weather-button').addEventListener('click', async function() {
     const latInput = document.querySelector('input[name="latitude"]');
@@ -751,14 +904,20 @@ document.getElementById('weather-button').addEventListener('click', async functi
             document.querySelector('input[name="temperature"]').value = data.temperature.toFixed(1);
         }
         
-        // Fill in wind direction (datalist input)
+        // Fill in wind direction (hybrid field - select or manual)
         if (data.wind_direction) {
-            document.querySelector('input[name="wind_direction"]').value = data.wind_direction;
+            const windDirControl = window.getHybridFieldControl('wind_direction');
+            if (windDirControl) {
+                windDirControl.value = data.wind_direction;
+            }
         }
         
-        // Fill in wind strength (Beaufort) (datalist input)
+        // Fill in wind strength (Beaufort) (hybrid field - select or manual)
         if (data.wind_strength) {
-            document.querySelector('input[name="wind_strength"]').value = data.wind_strength;
+            const windStrControl = window.getHybridFieldControl('wind_strength');
+            if (windStrControl) {
+                windStrControl.value = data.wind_strength;
+            }
         }
         
         // Fill in pressure
