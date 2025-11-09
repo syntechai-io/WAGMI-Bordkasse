@@ -1,7 +1,7 @@
-# Crew Wallet - Bordkasse
+# WAGMI CrewLog - Maritime Logbook & Bordkasse
 
 ### Overview
-Crew Wallet is a minimalist expense tracking and settlement application for sailing crew members. It offers secure authentication, manages up to 12 crew members, tracks deposits and expenses with flexible splitting, and automatically calculates optimized settlement transfers. Key features include multi-currency support with automatic conversion, PWA capabilities, and professional PDF export for trip documentation. The project aims to simplify shared expense management for sailing trips, targeting a subscription-based revenue model.
+WAGMI CrewLog is a comprehensive maritime logbook and expense tracking application for sailing crew members. It combines professional logbook entries with GPS and weather data integration alongside expense tracking (Bordkasse) and settlement calculations. The application offers secure authentication, manages up to 12 crew members, tracks deposits and expenses with flexible splitting, and automatically calculates optimized settlement transfers. Key features include maritime logbook compliance, multi-currency support with automatic conversion, PWA capabilities, and professional PDF export for trip documentation and official logbook records.
 
 ### Recent Changes (November 9, 2025)
 - **Vessel Information Auto-Population (LATEST)**: Enhanced Trip model with complete vessel metadata (home_port, call_sign, imo_mmsi) for maritime logbook compliance. Quick Start and Solo-Sailing trip creation now auto-populate skipper name/code and home port from UserPreferences. For Sven's WAGMI trips, this ensures PDFs automatically show "Sven" as skipper and "Fredericia" as home port without manual entry. Call sign and MMSI remain trip-specific fields for manual entry when needed. Created database migration (1350e71f86fe) to add vessel columns.
