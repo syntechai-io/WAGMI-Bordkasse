@@ -51,7 +51,7 @@ async def quick_start_trip(
     
     TripService.set_selected_trip(request, trip.id)
     
-    return RedirectResponse(url=f"/trips/{trip.id}", status_code=303)
+    return RedirectResponse(url="/", status_code=303)
 
 @router.post("/new")
 async def create_trip(
