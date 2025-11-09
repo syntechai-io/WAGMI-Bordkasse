@@ -4,11 +4,17 @@
 Crew Wallet is a minimalist expense tracking and settlement application for sailing crew members. It offers secure authentication, manages up to 12 crew members, tracks deposits and expenses with flexible splitting, and automatically calculates optimized settlement transfers. Key features include multi-currency support with automatic conversion, PWA capabilities, and professional PDF export for trip documentation. The project aims to simplify shared expense management for sailing trips, targeting a subscription-based revenue model.
 
 ### Recent Changes (November 9, 2025)
-- **Dashboard Redesign (NEW)**: Reorganized dashboard to focus on core workflows with two-column desktop layout:
-  - Left column: Logbook section with logbook entry action + crew management
-  - Right column: Bordkasse section with total expenses display + expense entry + settlement
-  - Mobile layout simplified with single-column card stack prioritizing logbook and expense entry
-  - Removed detailed stats (deposits, wallet/private expenses breakdown, top categories) to reduce clutter
+- **Mobile Dashboard UX Optimization (NEW)**: Completely redesigned mobile dashboard prioritizing quick logbook entry:
+  - **Primary CTA**: Prominent "Schnell-Logbuch" button at top with 96px min-height and 24px padding for easy tapping while sailing
+  - **Accessibility**: All touch targets meet ≥72px minimum (48dp accessibility guideline)
+  - **Visual Hierarchy**: Info cards (e.g., total expenses) visually distinct with border styling vs. action cards
+  - **Layout**: Compact 2-column grids for secondary actions reducing scrolling
+  - **Admin Controls**: Quick Start button hidden on mobile to prioritize core logbook workflow
+  - **Goal**: Reduce time-to-log-entry to ≤4 taps from dashboard
+- **Desktop Dashboard Redesign**: Two-column layout focusing on core workflows:
+  - Left column: Logbook section with entry action + crew management
+  - Right column: Bordkasse section with total expenses + expense entry + settlement
+  - Removed detailed stats (deposits breakdown, top categories) to reduce clutter
   - Added timezone capture using device's Intl.DateTimeFormat API, stored in sessionStorage for consistent local time handling
 - **Quick Start Törn**: Implemented one-click trip creation for single-handed sailing workflow. Features:
   - New `UserPreferences` model storing default skipper, boat, home port, coordinates, and currency
