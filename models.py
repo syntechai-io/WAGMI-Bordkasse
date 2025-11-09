@@ -57,6 +57,8 @@ class Trip(Base):
     is_closed = Column(Integer, nullable=False, default=0)  # 0 = open, 1 = closed (admin only can edit)
     trip_admin_password_hash = Column(String(200), nullable=True)  # Password for trip admins
     crew_password_hash = Column(String(200), nullable=True)  # Password for regular crew members
+    skipper_name = Column(String(100), nullable=True)  # Skipper name for logbook PDFs
+    skipper_code = Column(String(20), nullable=True)  # Skipper code for logbook PDFs
     created_at = Column(DateTime, default=datetime.utcnow)
     
     crew_members = relationship("CrewMember", back_populates="trip", cascade="all, delete-orphan")

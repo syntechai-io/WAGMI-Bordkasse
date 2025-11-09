@@ -816,10 +816,10 @@ async def export_single_entry_pdf(request: Request, entry_id: int, db: Session =
     
     crew_list = [{'code': member.code, 'name': member.name} for member in crew_members]
     
-    # Get skipper info
+    # Get skipper info (with fallback for trips created before skipper fields were added)
     skipper_info = {
-        'name': active_trip.skipper_name or '-',
-        'code': active_trip.skipper_code or '-'
+        'name': getattr(active_trip, 'skipper_name', None) or '-',
+        'code': getattr(active_trip, 'skipper_code', None) or '-'
     }
     
     pdf_buffer = io.BytesIO()
@@ -905,10 +905,10 @@ async def export_daily_pdf(
     
     crew_list = [{'code': member.code, 'name': member.name} for member in crew_members]
     
-    # Get skipper info
+    # Get skipper info (with fallback for trips created before skipper fields were added)
     skipper_info = {
-        'name': active_trip.skipper_name or '-',
-        'code': active_trip.skipper_code or '-'
+        'name': getattr(active_trip, 'skipper_name', None) or '-',
+        'code': getattr(active_trip, 'skipper_code', None) or '-'
     }
     
     total_dist = sum(e.dist_day_nm for e in entries if e.dist_day_nm is not None)
