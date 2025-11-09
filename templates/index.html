@@ -1,6 +1,31 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<script>
+// Capture device timezone and store in session storage for all datetime inputs
+function getDeviceTimezone() {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+function getLocalISOString() {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const localTime = new Date(now.getTime() - offset);
+    return localTime.toISOString().slice(0, 16);
+}
+
+// Set timezone in session storage on page load
+sessionStorage.setItem('deviceTimezone', getDeviceTimezone());
+
+// Helper function to set datetime fields to current local time
+function setCurrentLocalTime(inputId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+        input.value = getLocalISOString();
+    }
+}
+</script>
+
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex justify-between items-center">
@@ -53,84 +78,8 @@
         </div>
     </a>
     
-    <!-- MOBILE: Simple Total Spend (only on mobile) -->
-    <div class="block md:hidden bg-white porthole-card p-6">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium" style="color: var(--navy-deep);">💸 Gesamt Ausgaben</p>
-                <p class="text-3xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(total_expenses) }} €</p>
-            </div>
-            <div class="text-6xl">💸</div>
-        </div>
-    </div>
-    
-    <!-- DESKTOP: Detailed Stats Grid (only on desktop/tablet) -->
-    <div class="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white porthole-card p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium" style="color: var(--navy-deep);">Gesamt Ausgaben</p>
-                    <p class="text-2xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(total_expenses) }} €</p>
-                </div>
-                <div class="text-5xl">💸</div>
-            </div>
-        </div>
-        
-        <div class="bg-white porthole-card p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium" style="color: var(--navy-deep);">Einzahlungen</p>
-                    <p class="text-2xl font-bold" style="color: var(--ocean-blue);">{{ "%.2f"|format(total_deposits) }} €</p>
-                </div>
-                <div class="text-5xl">⬆️</div>
-            </div>
-        </div>
-        
-        <div class="bg-white porthole-card p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium" style="color: var(--navy-deep);">Ausgaben Wallet</p>
-                    <p class="text-2xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(wallet_expenses) }} €</p>
-                </div>
-                <div class="text-5xl">💳</div>
-            </div>
-        </div>
-        
-        <div class="bg-white porthole-card p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium" style="color: var(--navy-deep);">Ausgaben Privat</p>
-                    <p class="text-2xl font-bold" style="color: #9b59b6;">{{ "%.2f"|format(private_expenses) }} €</p>
-                </div>
-                <div class="text-5xl">💸</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="rope-divider"></div>
-
     <!-- MOBILE: Simple Navigation Cards -->
     <div class="grid grid-cols-1 gap-4 md:hidden">
-        <a href="/expenses" class="text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-            <div class="flex items-center justify-center space-x-3">
-                <div class="text-5xl">⚓</div>
-                <div class="text-left">
-                    <h3 class="text-xl font-bold maritime-header">Ausgabe erfassen</h3>
-                    <p class="text-sm opacity-90">Einkauf oder Rechnung buchen</p>
-                </div>
-            </div>
-        </a>
-        
-        <a href="/deposits" class="text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #005a8c 100%);">
-            <div class="flex items-center justify-center space-x-3">
-                <div class="text-5xl">💰</div>
-                <div class="text-left">
-                    <h3 class="text-xl font-bold maritime-header">Einzahlung erfassen</h3>
-                    <p class="text-sm opacity-90">Geld ins Wallet einzahlen</p>
-                </div>
-            </div>
-        </a>
-        
         <a href="/logbook" class="text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
             <div class="flex items-center justify-center space-x-3">
                 <div class="text-5xl">📓</div>
@@ -141,48 +90,97 @@
             </div>
         </a>
         
+        <div class="bg-white porthole-card p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium" style="color: var(--navy-deep);">💸 Gesamt Ausgaben</p>
+                    <p class="text-3xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(total_expenses) }} €</p>
+                </div>
+                <div class="text-6xl">💸</div>
+            </div>
+        </div>
+        
+        <a href="/expenses" class="text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+            <div class="flex items-center justify-center space-x-3">
+                <div class="text-5xl">⚓</div>
+                <div class="text-left">
+                    <h3 class="text-xl font-bold maritime-header">Ausgabe erfassen</h3>
+                    <p class="text-sm opacity-90">Einkauf oder Rechnung buchen</p>
+                </div>
+            </div>
+        </a>
+        
+        <a href="/crew" class="text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #005a8c 100%);">
+            <div class="flex items-center justify-center space-x-3">
+                <div class="text-5xl">👥</div>
+                <div class="text-left">
+                    <h3 class="text-xl font-bold maritime-header">Crew verwalten</h3>
+                    <p class="text-sm opacity-90">Mitglieder ansehen</p>
+                </div>
+            </div>
+        </a>
+        
         <a href="/balances" class="text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
             <div class="flex items-center justify-center space-x-3">
                 <div class="text-5xl">📊</div>
                 <div class="text-left">
                     <h3 class="text-xl font-bold maritime-header">Salden anzeigen</h3>
-                    <p class="text-sm opacity-90">Wer zahlt wem wie viel?</p>
+                    <p class="text-sm opacity-90">Wer zahlt wem?</p>
                 </div>
             </div>
         </a>
     </div>
 
-    <!-- DESKTOP: Top Categories (only on desktop/tablet) -->
-    <div class="hidden md:block bg-white porthole-card p-6">
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">📊 Top Kategorien</h2>
-        <div class="space-y-3">
-            {% for category, total in top_categories %}
-            <div class="flex items-center justify-between border-b border-sky-100 pb-2">
-                <span class="font-medium" style="color: var(--navy-deep);">{{ category }}</span>
-                <span class="font-semibold" style="color: var(--ocean-blue);">{{ "%.2f"|format(total) }} €</span>
-            </div>
-            {% endfor %}
+    <!-- DESKTOP: Two-Column Layout: Logbook (Left) | Expenses (Right) -->
+    <div class="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- LEFT COLUMN: Logbook -->
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">📓 Logbuch</h2>
+            
+            <!-- Logbook Action -->
+            <a href="/logbook" class="block text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                <div class="text-6xl mb-3">📓</div>
+                <h3 class="text-xl font-bold maritime-header">Logbuch führen</h3>
+                <p class="text-sm opacity-90 mt-2">Position & Wetter erfassen</p>
+            </a>
+            
+            <!-- Crew Management -->
+            <a href="/crew" class="block ocean-gradient text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg">
+                <div class="text-6xl mb-3">👥</div>
+                <h3 class="text-xl font-bold maritime-header">Crew verwalten</h3>
+                <p class="text-sm opacity-90 mt-2">Crew-Mitglieder ansehen</p>
+            </a>
         </div>
-    </div>
-
-    <div class="hidden md:block rope-divider"></div>
-
-    <!-- DESKTOP: Large Action Cards (only on desktop/tablet) -->
-    <div class="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4">
-        <a href="/crew" class="ocean-gradient text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg">
-            <div class="text-6xl mb-3">👥</div>
-            <h3 class="text-xl font-bold maritime-header">Crew verwalten</h3>
-        </a>
         
-        <a href="/expenses" class="text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-            <div class="text-6xl mb-3">⚓</div>
-            <h3 class="text-xl font-bold maritime-header">Ausgabe erfassen</h3>
-        </a>
-        
-        <a href="/settlement" class="text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
-            <div class="text-6xl mb-3">⛵</div>
-            <h3 class="text-xl font-bold maritime-header">Ausgleich anzeigen</h3>
-        </a>
+        <!-- RIGHT COLUMN: Expenses -->
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ Bordkasse</h2>
+            
+            <!-- Total Expenses Card -->
+            <div class="bg-white porthole-card p-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-lg font-medium mb-2" style="color: var(--navy-deep);">💸 Gesamt Ausgaben</p>
+                        <p class="text-4xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(total_expenses) }} €</p>
+                    </div>
+                    <div class="text-7xl">💸</div>
+                </div>
+            </div>
+            
+            <!-- Expense Action -->
+            <a href="/expenses" class="block text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                <div class="text-6xl mb-3">⚓</div>
+                <h3 class="text-xl font-bold maritime-header">Ausgabe erfassen</h3>
+                <p class="text-sm opacity-90 mt-2">Einkauf oder Rechnung buchen</p>
+            </a>
+            
+            <!-- Settlement -->
+            <a href="/settlement" class="block text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
+                <div class="text-6xl mb-3">⛵</div>
+                <h3 class="text-xl font-bold maritime-header">Ausgleich anzeigen</h3>
+                <p class="text-sm opacity-90 mt-2">Minimale Überweisungen</p>
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}
