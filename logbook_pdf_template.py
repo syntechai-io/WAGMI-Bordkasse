@@ -1,4 +1,4 @@
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
@@ -21,7 +21,7 @@ def render_logbook_pdf(
     trip_name: Optional[str] = None
 ) -> None:
     """
-    Render official German/European standard logbook PDF export.
+    Render official German/European standard logbook PDF export in traditional grid format.
     
     Args:
         entries: List of LogbookEntry objects to export
@@ -34,14 +34,15 @@ def render_logbook_pdf(
         trip_name: Optional trip name for display
     """
     
+    # Use landscape orientation for wider table
     doc = SimpleDocTemplate(
         outfile,
-        pagesize=A4,
-        rightMargin=15*mm,
-        leftMargin=15*mm,
-        topMargin=20*mm,
-        bottomMargin=20*mm,
-        title=meta.get('title', 'Logbuch') if meta else 'Logbuch'
+        pagesize=landscape(A4),
+        rightMargin=10*mm,
+        leftMargin=10*mm,
+        topMargin=15*mm,
+        bottomMargin=15*mm,
+        title=meta.get('title', 'Bordbuch') if meta else 'Bordbuch'
     )
     
     styles = getSampleStyleSheet()
@@ -49,327 +50,280 @@ def render_logbook_pdf(
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
-        fontSize=18,
+        fontSize=14,
         textColor=colors.HexColor('#1a3a52'),
-        spaceAfter=12,
+        spaceAfter=6,
         alignment=TA_CENTER,
         fontName='Helvetica-Bold'
     )
     
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=12,
-        textColor=colors.HexColor('#1a3a52'),
-        spaceAfter=6,
-        spaceBefore=8,
-        fontName='Helvetica-Bold'
+    header_style = ParagraphStyle(
+        'HeaderStyle',
+        parent=styles['Normal'],
+        fontSize=7,
+        textColor=colors.white,
+        fontName='Helvetica-Bold',
+        alignment=TA_CENTER,
+        leading=8
     )
     
-    normal_style = ParagraphStyle(
-        'CustomNormal',
+    cell_style = ParagraphStyle(
+        'CellStyle',
         parent=styles['Normal'],
-        fontSize=9,
+        fontSize=7,
         textColor=colors.black,
-        fontName='Helvetica'
+        fontName='Helvetica',
+        leading=8,
+        alignment=TA_LEFT
     )
     
     small_style = ParagraphStyle(
-        'CustomSmall',
+        'SmallStyle',
         parent=styles['Normal'],
-        fontSize=8,
+        fontSize=6,
         textColor=colors.HexColor('#555555'),
         fontName='Helvetica'
     )
     
     story = []
     
-    title_text = "Bordbuch / Ship's Log"
-    if scope == "single_entry":
-        title_text = "Bordbuch-Eintrag / Logbook Entry"
-    elif scope == "daily":
-        title_text = "Tageslogbuch / Daily Log"
+    # Header with vessel info
+    title_text = "BORDBUCH / SHIP'S LOG"
+    if scope == "daily":
+        if entries and entries[0].entry_date:
+            date_str = entries[0].entry_date.strftime('%d.%m.%Y')
+            title_text = f"TAGESLOGBUCH / DAILY LOG - {date_str}"
     
     story.append(Paragraph(title_text, title_style))
-    story.append(Spacer(1, 8*mm))
     
-    vessel_data = [
-        ['Schiffsname / Vessel Name:', vessel.get('name', '-')],
-        ['Heimathafen / Home Port:', vessel.get('home_port', '-')],
-        ['Rufzeichen / Call Sign:', vessel.get('call_sign', '-')],
-        ['IMO/MMSI:', vessel.get('imo_mmsi', '-')]
+    # Vessel info in compact format
+    vessel_info = f"<b>Schiff/Vessel:</b> {vessel.get('name', '-')}  |  " \
+                 f"<b>Heimathafen/Home Port:</b> {vessel.get('home_port', '-')}  |  " \
+                 f"<b>Rufzeichen/Call Sign:</b> {vessel.get('call_sign', '-')}"
+    
+    vessel_para = Paragraph(vessel_info, ParagraphStyle(
+        'VesselInfo',
+        parent=styles['Normal'],
+        fontSize=8,
+        textColor=colors.HexColor('#1a3a52'),
+        alignment=TA_CENTER
+    ))
+    story.append(vessel_para)
+    story.append(Spacer(1, 4*mm))
+    
+    # Build logbook table with all entries
+    # Column headers (German/English)
+    table_data = [[
+        Paragraph('<b>Zeit<br/>Time</b>', header_style),
+        Paragraph('<b>Position<br/>Lat/Lon</b>', header_style),
+        Paragraph('<b>Kurs<br/>COG</b>', header_style),
+        Paragraph('<b>Fahrt<br/>SOG</b>', header_style),
+        Paragraph('<b>Log<br/>(nm)</b>', header_style),
+        Paragraph('<b>Wind<br/>Richt/Stärke</b>', header_style),
+        Paragraph('<b>Wetter<br/>Temp/Druck</b>', header_style),
+        Paragraph('<b>Motor<br/>Engine</b>', header_style),
+        Paragraph('<b>Segel<br/>Sails</b>', header_style),
+        Paragraph('<b>Wache<br/>Watch</b>', header_style),
+        Paragraph('<b>Bemerkungen<br/>Notes</b>', header_style),
+    ]]
+    
+    # Add each entry as a row
+    for entry in entries:
+        # Time
+        time_str = entry.entry_date.strftime('%H:%M') if entry.entry_date else '-'
+        
+        # Position
+        pos_str = '-'
+        if entry.latitude is not None and entry.longitude is not None:
+            lat = f"{abs(entry.latitude):.2f}°{'N' if entry.latitude >= 0 else 'S'}"
+            lon = f"{abs(entry.longitude):.2f}°{'E' if entry.longitude >= 0 else 'W'}"
+            pos_str = f"{lat}<br/>{lon}"
+        
+        # COG (Course Over Ground)
+        cog_str = f"{entry.cog_deg}°" if entry.cog_deg is not None else '-'
+        
+        # SOG (Speed Over Ground)
+        sog_str = f"{entry.sog_kn} kn" if entry.sog_kn is not None else '-'
+        
+        # Log (distance)
+        log_str = f"{entry.dist_day_nm}" if entry.dist_day_nm is not None else '-'
+        
+        # Wind
+        wind_str = '-'
+        if entry.wind_direction or entry.wind_strength:
+            wind_parts = []
+            if entry.wind_direction:
+                wind_parts.append(entry.wind_direction)
+            if entry.wind_strength:
+                wind_parts.append(entry.wind_strength)
+            wind_str = '<br/>'.join(wind_parts)
+        
+        # Weather (temperature and pressure)
+        weather_parts = []
+        if entry.temperature is not None:
+            weather_parts.append(f"{entry.temperature}°C")
+        if entry.pressure_hpa is not None:
+            pressure_str = f"{entry.pressure_hpa}hPa"
+            if entry.pressure_trend:
+                trend_sym = {'steigend': '↗', 'fallend': '↘', 'gleichbleibend': '→'}.get(entry.pressure_trend, '')
+                pressure_str += trend_sym
+            weather_parts.append(pressure_str)
+        weather_str = '<br/>'.join(weather_parts) if weather_parts else '-'
+        
+        # Engine
+        engine_parts = []
+        if entry.engine_on is not None:
+            engine_parts.append("AN" if entry.engine_on else "AUS")
+        if entry.eng_hours_total is not None:
+            engine_parts.append(f"{entry.eng_hours_total}h")
+        elif entry.engine_hours is not None:
+            engine_parts.append(f"{entry.engine_hours}h")
+        engine_str = '<br/>'.join(engine_parts) if engine_parts else '-'
+        
+        # Sails
+        sail_parts = []
+        if entry.main_furl_pct is not None:
+            sail_parts.append(f"Groß {entry.main_furl_pct}%")
+        if entry.headsail:
+            sail_parts.append(f"{entry.headsail}")
+        if entry.sail_action:
+            sail_parts.append(entry.sail_action)
+        sail_str = '<br/>'.join(sail_parts) if sail_parts else '-'
+        
+        # Watch (crew)
+        watch_str = '-'
+        if hasattr(entry, 'crew_on_watch') and entry.crew_on_watch:
+            crew_codes = [watch.member.code for watch in entry.crew_on_watch if watch.member]
+            watch_str = ', '.join(crew_codes) if crew_codes else '-'
+        
+        # Notes (compact)
+        notes_parts = []
+        if entry.departure or entry.destination:
+            route = f"{entry.departure or ''} → {entry.destination or ''}".strip(' →')
+            notes_parts.append(route)
+        if entry.notes:
+            # Truncate long notes
+            note_text = entry.notes if len(entry.notes) <= 100 else entry.notes[:97] + '...'
+            notes_parts.append(note_text)
+        if entry.event_details:
+            event_text = entry.event_details if len(entry.event_details) <= 50 else entry.event_details[:47] + '...'
+            notes_parts.append(f"⚠ {event_text}")
+        notes_str = '<br/>'.join(notes_parts) if notes_parts else '-'
+        
+        # Add row to table
+        table_data.append([
+            Paragraph(time_str, cell_style),
+            Paragraph(pos_str, cell_style),
+            Paragraph(cog_str, cell_style),
+            Paragraph(sog_str, cell_style),
+            Paragraph(log_str, cell_style),
+            Paragraph(wind_str, cell_style),
+            Paragraph(weather_str, cell_style),
+            Paragraph(engine_str, cell_style),
+            Paragraph(sail_str, cell_style),
+            Paragraph(watch_str, cell_style),
+            Paragraph(notes_str, cell_style),
+        ])
+    
+    # Create the table with column widths optimized for landscape A4
+    col_widths = [
+        18*mm,  # Time
+        22*mm,  # Position
+        15*mm,  # COG
+        15*mm,  # SOG
+        12*mm,  # Log
+        20*mm,  # Wind
+        22*mm,  # Weather
+        18*mm,  # Engine
+        22*mm,  # Sails
+        18*mm,  # Watch
+        55*mm,  # Notes (largest)
     ]
     
-    vessel_table = Table(vessel_data, colWidths=[60*mm, 100*mm])
-    vessel_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#1a3a52')),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+    logbook_table = Table(table_data, colWidths=col_widths, repeatRows=1)
+    
+    # Table styling to match traditional logbook
+    table_style = TableStyle([
+        # Header row styling
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a3a52')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 7),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+        
+        # Data rows styling
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 7),
+        ('VALIGN', (0, 1), (-1, -1), 'TOP'),
+        ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+        
+        # Grid lines (traditional logbook has visible grid)
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('BOX', (0, 0), (-1, -1), 1, colors.black),
+        
+        # Cell padding
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
         ('TOPPADDING', (0, 0), (-1, -1), 4),
-    ]))
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        
+        # Alternating row colors for readability
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8f9fa')]),
+    ])
     
-    story.append(vessel_table)
-    story.append(Spacer(1, 6*mm))
+    logbook_table.setStyle(table_style)
+    story.append(logbook_table)
     
-    for idx, entry in enumerate(entries):
-        if idx > 0:
-            story.append(Spacer(1, 5*mm))
-            story.append(Paragraph('─' * 80, small_style))
-            story.append(Spacer(1, 3*mm))
-        
-        entry_date_str = entry.entry_date.strftime('%d.%m.%Y %H:%M') if entry.entry_date else '-'
-        
-        story.append(Paragraph(f'<b>Eintrag vom / Entry from:</b> {entry_date_str}', heading_style))
-        
-        basic_data = []
-        
-        if entry.latitude or entry.longitude:
-            lat_str = f"{entry.latitude:.6f}" if entry.latitude else "-"
-            lon_str = f"{entry.longitude:.6f}" if entry.longitude else "-"
-            basic_data.append(['Position (Lat/Lon):', f'{lat_str} / {lon_str}'])
-        
-        if entry.departure or entry.destination:
-            route_str = f"{entry.departure or '-'} → {entry.destination or '-'}"
-            basic_data.append(['Route:', route_str])
-        
-        if entry.cog_deg is not None or entry.sog_kn is not None:
-            nav_str = f"COG: {entry.cog_deg}° " if entry.cog_deg is not None else ""
-            nav_str += f"SOG: {entry.sog_kn} kn" if entry.sog_kn is not None else ""
-            basic_data.append(['Kurs/Geschw. (Course/Speed):', nav_str.strip()])
-        
-        if entry.log_kn is not None:
-            basic_data.append(['Log (kn):', f'{entry.log_kn} kn'])
-        
-        if entry.dist_day_nm is not None:
-            basic_data.append(['Tagesstrecke (nm):', f'{entry.dist_day_nm} nm'])
-        
-        if basic_data:
-            basic_table = Table(basic_data, colWidths=[60*mm, 100*mm])
-            basic_table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#1a3a52')),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-                ('TOPPADDING', (0, 0), (-1, -1), 3),
-            ]))
-            story.append(basic_table)
-            story.append(Spacer(1, 3*mm))
-        
-        weather_data = []
-        
-        if entry.wind_direction or entry.wind_strength:
-            wind_str = f"{entry.wind_direction or ''} {entry.wind_strength or ''}".strip()
-            weather_data.append(['Wind:', wind_str])
-        
-        if entry.sea_state:
-            weather_data.append(['Seegang (Sea State):', entry.sea_state.value if hasattr(entry.sea_state, 'value') else str(entry.sea_state)])
-        
-        if entry.visibility:
-            weather_data.append(['Sicht (Visibility):', entry.visibility])
-        
-        if entry.temperature is not None:
-            weather_data.append(['Temperatur:', f'{entry.temperature}°C'])
-        
-        if entry.pressure_hpa is not None:
-            pressure_str = f"{entry.pressure_hpa} hPa"
-            if entry.pressure_trend:
-                trend_symbol = {'steigend': '↗', 'fallend': '↘', 'gleichbleibend': '→'}.get(entry.pressure_trend, '')
-                pressure_str += f" {trend_symbol}"
-            weather_data.append(['Luftdruck (Pressure):', pressure_str])
-        
-        if entry.weather_source:
-            weather_data.append(['Wetterquelle (Source):', entry.weather_source])
-        
-        if weather_data:
-            story.append(Paragraph('<b>Wetter / Weather:</b>', normal_style))
-            weather_table = Table(weather_data, colWidths=[60*mm, 100*mm])
-            weather_table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#1a3a52')),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-                ('TOPPADDING', (0, 0), (-1, -1), 3),
-            ]))
-            story.append(weather_table)
-            story.append(Spacer(1, 3*mm))
-        
-        sail_data = []
-        
-        if entry.sail_plan:
-            sail_data.append(['Segelplan (Sail Plan):', entry.sail_plan])
-        
-        if entry.main_furl_pct is not None:
-            sail_data.append(['Großsegel (Mainsail):', f'{entry.main_furl_pct}% ausgerollt'])
-        
-        if entry.headsail:
-            sail_data.append(['Vorsegel (Headsail):', entry.headsail])
-        
-        if entry.sail_action:
-            sail_data.append(['Segelaktion:', entry.sail_action])
-        
-        if sail_data:
-            story.append(Paragraph('<b>Segel / Sails:</b>', normal_style))
-            sail_table = Table(sail_data, colWidths=[60*mm, 100*mm])
-            sail_table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#1a3a52')),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-                ('TOPPADDING', (0, 0), (-1, -1), 3),
-            ]))
-            story.append(sail_table)
-            story.append(Spacer(1, 3*mm))
-        
-        engine_data = []
-        
-        if entry.engine_on is not None:
-            engine_status = "AN (ON)" if entry.engine_on else "AUS (OFF)"
-            engine_data.append(['Motor Status:', engine_status])
-        
-        if entry.engine_on_time:
-            engine_data.append(['Motor AN um:', entry.engine_on_time.strftime('%d.%m.%Y %H:%M')])
-        
-        if entry.engine_off_time:
-            engine_data.append(['Motor AUS um:', entry.engine_off_time.strftime('%d.%m.%Y %H:%M')])
-        
-        if entry.eng_hours_total is not None:
-            engine_data.append(['Motorstunden gesamt:', f'{entry.eng_hours_total} h'])
-        elif entry.engine_hours is not None:
-            engine_data.append(['Motorstunden:', f'{entry.engine_hours} h'])
-        
-        if entry.fuel_level_l is not None:
-            engine_data.append(['Kraftstoff (Fuel):', f'{entry.fuel_level_l} L'])
-        
-        if engine_data:
-            story.append(Paragraph('<b>Motor / Engine:</b>', normal_style))
-            engine_table = Table(engine_data, colWidths=[60*mm, 100*mm])
-            engine_table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#1a3a52')),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-                ('TOPPADDING', (0, 0), (-1, -1), 3),
-            ]))
-            story.append(engine_table)
-            story.append(Spacer(1, 3*mm))
-        
-        if hasattr(entry, 'crew_on_watch') and entry.crew_on_watch:
-            crew_names = [f"{watch.member.code} - {watch.member.name}" for watch in entry.crew_on_watch if watch.member]
-            if crew_names:
-                story.append(Paragraph(f'<b>Wache (Watch):</b> {", ".join(crew_names)}', normal_style))
-                story.append(Spacer(1, 2*mm))
-        
-        if entry.event_category or entry.event_details:
-            story.append(Paragraph('<b>Ereignis / Event:</b>', normal_style))
-            event_data = []
-            if entry.event_category:
-                event_data.append(['Kategorie:', entry.event_category])
-            if entry.event_details:
-                event_data.append(['Details:', entry.event_details])
-            
-            event_table = Table(event_data, colWidths=[60*mm, 100*mm])
-            event_table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#1a3a52')),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-                ('TOPPADDING', (0, 0), (-1, -1), 3),
-            ]))
-            story.append(event_table)
-            story.append(Spacer(1, 3*mm))
-        
-        if entry.notes:
-            story.append(Paragraph('<b>Notizen / Notes:</b>', normal_style))
-            story.append(Paragraph(entry.notes, normal_style))
-            story.append(Spacer(1, 2*mm))
-        
-        if entry.safety_checks_completed:
-            story.append(Paragraph('<b>Sicherheitschecks / Safety Checks:</b>', normal_style))
-            story.append(Paragraph(entry.safety_checks_completed, normal_style))
-            story.append(Spacer(1, 2*mm))
-        
-        if hasattr(entry, 'parent_id') and entry.parent_id:
-            story.append(Paragraph(f'<i>Nachtrag zu Eintrag #{entry.parent_id}</i>', small_style))
-            if entry.change_note:
-                story.append(Paragraph(f'<i>Änderungsnotiz: {entry.change_note}</i>', small_style))
-            story.append(Spacer(1, 2*mm))
-    
+    # Summary section (if provided)
     if summary:
-        story.append(Spacer(1, 8*mm))
-        story.append(Paragraph('<b>Zusammenfassung / Summary:</b>', heading_style))
-        
-        summary_data = []
+        story.append(Spacer(1, 5*mm))
+        summary_parts = []
         if summary.get('total_nm'):
-            summary_data.append(['Gesamtstrecke (Total Distance):', f"{summary['total_nm']} nm"])
+            summary_parts.append(f"Gesamtstrecke/Total Distance: {summary['total_nm']} nm")
         if summary.get('total_engine_hours'):
-            summary_data.append(['Motorstunden gesamt:', f"{summary['total_engine_hours']} h"])
+            summary_parts.append(f"Motorstunden/Engine Hours: {summary['total_engine_hours']} h")
         if summary.get('entry_count'):
-            summary_data.append(['Anzahl Einträge (Entries):', str(summary['entry_count'])])
+            summary_parts.append(f"Einträge/Entries: {summary['entry_count']}")
         
-        if summary_data:
-            summary_table = Table(summary_data, colWidths=[60*mm, 100*mm])
-            summary_table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#1a3a52')),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-                ('TOPPADDING', (0, 0), (-1, -1), 3),
-            ]))
-            story.append(summary_table)
+        if summary_parts:
+            summary_text = "  |  ".join(summary_parts)
+            summary_para = Paragraph(f"<b>ZUSAMMENFASSUNG / SUMMARY:</b> {summary_text}", 
+                                    ParagraphStyle('Summary', parent=styles['Normal'], fontSize=8))
+            story.append(summary_para)
     
-    story.append(Spacer(1, 10*mm))
-    
-    # Build navigation footer with link back to app
-    footer_lines = []
-    footer_lines.append(f"Erstellt am / Generated: {datetime.now().strftime('%d.%m.%Y %H:%M')}")
-    
-    if trip_name:
-        footer_lines.append(f"Reise / Trip: {trip_name}")
-    
-    # Get base URL from environment for navigation link
-    replit_domain = os.environ.get('REPLIT_DOMAINS', '')
-    if replit_domain and entry_id:
-        base_url = f"https://{replit_domain}"
-        entry_url = f"{base_url}/logbook/{entry_id}"
-        footer_lines.append(f'<link href="{entry_url}" color="blue">📱 Zurück zum Logbuch / Back to Logbook: {entry_url}</link>')
-    elif replit_domain:
-        base_url = f"https://{replit_domain}"
-        logbook_url = f"{base_url}/logbook"
-        footer_lines.append(f'<link href="{logbook_url}" color="blue">📱 Zurück zum Logbuch / Back to Logbook: {logbook_url}</link>')
-    
-    for line in footer_lines:
-        story.append(Paragraph(line, small_style))
-    
+    # Footer with timestamp and navigation
     story.append(Spacer(1, 5*mm))
     
-    signature_data = [
-        ['_' * 40, '_' * 40],
+    footer_parts = [f"Erstellt/Generated: {datetime.now().strftime('%d.%m.%Y %H:%M')}"]
+    if trip_name:
+        footer_parts.append(f"Reise/Trip: {trip_name}")
+    
+    # Navigation link
+    replit_domain = os.environ.get('REPLIT_DOMAINS', '')
+    if replit_domain:
+        base_url = f"https://{replit_domain}"
+        logbook_url = f"{base_url}/logbook"
+        footer_parts.append(f'📱 Zurück zum Logbuch/Back to Logbook')
+    
+    footer_text = "  |  ".join(footer_parts)
+    footer_para = Paragraph(footer_text, small_style)
+    story.append(footer_para)
+    
+    # Signature line
+    story.append(Spacer(1, 8*mm))
+    sig_data = [
+        ['_' * 60, '_' * 40],
         ['Unterschrift Skipper / Signature', 'Ort, Datum / Place, Date']
     ]
-    signature_table = Table(signature_data, colWidths=[80*mm, 80*mm])
-    signature_table.setStyle(TableStyle([
+    sig_table = Table(sig_data, colWidths=[100*mm, 80*mm])
+    sig_table.setStyle(TableStyle([
         ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('FONTSIZE', (0, 0), (-1, -1), 7),
         ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#555555')),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-        ('TOPPADDING', (0, 1), (-1, 1), 6),
+        ('TOPPADDING', (0, 1), (-1, 1), 4),
     ]))
-    story.append(signature_table)
+    story.append(sig_table)
     
     doc.build(story)
