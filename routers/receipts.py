@@ -7,6 +7,7 @@ from db import get_db
 from models import Receipt, Expense
 from pathlib import Path
 import uuid
+import logging
 
 router = APIRouter(prefix="/receipts", tags=["receipts"])
 templates = Jinja2Templates(
@@ -14,8 +15,11 @@ templates = Jinja2Templates(
     context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
 )
 
+logger = logging.getLogger(__name__)
+
 ALLOWED_CONTENT_TYPES = {"application/pdf", "image/jpeg", "image/png"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
+UPLOADS_DIR = Path("uploads").resolve()
 
 @router.post("/expenses/{expense_id}/upload")
 async def upload_receipt(
@@ -40,9 +44,14 @@ async def upload_receipt(
     ext = ext_map.get(file.content_type, ".bin")
     
     filename = str(uuid.uuid4()) + ext
-    filepath = Path("uploads") / filename
+    filepath = UPLOADS_DIR / filename
     
-    filepath.write_bytes(content)
+    try:
+        UPLOADS_DIR.mkdir(exist_ok=True)
+        filepath.write_bytes(content)
+    except (OSError, IOError) as e:
+        logger.error(f"Failed to write receipt file {filename}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save file")
     
     receipt = Receipt(
         expense_id=expense_id,
@@ -62,15 +71,19 @@ async def view_receipt(
     receipt_id: str,
     db: Session = Depends(get_db)
 ):
-    filepath = Path("uploads") / receipt_id
-    
-    if not filepath.exists():
-        raise HTTPException(status_code=404, detail="Receipt not found")
-    
     receipt = db.query(Receipt).filter(Receipt.stored_filename == receipt_id).first()
     
     if not receipt:
         raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    filepath = (UPLOADS_DIR / receipt.stored_filename).resolve()
+    
+    if not filepath.is_relative_to(UPLOADS_DIR):
+        logger.warning(f"Path traversal attempt detected: {receipt_id}")
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Receipt file not found")
     
     return templates.TemplateResponse("receipt_view.html", {
         "request": request,
@@ -85,15 +98,22 @@ async def download_receipt(
     receipt_id: str,
     db: Session = Depends(get_db)
 ):
-    filepath = Path("uploads") / receipt_id
-    
-    if not filepath.exists():
-        raise HTTPException(status_code=404, detail="Receipt not found")
-    
     receipt = db.query(Receipt).filter(Receipt.stored_filename == receipt_id).first()
     
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    filepath = (UPLOADS_DIR / receipt.stored_filename).resolve()
+    
+    if not filepath.is_relative_to(UPLOADS_DIR):
+        logger.warning(f"Path traversal attempt detected: {receipt_id}")
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Receipt file not found")
+    
     return FileResponse(
-        path=filepath,
-        media_type=receipt.content_type if receipt else "application/octet-stream",
-        filename=receipt.original_name if receipt else receipt_id
+        path=str(filepath),
+        media_type=str(receipt.content_type),
+        filename=str(receipt.original_name)
     )

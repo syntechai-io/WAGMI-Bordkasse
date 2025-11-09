@@ -64,7 +64,7 @@ async def login(
         # Auto-select active trip for admin (smooth UX, can switch later)
         active_trip = TripService.get_active_trip(db)
         if active_trip:
-            TripService.set_selected_trip(request, active_trip.id)
+            TripService.set_selected_trip(request, int(active_trip.id))
             return RedirectResponse(url="/", status_code=303)
         else:
             # No active trip - send admin to trips page to select/create one
@@ -85,7 +85,7 @@ async def login(
         
         if crew_member:
             # Check if trip admin password matches
-            if crew_member.is_trip_admin and trip.check_trip_admin_password(password):
+            if int(crew_member.is_trip_admin) == 1 and trip.check_trip_admin_password(password):
                 # Trip Admin login successful
                 request.session["user_id"] = f"crew_{crew_member.id}"
                 request.session["crew_member_id"] = crew_member.id

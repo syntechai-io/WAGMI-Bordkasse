@@ -8,10 +8,14 @@ from db import get_db
 from models import Expense, ExpenseParticipant, CrewMember, Receipt, PaidFromEnum, SplitModeEnum, Currency, ExpenseTemplate
 from services.trip import TripService
 from services.currency import CurrencyService
+from services.audit import AuditService
 from datetime import date, datetime
 from typing import List, Optional
 from pathlib import Path
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_active_crew_at_datetime(db: Session, trip_id: int, expense_datetime: datetime) -> List[CrewMember]:
     """Get crew members who were active at the given datetime"""
@@ -490,15 +494,15 @@ async def update_expense(
             AuditService.log(
                 db=db,
                 request=request,
-                trip_id=active_trip.id,
+                trip_id=int(active_trip.id),
                 action="update",
                 entity_type="expense",
-                entity_id=expense.id,
+                entity_id=int(expense.id),
                 details=f"Updated expense: {description}"
             )
         except Exception as e:
             # Log the error but don't fail the request since expense was already saved
-            print(f"Warning: Failed to log audit entry for expense {expense.id}: {e}")
+            logger.warning(f"Failed to log audit entry for expense {expense.id}: {e}")
         
         # Redirect to detail page if receipt was uploaded, otherwise to list
         if receipt_uploaded:

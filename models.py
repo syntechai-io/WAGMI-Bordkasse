@@ -73,7 +73,7 @@ class Trip(Base):
     
     def check_trip_admin_password(self, password: str) -> bool:
         """Verify trip admin password against hash"""
-        if not self.trip_admin_password_hash or not password:
+        if self.trip_admin_password_hash is None or not password:
             return False
         return check_password_hash(str(self.trip_admin_password_hash), password)
     
@@ -86,7 +86,7 @@ class Trip(Base):
     
     def check_crew_password(self, password: str) -> bool:
         """Verify crew password against hash"""
-        if not self.crew_password_hash or not password:
+        if self.crew_password_hash is None or not password:
             return False
         return check_password_hash(str(self.crew_password_hash), password)
 
