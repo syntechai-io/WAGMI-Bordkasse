@@ -58,12 +58,13 @@ class TripQuickStartService:
         
         departure_entry = LogbookEntry(
             trip_id=trip.id,
-            date_time_utc=now_utc,
+            entry_date=now_utc,
+            entry_date_utc=now_utc,
             maneuver_type="departure",
             latitude=prefs.home_lat,
             longitude=prefs.home_lon,
-            departure_port=prefs.home_port,
-            motor_on_time_utc=now_utc,
+            departure=prefs.home_port,
+            engine_on_time=now_utc,
             created_at=now_utc,
             updated_at=now_utc
         )
