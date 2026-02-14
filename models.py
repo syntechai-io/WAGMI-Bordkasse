@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint, Text, Boolean
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint, Text, Boolean, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -28,6 +28,19 @@ class SeaStateEnum(str, enum.Enum):
     rough = "rough"
     very_rough = "very_rough"
     high = "high"
+
+class PlanEnum(str, enum.Enum):
+    FREE = "FREE"
+    SKIPPER_PLUS = "SKIPPER_PLUS"
+
+class SubscriptionStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    PAST_DUE = "PAST_DUE"
+    CANCELED = "CANCELED"
+
+class TripRole(str, enum.Enum):
+    skipper = "skipper"
+    crew = "crew"
 
 class User(Base):
     __tablename__ = "users"
@@ -62,12 +75,15 @@ class Trip(Base):
     home_port = Column(String(100), nullable=True)  # Vessel home port for logbook PDFs
     call_sign = Column(String(50), nullable=True)  # Vessel call sign for logbook PDFs
     imo_mmsi = Column(String(50), nullable=True)  # Vessel IMO/MMSI number for logbook PDFs
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
+    account = relationship("Account", backref="trips")
     crew_members = relationship("CrewMember", back_populates="trip", cascade="all, delete-orphan")
     deposits = relationship("Deposit", back_populates="trip", cascade="all, delete-orphan")
     expenses = relationship("Expense", back_populates="trip", cascade="all, delete-orphan")
     logbook_entries = relationship("LogbookEntry", back_populates="trip", cascade="all, delete-orphan")
+    trip_members = relationship("TripMember", backref="trip", cascade="all, delete-orphan")
     
     def set_trip_admin_password(self, password: str):
         """Hash and set trip admin password"""
@@ -369,3 +385,91 @@ class UserPreferences(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     user = relationship("User")
+
+
+class Account(Base):
+    __tablename__ = "accounts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    owner_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    subscriptions = relationship("Subscription", back_populates="account", cascade="all, delete-orphan")
+    saas_users = relationship("SaaSUser", back_populates="account", cascade="all, delete-orphan")
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), index=True, nullable=True)
+    plan = Column(SQLEnum(PlanEnum, name="planenum", create_type=False), nullable=False)
+    status = Column(SQLEnum(SubscriptionStatus, name="subscriptionstatus", create_type=False), nullable=False)
+    current_period_end = Column(DateTime, nullable=True)
+    stripe_customer_id = Column(String, nullable=True)
+    stripe_subscription_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+    account = relationship("Account", back_populates="subscriptions")
+
+
+class SaaSUser(Base):
+    __tablename__ = "new_users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), index=True, nullable=False)
+    email = Column(String, nullable=False)
+    password_hash = Column(String, nullable=False)
+    is_owner = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    account = relationship("Account", back_populates="saas_users")
+    trip_memberships = relationship("TripMember", back_populates="user", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("ix_new_users_email", "email"),
+    )
+
+    def set_password(self, password: str):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        return check_password_hash(str(self.password_hash), password)
+
+
+class TripMember(Base):
+    __tablename__ = "trip_members"
+
+    id = Column(Integer, primary_key=True, index=True)
+    trip_id = Column(Integer, ForeignKey("trips.id"), index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("new_users.id"), index=True, nullable=False)
+    role = Column(SQLEnum(TripRole, name="triprole", create_type=False), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("SaaSUser", back_populates="trip_memberships")
+
+    __table_args__ = (
+        UniqueConstraint("trip_id", "user_id", name="uq_trip_members_trip_user"),
+        Index("ix_trip_members_trip_user", "trip_id", "user_id"),
+    )
+
+
+class InviteToken(Base):
+    __tablename__ = "invite_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), index=True, nullable=True)
+    trip_id = Column(Integer, ForeignKey("trips.id"), index=True, nullable=False)
+    role = Column(SQLEnum(TripRole, name="triprole", create_type=False), nullable=False)
+    email = Column(String, nullable=False)
+    token = Column(String, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    used_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        Index("ix_invite_tokens_token", "token"),
+        Index("ix_invite_tokens_email", "email"),
+    )

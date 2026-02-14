@@ -1,0 +1,130 @@
+# models.py (additions)
+
+import enum
+from datetime import datetime
+from sqlalchemy import (
+    Column, Integer, String, DateTime, Boolean, ForeignKey,
+    Enum as SQLEnum, UniqueConstraint, Index
+)
+from sqlalchemy.orm import relationship
+
+from db import Base  # adjust import to your project
+# If your Base lives elsewhere, keep consistent with existing codebase.
+
+
+# --- Enums (match DB enums exactly) ---
+
+class PlanEnum(str, enum.Enum):
+    FREE = "FREE"
+    SKIPPER_PLUS = "SKIPPER_PLUS"
+
+
+class SubscriptionStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    PAST_DUE = "PAST_DUE"
+    CANCELED = "CANCELED"
+
+
+class TripRole(str, enum.Enum):
+    skipper = "skipper"
+    crew = "crew"
+
+
+# --- SaaS Tables already in DB, now modeled ---
+
+class Account(Base):
+    __tablename__ = "accounts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Note: DB column exists; points to legacy users.id (not new_users.id)
+    owner_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    # Relationships (optional but useful)
+    subscriptions = relationship("Subscription", back_populates="account", cascade="all, delete-orphan")
+    saas_users = relationship("SaaSUser", back_populates="account", cascade="all, delete-orphan")
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), index=True, nullable=True)
+
+    plan = Column(SQLEnum(PlanEnum, name="planenum"), nullable=False)
+    status = Column(SQLEnum(SubscriptionStatus, name="subscriptionstatus"), nullable=False)
+
+    current_period_end = Column(DateTime, nullable=True)
+    stripe_customer_id = Column(String, nullable=True)
+    stripe_subscription_id = Column(String, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+    account = relationship("Account", back_populates="subscriptions")
+
+
+class SaaSUser(Base):
+    """
+    Maps to 'new_users' table in DB. We keep the table name as-is for Phase 1,
+    but use a sane model name in code.
+    """
+    __tablename__ = "new_users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), index=True, nullable=False)
+
+    email = Column(String, nullable=False)  # consider unique=True later if not already
+    password_hash = Column(String, nullable=False)
+    is_owner = Column(Boolean, nullable=False, default=False)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    account = relationship("Account", back_populates="saas_users")
+    trip_memberships = relationship("TripMember", back_populates="user", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("ix_new_users_email", "email"),
+    )
+
+
+class TripMember(Base):
+    __tablename__ = "trip_members"
+
+    id = Column(Integer, primary_key=True, index=True)
+    trip_id = Column(Integer, ForeignKey("trips.id"), index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("new_users.id"), index=True, nullable=False)
+
+    role = Column(SQLEnum(TripRole, name="triprole"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("SaaSUser", back_populates="trip_memberships")
+
+    __table_args__ = (
+        UniqueConstraint("trip_id", "user_id", name="uq_trip_members_trip_user"),
+        Index("ix_trip_members_trip_user", "trip_id", "user_id"),
+    )
+
+
+class InviteToken(Base):
+    __tablename__ = "invite_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), index=True, nullable=True)
+
+    trip_id = Column(Integer, ForeignKey("trips.id"), index=True, nullable=False)
+    role = Column(SQLEnum(TripRole, name="triprole"), nullable=False)
+
+    email = Column(String, nullable=False)
+    token = Column(String, nullable=False)
+
+    expires_at = Column(DateTime, nullable=False)
+    used_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        Index("ix_invite_tokens_token", "token"),
+        Index("ix_invite_tokens_email", "email"),
+    )

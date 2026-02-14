@@ -1,0 +1,159 @@
+Phase 1 Execution Plan (Concrete)
+
+A) Wire the missing SQLAlchemy models (1:1 to existing DB)
+
+Create models for:
+	1.	Account (accounts)
+	2.	Subscription (subscriptions)
+	3.	SaaSUser (new_users) — keep the DB name, model name can be SaaSUser
+	4.	TripMember (trip_members)
+	5.	InviteToken (invite_tokens) (model only, unused for now)
+
+Key details
+	•	Map enums exactly to existing DB enums (planenum, subscriptionstatus, triprole).
+	•	Relationships (optional but helpful):
+	•	Account.users (SaaSUser)
+	•	Account.subscriptions
+	•	Trip.members (TripMember)
+	•	SaaSUser.trip_memberships
+
+Acceptance criteria
+	•	You can run db.query(Account).first() etc. without raw SQL.
+
+⸻
+
+B) Implement SaaS login (email/password) in parallel to legacy login
+
+Add a new login mode:
+	•	Input: email, password
+	•	Lookup: new_users.email
+	•	Verify: password hash
+	•	Set session:
+	•	session['saas_user_id'] = user.id
+	•	session['account_id'] = user.account_id
+
+Important
+	•	Keep existing global admin login intact for now.
+	•	If you want to keep the UI single-form, allow either:
+	•	username/password → legacy admin
+	•	email/password → SaaS user
+(but keep the code paths distinct)
+
+Acceptance criteria
+	•	Logging in as an existing new_users user lands you in the app with correct account scope.
+
+⸻
+
+C) Enforce account scoping on trips (immediately)
+
+Every trip query must include:
+	•	Trip.account_id == session['account_id']
+
+This instantly gives you SaaS separation because account_id is already on trips.
+
+Acceptance criteria
+	•	If you manually change account_id in session (or try a different trip_id), you still cannot see cross-account trips.
+
+⸻
+
+D) Deterministic backfill: populate trip_members for every trip owner
+
+Because each account has exactly one owner (is_owner=true) and all users have account_id:
+
+Backfill rule
+
+For every trip:
+	1.	Find owner user for trip.account_id.
+	2.	Ensure a trip_members row exists:
+	•	trip_id = trip.id
+	•	user_id = owner.id
+	•	role = 'skipper'
+
+Also: if a trip has account_id null (you didn’t mention nulls, but just in case):
+	•	Either assign to Account 1 (Default) ONLY if you are sure, or skip and report.
+
+This backfill is safe and reversible because it only inserts missing memberships.
+
+Acceptance criteria
+	•	After backfill, every owner can access all trips in their account even if no crew has been added yet.
+
+⸻
+
+E) Authorization rules (Lean and sufficient)
+
+Define these helpers:
+
+get_current_saas_user()
+	•	reads session['saas_user_id'], loads new_users
+
+get_current_account()
+	•	reads session['account_id'], loads accounts
+
+require_trip_access(trip_id)
+
+Allow if:
+	•	Trip.account_id == current_account.id AND
+	•	(current_user.is_owner OR TripMember exists for (trip_id, user_id))
+
+require_trip_edit(trip_id)
+
+Allow if:
+	•	is_owner OR trip_member.role == ‘skipper’
+
+That’s it for Phase 1.
+
+⸻
+
+F) Plan gating (FREE vs SKIPPER_PLUS) using subscriptions
+
+You already have subscriptions.
+
+Implement:
+
+get_effective_plan(account_id)
+	•	If exists subscription with status ACTIVE → return its plan
+	•	Else → FREE
+
+Enforce only two FREE limits (Phase 1)
+	1.	Max 1 active trip
+
+	•	count trips where status='active' and is_closed=0 (or treat closed as non-active; pick one and keep consistent)
+
+	2.	Max 4 trip members
+
+	•	count trip_members for trip
+
+Pro-only features can be stub-locked now (403):
+	•	background tracking, GPX, compass, settlement groups, PDF no-watermark
+
+Acceptance criteria
+	•	Free accounts hit limits; SKIPPER_PLUS does not.
+
+⸻
+
+Minimal “Do Next” Implementation Checklist (ordered)
+	1.	Add SQLAlchemy models for the 5 tables.
+	2.	Add SaaS login path (email/password) + session keys.
+	3.	Update trip list view and trip detail routes to scope by account_id.
+	4.	Add require_trip_access() guard on all trip-scoped endpoints.
+	5.	Run one-time backfill script for trip_members:
+	•	insert skipper membership for each trip owner if missing.
+	6.	Add plan resolver + enforce 2 free limits.
+
+⸻
+
+Recommended next deliverable
+
+If you want, I can provide:
+	•	the exact SQLAlchemy model definitions (with enums + relationships),
+	•	plus the backfill SQL script,
+	•	plus the FastAPI dependency skeleton (get_current_saas_user, require_trip_access, get_effective_plan).
+
+To do that accurately, I need only one final technical detail:
+
+What hashing library are you using for password_hash verification today?
+	•	werkzeug check_password_hash?
+	•	bcrypt?
+	•	passlib?
+
+Reply with the function name or library, and I’ll write the wiring in the same style as your existing codebase.
