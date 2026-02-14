@@ -27,6 +27,7 @@ from routers.logbook import router as logbook_router
 from routers.templates import router as templates_router
 from routers.groups import router as groups_router
 from routers.api import router as api_router
+from routes_auth import router as saas_auth_router
 
 app = FastAPI(title="WAGMI CrewLog - Maritime Logbook & Bordkasse")
 
@@ -122,6 +123,7 @@ app.include_router(export_router)
 app.include_router(logbook_router)
 app.include_router(templates_router)
 app.include_router(groups_router)
+app.include_router(saas_auth_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):
