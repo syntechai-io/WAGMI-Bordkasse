@@ -3,6 +3,7 @@ from models import Trip, TripStatus
 from typing import Optional
 from fastapi import Request
 
+
 class TripService:
     @staticmethod
     def get_active_trip(db: Session) -> Optional[Trip]:
@@ -17,15 +18,20 @@ class TripService:
     
     @staticmethod
     def get_selected_trip(request: Request, db: Session) -> Optional[Trip]:
-        """Get the trip selected by user from session (no automatic fallback)"""
+        """Get the trip selected by user from session.
+        When SaaS session exists, enforces account_id scoping."""
         selected_trip_id = request.session.get("selected_trip_id")
+        account_id = request.session.get("account_id")
         
         if selected_trip_id:
-            trip = db.query(Trip).filter(Trip.id == selected_trip_id).first()
+            q = db.query(Trip).filter(Trip.id == selected_trip_id)
+            # SaaS session: scope to account
+            if account_id:
+                q = q.filter(Trip.account_id == account_id)
+            trip = q.first()
             if trip:
                 return trip
         
-        # No fallback - require explicit trip selection
         return None
     
     @staticmethod

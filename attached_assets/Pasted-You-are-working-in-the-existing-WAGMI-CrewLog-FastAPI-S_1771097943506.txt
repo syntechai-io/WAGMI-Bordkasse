@@ -1,0 +1,144 @@
+You are working in the existing WAGMI CrewLog FastAPI + SQLAlchemy + Jinja/HTMX codebase on Replit.
+
+Goal: implement the next SaaS wiring slice after /login-saas is already working:
+1) Trip scoping by account_id everywhere
+2) Trip access/edit guards based on new_users + trip_members
+3) Safe one-time backfill for trips.account_id (NULL -> 1) and trip_members (owner -> skipper)
+4) Add /api/whoami and /logout-saas for debugging and session hygiene
+
+IMPORTANT CONSTRAINTS
+- Do NOT redesign the frontend. Keep all Jinja/HTMX pages.
+- Do NOT remove legacy login yet. Keep it intact, but SaaS session must take precedence when present.
+- Do NOT drop any tables. Do NOT rename tables. Use existing DB schema as-is.
+- Use werkzeug.security check_password_hash / generate_password_hash patterns consistently (cast hash to str before check).
+- Keep changes minimal, isolated, and easy to revert.
+
+EXISTING DB TABLES (already in Postgres)
+- trips(account_id exists, but many rows are NULL)
+- accounts
+- new_users (SaaS identities; has account_id and is_owner)
+- subscriptions
+- trip_members(trip_id, user_id -> new_users.id, role triprole)
+- invite_tokens
+Legacy users table exists and must remain for now.
+
+STEP-BY-STEP TASKS
+
+A) Add/confirm SQLAlchemy models exist for these DB tables (if not already added):
+- Account -> accounts
+- Subscription -> subscriptions
+- SaaSUser -> new_users
+- TripMember -> trip_members
+- InviteToken -> invite_tokens
+Ensure enums match DB enums:
+- planenum: FREE, SKIPPER_PLUS
+- subscriptionstatus: ACTIVE, PAST_DUE, CANCELED
+- triprole: skipper, crew
+Do not change DB schema here—just model definitions.
+
+B) Create a new module file: auth_saas.py
+Implement these dependencies/helpers:
+1) get_current_saas_user(request, db) -> SaaSUser
+   - reads request.session['saas_user_id'] and request.session['account_id']
+   - loads SaaSUser from new_users
+   - validates user.account_id matches session account_id
+   - raises 401 on missing/invalid session
+
+2) require_trip_access(trip_id) dependency:
+   - loads Trip WHERE Trip.id == trip_id AND Trip.account_id == current_user.account_id
+   - if not found -> 404
+   - if current_user.is_owner -> allow
+   - else require a TripMember(trip_id, user_id) row exists -> else 403
+   - returns Trip object
+
+3) require_trip_edit(trip_id) dependency:
+   - same as access but additionally:
+   - if not owner, require TripMember.role == 'skipper' -> else 403
+   - returns Trip object
+
+4) get_effective_plan(account_id, db) -> PlanEnum
+   - finds latest ACTIVE subscription for account_id
+   - if none -> FREE
+
+Add minimal plan gates as functions (do not integrate everywhere yet):
+- enforce_free_limits_for_trip_creation(db, account_id)
+  Free: max 1 active trip where status='active' and is_closed=0
+- enforce_free_limits_for_crew_add(db, trip_id, account_id)
+  Free: max 4 trip_members rows for that trip
+
+C) Add debugging + logout endpoints
+In routes_auth.py (or a small new router), implement:
+1) GET /api/whoami
+   - If saas session exists:
+     return {mode:"saas", saas_user_id, account_id, email, is_owner}
+   - Else if legacy session exists:
+     return {mode:"legacy", user_id, role}
+   - Else:
+     return {mode:"none"}
+2) POST /logout-saas (or GET if easier)
+   - clears session keys: saas_user_id, account_id
+   - does NOT clear legacy keys unless they exist; keep it simple
+   - returns {"ok": true}
+
+Wire router into main.py.
+
+D) Enforce trip scoping by account_id (CRITICAL)
+Update ALL trip list + trip lookup queries used by views and APIs:
+- Any query that loads trips MUST filter by Trip.account_id == current_account_id from SaaS session when present.
+Implementation approach:
+1) Add a helper in a shared util module (or in auth_saas.py):
+   - get_active_account_id(request): if saas session -> use session['account_id'], else None
+2) In trip listing routes:
+   - if saas account_id exists: query trips filtered by that account_id
+   - else: keep existing legacy behavior unchanged
+3) In trip detail routes (and any route taking trip_id):
+   - if saas session exists: load trip with both trip_id and account_id filter (404 if mismatch)
+   - else: keep legacy behavior unchanged
+
+E) Apply guards on high-risk endpoints
+For all endpoints that:
+- export PDFs,
+- create/edit logbook entries,
+- create/edit expenses/deposits,
+- upload attachments,
+- close/archive trips,
+wrap them with the appropriate SaaS guard when saas session exists:
+- View: require_trip_access(trip_id)
+- Mutations: require_trip_edit(trip_id)
+Do this minimally: add the dependency and reuse the returned Trip object instead of re-querying.
+
+F) One-time backfill utilities (safe and idempotent)
+Create admin-only endpoint (protected by legacy admin session OR a hardcoded check for now) at:
+- POST /admin/saas/backfill
+
+This endpoint should:
+1) Assign all NULL trip account_ids to Default Account (id=1):
+   UPDATE trips SET account_id = 1 WHERE account_id IS NULL;
+2) For each trip, ensure the account owner is a TripMember with role='skipper':
+   - owner = SaaSUser where account_id=trip.account_id and is_owner=true
+   - insert TripMember if missing (trip_id, owner.id, skipper)
+3) Return a JSON report with:
+   - trips_total
+   - trips_updated_from_null
+   - trip_members_inserted
+   - already_present
+   - skipped_no_account_id (should become 0 after update)
+Do not modify any non-null account_id trips.
+
+G) Smoke tests
+After implementation, run these checks and report results:
+1) Login via /login-saas for account 1 owner, call GET /api/whoami -> mode=saas
+2) Call POST /admin/saas/backfill -> report shows 23 trips updated from null (expected in this dataset) and memberships inserted
+3) Load trip list page -> now shows trips scoped to account_id for SaaS session
+4) Try to access a trip outside the account (if you can identify one) -> should 404
+5) Legacy login still works unchanged if no saas session is set
+
+Deliverables
+- Updated models.py with SaaS models (if missing)
+- New auth_saas.py with dependencies + plan helpers
+- Updated routes_auth.py with /api/whoami and /logout-saas
+- Backfill endpoint implementation
+- Updated trip routes to enforce account scoping when SaaS session exists
+- Short notes in code comments where SaaS and legacy paths diverge
+
+Keep the implementation minimal and do not refactor unrelated files.

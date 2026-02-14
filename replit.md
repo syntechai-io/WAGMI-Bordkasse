@@ -10,12 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 #### Backend Architecture
 **Framework**: FastAPI (Python) with modular routers.
-**Authentication**: Session-based with Global Admin, Trip Admin, and Crew roles, using `werkzeug.security` for password hashing.
+**Authentication**: Dual-mode session-based auth — legacy (admin/trip_admin/crew roles) and SaaS (email/password via `new_users` table with account scoping). Uses `werkzeug.security` for password hashing.
 **Template Engine**: Jinja2 for server-side rendering, integrated with HTMX.
 **Data Storage**: PostgreSQL with SQLAlchemy ORM.
 **Key Architectural Decisions**:
 - **Modular Router Structure**: Enhances maintainability and separation of concerns.
 - **Role-Based Authentication**: Robust, role-based security with environment variable-based secrets and scoped permissions for Trip admins.
+- **SaaS Multi-Tenancy**: Account-based tenant isolation via `account_id` on trips. `auth_saas.py` provides session guards (`get_current_saas_user`, `require_trip_access`, `require_trip_edit`), plan gating (`get_effective_plan`, `enforce_free_limits_*`), and account scoping (`get_active_account_id`). SaaS endpoints: `POST /login-saas`, `GET /api/whoami`, `POST /logout-saas`, `POST /admin/saas/backfill`. Legacy login remains intact; SaaS session takes precedence when present.
 - **File Upload Security**: Enforces UUID-based filenames, type validation (PDF/JPG/PNG), and size limits (10MB).
 - **Trip Management**: `Trip` model organizes all data, supporting active/archived/closed states, with all data scoped to a specific trip.
 - **Multi-Currency Support**: Integrates with the ECB API for daily exchange rates, with caching.

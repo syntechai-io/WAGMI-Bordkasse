@@ -8,6 +8,11 @@ from models import SaaSUser, Subscription, PlanEnum, SubscriptionStatus, TripMem
 UPGRADE_REQUIRED = "UPGRADE_REQUIRED"
 
 
+def get_active_account_id(request: Request):
+    """Returns account_id from SaaS session if present, else None (legacy mode)."""
+    return request.session.get("account_id")
+
+
 def get_current_saas_user(request: Request, db: Session = Depends(get_db)) -> SaaSUser:
     saas_user_id = request.session.get("saas_user_id")
     account_id = request.session.get("account_id")

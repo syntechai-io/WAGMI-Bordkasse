@@ -8,7 +8,7 @@ from models import Trip, TripStatus, CrewMember, UserPreferences, TripMember, Tr
 from services.trip import TripService
 from services.quick_start import TripQuickStartService
 from services.wagmi_report import WagmiAnnualReportService
-from auth_saas import enforce_free_limits_for_trip_creation
+from auth_saas import enforce_free_limits_for_trip_creation, get_active_account_id
 from datetime import date, datetime
 from typing import Optional
 
@@ -19,6 +19,15 @@ def _get_account_id(request: Request) -> int:
         return 1
     return int(account_id)
 
+
+def _scoped_trip_query(db, request):
+    """Return a Trip query scoped to account_id when SaaS session exists."""
+    q = db.query(Trip)
+    account_id = get_active_account_id(request)
+    if account_id:
+        q = q.filter(Trip.account_id == account_id)
+    return q
+
 router = APIRouter(prefix="/trips", tags=["trips"])
 templates = Jinja2Templates(
     directory="templates",
@@ -27,9 +36,9 @@ templates = Jinja2Templates(
 
 @router.get("/", response_class=HTMLResponse)
 async def trips_page(request: Request, db: Session = Depends(get_db)):
-    """Display all trips"""
-    trips = db.query(Trip).order_by(Trip.start_date.desc()).all()
-    active_trip = db.query(Trip).filter(Trip.status == TripStatus.active).first()
+    """Display all trips — scoped to account when SaaS session exists"""
+    trips = _scoped_trip_query(db, request).order_by(Trip.start_date.desc()).all()
+    active_trip = _scoped_trip_query(db, request).filter(Trip.status == TripStatus.active).first()
     
     return templates.TemplateResponse("trips.html", {
         "request": request,
@@ -53,7 +62,8 @@ async def quick_start_trip(
     account_id = _get_account_id(request)
     enforce_free_limits_for_trip_creation(db, account_id)
 
-    current_active = db.query(Trip).filter(Trip.status == TripStatus.active).first()
+    # Scope active trip lookup to account to avoid cross-tenant archiving
+    current_active = _scoped_trip_query(db, request).filter(Trip.status == TripStatus.active).first()
     if current_active:
         current_active.status = TripStatus.archived
         if not current_active.end_date:
@@ -102,7 +112,8 @@ async def create_trip(
         trip.skipper_code = (prefs.skipper_code if prefs and prefs.skipper_code else "SK")
         trip.home_port = (prefs.home_port if prefs and prefs.home_port else None)
     
-    current_active = db.query(Trip).filter(Trip.status == TripStatus.active).first()
+    # Scope active trip lookup to account to avoid cross-tenant archiving
+    current_active = _scoped_trip_query(db, request).filter(Trip.status == TripStatus.active).first()
     if current_active:
         current_active.status = TripStatus.archived
         current_active.end_date = date.today()
@@ -142,15 +153,15 @@ async def activate_trip(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Set a trip as active"""
+    """Set a trip as active — scoped to account when SaaS session exists"""
     if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can activate trips")
     
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     
-    current_active = db.query(Trip).filter(Trip.status == TripStatus.active).first()
+    current_active = _scoped_trip_query(db, request).filter(Trip.status == TripStatus.active).first()
     if current_active:
         current_active.status = TripStatus.archived
         if not current_active.end_date:
@@ -169,11 +180,11 @@ async def archive_trip(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Archive a trip"""
+    """Archive a trip — scoped to account"""
     if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can archive trips")
     
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     
@@ -191,11 +202,11 @@ async def close_trip(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Close a trip (admin only - prevents crew from making changes)"""
+    """Close a trip — scoped to account"""
     if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can close trips")
     
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     
@@ -210,11 +221,11 @@ async def reopen_trip(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Reopen a trip (admin only - allows crew to make changes again)"""
+    """Reopen a trip — scoped to account"""
     if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can reopen trips")
     
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     
@@ -229,8 +240,8 @@ async def select_trip(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Select a trip to view/work with"""
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    """Select a trip to view/work with — scoped to account"""
+    trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     
