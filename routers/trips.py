@@ -4,12 +4,20 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
-from models import Trip, TripStatus, CrewMember, UserPreferences
+from models import Trip, TripStatus, CrewMember, UserPreferences, TripMember, TripRole
 from services.trip import TripService
 from services.quick_start import TripQuickStartService
 from services.wagmi_report import WagmiAnnualReportService
-from datetime import date
+from auth_saas import enforce_free_limits_for_trip_creation
+from datetime import date, datetime
 from typing import Optional
+
+
+def _get_account_id(request: Request) -> int:
+    account_id = request.session.get("account_id")
+    if not account_id:
+        return 1
+    return int(account_id)
 
 router = APIRouter(prefix="/trips", tags=["trips"])
 templates = Jinja2Templates(
@@ -42,6 +50,9 @@ async def quick_start_trip(
     if not user_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
+    account_id = _get_account_id(request)
+    enforce_free_limits_for_trip_creation(db, account_id)
+
     current_active = db.query(Trip).filter(Trip.status == TripStatus.active).first()
     if current_active:
         current_active.status = TripStatus.archived
@@ -49,7 +60,8 @@ async def quick_start_trip(
             current_active.end_date = date.today()
         db.commit()
     
-    trip = TripQuickStartService.create_quick_start_trip(db, user_id)
+    saas_user_id = request.session.get("saas_user_id")
+    trip = TripQuickStartService.create_quick_start_trip(db, user_id, account_id, saas_user_id)
     
     TripService.set_selected_trip(request, trip.id)
     
@@ -67,10 +79,14 @@ async def create_trip(
     if request.session.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admin can create trips")
     
+    account_id = _get_account_id(request)
+    enforce_free_limits_for_trip_creation(db, account_id)
+    
     trip = Trip(
         name=name,
         start_date=start_date,
-        status=TripStatus.active
+        status=TripStatus.active,
+        account_id=account_id
     )
     
     # If solo sailing, get user preferences once and use for both trip and crew
@@ -95,7 +111,16 @@ async def create_trip(
     db.commit()
     db.refresh(trip)
     
-    # Add crew member if solo sailing (reuse prefs from above)
+    saas_user_id = request.session.get("saas_user_id")
+    if saas_user_id:
+        db.add(TripMember(
+            trip_id=trip.id,
+            user_id=saas_user_id,
+            role=TripRole.skipper,
+            created_at=datetime.utcnow(),
+        ))
+        db.commit()
+
     if solo_sailing == "true":
         crew_code = (prefs.skipper_code if prefs and prefs.skipper_code else "SK")
         crew_name = (prefs.skipper_name if prefs and prefs.skipper_name else "Skipper")

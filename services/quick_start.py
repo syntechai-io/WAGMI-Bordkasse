@@ -1,16 +1,19 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, date
-from models import Trip, CrewMember, LogbookEntry, UserPreferences, Currency, TripStatus
+from typing import Optional
+from models import Trip, CrewMember, LogbookEntry, UserPreferences, Currency, TripStatus, TripMember, TripRole
 
 class TripQuickStartService:
     @staticmethod
-    def create_quick_start_trip(db: Session, user_id: int) -> Trip:
+    def create_quick_start_trip(db: Session, user_id: int, account_id: int = 1, saas_user_id: Optional[int] = None) -> Trip:
         """
         Create a new trip with user's default preferences and auto-generate first logbook entry.
         
         Args:
             db: Database session
             user_id: ID of the user creating the trip
+            account_id: Account (tenant) ID to scope the trip
+            saas_user_id: SaaS user ID to add as trip member
             
         Returns:
             Created Trip object with skipper added as crew and first logbook entry created
@@ -40,7 +43,8 @@ class TripQuickStartService:
             is_closed=0,
             skipper_name=prefs.skipper_name or "Skipper",
             skipper_code=prefs.skipper_code or "SK",
-            home_port=prefs.home_port or "Home Port"
+            home_port=prefs.home_port or "Home Port",
+            account_id=account_id
         )
         db.add(trip)
         db.flush()
@@ -56,6 +60,14 @@ class TripQuickStartService:
         )
         db.add(skipper)
         db.flush()
+
+        if saas_user_id:
+            db.add(TripMember(
+                trip_id=trip.id,
+                user_id=saas_user_id,
+                role=TripRole.skipper,
+                created_at=datetime.utcnow(),
+            ))
         
         now_utc = datetime.utcnow()
         
