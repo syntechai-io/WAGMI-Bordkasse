@@ -30,6 +30,7 @@ Preferred communication style: Simple, everyday language.
 - **Crew Departure Handling**: Settlement calculations correctly account for crew members departing mid-trip.
 - **Timezone Handling**: All datetime fields are normalized to UTC, with client-side conversion for accurate display.
 - **Solo-Sailing Workflow**: "Solo-Sailing" checkbox streamlines trip creation by automatically assigning the user as skipper and admin, utilizing `UserPreferences` for default information.
+- **Stripe Subscription Billing**: `billing_stripe.py` provides helpers for Stripe customer/subscription management. `routes_billing.py` handles checkout (`POST /billing/checkout`), portal (`POST /billing/portal`), success/cancel pages, and webhook (`POST /stripe/webhook`) with signature verification. Webhook updates `subscriptions` table idempotently for plan gating. Only account owners can manage billing. DB unique constraint enforces one active subscription per account.
 
 #### Data Model
 **Core Entities**: CrewMember, Deposit, Expense, ExpenseParticipant, ExpenseTemplate, CrewGroup, CrewGroupMember, Receipt, Trip, AuditLog, LogbookEntry, LogbookPhoto, UserPreferences.
@@ -69,6 +70,7 @@ Uses a greedy matching algorithm to minimize transfers between debtors and credi
 - **fastapi-csrf-jinja**: CSRF protection.
 - **slowapi**: Rate limiting.
 - **werkzeug**: Password hashing.
+- **stripe**: Stripe billing SDK.
 
 #### Frontend Libraries (CDN)
 - **Tailwind CSS**: CSS framework.
@@ -83,3 +85,4 @@ Uses a greedy matching algorithm to minimize transfers between debtors and credi
 #### External Services
 - **ECB (European Central Bank) API**: For daily exchange rates.
 - **Open-Meteo API**: For weather data retrieval.
+- **Stripe API**: For subscription billing (checkout, webhooks, billing portal).

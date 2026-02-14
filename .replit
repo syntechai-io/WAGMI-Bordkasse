@@ -38,3 +38,8 @@ externalPort = 80
 [deployment]
 deploymentTarget = "autoscale"
 run = ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
+
+[userenv]
+
+[userenv.development]
+APP_BASE_URL = "https://4ab24e3a-e318-4ff7-8dab-80d71ab1b725-00-19fomh9w0v1z9.riker.replit.dev"

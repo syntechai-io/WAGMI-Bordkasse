@@ -136,6 +136,37 @@
         </div>
     </div>
     
+    {% if is_saas_owner and current_plan == 'FREE' %}
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-lg p-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+                <p class="font-bold" style="color: var(--navy-deep);">🚀 Upgrade auf Skipper Plus</p>
+                <p class="text-sm mt-1" style="color: var(--navy-deep); opacity: 0.8;">Unbegrenzte Törns, mehr Crew-Mitglieder und alle Premium-Features.</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="startCheckout('monthly')" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+                    Monatlich
+                </button>
+                <button onclick="startCheckout('yearly')" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                    Jährlich (Rabatt)
+                </button>
+            </div>
+        </div>
+    </div>
+    {% elif is_saas_owner and current_plan == 'SKIPPER_PLUS' %}
+    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+                <p class="font-bold" style="color: var(--navy-deep);">✅ Skipper Plus aktiv</p>
+                <p class="text-sm mt-1" style="color: var(--navy-deep); opacity: 0.8;">Alle Premium-Features freigeschaltet.</p>
+            </div>
+            <button onclick="openBillingPortal()" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+                Abo verwalten
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
         <p class="text-sm font-semibold mb-2" style="color: var(--navy-deep);">💡 Törn-Verwaltung:</p>
         <ul class="text-sm space-y-1" style="color: var(--navy-deep);">
@@ -151,4 +182,48 @@
         </ul>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function getCsrfToken() {
+    const match = document.cookie.match(/csrftoken=([^;]+)/);
+    return match ? match[1] : '';
+}
+async function startCheckout(interval) {
+    const form = new FormData();
+    form.append('interval', interval);
+    try {
+        const res = await fetch('/billing/checkout', {
+            method: 'POST',
+            body: form,
+            headers: { 'x-csrftoken': getCsrfToken() }
+        });
+        const data = await res.json();
+        if (data.checkout_url) {
+            window.location.href = data.checkout_url;
+        } else {
+            alert(data.detail || 'Checkout konnte nicht gestartet werden.');
+        }
+    } catch (e) {
+        alert('Fehler beim Starten des Checkouts.');
+    }
+}
+async function openBillingPortal() {
+    try {
+        const res = await fetch('/billing/portal', {
+            method: 'POST',
+            headers: { 'x-csrftoken': getCsrfToken() }
+        });
+        const data = await res.json();
+        if (data.portal_url) {
+            window.location.href = data.portal_url;
+        } else {
+            alert(data.detail || 'Billing-Portal konnte nicht geöffnet werden.');
+        }
+    } catch (e) {
+        alert('Fehler beim Öffnen des Billing-Portals.');
+    }
+}
+</script>
 {% endblock %}

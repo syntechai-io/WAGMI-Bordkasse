@@ -28,6 +28,7 @@ from routers.templates import router as templates_router
 from routers.groups import router as groups_router
 from routers.api import router as api_router
 from routes_auth import router as saas_auth_router
+from routes_billing import router as billing_router
 
 app = FastAPI(title="WAGMI CrewLog - Maritime Logbook & Bordkasse")
 
@@ -74,15 +75,18 @@ app.add_middleware(
 )
 
 csrf_secret = os.getenv("CSRF_SECRET", session_secret)
+
+import re
 app.add_middleware(
     FastAPICSRFJinjaMiddleware,
     secret=csrf_secret,
     cookie_name="csrftoken",
     header_name="x-csrftoken",
     sensitive_cookies={"session"},
-    cookie_samesite="lax",  # Explicit for iPad Safari compatibility
-    cookie_secure=is_production,  # Secure flag required for HTTPS in production
-    cookie_domain=None  # Let browser determine correct domain
+    exempt_urls=[re.compile(r"^/stripe/webhook$")],
+    cookie_samesite="lax",
+    cookie_secure=is_production,
+    cookie_domain=None
 )
 
 # Cache control middleware to prevent browser caching of HTML pages
@@ -124,6 +128,7 @@ app.include_router(logbook_router)
 app.include_router(templates_router)
 app.include_router(groups_router)
 app.include_router(saas_auth_router)
+app.include_router(billing_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):

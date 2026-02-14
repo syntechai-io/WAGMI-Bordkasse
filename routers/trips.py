@@ -8,7 +8,8 @@ from models import Trip, TripStatus, CrewMember, UserPreferences, TripMember, Tr
 from services.trip import TripService
 from services.quick_start import TripQuickStartService
 from services.wagmi_report import WagmiAnnualReportService
-from auth_saas import enforce_free_limits_for_trip_creation, get_active_account_id
+from auth_saas import enforce_free_limits_for_trip_creation, get_active_account_id, get_effective_plan
+from models import SaaSUser, PlanEnum
 from datetime import date, datetime
 from typing import Optional
 
@@ -40,10 +41,22 @@ async def trips_page(request: Request, db: Session = Depends(get_db)):
     trips = _scoped_trip_query(db, request).order_by(Trip.start_date.desc()).all()
     active_trip = _scoped_trip_query(db, request).filter(Trip.status == TripStatus.active).first()
     
+    account_id = get_active_account_id(request)
+    current_plan = None
+    is_saas_owner = False
+    if account_id:
+        current_plan = get_effective_plan(account_id, db).value
+        saas_uid = request.session.get("saas_user_id")
+        if saas_uid:
+            saas_user = db.query(SaaSUser).filter(SaaSUser.id == saas_uid).first()
+            is_saas_owner = bool(saas_user and saas_user.is_owner)
+
     return templates.TemplateResponse("trips.html", {
         "request": request,
         "trips": trips,
-        "active_trip": active_trip
+        "active_trip": active_trip,
+        "current_plan": current_plan,
+        "is_saas_owner": is_saas_owner,
     })
 
 @router.post("/quick-start")
