@@ -1,0 +1,151 @@
+You are working in the existing WAGMI CrewLog FastAPI + SQLAlchemy + Jinja/HTMX codebase on Replit.
+
+Context (already implemented)
+- SaaS login is live: POST /login-saas (email/password) sets session['saas_user_id'] and session['account_id']
+- Tenant isolation by trips.account_id is enforced when SaaS session exists
+- trip_members + guards exist (require_trip_access/edit)
+- FREE limits enforced: 1 active trip, 4 crew members per trip
+- DB tables exist and are now wired by SQLAlchemy models:
+  accounts, subscriptions, new_users, trip_members, invite_tokens
+- hashing uses werkzeug.security generate_password_hash / check_password_hash with str(hash) cast
+
+Goal now
+Implement Stripe subscription billing for the flat “Skipper” plan (per account/boat/team), using the existing `subscriptions` table as source of truth for plan gating.
+We will support two Stripe prices:
+- SKIPPER_PLUS monthly
+- SKIPPER_PLUS yearly (discount)
+FREE remains the default when no active subscription exists.
+
+Hard requirements
+- Do NOT refactor or rewrite frontend. Add only minimal pages/buttons as needed.
+- All billing changes must be server-driven (webhooks update DB). Never trust the client.
+- Webhooks must verify Stripe signature and be idempotent.
+- Subscription status in DB must drive plan gating (ACTIVE -> SKIPPER_PLUS; otherwise FREE).
+- Only the SaaS owner (new_users.is_owner=true) may initiate checkout or manage billing.
+- Keep legacy auth intact.
+- Do not drop or rename DB tables. Reuse `subscriptions` table fields:
+  account_id, plan, status, current_period_end, stripe_customer_id, stripe_subscription_id, created_at, updated_at.
+
+Environment variables (add to Replit Secrets)
+- STRIPE_SECRET_KEY
+- STRIPE_WEBHOOK_SECRET
+- STRIPE_PRICE_MONTHLY (price_...)
+- STRIPE_PRICE_YEARLY (price_...)
+- APP_BASE_URL (e.g., https://<your-replit-app-url>)
+
+Implementation tasks (do in order)
+
+A) Add Stripe SDK + billing module
+1) Add dependency `stripe` in requirements if missing.
+2) Create a new module `billing_stripe.py` that:
+   - initializes stripe.api_key from STRIPE_SECRET_KEY
+   - contains helper functions:
+     - get_or_create_subscription_row(db, account_id) -> Subscription (create row with plan=FREE, status=CANCELED or equivalent default if none exists)
+     - get_or_create_stripe_customer(db, account_id, owner_user) -> stripe_customer_id
+       * If the DB subscription row has stripe_customer_id, reuse it.
+       * Else create Stripe Customer with email=owner.email and metadata {account_id}
+       * Save stripe_customer_id to subscriptions table (and updated_at)
+     - set_subscription_state(db, account_id, plan, status, stripe_customer_id, stripe_subscription_id, current_period_end)
+
+B) Create checkout endpoint
+Create a router `routes_billing.py` and wire into main.py.
+
+Endpoints:
+1) POST /billing/checkout
+   - Requires SaaS session and owner user (new_users.is_owner == True).
+   - Accepts form field: `interval` = "monthly" or "yearly"
+   - Validates interval and selects Stripe price id from env STRIPE_PRICE_MONTHLY / STRIPE_PRICE_YEARLY
+   - Loads current account_id from session
+   - Ensures a subscriptions row exists for this account (create if missing)
+   - Ensures stripe_customer_id exists (create Stripe customer if missing)
+   - Creates Stripe Checkout Session (mode="subscription"):
+       customer = stripe_customer_id
+       line_items = [{"price": <price_id>, "quantity": 1}]
+       success_url = APP_BASE_URL + "/billing/success"
+       cancel_url  = APP_BASE_URL + "/billing/cancel"
+       allow_promotion_codes = True (optional)
+       metadata: {account_id}
+       subscription_data.metadata: {account_id}
+   - Returns JSON: { "checkout_url": session.url }
+
+2) GET /billing/success and GET /billing/cancel
+   - Minimal Jinja pages or JSON responses:
+     - success: “Thanks — your subscription will activate shortly.”
+     - cancel: “Checkout canceled.”
+
+C) Add “Manage Billing” portal endpoint (recommended)
+3) POST /billing/portal
+   - Requires SaaS owner.
+   - Ensures stripe_customer_id exists
+   - Creates Stripe Billing Portal session:
+     return_url = APP_BASE_URL + "/"
+   - Returns JSON: { "portal_url": session.url }
+
+D) Implement Stripe webhook (critical)
+4) POST /stripe/webhook
+   - Reads raw body and Stripe-Signature header
+   - Verifies using STRIPE_WEBHOOK_SECRET
+   - Parses event and updates subscriptions table deterministically (idempotent updates):
+Handle at minimum these event types:
+- "checkout.session.completed"
+  * If mode subscription:
+    - get subscription id from session.subscription
+    - fetch full subscription via stripe.Subscription.retrieve(...)
+    - read status, current_period_end, customer id, subscription id
+    - determine plan:
+       if status in ("active", "trialing"): SKIPPER_PLUS + ACTIVE
+       elif status in ("past_due", "unpaid"): SKIPPER_PLUS + PAST_DUE
+       else: FREE + CANCELED
+    - update DB row for account_id from metadata (preferred) OR from customer metadata lookup fallback
+- "customer.subscription.updated"
+- "customer.subscription.deleted"
+- "invoice.paid"
+- "invoice.payment_failed"
+
+Rules:
+- DB status enum must map to subscriptionstatus: ACTIVE / PAST_DUE / CANCELED
+- DB plan enum must map to planenum: FREE / SKIPPER_PLUS
+- Always update:
+  stripe_customer_id, stripe_subscription_id, current_period_end, updated_at
+- If event refers to a subscription, always use stripe_subscription_id as the idempotency anchor (update same row, do not insert duplicates).
+- If an account has no DB subscription row yet, create it using account_id from metadata.
+
+E) Update plan resolution in auth_saas.py
+Replace any temporary plan logic with:
+- get_effective_plan(account_id):
+   query subscriptions where account_id = account_id
+   if status == ACTIVE and plan == SKIPPER_PLUS -> SKIPPER_PLUS
+   else -> FREE
+(If you already do this, ensure it uses DB subscription row updated by webhook.)
+
+F) Minimal UI integration (no redesign)
+1) Add a “Upgrade to Skipper Plus” button visible only when:
+   - SaaS session active AND current plan is FREE AND user is_owner
+   - Button posts to /billing/checkout with interval selection (simple two buttons: monthly/yearly)
+   - On response, redirect browser to checkout_url (HTMX can do window.location)
+2) Add “Manage Billing” button visible for owners on SKIPPER_PLUS.
+
+Keep UI minimal and consistent with existing Tailwind.
+
+G) Data integrity hardening (optional but recommended)
+- Ensure only one subscription row per account:
+  add a UNIQUE constraint on subscriptions.account_id if safe (since you currently expect one subscription per account).
+  If you cannot change DB constraints now, enforce in code: always update the same row for an account, never insert duplicates.
+
+H) Tests (must be performed and reported)
+Using Stripe test mode:
+1) As SaaS owner, call POST /billing/checkout interval=monthly -> returns checkout_url
+2) Complete checkout in Stripe test UI -> webhook receives event -> DB subscription row updates to ACTIVE + SKIPPER_PLUS
+3) Confirm /api/whoami still shows SaaS session
+4) Confirm FREE limits no longer block creating a second active trip and adding >4 crew
+5) Cancel subscription from Stripe portal -> webhook updates DB to CANCELED -> FREE limits apply again
+
+Deliverables
+- billing_stripe.py (helpers)
+- routes_billing.py (checkout + portal + success/cancel)
+- webhook route + verified signature handling
+- updated auth_saas plan resolution if needed
+- minimal UI buttons (owner-only)
+- brief notes where you integrated and how to test locally in Replit (no long docs)
+
+Do not over-engineer. Keep it lean, safe, and consistent with the existing codebase.
