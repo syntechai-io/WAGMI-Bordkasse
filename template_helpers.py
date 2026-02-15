@@ -4,7 +4,7 @@ from fastapi import Request
 from typing import Dict, Any
 from sqlalchemy.orm import Session
 from db import get_db
-from models import Trip
+from models import Trip, BoatProfile
 from services.trip import TripService
 from i18n import get_lang, t as i18n_t
 
@@ -13,7 +13,9 @@ def trip_context_processor(request: Request) -> Dict[str, Any]:
     """Add trip information to all template contexts"""
     context = {
         "all_trips": [],
-        "selected_trip": None
+        "selected_trip": None,
+        "boat_brand_name": None,
+        "show_brand": False,
     }
     
     db_generator = get_db()
@@ -26,6 +28,13 @@ def trip_context_processor(request: Request) -> Dict[str, Any]:
         
         selected_trip = TripService.get_selected_trip(request, db)
         context["selected_trip"] = selected_trip
+
+        account_id = request.session.get("account_id")
+        if account_id:
+            bp = db.query(BoatProfile).filter(BoatProfile.account_id == account_id).first()
+            if bp and not bp.boat_name_is_default:
+                context["boat_brand_name"] = bp.boat_name
+                context["show_brand"] = True
         
     except Exception:
         pass

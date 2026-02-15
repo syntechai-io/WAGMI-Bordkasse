@@ -30,6 +30,7 @@ from routers.api import router as api_router
 from routes_auth import router as saas_auth_router
 from routes_billing import router as billing_router
 from routes_billing_ui import router as billing_ui_router
+from routes_boat import router as boat_router
 from i18n import set_lang, SUPPORTED_LANGS
 
 app = FastAPI(title="WAGMI CrewLog - Maritime Logbook & Bordkasse")
@@ -132,6 +133,7 @@ app.include_router(groups_router)
 app.include_router(saas_auth_router)
 app.include_router(billing_router)
 app.include_router(billing_ui_router)
+app.include_router(boat_router)
 
 @app.get("/set-language")
 @app.post("/set-language")

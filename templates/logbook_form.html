@@ -513,13 +513,35 @@
         
         <div class="rope-divider"></div>
         
-        <!-- Phase A: Sails Section with In-Mast Furling -->
+        <!-- Phase A: Sails Section - sail-profile-aware -->
         <details class="porthole-card p-4 mb-4 cursor-pointer">
             <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
                 ⛵ {{ t('logbook.sails_section') }}
             </summary>
             <div class="mt-4 space-y-4">
-                <!-- In-Mast Furling Slider: 0-100% NO REEFS -->
+                {% if sail_profile and sail_profile.main_type == 'SLAB_REEFING' %}
+                <!-- Slab Reefing: Reef level selector -->
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
+                        ⛵ {{ t('logbook.main_reef_level') }}
+                    </label>
+                    <div class="flex gap-2">
+                        {% set current_reef = entry.main_reef_level|default(0) if entry else 0 %}
+                        {% for level in range((sail_profile.reef_count or 3) + 1) %}
+                        <label class="flex-1 text-center">
+                            <input type="radio" name="main_reef_level" value="{{ level }}" 
+                                   {% if current_reef == level %}checked{% endif %}
+                                   class="hidden peer">
+                            <div class="peer-checked:bg-blue-600 peer-checked:text-white bg-white border-2 rounded-lg py-3 px-2 cursor-pointer transition font-bold text-sm"
+                                 style="border-color: var(--sky-blue);">
+                                {% if level == 0 %}{{ t('logbook.reef_full') }}{% else %}{{ t('logbook.reef_level') }} {{ level }}{% endif %}
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <!-- In-Mast Furling Slider: 0-100% -->
                 <div>
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">
                         🎚️ {{ t('logbook.main_furl') }}: <span id="main-furl-display">{% if entry and entry.main_furl_pct %}{{ entry.main_furl_pct }}%{% else %}0%{% endif %}</span>
@@ -548,10 +570,33 @@
                         ➡️ {{ t('logbook.furl_out') }}
                     </button>
                 </div>
+                {% endif %}
                 
+                <!-- Headsail section -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-medium mb-2" style="color: var(--navy-deep);">🎐 {{ t('logbook.headsail') }}</label>
+                        {% if sail_profile and sail_profile.headsail_names %}
+                        <select name="headsail_type" 
+                                class="w-full px-4 py-3 border rounded-lg text-lg" 
+                                style="border-color: var(--sky-blue);">
+                            <option value="">{{ t('common.select_option') }}</option>
+                            {% for hs in sail_profile.headsail_names %}
+                            <option value="{{ hs }}" {% if entry and entry.headsail_type == hs %}selected{% endif %}>{{ hs }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if sail_profile.headsail_furling %}
+                        <div class="mt-2">
+                            <label class="block text-sm mb-1" style="color: var(--navy-deep);">
+                                {{ t('logbook.headsail_furl_percent') }}: <span id="headsail-furl-display">{% if entry and entry.headsail_furl_percent %}{{ entry.headsail_furl_percent }}%{% else %}0%{% endif %}</span>
+                            </label>
+                            <input type="range" name="headsail_furl_percent" id="headsail_furl_slider" min="0" max="100" step="5"
+                                   value="{% if entry and entry.headsail_furl_percent %}{{ entry.headsail_furl_percent }}{% else %}0{% endif %}"
+                                   class="w-full h-3 rounded-lg appearance-none cursor-pointer"
+                                   style="background: linear-gradient(to right, var(--sea-foam) 0%, var(--sky-blue) 100%);">
+                        </div>
+                        {% endif %}
+                        {% else %}
                         <select name="headsail" 
                                 class="w-full px-4 py-3 border rounded-lg text-lg" 
                                 style="border-color: var(--sky-blue);">
@@ -560,15 +605,28 @@
                             <option value="Genua teilweise" {% if entry and entry.headsail == 'Genua teilweise' %}selected{% endif %}>{{ t('logbook.headsail_partial') }}</option>
                             <option value="Genua geborgen" {% if entry and entry.headsail == 'Genua geborgen' %}selected{% endif %}>{{ t('logbook.headsail_furled') }}</option>
                         </select>
+                        {% endif %}
                     </div>
                     
                     <div>
+                        {% if sail_profile and sail_profile.extra_sail_names %}
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">🪁 {{ t('logbook.extra_sail') }}</label>
+                        <select name="extra_sail" 
+                                class="w-full px-4 py-3 border rounded-lg text-lg" 
+                                style="border-color: var(--sky-blue);">
+                            <option value="">{{ t('common.select_option') }}</option>
+                            {% for es in sail_profile.extra_sail_names %}
+                            <option value="{{ es }}" {% if entry and entry.extra_sail == es %}selected{% endif %}>{{ es }}</option>
+                            {% endfor %}
+                        </select>
+                        {% else %}
                         <label class="block font-medium mb-2" style="color: var(--navy-deep);">⚙️ {{ t('logbook.sail_action') }}</label>
                         <input type="text" name="sail_action" 
                                value="{% if entry and entry.sail_action %}{{ entry.sail_action }}{% endif %}" 
                                placeholder="{{ t('logbook.placeholder_sail_action') }}" 
                                class="w-full px-4 py-3 border rounded-lg text-lg" 
                                style="border-color: var(--sky-blue);">
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -768,32 +826,47 @@ function calculateMotorHours() {
 document.getElementById('engine_on_time').addEventListener('change', calculateMotorHours);
 document.getElementById('engine_off_time').addEventListener('change', calculateMotorHours);
 
-// Phase A: In-Mast Furling Slider
+// Phase A: In-Mast Furling Slider (only present when not slab reefing)
 const furlSlider = document.getElementById('main_furl_slider');
 const furlDisplay = document.getElementById('main-furl-display');
 
-furlSlider.addEventListener('input', function() {
-    furlDisplay.textContent = this.value + '%';
-});
+if (furlSlider && furlDisplay) {
+    furlSlider.addEventListener('input', function() {
+        furlDisplay.textContent = this.value + '%';
+    });
 
-// Phase A: In-Mast Furling Quick Buttons
-document.getElementById('furl-in-btn').addEventListener('click', function() {
-    furlSlider.value = 0;
-    furlDisplay.textContent = '0%';
-    this.textContent = '✅ ' + i18n.furled_in;
-    setTimeout(() => {
-        this.textContent = '⬅️ ' + i18n.furl_in;
-    }, 2000);
-});
+    const furlInBtn = document.getElementById('furl-in-btn');
+    const furlOutBtn = document.getElementById('furl-out-btn');
+    if (furlInBtn) {
+        furlInBtn.addEventListener('click', function() {
+            furlSlider.value = 0;
+            furlDisplay.textContent = '0%';
+            this.textContent = '✅ ' + i18n.furled_in;
+            setTimeout(() => {
+                this.textContent = '⬅️ ' + i18n.furl_in;
+            }, 2000);
+        });
+    }
+    if (furlOutBtn) {
+        furlOutBtn.addEventListener('click', function() {
+            furlSlider.value = 100;
+            furlDisplay.textContent = '100%';
+            this.textContent = '✅ ' + i18n.furled_out;
+            setTimeout(() => {
+                this.textContent = '➡️ ' + i18n.furl_out;
+            }, 2000);
+        });
+    }
+}
 
-document.getElementById('furl-out-btn').addEventListener('click', function() {
-    furlSlider.value = 100;
-    furlDisplay.textContent = '100%';
-    this.textContent = '✅ ' + i18n.furled_out;
-    setTimeout(() => {
-        this.textContent = '➡️ ' + i18n.furl_out;
-    }, 2000);
-});
+// Headsail Furling Slider (only present when sail profile has headsail furling)
+const headsailFurlSlider = document.getElementById('headsail_furl_slider');
+const headsailFurlDisplay = document.getElementById('headsail-furl-display');
+if (headsailFurlSlider && headsailFurlDisplay) {
+    headsailFurlSlider.addEventListener('input', function() {
+        headsailFurlDisplay.textContent = this.value + '%';
+    });
+}
 
 function getPermissionInstructions() {
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);

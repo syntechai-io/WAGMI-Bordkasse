@@ -1,0 +1,230 @@
+{% extends "layout.html" %}
+{% block title %}{{ t('admin.boat_setup.title') }} - CrewLog{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">
+        ⛵ {{ t('admin.boat_setup.title') }}
+    </h1>
+
+    {% if request.session.pop('success', None) == 'boat_saved' %}
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+        {{ t('common.saved_successfully') }}
+    </div>
+    {% endif %}
+
+    {% if not is_owner %}
+    <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6">
+        {{ t('admin.boat_setup.read_only') }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/admin/boat">
+        {{ csrf_input | safe }}
+
+        <div class="porthole-card p-6 mb-6" style="background: white;">
+            <h2 class="text-xl font-bold mb-4" style="color: var(--navy-deep);">🏷️ {{ t('admin.boat_setup.branding') }}</h2>
+            <div>
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.boat_name') }} *</label>
+                <input type="text" name="boat_name" value="{{ boat_profile.boat_name }}" required maxlength="100"
+                    class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                    placeholder="{{ t('admin.boat_setup.boat_name_placeholder') }}"
+                    {% if not is_owner %}disabled{% endif %}>
+            </div>
+        </div>
+
+        <div class="porthole-card p-6 mb-6" style="background: white;">
+            <h2 class="text-xl font-bold mb-4" style="color: var(--navy-deep);">📍 {{ t('admin.boat_setup.home_port') }}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.port_name') }}</label>
+                    <input type="text" name="home_port_name" value="{{ boat_profile.home_port_name or '' }}" maxlength="100"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        placeholder="{{ t('admin.boat_setup.port_name_placeholder') }}"
+                        {% if not is_owner %}disabled{% endif %}>
+                </div>
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.latitude') }}</label>
+                    <input type="number" name="home_port_lat" id="home_port_lat" step="0.000001"
+                        value="{{ boat_profile.home_port_lat if boat_profile.home_port_lat is not none else '' }}"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        placeholder="55.5678"
+                        {% if not is_owner %}disabled{% endif %}>
+                </div>
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.longitude') }}</label>
+                    <input type="number" name="home_port_lon" id="home_port_lon" step="0.000001"
+                        value="{{ boat_profile.home_port_lon if boat_profile.home_port_lon is not none else '' }}"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        placeholder="9.7539"
+                        {% if not is_owner %}disabled{% endif %}>
+                </div>
+            </div>
+            {% if is_owner %}
+            <button type="button" id="gps-btn" class="mt-4 px-4 py-2 rounded-lg text-white font-semibold transition hover:scale-105"
+                style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--sea-foam) 100%);">
+                📡 {{ t('common.use_current_gps') }}
+            </button>
+            <span id="gps-status" class="ml-2 text-sm" style="color: var(--navy-deep);"></span>
+            {% endif %}
+        </div>
+
+        <div class="porthole-card p-6 mb-6" style="background: white;">
+            <h2 class="text-xl font-bold mb-4" style="color: var(--navy-deep);">🔧 {{ t('admin.boat_setup.specs') }}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.make') }}</label>
+                    <input type="text" name="boat_make" value="{{ boat_profile.boat_make or '' }}" maxlength="100"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        placeholder="{{ t('admin.boat_setup.make_placeholder') }}"
+                        {% if not is_owner %}disabled{% endif %}>
+                </div>
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.model') }}</label>
+                    <input type="text" name="boat_model" value="{{ boat_profile.boat_model or '' }}" maxlength="100"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        placeholder="{{ t('admin.boat_setup.model_placeholder') }}"
+                        {% if not is_owner %}disabled{% endif %}>
+                </div>
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.year') }}</label>
+                    <input type="number" name="boat_year" value="{{ boat_profile.boat_year if boat_profile.boat_year else '' }}" min="1900" max="2030"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        placeholder="2020"
+                        {% if not is_owner %}disabled{% endif %}>
+                </div>
+            </div>
+        </div>
+
+        <div class="porthole-card p-6 mb-6" style="background: white;">
+            <h2 class="text-xl font-bold mb-4" style="color: var(--navy-deep);">⛵ {{ t('admin.boat_setup.sails') }}</h2>
+
+            <div class="mb-6">
+                <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('sails.main_type') }}</label>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="main_type" value="FURLING"
+                            {% if sail_profile.main_type == 'FURLING' %}checked{% endif %}
+                            {% if not is_owner %}disabled{% endif %}>
+                        <span style="color: var(--navy-deep);">{{ t('sails.furling') }}</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="main_type" value="SLAB_REEFING"
+                            {% if sail_profile.main_type == 'SLAB_REEFING' %}checked{% endif %}
+                            {% if not is_owner %}disabled{% endif %}>
+                        <span style="color: var(--navy-deep);">{{ t('sails.slab_reefing') }}</span>
+                    </label>
+                </div>
+                <p id="reef-note" class="text-sm mt-1 {% if sail_profile.main_type != 'SLAB_REEFING' %}hidden{% endif %}" style="color: var(--ocean-blue);">
+                    {{ t('sails.reef_note') }}
+                </p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block font-medium mb-3" style="color: var(--navy-deep);">{{ t('sails.headsails') }}</label>
+                <div class="flex flex-wrap gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="headsail_genoa" {% if sail_profile.headsail_genoa %}checked{% endif %}
+                            {% if not is_owner %}disabled{% endif %}>
+                        <span style="color: var(--navy-deep);">{{ t('sails.genoa') }}</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="headsail_jib" {% if sail_profile.headsail_jib %}checked{% endif %}
+                            {% if not is_owner %}disabled{% endif %}>
+                        <span style="color: var(--navy-deep);">{{ t('sails.jib') }}</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="headsail_furling" {% if sail_profile.headsail_furling %}checked{% endif %}
+                            {% if not is_owner %}disabled{% endif %}>
+                        <span style="color: var(--navy-deep);">{{ t('sails.headsail_furling') }}</span>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-medium mb-3" style="color: var(--navy-deep);">{{ t('sails.extra_sails') }}</label>
+                <div class="flex flex-wrap gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="has_code0" {% if sail_profile.has_code0 %}checked{% endif %}
+                            {% if not is_owner %}disabled{% endif %}>
+                        <span style="color: var(--navy-deep);">Code 0</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="has_gennaker" {% if sail_profile.has_gennaker %}checked{% endif %}
+                            {% if not is_owner %}disabled{% endif %}>
+                        <span style="color: var(--navy-deep);">Gennaker</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="has_spinnaker" {% if sail_profile.has_spinnaker %}checked{% endif %}
+                            {% if not is_owner %}disabled{% endif %}>
+                        <span style="color: var(--navy-deep);">Spinnaker</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        {% if is_owner %}
+        <button type="submit" class="w-full py-3 rounded-lg text-white font-bold text-lg transition hover:scale-105"
+            style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+            💾 {{ t('common.save') }}
+        </button>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('input[name="main_type"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            var note = document.getElementById('reef-note');
+            if (this.value === 'SLAB_REEFING') {
+                note.classList.remove('hidden');
+            } else {
+                note.classList.add('hidden');
+            }
+        });
+    });
+
+    var gpsBtn = document.getElementById('gps-btn');
+    if (gpsBtn) {
+        gpsBtn.addEventListener('click', function() {
+            var statusEl = document.getElementById('gps-status');
+            statusEl.textContent = '{{ t("admin.boat_setup.gps_requesting") }}';
+
+            if (!navigator.geolocation) {
+                statusEl.textContent = '{{ t("admin.boat_setup.gps_not_supported") }}';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    var lat = pos.coords.latitude;
+                    var lon = pos.coords.longitude;
+
+                    fetch('/admin/boat/fetch-gps', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({lat: lat, lon: lon})
+                    }).then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.ok) {
+                            document.getElementById('home_port_lat').value = data.lat.toFixed(6);
+                            document.getElementById('home_port_lon').value = data.lon.toFixed(6);
+                            statusEl.textContent = '{{ t("admin.boat_setup.gps_success") }}';
+                        } else {
+                            statusEl.textContent = data.error || '{{ t("admin.boat_setup.gps_error") }}';
+                        }
+                    }).catch(function() {
+                        statusEl.textContent = '{{ t("admin.boat_setup.gps_error") }}';
+                    });
+                },
+                function(err) {
+                    statusEl.textContent = '{{ t("admin.boat_setup.gps_denied") }}';
+                },
+                {enableHighAccuracy: true, timeout: 10000}
+            );
+        });
+    }
+</script>
+{% endblock %}

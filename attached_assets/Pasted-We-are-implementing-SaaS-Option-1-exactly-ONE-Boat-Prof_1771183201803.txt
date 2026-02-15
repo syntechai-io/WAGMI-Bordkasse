@@ -1,0 +1,282 @@
+We are implementing SaaS Option 1: exactly ONE Boat Profile per Account (tenant). This Boat Profile is the single source of truth for boat configuration (branding, home port, sails). Account remains the tenant; BoatProfile is the domain configuration. Do NOT duplicate boat name/home port into trips or logbook entries (no redundancy). Only store per-trip overrides in the future if needed.
+
+Stack: FastAPI + SQLAlchemy + Jinja/HTMX. i18n exists (t() + locales/de.json + locales/en.json). Any NEW UI strings must use t() keys.
+
+PHASE: Implement Boat Profile module + dynamic header branding + optional home port + sail-aware “Sail Change” log entries.
+
+========================
+1) DATABASE (MIGRATIONS)
+========================
+Create two new tables and extend logbook entry storage.
+
+1.1 boat_profiles (1:1 with accounts)
+- id SERIAL PK
+- account_id INT UNIQUE NOT NULL FK -> accounts.id
+- boat_name VARCHAR(100) NOT NULL
+- home_port_name VARCHAR(100) NULL
+- home_port_lat DOUBLE PRECISION NULL
+- home_port_lon DOUBLE PRECISION NULL
+- boat_make VARCHAR(100) NULL
+- boat_model VARCHAR(100) NULL
+- boat_year INT NULL
+- created_at TIMESTAMP DEFAULT now()
+- updated_at TIMESTAMP DEFAULT now()
+
+1.2 sail_profiles (1:1 with boat_profiles)
+- id SERIAL PK
+- boat_profile_id INT UNIQUE NOT NULL FK -> boat_profiles.id
+- main_type VARCHAR(20) NOT NULL DEFAULT 'FURLING'   (allowed: FURLING, SLAB_REEFING)
+- main_reef_levels INT NOT NULL DEFAULT 2            (relevant for SLAB_REEFING)
+- headsail_genoa BOOL NOT NULL DEFAULT true
+- headsail_jib BOOL NOT NULL DEFAULT false
+- headsail_furling BOOL NOT NULL DEFAULT true
+- has_code0 BOOL NOT NULL DEFAULT false
+- has_gennaker BOOL NOT NULL DEFAULT false
+- has_spinnaker BOOL NOT NULL DEFAULT false
+- created_at TIMESTAMP DEFAULT now()
+- updated_at TIMESTAMP DEFAULT now()
+
+(Keep sail_profiles simple: use VARCHAR + check constraint if easy, or Python enum mapped to VARCHAR. Avoid complex Postgres enum migrations unless the project already uses them cleanly.)
+
+1.3 Extend logbook entry table (whatever your table is named, e.g. logbook_entries)
+Add nullable columns to store structured sail state for sail-change maneuver entries:
+- main_furl_percent INT NULL           (0..100)
+- main_reef_level INT NULL             (0,1,2)
+- headsail_type VARCHAR(10) NULL       (NONE, GENOA, JIB)
+- headsail_furl_percent INT NULL       (0..100)
+- extra_sail VARCHAR(10) NULL          (NONE, CODE0, GENNAKER, SPINNAKER)
+
+Add lightweight constraints if safe:
+- CHECK main_furl_percent between 0 and 100 when not null
+- CHECK headsail_furl_percent between 0 and 100 when not null
+
+Backfill / bootstrap:
+- For Account 1: create boat_profile with boat_name='WAGMI' and home_port_name='Fredericia' (data only).
+- Create sail_profile for that boat_profile with main_type='FURLING', headsail_genoa=true, headsail_furling=true (reasonable default).
+- For other accounts: do not auto-create in migration; create lazily on first access to Boat Setup page. Header must handle missing boat_profile gracefully.
+
+========================
+2) SQLALCHEMY MODELS
+========================
+Create models in models.py (or appropriate module):
+- BoatProfile
+- SailProfile
+Add relationships:
+- Account -> BoatProfile (one-to-one)
+- BoatProfile -> SailProfile (one-to-one)
+
+Add helper functions (e.g., in services/boat.py):
+- get_or_create_boat_profile(db, account_id) -> BoatProfile
+  - If missing: create boat_profile with boat_name='CrewLog' or 'My Boat' (decide below)
+  - Always ensure there is a sail_profile row with defaults.
+
+Decide default boat_name when auto-creating:
+- Use 'My Boat' (English neutral) OR 'Boot' (German). Better: set empty? But boat_name is required.
+=> Use 'My Boat' as placeholder; user can rename in Boat Setup. Header should show only “CrewLog” until user sets a “real” name, but that would require boat_name nullable. We do NOT want nullable.
+So implement:
+- boat_name default = 'My Boat'
+- But in header, if boat_name == 'My Boat' and user never edited, show just “CrewLog” (avoid ugly placeholder branding).
+Implement a boolean flag:
+- boat_name_is_default BOOL NOT NULL DEFAULT true on boat_profiles
+When user saves boat setup, set it to false.
+Then header logic:
+- if boat_name_is_default true: show “CrewLog”
+- else show boat_name above “CrewLog”
+
+Add this column in boat_profiles:
+- boat_name_is_default BOOL NOT NULL DEFAULT true
+
+========================
+3) AUTHZ / PERMISSIONS
+========================
+Owner-only edits:
+- Use new_users.is_owner for current saas_user_id + account_id.
+- Non-owner can view boat setup read-only OR 403 on POST. Choose:
+  - GET: allow view read-only
+  - POST: 403
+
+========================
+4) BOAT SETUP UI (ADMIN SECTION)
+========================
+Add navigation entry under Administration dropdown:
+- “Boat Setup” (t("admin.boat_setup.nav"))
+
+Routes:
+- GET  /admin/boat
+- POST /admin/boat
+- POST /admin/boat/fetch-gps  (owner-only)
+
+GET /admin/boat
+- Requires SaaS session (account_id + saas_user_id)
+- Load or create boat_profile + sail_profile
+- Render template templates/admin_boat.html
+- Provide:
+  - boat_profile
+  - sail_profile
+  - is_owner boolean
+
+POST /admin/boat
+- Owner-only
+- Validate boat_name non-empty
+- Save:
+  - boat_name
+  - boat_name_is_default=false
+  - home_port_name optional (empty -> NULL)
+  - home_port_lat/lon optional (empty -> NULL)
+  - boat_make/model/year optional
+  - sail_profile fields (main_type, headsails, extras)
+- Redirect back with success banner
+
+admin_boat.html sections:
+A) Branding
+- Boat Name (required)
+B) Home Port (optional)
+- Name
+- Lat/Lon
+- Button “Use current GPS”
+C) Boat Specs (optional)
+- Make / Model / Year
+D) Sails
+- Main type: FURLING vs SLAB_REEFING
+- If SLAB_REEFING: show “Reef 1 / Reef 2” note (no need to change reef_levels now; keep fixed 2)
+- Headsails: Genoa, Jib, Furling for headsail
+- Extra sails: Code0, Gennaker, Spinnaker
+
+i18n: all labels/help text are t("...") keys.
+
+========================
+5) “USE CURRENT GPS” (CLIENT GEOLOCATION -> SERVER SAVE)
+========================
+Because server cannot fetch user GPS:
+- Add minimal JS to admin_boat.html:
+  - navigator.geolocation.getCurrentPosition()
+  - POST lat/lon to /admin/boat/fetch-gps via fetch() or HTMX
+- Endpoint POST /admin/boat/fetch-gps:
+  - Owner-only
+  - Accept lat, lon (floats)
+  - Save to boat_profile.home_port_lat/lon
+  - Return JSON {ok:true, lat, lon} OR HTMX partial update.
+
+Update the form fields in UI after success (simple JS sets input values).
+
+========================
+6) HEADER BRANDING + UI IMPROVEMENT
+========================
+Update base template navbar header:
+- Remove hardcoded WAGMI.
+- Inject boat name via template context:
+  - boat_brand_name: string or None
+  - show_brand: bool (boat_name_is_default false)
+Logic:
+- If SaaS session and show_brand true: show boat_name as top line above “CrewLog”
+- Else show just “CrewLog”
+Also improve spacing:
+- reduce font size of brand block slightly
+- add padding and gap between brand and nav items
+- ensure DE|EN switch and user/logout are right aligned
+
+Implementation detail:
+- Add a dependency/middleware that loads boat_profile for current SaaS session once per request and stores in request.state.boat_profile.
+- Template context builder reads it and injects boat_name and show_brand.
+
+Legacy mode:
+- No boat profile => always show “CrewLog” only
+- No change to legacy sessions
+
+========================
+7) HOME PORT DEFAULT (REPLACE HARDCODED FREDERICIA IN SAAS MODE)
+========================
+Implement helper:
+- get_default_home_port(db, request) -> str
+Logic:
+- If SaaS session and boat_profile.home_port_name is set: return it
+- Else return existing default “Fredericia” (to preserve legacy and fallback)
+
+Apply this helper in:
+A) Quick Start trip creation logic (where start/home port is set)
+B) Logbook entry form defaults for departure/arrival/start entries (where a port field is defaulted)
+
+Important:
+- Do not overwrite user-entered port values.
+- If home_port_name is NULL, behavior remains identical to before.
+
+========================
+8) LOGBOOK: SAIL CHANGE MANEUVER (SAIL-AWARE UI + STORAGE)
+========================
+Add/extend the “Sail Change” maneuver entry UI to store structured sail state.
+
+8.1 Data storage:
+- Use the new nullable columns on logbook entries.
+
+8.2 UI logic (conditional based on sail_profile):
+On the Sail Change entry form:
+- Mainsail:
+  - If main_type == FURLING: show slider main_furl_percent 0–100
+  - If main_type == SLAB_REEFING: show selector main_reef_level: 0 (none), 1 (reef 1), 2 (reef 2)
+  - Never show both.
+- Headsail:
+  - Dropdown headsail_type based on inventory:
+    - if genoa enabled: GENOA option
+    - if jib enabled: JIB option
+    - always NONE option
+  - If headsail_furling true AND headsail_type != NONE: show slider headsail_furl_percent 0–100
+- Extra sail:
+  - If any of has_code0/has_gennaker/has_spinnaker true: show dropdown extra_sail:
+    - NONE always
+    - CODE0/GENNAKER/SPINNAKER only if enabled
+  - Else hide field.
+
+8.3 Save logic:
+- When saving entry:
+  - If main_type == FURLING: save main_furl_percent, set main_reef_level=NULL
+  - If SLAB_REEFING: save main_reef_level, set main_furl_percent=NULL
+  - If headsail_type == NONE: set headsail_furl_percent=NULL
+  - If no extra_sail: save NONE or NULL (choose consistent; prefer NULL for “not set”, but if your UI expects “NONE” use NONE)
+
+8.4 Display:
+- In logbook list/timeline, for Sail Change entries show compact summary lines using t() keys:
+  - Main: “70%” or “Reef 1”
+  - Headsail: “Genoa 80%” etc.
+  - Extra: “Code 0”
+Ensure this is language-aware.
+
+========================
+9) I18N KEYS (NEW ONLY)
+========================
+Add keys to locales/de.json and locales/en.json for:
+- admin.boat_setup.*
+- boat_profile.*
+- sails.*
+- logbook.sail_change.*
+- common.use_current_gps
+- common.saved_successfully (banner)
+Do NOT translate existing pages in this prompt; only new UI strings required for this feature.
+
+========================
+10) TESTING (MUST DO)
+========================
+1) Owner sets boat name -> header updates across pages.
+2) boat_name_is_default:
+   - Fresh account: header shows “CrewLog” only
+   - After saving boat name: header shows boat name + CrewLog
+3) Home port:
+   - empty -> defaults remain Fredericia
+   - set to Kiel -> quick start and logbook default port uses Kiel
+4) Use current GPS:
+   - prompts for location, saves lat/lon, updates inputs
+5) Sail Change:
+   - FURLING main -> shows furl slider, saves main_furl_percent
+   - SLAB_REEFING -> shows reef selector, saves main_reef_level
+   - headsail inventory affects dropdown options
+6) Legacy mode unaffected.
+
+Deliverables
+- Alembic migrations (or safe SQL scripts) for new tables + new columns
+- SQLAlchemy models and relationships
+- /admin/boat pages + template + JS geolocation + fetch-gps endpoint
+- Navbar dynamic branding + spacing improvements
+- Home port default helper applied
+- Sail Change maneuver: conditional UI + save + display
+- Updated locales for new keys
+- Summary of files changed and how to test
+Keep changes minimal, follow existing code style, do not introduce new frameworks.

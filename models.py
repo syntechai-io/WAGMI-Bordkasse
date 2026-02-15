@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint, Text, Boolean, Index
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, Enum as SQLEnum, UniqueConstraint, CheckConstraint, Text, Boolean, Index, Double
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -309,6 +309,12 @@ class LogbookEntry(Base):
     headsail = Column(String(100), nullable=True)
     sail_action = Column(String(200), nullable=True)
     
+    # Sail Change structured state
+    main_reef_level = Column(Integer, nullable=True)
+    headsail_type = Column(String(10), nullable=True)
+    headsail_furl_percent = Column(Integer, nullable=True)
+    extra_sail = Column(String(10), nullable=True)
+
     # Events (Phase A enhancement)
     event_category = Column(String(100), nullable=True)
     event_details = Column(Text, nullable=True)
@@ -397,6 +403,7 @@ class Account(Base):
 
     subscriptions = relationship("Subscription", back_populates="account", cascade="all, delete-orphan")
     saas_users = relationship("SaaSUser", back_populates="account", cascade="all, delete-orphan")
+    boat_profile = relationship("BoatProfile", back_populates="account", uselist=False, cascade="all, delete-orphan")
 
 
 class Subscription(Base):
@@ -474,3 +481,66 @@ class InviteToken(Base):
         Index("ix_invite_tokens_token", "token"),
         Index("ix_invite_tokens_email", "email"),
     )
+
+
+class BoatProfile(Base):
+    __tablename__ = "boat_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), unique=True, nullable=False, index=True)
+    boat_name = Column(String(100), nullable=False, default="My Boat")
+    boat_name_is_default = Column(Boolean, nullable=False, default=True)
+    home_port_name = Column(String(100), nullable=True)
+    home_port_lat = Column(Float, nullable=True)
+    home_port_lon = Column(Float, nullable=True)
+    boat_make = Column(String(100), nullable=True)
+    boat_model = Column(String(100), nullable=True)
+    boat_year = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    account = relationship("Account", back_populates="boat_profile")
+    sail_profile = relationship("SailProfile", back_populates="boat_profile", uselist=False, cascade="all, delete-orphan")
+
+
+class SailProfile(Base):
+    __tablename__ = "sail_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    boat_profile_id = Column(Integer, ForeignKey("boat_profiles.id"), unique=True, nullable=False, index=True)
+    main_type = Column(String(20), nullable=False, default="FURLING")
+    main_reef_levels = Column(Integer, nullable=False, default=2)
+    headsail_genoa = Column(Boolean, nullable=False, default=True)
+    headsail_jib = Column(Boolean, nullable=False, default=False)
+    headsail_furling = Column(Boolean, nullable=False, default=True)
+    has_code0 = Column(Boolean, nullable=False, default=False)
+    has_gennaker = Column(Boolean, nullable=False, default=False)
+    has_spinnaker = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    boat_profile = relationship("BoatProfile", back_populates="sail_profile")
+
+    @property
+    def reef_count(self):
+        return self.main_reef_levels or 2
+
+    @property
+    def headsail_names(self):
+        names = []
+        if self.headsail_genoa:
+            names.append("Genoa")
+        if self.headsail_jib:
+            names.append("Jib")
+        return names if names else None
+
+    @property
+    def extra_sail_names(self):
+        names = []
+        if self.has_code0:
+            names.append("Code 0")
+        if self.has_gennaker:
+            names.append("Gennaker")
+        if self.has_spinnaker:
+            names.append("Spinnaker")
+        return names if names else None

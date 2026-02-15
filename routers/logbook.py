@@ -7,6 +7,7 @@ from db import get_db
 from models import LogbookEntry, LogbookPhoto, CrewOnWatch, CrewMember, SeaStateEnum
 from services.trip import TripService
 from services.audit import AuditService
+from services.boat import get_or_create_boat_profile, get_boat_profile_for_account
 from datetime import datetime, date
 from typing import List, Optional
 from pathlib import Path
@@ -152,13 +153,21 @@ async def new_entry_form(request: Request, db: Session = Depends(get_db)):
     
     crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.name).all()
     sea_states = [s.value for s in SeaStateEnum]
+
+    sail_profile = None
+    account_id = request.session.get("account_id")
+    if account_id:
+        bp = get_boat_profile_for_account(db, account_id)
+        if bp:
+            sail_profile = bp.sail_profile
     
     return templates.TemplateResponse("logbook_form.html", {
         "request": request,
         "crew_members": crew_members,
         "sea_states": sea_states,
         "active_trip": active_trip,
-        "entry": None
+        "entry": None,
+        "sail_profile": sail_profile,
     })
 
 @router.post("/new")
@@ -201,6 +210,11 @@ async def create_entry(
     main_furl_pct: Optional[int] = Depends(optional_int),
     headsail: Optional[str] = Form(None),
     sail_action: Optional[str] = Form(None),
+    # Sail Change structured fields
+    main_reef_level: Optional[int] = Depends(optional_int),
+    headsail_type: Optional[str] = Form(None),
+    headsail_furl_percent: Optional[int] = Depends(optional_int),
+    extra_sail: Optional[str] = Form(None),
     # Phase A: Events fields
     event_category: Optional[str] = Form(None),
     event_details: Optional[str] = Form(None),
@@ -278,6 +292,11 @@ async def create_entry(
             main_furl_pct=main_furl_pct,
             headsail=headsail,
             sail_action=sail_action,
+            # Sail Change structured fields
+            main_reef_level=main_reef_level,
+            headsail_type=headsail_type if headsail_type else None,
+            headsail_furl_percent=headsail_furl_percent,
+            extra_sail=extra_sail if extra_sail else None,
             # Phase A: Events
             event_category=event_category,
             event_details=event_details,
@@ -356,12 +375,20 @@ async def edit_entry_form(request: Request, entry_id: int, db: Session = Depends
     crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.name).all()
     sea_states = [s.value for s in SeaStateEnum]
     
+    sail_profile = None
+    account_id = request.session.get("account_id")
+    if account_id:
+        bp = get_boat_profile_for_account(db, account_id)
+        if bp:
+            sail_profile = bp.sail_profile
+
     return templates.TemplateResponse("logbook_form.html", {
         "request": request,
         "crew_members": crew_members,
         "sea_states": sea_states,
         "active_trip": active_trip,
-        "entry": entry
+        "entry": entry,
+        "sail_profile": sail_profile,
     })
 
 @router.post("/{entry_id}/edit")
@@ -403,6 +430,11 @@ async def update_entry(
     main_furl_pct: Optional[int] = Depends(optional_int),
     headsail: Optional[str] = Form(None),
     sail_action: Optional[str] = Form(None),
+    # Sail Change structured fields
+    main_reef_level: Optional[int] = Depends(optional_int),
+    headsail_type: Optional[str] = Form(None),
+    headsail_furl_percent: Optional[int] = Depends(optional_int),
+    extra_sail: Optional[str] = Form(None),
     # Phase A: Events fields
     event_category: Optional[str] = Form(None),
     event_details: Optional[str] = Form(None),
@@ -472,6 +504,11 @@ async def update_entry(
         entry.main_furl_pct = main_furl_pct
         entry.headsail = headsail
         entry.sail_action = sail_action
+        # Sail Change structured fields
+        entry.main_reef_level = main_reef_level
+        entry.headsail_type = headsail_type if headsail_type else None
+        entry.headsail_furl_percent = headsail_furl_percent
+        entry.extra_sail = extra_sail if extra_sail else None
         # Phase A: Events
         entry.event_category = event_category
         entry.event_details = event_details
@@ -623,6 +660,10 @@ async def create_addendum(
             main_furl_pct=parent_entry.main_furl_pct,
             headsail=parent_entry.headsail,
             sail_action=parent_entry.sail_action,
+            main_reef_level=parent_entry.main_reef_level,
+            headsail_type=parent_entry.headsail_type,
+            headsail_furl_percent=parent_entry.headsail_furl_percent,
+            extra_sail=parent_entry.extra_sail,
             event_category=parent_entry.event_category,
             event_details=parent_entry.event_details
         )
