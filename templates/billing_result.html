@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ title }} - WAGMI CrewLog{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-center space-y-6 py-12">
+    <div class="text-6xl">{{ icon }}</div>
+    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">{{ title }}</h1>
+    <p class="text-lg" style="color: var(--navy-deep);">{{ message }}</p>
+    <p class="text-sm" style="color: var(--navy-deep); opacity:0.6;">{{ sub_message }}</p>
+    <a href="{{ link_url }}" class="inline-block text-white px-6 py-3 rounded-lg font-bold transition hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+        {{ link_text }}
+    </a>
+</div>
+{% endblock %}

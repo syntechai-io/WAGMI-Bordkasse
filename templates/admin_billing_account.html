@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+
+{% block title %}Account {{ account.id }} - Admin Billing{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">🔧 Account #{{ account.id }}</h1>
+        <a href="/admin/billing" class="text-sm font-semibold hover:underline" style="color: var(--ocean-blue);">← Zurück</a>
+    </div>
+
+    <div class="bg-white porthole-card p-6 space-y-4">
+        <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">Account Details</h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Name</p>
+                <p class="font-semibold" style="color: var(--navy-deep);">{{ account.name }}</p>
+            </div>
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Erstellt</p>
+                <p>{{ account.created_at.strftime("%d.%m.%Y %H:%M") if account.created_at else "—" }}</p>
+            </div>
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Owner</p>
+                <p>{{ owner.email if owner else "—" }}</p>
+            </div>
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Törns</p>
+                <p class="font-semibold">{{ trip_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white porthole-card p-6 space-y-4">
+        <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">Subscription</h2>
+        {% if sub %}
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Plan</p>
+                <p>
+                    {% if sub.plan.value == "SKIPPER_PLUS" %}
+                    <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold text-white" style="background: var(--sea-foam);">Skipper Plus</span>
+                    {% else %}
+                    <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold bg-gray-200 text-gray-600">Free</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Status</p>
+                <p>
+                    {% if sub.status.value == "ACTIVE" %}
+                    <span class="text-green-600 font-semibold">Active</span>
+                    {% elif sub.status.value == "PAST_DUE" %}
+                    <span class="text-red-600 font-semibold">Past Due</span>
+                    {% else %}
+                    <span class="text-gray-500">{{ sub.status.value }}</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Verlängerung</p>
+                <p>{{ sub.current_period_end.strftime("%d.%m.%Y") if sub.current_period_end else "—" }}</p>
+            </div>
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Aktualisiert</p>
+                <p>{{ sub.updated_at.strftime("%d.%m.%Y %H:%M") if sub.updated_at else "—" }}</p>
+            </div>
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Stripe Customer ID</p>
+                <p class="font-mono text-xs text-gray-500">{{ sub.stripe_customer_id or "—" }}</p>
+            </div>
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Stripe Subscription ID</p>
+                <p class="font-mono text-xs text-gray-500">{{ sub.stripe_subscription_id or "—" }}</p>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-gray-500">Kein Abonnement vorhanden.</p>
+        {% endif %}
+    </div>
+
+    <div class="bg-white porthole-card p-6 space-y-4">
+        <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">Benutzer ({{ members|length }})</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr style="background: rgba(135, 206, 235, 0.1);">
+                        <th class="px-4 py-2 text-left font-medium" style="color: var(--navy-deep);">ID</th>
+                        <th class="px-4 py-2 text-left font-medium" style="color: var(--navy-deep);">E-Mail</th>
+                        <th class="px-4 py-2 text-left font-medium" style="color: var(--navy-deep);">Owner</th>
+                        <th class="px-4 py-2 text-left font-medium" style="color: var(--navy-deep);">Erstellt</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-sky-200">
+                    {% for m in members %}
+                    <tr>
+                        <td class="px-4 py-2">{{ m.id }}</td>
+                        <td class="px-4 py-2">{{ m.email }}</td>
+                        <td class="px-4 py-2">{% if m.is_owner %}✅{% else %}—{% endif %}</td>
+                        <td class="px-4 py-2 text-xs text-gray-500">{{ m.created_at.strftime("%d.%m.%Y") if m.created_at else "—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

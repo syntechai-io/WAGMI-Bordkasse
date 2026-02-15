@@ -31,6 +31,7 @@ Preferred communication style: Simple, everyday language.
 - **Timezone Handling**: All datetime fields are normalized to UTC, with client-side conversion for accurate display.
 - **Solo-Sailing Workflow**: "Solo-Sailing" checkbox streamlines trip creation by automatically assigning the user as skipper and admin, utilizing `UserPreferences` for default information.
 - **Stripe Subscription Billing**: `billing_stripe.py` provides helpers for Stripe customer/subscription management. `routes_billing.py` handles checkout (`POST /billing/checkout`), portal (`POST /billing/portal`), success/cancel pages, and webhook (`POST /stripe/webhook`) with signature verification. Webhook updates `subscriptions` table idempotently for plan gating. Only account owners can manage billing. DB unique constraint enforces one active subscription per account.
+- **Billing UI**: `routes_billing_ui.py` provides in-product billing pages. `GET /billing` shows SaaS users their plan/status/renewal with upgrade (FREE) or manage (SKIPPER_PLUS) buttons. Owner-only `POST /billing/ui/checkout` and `POST /billing/ui/portal` create Stripe sessions with HTMX redirect support. `GET /admin/billing` provides admin-only overview of all accounts with subscription state, filters, and Stripe IDs. `GET /admin/billing/account/{id}` shows account detail with members and trip count.
 
 #### Data Model
 **Core Entities**: CrewMember, Deposit, Expense, ExpenseParticipant, ExpenseTemplate, CrewGroup, CrewGroupMember, Receipt, Trip, AuditLog, LogbookEntry, LogbookPhoto, UserPreferences.

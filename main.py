@@ -29,6 +29,7 @@ from routers.groups import router as groups_router
 from routers.api import router as api_router
 from routes_auth import router as saas_auth_router
 from routes_billing import router as billing_router
+from routes_billing_ui import router as billing_ui_router
 
 app = FastAPI(title="WAGMI CrewLog - Maritime Logbook & Bordkasse")
 
@@ -129,6 +130,7 @@ app.include_router(templates_router)
 app.include_router(groups_router)
 app.include_router(saas_auth_router)
 app.include_router(billing_router)
+app.include_router(billing_ui_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):

@@ -1,0 +1,133 @@
+You are working in the existing CrewLog SaaS FastAPI + SQLAlchemy + Jinja/HTMX codebase on Replit.
+
+Context (already working)
+- Stripe Checkout + Billing Portal endpoints exist:
+  - POST /billing/checkout (form: interval=monthly|yearly) returns {"checkout_url": "..."}
+  - POST /billing/portal returns {"portal_url": "..."}
+  - POST /stripe/webhook verifies signature and updates subscriptions table idempotently
+- Plan gating reads from DB subscriptions row
+- SaaS login exists and sets session["saas_user_id"] + session["account_id"]
+- SQLAlchemy models exist for accounts, subscriptions, new_users, trip_members, trips
+- Owner rule: only new_users.is_owner==true can start checkout/portal
+
+Goal
+Close the Stripe loop “in-product” by adding:
+1) A minimal owner-only Billing page that shows plan/status/renewal and provides Upgrade/Manage buttons.
+2) A minimal Admin Billing overview page that lists accounts and their subscription state for operational visibility.
+
+Hard requirements
+- No frontend rewrite. Use existing Jinja templates + minimal HTMX.
+- Do NOT change existing billing endpoints behavior. Only call them from UI.
+- Do NOT expose Stripe IDs to non-admin users (only owner can see limited info; admin can see Stripe IDs).
+- Keep everything tenant-scoped using session["account_id"].
+- Ensure pages work with SaaS session priority and do not break legacy mode.
+
+Data model (use existing columns)
+subscriptions: account_id, plan (FREE|SKIPPER_PLUS), status (ACTIVE|PAST_DUE|CANCELED), current_period_end, stripe_customer_id, stripe_subscription_id, created_at, updated_at
+accounts: id, name, owner_user_id
+new_users: id, account_id, email, is_owner
+
+Implementation tasks
+
+A) Add Billing router + page
+1) Create a new router file: routes_billing_ui.py and include it in main.py.
+2) Add GET /billing
+   - Requires SaaS session (saas_user_id present).
+   - Load account_id from session.
+   - Load current SaaS user (SaaSUser/new_users).
+   - Fetch subscription row for account_id (create a default row if none exists, consistent with billing_stripe.get_or_create_subscription_row).
+   - Render templates/billing.html with:
+     - account name
+     - is_owner boolean
+     - plan (FREE|SKIPPER_PLUS)
+     - status (ACTIVE|PAST_DUE|CANCELED)
+     - current_period_end formatted (YYYY-MM-DD or “—”)
+     - For owners only: show upgrade/manage buttons
+     - For non-owners: show read-only subscription state + instruction “Ask account owner to manage billing”
+   - UX notes:
+     - If status=PAST_DUE show warning banner: “Payment issue — please update payment method.”
+     - If plan=FREE show “Upgrade to Skipper Plus” section with Monthly/Yearly buttons.
+     - If plan=SKIPPER_PLUS show “Manage billing” button.
+     - Do not show stripe_customer_id or stripe_subscription_id to non-admin users.
+
+3) Add POST /billing/ui/checkout
+   - This is a thin UI wrapper that calls existing billing checkout logic (or simply duplicates the create session call):
+     - Accepts interval=monthly|yearly
+     - Requires SaaS owner (is_owner)
+     - Calls existing /billing/checkout code path (ideally import and call helper function rather than HTTP call)
+     - Responds with HTMX redirect or normal redirect to checkout_url:
+       - If request is HTMX: return 204 with HX-Redirect header to checkout_url
+       - Else: return RedirectResponse(checkout_url, 303)
+
+4) Add POST /billing/ui/portal
+   - Owner-only
+   - Calls existing billing portal function, returns redirect to portal_url (same HTMX redirect handling).
+
+B) Add Admin Billing overview
+1) Add GET /admin/billing
+   - Requires Global Admin (legacy admin user OR a dedicated admin guard you already have).
+   - Display a simple table with:
+     - account_id
+     - account_name
+     - owner_email (from new_users where account_id and is_owner=true)
+     - plan
+     - status
+     - current_period_end
+     - stripe_customer_id (admin-only)
+     - stripe_subscription_id (admin-only)
+     - updated_at
+   - Provide basic filters (optional, but light):
+     - ?status=PAST_DUE
+     - ?plan=FREE
+     - ?q=account name search (ILIKE)
+   - Also show a count summary at top:
+     - total accounts
+     - active subscriptions
+     - past_due subscriptions
+     - free accounts
+2) Add “View” link per account to a simple detail page:
+   - GET /admin/billing/account/{account_id}
+   - Shows same fields + list of trips count for that account (to sanity-check tenant scoping).
+
+C) Templates
+1) Create templates/billing.html
+   - Minimal Tailwind, consistent with existing layout.
+   - Include buttons:
+     - Upgrade Monthly -> POST /billing/ui/checkout interval=monthly
+     - Upgrade Yearly -> POST /billing/ui/checkout interval=yearly
+     - Manage Billing -> POST /billing/ui/portal
+   - Use HTMX if already present:
+     - hx-post on buttons
+     - hx-swap="none"
+     - On response, use HX-Redirect to navigate to Stripe.
+
+2) Create templates/admin_billing.html and templates/admin_billing_account.html
+   - Simple table layout + filter form.
+
+D) Navigation
+- Add a link “Billing” to the main navigation (visible when SaaS session exists).
+- Add link “Admin Billing” under admin section (admin only).
+
+E) Testing checklist (must perform and report results)
+1) As SaaS owner:
+   - Open /billing and confirm plan/status visible.
+   - Click Upgrade Monthly -> redirect to Stripe checkout.
+   - Complete checkout -> webhook updates -> refresh /billing -> shows SKIPPER_PLUS ACTIVE and renewal date.
+   - Click Manage Billing -> opens Stripe portal.
+2) As non-owner user:
+   - Open /billing -> read-only view, no buttons.
+3) As Global Admin:
+   - Open /admin/billing -> table renders, shows correct status/plan for accounts.
+   - Filter by status=PAST_DUE works.
+4) Confirm tenant isolation:
+   - /billing always reads subscription for session account_id only.
+
+Deliverables
+- routes_billing_ui.py + main.py wiring
+- templates/billing.html
+- templates/admin_billing.html
+- templates/admin_billing_account.html
+- minimal navigation updates
+- short note in PR/summary: how to test (URLs and expected behavior)
+
+Keep this lean, no new frameworks, no heavy refactors.

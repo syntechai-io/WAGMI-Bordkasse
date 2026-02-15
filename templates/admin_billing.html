@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+
+{% block title %}Admin Billing - WAGMI CrewLog{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">🔧 Admin Billing</h1>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white porthole-card p-4 text-center">
+            <p class="text-2xl font-bold" style="color: var(--navy-deep);">{{ total_accounts }}</p>
+            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Accounts</p>
+        </div>
+        <div class="bg-white porthole-card p-4 text-center">
+            <p class="text-2xl font-bold text-green-600">{{ active_subs }}</p>
+            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Aktiv</p>
+        </div>
+        <div class="bg-white porthole-card p-4 text-center">
+            <p class="text-2xl font-bold text-red-600">{{ past_due_subs }}</p>
+            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Past Due</p>
+        </div>
+        <div class="bg-white porthole-card p-4 text-center">
+            <p class="text-2xl font-bold text-gray-500">{{ free_accounts }}</p>
+            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Free</p>
+        </div>
+    </div>
+
+    <div class="bg-white porthole-card p-6">
+        <form method="get" action="/admin/billing" class="flex flex-col sm:flex-row gap-3 mb-6">
+            <input type="text" name="q" value="{{ q }}" placeholder="Account-Name suchen..." class="flex-1 px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+            <select name="plan" class="px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                <option value="">Alle Pläne</option>
+                <option value="FREE" {% if plan_filter == "FREE" %}selected{% endif %}>Free</option>
+                <option value="SKIPPER_PLUS" {% if plan_filter == "SKIPPER_PLUS" %}selected{% endif %}>Skipper Plus</option>
+            </select>
+            <select name="status" class="px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                <option value="">Alle Status</option>
+                <option value="ACTIVE" {% if status_filter == "ACTIVE" %}selected{% endif %}>Active</option>
+                <option value="PAST_DUE" {% if status_filter == "PAST_DUE" %}selected{% endif %}>Past Due</option>
+                <option value="CANCELED" {% if status_filter == "CANCELED" %}selected{% endif %}>Canceled</option>
+            </select>
+            <button type="submit" class="text-white px-4 py-2 rounded-lg font-semibold" style="background: var(--ocean-blue);">🔍 Filtern</button>
+        </form>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">ID</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Account</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Owner</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Plan</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Status</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Verlängerung</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Stripe Customer</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Stripe Sub</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Aktualisiert</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-sky-200">
+                    {% for row in rows %}
+                    <tr class="hover:bg-sky-50 transition">
+                        <td class="px-4 py-3">{{ row.account_id }}</td>
+                        <td class="px-4 py-3 font-semibold" style="color: var(--navy-deep);">{{ row.account_name }}</td>
+                        <td class="px-4 py-3">{{ row.owner_email or "—" }}</td>
+                        <td class="px-4 py-3">
+                            {% if row.plan and row.plan.value == "SKIPPER_PLUS" %}
+                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold text-white" style="background: var(--sea-foam);">Plus</span>
+                            {% else %}
+                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold bg-gray-200 text-gray-600">Free</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if row.status and row.status.value == "ACTIVE" %}
+                            <span class="text-green-600 font-semibold">Active</span>
+                            {% elif row.status and row.status.value == "PAST_DUE" %}
+                            <span class="text-red-600 font-semibold">Past Due</span>
+                            {% elif row.status %}
+                            <span class="text-gray-500">{{ row.status.value }}</span>
+                            {% else %}
+                            <span class="text-gray-400">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">{{ row.current_period_end.strftime("%d.%m.%Y") if row.current_period_end else "—" }}</td>
+                        <td class="px-4 py-3 text-xs font-mono text-gray-500">{{ row.stripe_customer_id or "—" }}</td>
+                        <td class="px-4 py-3 text-xs font-mono text-gray-500">{{ row.stripe_subscription_id or "—" }}</td>
+                        <td class="px-4 py-3 text-xs text-gray-500">{{ row.updated_at.strftime("%d.%m.%Y %H:%M") if row.updated_at else "—" }}</td>
+                        <td class="px-4 py-3">
+                            <a href="/admin/billing/account/{{ row.account_id }}" class="text-sm font-semibold hover:underline" style="color: var(--ocean-blue);">Details</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not rows %}
+                    <tr>
+                        <td colspan="10" class="px-4 py-8 text-center text-gray-400">Keine Ergebnisse</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -228,6 +228,12 @@
                             <a href="/trips/passwords" class="block px-4 py-2 hover:bg-sky-100 transition">🔐 Passwörter</a>
                             {% endif %}
                             <a href="/export/csv" class="block px-4 py-2 hover:bg-sky-100 transition">📋 Export</a>
+                            {% if request.session.get('saas_user_id') %}
+                            <a href="/billing" class="block px-4 py-2 hover:bg-sky-100 transition">💳 Billing</a>
+                            {% endif %}
+                            {% if request.session.get('role') == 'admin' %}
+                            <a href="/admin/billing" class="block px-4 py-2 hover:bg-sky-100 transition">🔧 Admin Billing</a>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -257,6 +263,12 @@
                 <a href="/balances" class="block py-2 hover:text-sky-200 transition touch-action">📊 Salden</a>
                 <a href="/settlement" class="block py-2 hover:text-sky-200 transition touch-action">⛵ Ausgleich</a>
                 <a href="/export/csv" class="block py-2 hover:text-sky-200 transition touch-action">📋 Export</a>
+                {% if request.session.get('saas_user_id') %}
+                <a href="/billing" class="block py-2 hover:text-sky-200 transition touch-action">💳 Billing</a>
+                {% endif %}
+                {% if request.session.get('role') == 'admin' %}
+                <a href="/admin/billing" class="block py-2 hover:text-sky-200 transition touch-action">🔧 Admin Billing</a>
+                {% endif %}
                 <a href="/help" class="block py-2 hover:text-sky-200 transition touch-action">📖 Anleitung</a>
                 {% if request.session.get('user_id') %}
                 <div class="border-t border-sky-300 pt-4 mt-4">

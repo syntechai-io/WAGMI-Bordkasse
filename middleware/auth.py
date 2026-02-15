@@ -16,6 +16,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/stripe",
         "/billing/success",
         "/billing/cancel",
+        "/billing/ui/success",
+        "/billing/ui/cancel",
     ]
     
     async def dispatch(self, request, call_next):
