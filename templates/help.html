@@ -2,85 +2,85 @@
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">📖 Anleitung für die Crew</h1>
+    <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">📖 {{ t('help.title') }}</h1>
     
     <div class="bg-white porthole-card p-8 prose max-w-none">
         <div style="color: var(--navy-deep);">
             
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">🔐 Login & Benutzerrollen</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">🔐 {{ t('help.login_title') }}</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">So loggst du dich ein:</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.login_how') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
-                    <li><strong>Benutzername:</strong> Dein Crew-Benutzername (vom Admin vergeben)</li>
-                    <li><strong>Passwort:</strong> Crew-Passwort für diesen Törn (beim Admin erfragen)</li>
-                    <li><strong>Törn auswählen:</strong> Wähle den Törn aus, für den du dich anmelden möchtest</li>
-                    <li>Klicke auf <strong>"⛵ Einloggen"</strong></li>
+                    <li>{{ t('help.login_step1') }}</li>
+                    <li>{{ t('help.login_step2') }}</li>
+                    <li>{{ t('help.login_step3') }}</li>
+                    <li>{{ t('help.login_step4') }}</li>
                 </ol>
 
-                <h3 class="text-xl font-semibold mb-3 mt-6" style="color: var(--navy-deep);">🎯 Benutzerrollen im System</h3>
-                <p class="mb-4">Es gibt drei verschiedene Rollen mit unterschiedlichen Rechten:</p>
+                <h3 class="text-xl font-semibold mb-3 mt-6" style="color: var(--navy-deep);">🎯 {{ t('help.roles_title') }}</h3>
+                <p class="mb-4">{{ t('help.roles_intro') }}</p>
 
                 <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 mb-4">
-                    <h4 class="font-bold text-blue-900 mb-2">👑 Global-Admin (z.B. Sven)</h4>
+                    <h4 class="font-bold text-blue-900 mb-2">👑 {{ t('help.role_admin_title') }}</h4>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li><strong>Volle Berechtigung</strong> für alle Törns ohne Einschränkungen</li>
-                        <li>Kann neue Törns erstellen, archivieren und schließen</li>
-                        <li>Kann alle Crew-Mitglieder verwalten</li>
-                        <li>Kann Törn-Admins berechtigen (max. 2 pro Törn)</li>
-                        <li>Kann Passwörter für Törn-Admins und Crew setzen</li>
-                        <li><strong>Login:</strong> Admin-Benutzername + Admin-Passwort (ohne Törn-Auswahl)</li>
+                        <li>{{ t('help.role_admin_1') }}</li>
+                        <li>{{ t('help.role_admin_2') }}</li>
+                        <li>{{ t('help.role_admin_3') }}</li>
+                        <li>{{ t('help.role_admin_4') }}</li>
+                        <li>{{ t('help.role_admin_5') }}</li>
+                        <li>{{ t('help.role_admin_login') }}</li>
                     </ul>
                 </div>
 
                 <div class="bg-amber-50 p-4 rounded-lg border-2 border-amber-200 mb-4">
-                    <h4 class="font-bold text-amber-900 mb-2">⚓ Törn-Admin (max. 2 pro Törn)</h4>
+                    <h4 class="font-bold text-amber-900 mb-2">⚓ {{ t('help.role_trip_admin_title') }}</h4>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li><strong>Erweiterte Rechte</strong> für einen bestimmten Törn</li>
-                        <li>Kann den zugewiesenen Törn auch nach Abschluss bearbeiten</li>
-                        <li>Perfekt für Crew-Mitglieder, die bei der Verwaltung helfen (z.B. Robert, Mario)</li>
-                        <li>Wird vom Global-Admin in der Crew-Verwaltung berechtigt (Checkbox "⚓ Törn-Admin berechtigen")</li>
-                        <li><strong>Login:</strong> Crew-Benutzername + Törn-Admin-Passwort + Törn auswählen</li>
+                        <li>{{ t('help.role_trip_admin_1') }}</li>
+                        <li>{{ t('help.role_trip_admin_2') }}</li>
+                        <li>{{ t('help.role_trip_admin_3') }}</li>
+                        <li>{{ t('help.role_trip_admin_4') }}</li>
+                        <li>{{ t('help.role_trip_admin_login') }}</li>
                     </ul>
                 </div>
 
                 <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200 mb-4">
-                    <h4 class="font-bold text-green-900 mb-2">👥 Crew (reguläre Mitglieder)</h4>
+                    <h4 class="font-bold text-green-900 mb-2">👥 {{ t('help.role_crew_title') }}</h4>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li><strong>Standard-Berechtigung</strong> für einen bestimmten Törn</li>
-                        <li>Kann Ausgaben erfassen, Einzahlungen verwalten, Logbuch führen</li>
-                        <li>Kann Salden und Ausgleichszahlungen einsehen</li>
-                        <li><strong>Einschränkung:</strong> Kann geschlossene Törns nicht mehr bearbeiten</li>
-                        <li><strong>Login:</strong> Crew-Benutzername + Crew-Passwort + Törn auswählen</li>
+                        <li>{{ t('help.role_crew_1') }}</li>
+                        <li>{{ t('help.role_crew_2') }}</li>
+                        <li>{{ t('help.role_crew_3') }}</li>
+                        <li>{{ t('help.role_crew_4') }}</li>
+                        <li>{{ t('help.role_crew_login') }}</li>
                     </ul>
                 </div>
 
                 <div class="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
-                    <h4 class="font-bold text-yellow-900 mb-2">💡 Wichtige Hinweise:</h4>
+                    <h4 class="font-bold text-yellow-900 mb-2">💡 {{ t('help.important_notes') }}</h4>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li>Passwörter sind <strong>törn-spezifisch</strong> und können pro Törn unterschiedlich sein</li>
-                        <li>Der Global-Admin setzt die Passwörter unter <strong>"🔐 Passwörter"</strong> (im Menü "Verwaltung")</li>
-                        <li>Maximal <strong>2 Törn-Admins</strong> pro Törn erlaubt</li>
-                        <li>Törn-Admins behalten ihre Rechte auch nach Törn-Abschluss</li>
-                        <li>Crew-Mitglieder können auf geschlossene Törns nur lesend zugreifen</li>
+                        <li>{{ t('help.note_trip_specific') }}</li>
+                        <li>{{ t('help.note_admin_sets') }}</li>
+                        <li>{{ t('help.note_max_admins') }}</li>
+                        <li>{{ t('help.note_admin_rights') }}</li>
+                        <li>{{ t('help.note_crew_readonly') }}</li>
                     </ul>
                 </div>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💰 Einzahlungen ins gemeinsame Wallet</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💰 {{ t('help.deposits_title') }}</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">So zahlst du ein:</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.deposits_how') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
-                    <li><strong>Zahle deinen Betrag ein</strong> (per Überweisung, Bargeld, etc.)</li>
-                    <li><strong>Erfasse die Einzahlung in der App:</strong>
+                    <li>{{ t('help.deposits_step1') }}</li>
+                    <li>{{ t('help.deposits_step2') }}
                         <ul class="list-disc ml-6 mt-2">
-                            <li>Gehe zu <strong>"💰 Einzahlungen"</strong></li>
-                            <li>Wähle dein Crew-Mitglied aus</li>
-                            <li>Gib den Betrag ein</li>
-                            <li>Datum auswählen</li>
-                            <li>Optional: Notiz hinzufügen</li>
-                            <li><strong>"✅ Einzahlung hinzufügen"</strong> klicken</li>
+                            <li>{{ t('help.deposits_step2a') }}</li>
+                            <li>{{ t('help.deposits_step2b') }}</li>
+                            <li>{{ t('help.deposits_step2c') }}</li>
+                            <li>{{ t('help.deposits_step2d') }}</li>
+                            <li>{{ t('help.deposits_step2e') }}</li>
+                            <li>{{ t('help.deposits_step2f') }}</li>
                         </ul>
                     </li>
                 </ol>
@@ -88,274 +88,274 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⚓ Ausgaben erfassen</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⚓ {{ t('help.expenses_title') }}</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Wenn du vom Wallet bezahlt hast:</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.expenses_wallet') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
-                    <li>Gehe zu <strong>"⚓ Ausgaben"</strong></li>
-                    <li>Klicke <strong>"Neue Ausgabe"</strong></li>
-                    <li>Fülle das Formular aus:
+                    <li>{{ t('help.expenses_step1') }}</li>
+                    <li>{{ t('help.expenses_step2') }}</li>
+                    <li>{{ t('help.expenses_step3') }}
                         <ul class="list-disc ml-6 mt-2">
-                            <li><strong>Kategorie:</strong> z.B. Verpflegung, Hafengebühren, Diesel</li>
-                            <li><strong>Beschreibung:</strong> Was wurde gekauft?</li>
-                            <li><strong>Betrag:</strong> Wie viel Euro?</li>
-                            <li><strong>Bezahlt von:</strong> Dein Name</li>
-                            <li><strong>Bezahlt aus:</strong> <strong>"wallet"</strong> (vom gemeinsamen Geld)</li>
-                            <li><strong>Aufteilung:</strong> "equal" (alle zahlen gleich viel)</li>
-                            <li><strong>Optional:</strong> Beleg hochladen 📸</li>
+                            <li>{{ t('help.expenses_cat') }}</li>
+                            <li>{{ t('help.expenses_desc') }}</li>
+                            <li>{{ t('help.expenses_amount') }}</li>
+                            <li>{{ t('help.expenses_paid_by') }}</li>
+                            <li>{{ t('help.expenses_paid_from') }}</li>
+                            <li>{{ t('help.expenses_split') }}</li>
+                            <li>{{ t('help.expenses_receipt') }}</li>
                         </ul>
                     </li>
-                    <li><strong>"💸 Ausgabe erfassen"</strong> klicken</li>
+                    <li>{{ t('help.expenses_step4') }}</li>
                 </ol>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Wenn du privat bezahlt hast (Geld zurückhaben):</h3>
-                <p class="mb-2">Gleicher Prozess wie oben, aber bei <strong>"Bezahlt aus"</strong> wählst du <strong>"private"</strong></p>
-                <p class="text-sm opacity-75">Die App berechnet dann automatisch, wer dir wie viel zurückzahlen muss!</p>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.expenses_private') }}</h3>
+                <p class="mb-2">{{ t('help.expenses_private_desc') }}</p>
+                <p class="text-sm opacity-75">{{ t('help.expenses_private_auto') }}</p>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📸 Belege hochladen</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📸 {{ t('help.receipts_title') }}</h2>
             <div class="mb-6">
-                <p class="mb-4">Du kannst direkt beim Erfassen einer Ausgabe einen Beleg hochladen:</p>
+                <p class="mb-4">{{ t('help.receipts_intro') }}</p>
                 <ul class="list-disc ml-6 mb-4">
-                    <li><strong>Am Handy:</strong> Kamera öffnet sich automatisch</li>
-                    <li><strong>Am Computer:</strong> Datei auswählen (PDF, JPG, PNG bis 10MB)</li>
+                    <li>{{ t('help.receipts_phone') }}</li>
+                    <li>{{ t('help.receipts_desktop') }}</li>
                 </ul>
-                <p class="text-sm opacity-75">Oder später auf der Ausgaben-Detail-Seite nachträglich hinzufügen.</p>
+                <p class="text-sm opacity-75">{{ t('help.receipts_later') }}</p>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">👋 Crew-Mitglieder deaktivieren</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">👋 {{ t('help.crew_deactivate_title') }}</h2>
             <div class="mb-6">
-                <p class="mb-4">Wenn jemand während des Törns früher abreist, kann der Admin dieses Crew-Mitglied deaktivieren:</p>
+                <p class="mb-4">{{ t('help.crew_deactivate_intro') }}</p>
                 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Wie funktioniert das?</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.crew_deactivate_how') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
-                    <li><strong>Nur Admin/Törn-Admin</strong> kann Crew-Mitglieder deaktivieren</li>
-                    <li>Gehe zu <strong>"👥 Crew"</strong></li>
-                    <li>Bei dem entsprechenden Crew-Mitglied: <strong>"🚪 Deaktivieren"</strong> klicken</li>
-                    <li><strong>Abreise-Zeitpunkt</strong> eingeben (Datum & Uhrzeit)</li>
-                    <li>Bestätigen</li>
+                    <li>{{ t('help.crew_deactivate_step1') }}</li>
+                    <li>{{ t('help.crew_deactivate_step2') }}</li>
+                    <li>{{ t('help.crew_deactivate_step3') }}</li>
+                    <li>{{ t('help.crew_deactivate_step4') }}</li>
+                    <li>{{ t('help.crew_deactivate_step5') }}</li>
                 </ol>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Was passiert automatisch?</h3>
-                <p class="mb-3">Die App behandelt abgereiste Crew-Mitglieder intelligent:</p>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.crew_deactivate_auto') }}</h3>
+                <p class="mb-3">{{ t('help.crew_deactivate_auto_desc') }}</p>
 
                 <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 mb-3">
-                    <h4 class="font-bold text-blue-900 mb-2">Neue Ausgaben (ab jetzt):</h4>
+                    <h4 class="font-bold text-blue-900 mb-2">{{ t('help.crew_new_expenses') }}</h4>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li>Person wird <strong>automatisch ausgeschlossen</strong> von allen zukünftigen Ausgaben</li>
-                        <li><strong>Beispiel:</strong> Tom reist um 10:00 Uhr ab → Diesel-Ausgabe um 10:30 Uhr → Tom zahlt <strong>nicht</strong> mit</li>
+                        <li>{{ t('help.crew_new_expenses_1') }}</li>
+                        <li>{{ t('help.crew_new_expenses_2') }}</li>
                     </ul>
                 </div>
 
                 <div class="bg-amber-50 p-4 rounded-lg border-2 border-amber-200 mb-3">
-                    <h4 class="font-bold text-amber-900 mb-2">Rückdatierte Ausgaben (aus der Vergangenheit):</h4>
+                    <h4 class="font-bold text-amber-900 mb-2">{{ t('help.crew_backdated') }}</h4>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li>Person wird <strong>eingeschlossen</strong>, wenn sie zu dem Zeitpunkt noch an Bord war</li>
-                        <li><strong>Beispiel:</strong> Tom reist heute um 10:00 Uhr ab → Ausgabe von vorgestern eingeben → Tom zahlt <strong>mit</strong></li>
+                        <li>{{ t('help.crew_backdated_1') }}</li>
+                        <li>{{ t('help.crew_backdated_2') }}</li>
                     </ul>
                 </div>
 
                 <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200 mb-3">
-                    <h4 class="font-bold text-green-900 mb-2">In den Salden:</h4>
+                    <h4 class="font-bold text-green-900 mb-2">{{ t('help.crew_balances_title') }}</h4>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li>Abgereiste Crew-Mitglieder bleiben sichtbar mit ihren Salden</li>
-                        <li>Status zeigt "Abgereist" mit Datum/Uhrzeit</li>
-                        <li>Beim Ausgleich werden sie normal eingerechnet (bezahlen ihren Anteil wie alle anderen)</li>
+                        <li>{{ t('help.crew_balances_1') }}</li>
+                        <li>{{ t('help.crew_balances_2') }}</li>
+                        <li>{{ t('help.crew_balances_3') }}</li>
                     </ul>
                 </div>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Person wieder aktivieren</h3>
-                <p class="mb-2">Falls versehentlich deaktiviert:</p>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.crew_reactivate') }}</h3>
+                <p class="mb-2">{{ t('help.crew_reactivate_intro') }}</p>
                 <ul class="list-disc ml-6">
-                    <li>Bei dem Crew-Mitglied: <strong>"🔄 Reaktivieren"</strong> klicken</li>
-                    <li>Person ist dann wieder aktiv für neue Ausgaben</li>
+                    <li>{{ t('help.crew_reactivate_1') }}</li>
+                    <li>{{ t('help.crew_reactivate_2') }}</li>
                 </ul>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📊 Übersicht & Salden</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📊 {{ t('help.overview_title') }}</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Dashboard (Startseite)</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.overview_dashboard') }}</h3>
                 <ul class="list-disc ml-6 mb-4">
-                    <li>Zeigt aktuellen <strong>Wallet-Saldo</strong></li>
-                    <li><strong>Gesamte Einzahlungen</strong> und <strong>Ausgaben</strong></li>
-                    <li><strong>Top Kategorien</strong> - wo wurde am meisten ausgegeben?</li>
+                    <li>{{ t('help.overview_wallet') }}</li>
+                    <li>{{ t('help.overview_totals') }}</li>
+                    <li>{{ t('help.overview_categories') }}</li>
                 </ul>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Salden anzeigen</h3>
-                <p>Gehe zu <strong>"📊 Salden"</strong> um zu sehen:</p>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.overview_balances') }}</h3>
+                <p>{{ t('help.overview_balances_desc') }}</p>
                 <ul class="list-disc ml-6 mb-4">
-                    <li>Wer wie viel eingezahlt hat</li>
-                    <li>Wer wie viel Anteil an Ausgaben hat</li>
-                    <li>Wer im Plus oder Minus ist</li>
+                    <li>{{ t('help.overview_who_paid') }}</li>
+                    <li>{{ t('help.overview_who_share') }}</li>
+                    <li>{{ t('help.overview_who_plus_minus') }}</li>
                 </ul>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⛵ Ausgleich berechnen</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⛵ {{ t('help.settlement_title') }}</h2>
             <div class="mb-6">
-                <p class="mb-2">Am Ende des Törns:</p>
+                <p class="mb-2">{{ t('help.settlement_intro') }}</p>
                 <ol class="list-decimal ml-6 space-y-2">
-                    <li>Gehe zu <strong>"⛵ Ausgleich"</strong></li>
-                    <li>Die App zeigt dir <strong>minimale Überweisungen</strong>, um alle Schulden auszugleichen</li>
-                    <li>Beispiel: "A überweist 50€ an B" statt vieler einzelner Überweisungen</li>
+                    <li>{{ t('help.settlement_step1') }}</li>
+                    <li>{{ t('help.settlement_step2') }}</li>
+                    <li>{{ t('help.settlement_step3') }}</li>
                 </ol>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📓 Logbuch führen</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📓 {{ t('help.logbook_title') }}</h2>
             <div class="mb-6">
-                <p class="mb-4">Das digitale Logbuch dokumentiert euren Törn mit allen wichtigen Details für offizielle maritime Logbücher:</p>
+                <p class="mb-4">{{ t('help.logbook_intro') }}</p>
                 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">⚡ Quick Fill - Der schnellste Weg (empfohlen!):</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">⚡ {{ t('help.logbook_quickfill_title') }}</h3>
                 <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border-2 border-blue-300 mb-4">
-                    <p class="font-semibold mb-2">🎯 Alles mit einem Klick erfassen:</p>
+                    <p class="font-semibold mb-2">🎯 {{ t('help.logbook_quickfill_headline') }}</p>
                     <ol class="list-decimal ml-6 space-y-2">
-                        <li>Gehe zu <strong>"📓 Logbuch"</strong> → <strong>"Neuer Eintrag"</strong></li>
-                        <li>Klicke auf den großen <strong>"⚡ Quick Fill"</strong> Button oben im Formular</li>
-                        <li>Automatisch ausgefüllt werden:
+                        <li>{{ t('help.logbook_quickfill_step1') }}</li>
+                        <li>{{ t('help.logbook_quickfill_step2') }}</li>
+                        <li>{{ t('help.logbook_quickfill_auto') }}
                             <ul class="list-disc ml-6 mt-2">
-                                <li><strong>📅 Datum & Uhrzeit:</strong> Aktuelle Zeit</li>
-                                <li><strong>📍 GPS-Position:</strong> Latitude, Longitude, SOG (Speed over Ground), COG (Course over Ground)</li>
-                                <li><strong>🌤️ Wetter-Daten:</strong> Temperatur, Windrichtung, Windstärke, Luftdruck (via Open-Meteo API)</li>
+                                <li>📅 {{ t('help.logbook_quickfill_time') }}</li>
+                                <li>📍 {{ t('help.logbook_quickfill_gps') }}</li>
+                                <li>🌤️ {{ t('help.logbook_quickfill_weather') }}</li>
                             </ul>
                         </li>
-                        <li>Ergänze nur noch fehlende Details (z.B. Motorstunden, Segel, Bemerkungen)</li>
-                        <li><strong>"💾 Eintrag speichern"</strong> klicken</li>
+                        <li>{{ t('help.logbook_quickfill_step4') }}</li>
+                        <li>{{ t('help.logbook_quickfill_step5') }}</li>
                     </ol>
-                    <p class="text-sm mt-3 opacity-75"><strong>Hinweis:</strong> GPS funktioniert auch ohne Internet! Wetter-Daten benötigen jedoch eine aktive Verbindung.</p>
+                    <p class="text-sm mt-3 opacity-75">{{ t('help.logbook_quickfill_note') }}</p>
                 </div>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🎯 Manöver-Typen für schnelle Einträge:</h3>
-                <p class="mb-3">Wähle einen Manöver-Typ aus, um deinen Eintrag zu kategorisieren:</p>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🎯 {{ t('help.logbook_maneuver_title') }}</h3>
+                <p class="mb-3">{{ t('help.logbook_maneuver_intro') }}</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                     <div class="bg-blue-50 p-3 rounded border border-blue-200">
-                        <p class="font-bold">🚢 Departure (Abfahrt)</p>
-                        <p class="text-sm">Beginn des Törns, Ablegen vom Hafen</p>
+                        <p class="font-bold">🚢 {{ t('help.logbook_departure_title') }}</p>
+                        <p class="text-sm">{{ t('help.logbook_departure_desc') }}</p>
                     </div>
                     <div class="bg-green-50 p-3 rounded border border-green-200">
-                        <p class="font-bold">⛵ Sail Change (Segelwechsel)</p>
-                        <p class="text-sm">Änderung der Segelstellung</p>
+                        <p class="font-bold">⛵ {{ t('help.logbook_sail_title') }}</p>
+                        <p class="text-sm">{{ t('help.logbook_sail_desc') }}</p>
                     </div>
                     <div class="bg-amber-50 p-3 rounded border border-amber-200">
-                        <p class="font-bold">🔧 Motor (Motorstatus)</p>
-                        <p class="text-sm">Motor an/aus, Motorstunden erfassen</p>
+                        <p class="font-bold">🔧 {{ t('help.logbook_motor_title') }}</p>
+                        <p class="text-sm">{{ t('help.logbook_motor_desc') }}</p>
                     </div>
                     <div class="bg-cyan-50 p-3 rounded border border-cyan-200">
-                        <p class="font-bold">⚓ Anchor (Ankern)</p>
-                        <p class="text-sm">Anker setzen oder lichten</p>
+                        <p class="font-bold">⚓ {{ t('help.logbook_anchor_title') }}</p>
+                        <p class="text-sm">{{ t('help.logbook_anchor_desc') }}</p>
                     </div>
                     <div class="bg-sky-50 p-3 rounded border border-sky-200">
-                        <p class="font-bold">🌤️ Weather (Wetter-Update)</p>
-                        <p class="text-sm">Wetteränderungen dokumentieren</p>
+                        <p class="font-bold">🌤️ {{ t('help.logbook_weather_title') }}</p>
+                        <p class="text-sm">{{ t('help.logbook_weather_desc') }}</p>
                     </div>
                     <div class="bg-purple-50 p-3 rounded border border-purple-200">
-                        <p class="font-bold">🏁 Arrival (Ankunft)</p>
-                        <p class="text-sm">Festmachen im Zielhafen</p>
+                        <p class="font-bold">🏁 {{ t('help.logbook_arrival_title') }}</p>
+                        <p class="text-sm">{{ t('help.logbook_arrival_desc') }}</p>
                     </div>
                     <div class="bg-gray-50 p-3 rounded border border-gray-200">
-                        <p class="font-bold">📝 Full Entry (Vollständiger Eintrag)</p>
-                        <p class="text-sm">Detaillierter Eintrag mit allen Feldern</p>
+                        <p class="font-bold">📝 {{ t('help.logbook_full_title') }}</p>
+                        <p class="text-sm">{{ t('help.logbook_full_desc') }}</p>
                     </div>
                 </div>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📋 Erfasste Daten im Logbuch:</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📋 {{ t('help.logbook_data_title') }}</h3>
                 <ul class="list-disc ml-6 space-y-2 mb-4">
-                    <li><strong>📍 Navigation:</strong> GPS-Position (Breite/Länge), SOG, COG, Kurs, Fahrt, Log, Abfahrts-/Zielhafen</li>
-                    <li><strong>🌤️ Wetter:</strong> Temperatur, Windrichtung, Windstärke (Beaufort), Seegang, Sichtweite, Luftdruck</li>
-                    <li><strong>⛵ Segel:</strong> Segelstellung (z.B. "Groß + Fock", "Genua + Besan")</li>
-                    <li><strong>🔧 Motor:</strong> Motorstunden mit Auto-Berechnung (Start/Stop-Zeit → Laufzeit wird automatisch ermittelt)</li>
-                    <li><strong>👥 Wache:</strong> Crew-Mitglieder auf Wache</li>
-                    <li><strong>📝 Ereignisse:</strong> Besondere Vorkommnisse, Beobachtungen, Bemerkungen</li>
-                    <li><strong>📸 Fotos:</strong> Bis zu 10 Fotos pro Eintrag (nachträglich hinzufügen)</li>
+                    <li>📍 {{ t('help.logbook_data_nav') }}</li>
+                    <li>🌤️ {{ t('help.logbook_data_weather') }}</li>
+                    <li>⛵ {{ t('help.logbook_data_sails') }}</li>
+                    <li>🔧 {{ t('help.logbook_data_engine') }}</li>
+                    <li>👥 {{ t('help.logbook_data_watch') }}</li>
+                    <li>📝 {{ t('help.logbook_data_events') }}</li>
+                    <li>📸 {{ t('help.logbook_data_photos') }}</li>
                 </ul>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📖 Tagesansicht & Navigation:</h3>
-                <p class="mb-3">Das Logbuch bietet eine professionelle Timeline-Ansicht:</p>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📖 {{ t('help.logbook_daily_title') }}</h3>
+                <p class="mb-3">{{ t('help.logbook_daily_intro') }}</p>
                 <ul class="list-disc ml-6 space-y-2 mb-4">
-                    <li><strong>Nach Datum gruppiert:</strong> Einträge werden automatisch nach Tagen sortiert</li>
-                    <li><strong>Tagesansicht:</strong> Klicke auf ein Datum, um alle Einträge des Tages chronologisch zu sehen</li>
-                    <li><strong>Statistiken:</strong> Anzahl Einträge, Gesamtstrecke, Motorstunden (Delta: Max - Min), Route (Abfahrt → Ankunft)</li>
-                    <li><strong>Navigation:</strong> Vor/Zurück-Buttons oder Datum-Picker für schnelles Springen</li>
-                    <li><strong>PDF-Export:</strong> Kompletter Tagestag als maritimes Logbuch-PDF exportierbar</li>
+                    <li>{{ t('help.logbook_daily_grouped') }}</li>
+                    <li>{{ t('help.logbook_daily_view') }}</li>
+                    <li>{{ t('help.logbook_daily_stats') }}</li>
+                    <li>{{ t('help.logbook_daily_nav') }}</li>
+                    <li>{{ t('help.logbook_daily_pdf') }}</li>
                 </ul>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🔧 Motor-Stunden Auto-Berechnung:</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🔧 {{ t('help.logbook_engine_title') }}</h3>
                 <div class="bg-amber-50 p-4 rounded-lg border-2 border-amber-200 mb-4">
-                    <p class="mb-2"><strong>Intelligente Berechnung der Motorlaufzeit:</strong></p>
+                    <p class="mb-2">{{ t('help.logbook_engine_intro') }}</p>
                     <ol class="list-decimal ml-6 space-y-1 text-sm">
-                        <li>Erfasse <strong>"Motor an"</strong> mit Startzeitpunkt (z.B. 10:00 Uhr)</li>
-                        <li>Erfasse <strong>"Motor aus"</strong> mit Endzeitpunkt (z.B. 12:30 Uhr)</li>
-                        <li>Die App berechnet automatisch: <strong>2,5 Stunden Laufzeit</strong></li>
-                        <li>Motorstunden werden im Logbuch angezeigt und in PDFs dokumentiert</li>
+                        <li>{{ t('help.logbook_engine_step1') }}</li>
+                        <li>{{ t('help.logbook_engine_step2') }}</li>
+                        <li>{{ t('help.logbook_engine_step3') }}</li>
+                        <li>{{ t('help.logbook_engine_step4') }}</li>
                     </ol>
                 </div>
 
                 <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 mt-4">
-                    <p class="font-semibold mb-2">💡 Pro-Tipps für effizientes Loggen:</p>
+                    <p class="font-semibold mb-2">💡 {{ t('help.logbook_tips_title') }}</p>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li><strong>Quick Fill nutzen:</strong> Spart 90% der Eingabezeit - ein Klick erfasst Position + Wetter</li>
-                        <li><strong>Manöver-Typen verwenden:</strong> Kategorisiert Einträge für bessere Übersicht</li>
-                        <li><strong>Regelmäßig loggen:</strong> Alle 2-4 Stunden einen Eintrag für lückenloses Logbuch</li>
-                        <li><strong>Tagesansicht prüfen:</strong> Am Ende des Tages die Timeline kontrollieren</li>
+                        <li>{{ t('help.logbook_tip1') }}</li>
+                        <li>{{ t('help.logbook_tip2') }}</li>
+                        <li>{{ t('help.logbook_tip3') }}</li>
+                        <li>{{ t('help.logbook_tip4') }}</li>
                     </ul>
                 </div>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⛵ Törns verwalten</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⛵ {{ t('help.trips_title') }}</h2>
             <div class="mb-6">
-                <p class="mb-4">Die App organisiert alles nach Törns und bietet intelligente Schnellstart-Optionen:</p>
+                <p class="mb-4">{{ t('help.trips_intro') }}</p>
                 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">⚡ Quick Start WAGMI (nur für Sven):</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">⚡ {{ t('help.trips_quickstart_title') }}</h3>
                 <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border-2 border-blue-300 mb-4">
-                    <p class="font-semibold mb-2">🚀 Törn mit einem Klick starten:</p>
+                    <p class="font-semibold mb-2">🚀 {{ t('help.trips_quickstart_headline') }}</p>
                     <ol class="list-decimal ml-6 space-y-2 text-sm">
-                        <li>Klicke auf <strong>"⚡ Quick Start WAGMI"</strong> auf Dashboard oder Törn-Seite</li>
-                        <li>Automatisch erstellt wird:
+                        <li>{{ t('help.trips_quickstart_step1') }}</li>
+                        <li>{{ t('help.trips_quickstart_auto') }}
                             <ul class="list-disc ml-6 mt-2">
-                                <li><strong>Törn-Name:</strong> "WAGMI - [Datum]" (z.B. "WAGMI - 09.11.2025")</li>
-                                <li><strong>Boot & Heimathafen:</strong> WAGMI aus Fredericia, Dänemark</li>
-                                <li><strong>Währung:</strong> DKK (Dänische Kronen)</li>
-                                <li><strong>Crew:</strong> Sven als Skipper und Crew mit Admin-Rechten</li>
-                                <li><strong>Erster Logbuch-Eintrag:</strong> Abfahrt von Fredericia (55°33.2'N, 9°43.8'E) mit Motor an</li>
+                                <li>{{ t('help.trips_quickstart_name') }}</li>
+                                <li>{{ t('help.trips_quickstart_boat') }}</li>
+                                <li>{{ t('help.trips_quickstart_currency') }}</li>
+                                <li>{{ t('help.trips_quickstart_crew') }}</li>
+                                <li>{{ t('help.trips_quickstart_logbook') }}</li>
                             </ul>
                         </li>
-                        <li>Alter aktiver Törn wird automatisch archiviert</li>
-                        <li>Sofort einsatzbereit - GPS, Wetter, Ausgaben direkt erfassbar!</li>
+                        <li>{{ t('help.trips_quickstart_archive') }}</li>
+                        <li>{{ t('help.trips_quickstart_ready') }}</li>
                     </ol>
-                    <p class="text-sm mt-3 opacity-75"><strong>Perfekt für:</strong> Solo-Segeln mit WAGMI von Fredericia aus</p>
+                    <p class="text-sm mt-3 opacity-75">{{ t('help.trips_quickstart_perfect') }}</p>
                 </div>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🧑‍✈️ Solo-Sailing Modus:</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🧑‍✈️ {{ t('help.trips_solo_title') }}</h3>
                 <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200 mb-4">
-                    <p class="mb-2">Bei <strong>"Neuer Törn"</strong> Formular:</p>
+                    <p class="mb-2">{{ t('help.trips_solo_intro') }}</p>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li>Checkbox <strong>"Solo-Sailing"</strong> aktivieren</li>
-                        <li>Du wirst automatisch als Skipper und Crew mit Admin-Rechten hinzugefügt</li>
-                        <li>Spart Crew-Erstellung und Berechtigungen manuell zu setzen</li>
-                        <li>Skipper-Name und Code werden aus deinen Einstellungen geladen</li>
+                        <li>{{ t('help.trips_solo_1') }}</li>
+                        <li>{{ t('help.trips_solo_2') }}</li>
+                        <li>{{ t('help.trips_solo_3') }}</li>
+                        <li>{{ t('help.trips_solo_4') }}</li>
                     </ul>
                 </div>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📋 Normale Törn-Verwaltung:</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📋 {{ t('help.trips_manage_title') }}</h3>
                 <ul class="list-disc ml-6 space-y-2 mb-4">
-                    <li><strong>Aktueller Törn:</strong> Alle Daten (Crew, Einzahlungen, Ausgaben, Logbuch) gehören zum aktiven Törn</li>
-                    <li><strong>Neuen Törn manuell starten:</strong> 
+                    <li>{{ t('help.trips_current') }}</li>
+                    <li>{{ t('help.trips_new') }} 
                         <ul class="list-disc ml-6 mt-2">
-                            <li>Unter <strong>"⛵ Törns"</strong> → <strong>"Neuer Törn"</strong></li>
-                            <li>Törn-Name, Boot, Heimathafen, Koordinaten, Währung eingeben</li>
-                            <li>Optional: Solo-Sailing Checkbox für automatische Crew-Erstellung</li>
-                            <li>Alter Törn wird automatisch archiviert</li>
-                            <li>Du startest mit leerem Wallet und neuer Crew</li>
+                            <li>{{ t('help.trips_new_1') }}</li>
+                            <li>{{ t('help.trips_new_2') }}</li>
+                            <li>{{ t('help.trips_new_3') }}</li>
+                            <li>{{ t('help.trips_new_4') }}</li>
+                            <li>{{ t('help.trips_new_5') }}</li>
                         </ul>
                     </li>
                     <li><strong>Törn bearbeiten:</strong> Törn-Details (Name, Boot, Heimathafen, etc.) nachträglich ändern</li>
@@ -521,20 +521,20 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💡 Tipps</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💡 {{ t('help.general_tips_title') }}</h2>
             <div class="mb-6">
                 <ol class="list-decimal ml-6 space-y-2">
-                    <li><strong>Belege fotografieren:</strong> Immer direkt den Kassenzettel abfotografieren</li>
-                    <li><strong>Sofort erfassen:</strong> Ausgaben direkt eintragen, damit nichts vergessen wird</li>
-                    <li><strong>Richtige Aufteilung:</strong> Überlege, ob wirklich alle mitzahlen (z.B. persönliche Snacks → private)</li>
-                    <li><strong>Crew deaktivieren:</strong> Wenn jemand früher abreist, sofort deaktivieren - die App schließt die Person automatisch von neuen Ausgaben aus</li>
+                    <li>{{ t('help.general_tip1') }}</li>
+                    <li>{{ t('help.general_tip2') }}</li>
+                    <li>{{ t('help.general_tip3') }}</li>
+                    <li>{{ t('help.general_tip4') }}</li>
                 </ol>
             </div>
 
             <div class="rope-divider"></div>
 
             <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border-2" style="border-color: var(--sky-blue);">
-                <h2 class="text-2xl font-bold maritime-header mb-3" style="color: var(--ocean-blue);">❓ Fragen?</h2>
+                <h2 class="text-2xl font-bold maritime-header mb-3" style="color: var(--ocean-blue);">❓ {{ t('help.faq_title') }}</h2>
                 <p class="mb-4">Bei Problemen oder Fragen: Sprich den Skipper oder Admin an!</p>
                 <p class="text-xl font-bold maritime-header" style="color: var(--sea-foam);">Schönen Törn und fair winds! ⛵🌊</p>
             </div>

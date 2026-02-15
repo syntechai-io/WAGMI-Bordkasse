@@ -195,7 +195,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">
                             <span class="px-2 py-1 text-xs rounded-full {% if expense.paid_from.value == 'wallet' %}text-white{% else %}text-white{% endif %}" style="background: {% if expense.paid_from.value == 'wallet' %}linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%){% else %}linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%){% endif %};">
-                                {{ expense.paid_from.value }}
+                                {% if expense.paid_from.value == 'wallet' %}{{ t('common.wallet') }}{% else %}{{ t('common.private') }}{% endif %}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">

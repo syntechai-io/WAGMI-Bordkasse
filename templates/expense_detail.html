@@ -33,11 +33,11 @@
             </div>
             <div>
                 <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💰 {{ t('expense.paid_from') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.paid_from.value }}</p>
+                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{% if expense.paid_from.value == 'wallet' %}{{ t('common.wallet') }}{% else %}{{ t('common.private') }}{% endif %}</p>
             </div>
             <div>
                 <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🎯 {{ t('expense.split_mode') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.split_mode.value }}</p>
+                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{% if expense.split_mode.value == 'equal' %}{{ t('expense.split_equal') }}{% elif expense.split_mode.value == 'participants' %}{{ t('expense.split_participants') }}{% else %}{{ t('expense.split_percentage') }}{% endif %}</p>
             </div>
             <div class="md:col-span-2">
                 <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📝 {{ t('common.description') }}</p>

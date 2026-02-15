@@ -1,19 +1,19 @@
 {% extends "layout.html" %}
 
-{% block title %}Admin Billing - WAGMI CrewLog{% endblock %}
+{% block title %}{{ t('admin_billing.title') }} - WAGMI CrewLog{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">🔧 Admin Billing</h1>
+    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">🔧 {{ t('admin_billing.title') }}</h1>
 
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div class="bg-white porthole-card p-4 text-center">
             <p class="text-2xl font-bold" style="color: var(--navy-deep);">{{ total_accounts }}</p>
-            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Accounts</p>
+            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">{{ t('admin_billing.accounts') }}</p>
         </div>
         <div class="bg-white porthole-card p-4 text-center">
             <p class="text-2xl font-bold text-green-600">{{ active_subs }}</p>
-            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Aktiv</p>
+            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">{{ t('admin_billing.active') }}</p>
         </div>
         <div class="bg-white porthole-card p-4 text-center">
             <p class="text-2xl font-bold text-red-600">{{ past_due_subs }}</p>
@@ -29,40 +29,40 @@
         </div>
         <div class="bg-white porthole-card p-4 text-center {% if stale_webhook_count > 0 %}border-2 border-amber-400{% endif %}">
             <p class="text-2xl font-bold {% if stale_webhook_count > 0 %}text-amber-600{% else %}text-green-600{% endif %}">{{ stale_webhook_count }}</p>
-            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Stale Webhooks (>7d)</p>
+            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">{{ t('admin_billing.stale_webhooks') }}</p>
         </div>
     </div>
 
     <div class="bg-white porthole-card p-6">
         <form method="get" action="/admin/billing" class="flex flex-col sm:flex-row gap-3 mb-6">
-            <input type="text" name="q" value="{{ q }}" placeholder="Account-Name suchen..." class="flex-1 px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+            <input type="text" name="q" value="{{ q }}" placeholder="{{ t('admin_billing.search_placeholder') }}" class="flex-1 px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
             <select name="plan" class="px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-                <option value="">Alle Pläne</option>
+                <option value="">{{ t('admin_billing.all_plans') }}</option>
                 <option value="FREE" {% if plan_filter == "FREE" %}selected{% endif %}>Free</option>
                 <option value="SKIPPER_PLUS" {% if plan_filter == "SKIPPER_PLUS" %}selected{% endif %}>Skipper Plus</option>
             </select>
             <select name="status" class="px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-                <option value="">Alle Status</option>
+                <option value="">{{ t('admin_billing.all_status') }}</option>
                 <option value="ACTIVE" {% if status_filter == "ACTIVE" %}selected{% endif %}>Active</option>
                 <option value="PAST_DUE" {% if status_filter == "PAST_DUE" %}selected{% endif %}>Past Due</option>
                 <option value="CANCELED" {% if status_filter == "CANCELED" %}selected{% endif %}>Canceled</option>
             </select>
-            <button type="submit" class="text-white px-4 py-2 rounded-lg font-semibold" style="background: var(--ocean-blue);">🔍 Filtern</button>
+            <button type="submit" class="text-white px-4 py-2 rounded-lg font-semibold" style="background: var(--ocean-blue);">🔍 {{ t('admin_billing.filter') }}</button>
         </form>
 
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
                     <tr>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">ID</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Account</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Owner</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Plan</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Status</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Verlängerung</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Webhook</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Stripe IDs</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Aktionen</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_id') }}</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_account') }}</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_owner') }}</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_plan') }}</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_status') }}</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_renewal') }}</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_webhook') }}</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_stripe_ids') }}</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-sky-200">
@@ -117,7 +117,7 @@
                     {% endfor %}
                     {% if not rows %}
                     <tr>
-                        <td colspan="9" class="px-4 py-8 text-center text-gray-400">Keine Ergebnisse</td>
+                        <td colspan="9" class="px-4 py-8 text-center text-gray-400">{{ t('admin_billing.no_results') }}</td>
                     </tr>
                     {% endif %}
                 </tbody>
