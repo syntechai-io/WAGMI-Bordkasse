@@ -67,7 +67,7 @@ def logout_saas(request: Request):
     request.session.pop("saas_email", None)
     if request.headers.get("accept", "").startswith("text/html") or request.headers.get("content-type", "").startswith("application/x-www-form-urlencoded"):
         from starlette.responses import RedirectResponse
-        return RedirectResponse(url="/login-saas", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
     return {"ok": True}
 
 
