@@ -1,0 +1,55 @@
+We already have session-based i18n with t() and locales/de.json + locales/en.json, but many pages are still hardcoded in German.
+
+Task: perform a systematic “template string migration” for the remaining core pages so EN actually renders across the app.
+
+Scope for this pass (must complete):
+1) Dashboard page (all headings, tiles, subtext, quick start banner, “selected trip” label)
+2) Logbook main pages (list/timeline, entry form, entry type buttons, PDF/export labels shown in UI)
+3) Bordkasse/Finances pages (totals widgets, add expense/deposit forms, split mode labels, settlement calculator UI strings)
+4) Crew management pages (crew list, add/edit crew, role labels, trip admin flag labels)
+5) Common UI strings used by these pages (buttons, form labels, validation errors shown to user)
+
+Hard requirements:
+- Replace ALL user-visible hardcoded German strings in these templates with {{ t("...") }} keys.
+- Do not change backend logic or endpoints unless necessary to remove German “enum labels” leaking into UI (e.g. status labels).
+- Use consistent key namespaces:
+  - dashboard.*
+  - logbook.*
+  - finances.* (or bordkasse.*)
+  - crew.*
+  - common.*
+- Update locales/de.json with the existing German text (so DE output stays identical).
+- Add proper English translations in locales/en.json.
+- Keep fallback behavior: missing EN key falls back to German.
+
+Implementation guidance:
+A) First, locate all templates involved:
+- Identify dashboard template (e.g., templates/dashboard.html)
+- Identify logbook templates folder
+- Identify finances/bordkasse templates folder
+- Identify crew templates folder
+- Identify shared partials used by these pages (navbar already done)
+
+B) Do a controlled search and replace:
+- For each template in scope, replace visible strings with t() keys.
+- Avoid translating:
+  - trip names, usernames, boat names (these are data)
+  - numeric formats (keep existing formatting; do not introduce locale number formatting yet)
+
+C) Add a developer aid:
+- Add a small helper mode (env var I18N_DEBUG=1):
+  - if enabled, missing key should render as ⟦key⟧ instead of falling back silently
+  - default remains current fallback (German)
+This makes it obvious which keys are still missing.
+
+Testing checklist:
+1) Set EN via /set-language or navbar.
+2) Visit /dashboard, /logbook, /finances, /crew.
+3) Confirm there are no German UI labels left except data-driven names.
+4) Toggle back to DE and confirm UI stays identical to before.
+
+Deliverables:
+- Updated templates for all pages in scope with t() keys
+- Updated locales/de.json and locales/en.json for all keys introduced
+- Optional: i18n debug mode for missing keys (env var controlled)
+- Short summary of which templates were updated and how to test

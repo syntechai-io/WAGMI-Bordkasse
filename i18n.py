@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 SUPPORTED_LANGS = ("de", "en")
 DEFAULT_LANG = "de"
+I18N_DEBUG = os.environ.get("I18N_DEBUG", "0") == "1"
 
 _translations: dict[str, dict[str, str]] = {}
 
@@ -75,6 +76,8 @@ def t(lang: str, key: str, **kwargs) -> str:
         value = fallback_dict.get(key)
 
     if value is None:
+        if I18N_DEBUG:
+            return f"\u27e6{key}\u27e7"
         return key
 
     if kwargs:
