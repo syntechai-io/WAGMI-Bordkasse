@@ -102,7 +102,7 @@
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌍 {{ t('logbook.latitude') }}</label>
                 <input type="number" name="latitude" step="0.000001" 
                        value="{% if entry and entry.latitude %}{{ entry.latitude }}{% endif %}" 
-                       placeholder="z.B. 54.0833" 
+                       placeholder="{{ t('logbook.placeholder_lat') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
                        style="border-color: var(--sky-blue);">
             </div>
@@ -111,7 +111,7 @@
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌍 {{ t('logbook.longitude') }}</label>
                 <input type="number" name="longitude" step="0.000001" 
                        value="{% if entry and entry.longitude %}{{ entry.longitude }}{% endif %}" 
-                       placeholder="z.B. 13.4378" 
+                       placeholder="{{ t('logbook.placeholder_lon') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
                        style="border-color: var(--sky-blue);">
             </div>
@@ -162,7 +162,7 @@
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">📐 {{ t('logbook.cog_label') }}</label>
                     <input type="number" name="cog_deg" min="0" max="359" step="1"
                            value="{% if entry and entry.cog_deg %}{{ entry.cog_deg }}{% endif %}" 
-                           placeholder="z.B. 045" 
+                           placeholder="{{ t('logbook.placeholder_cog') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
                            style="border-color: var(--sky-blue);">
                 </div>
@@ -171,7 +171,7 @@
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">⏱️ {{ t('logbook.sog_label') }}</label>
                     <input type="number" name="sog_kn" min="0" step="0.1"
                            value="{% if entry and entry.sog_kn %}{{ entry.sog_kn }}{% endif %}" 
-                           placeholder="z.B. 6.5" 
+                           placeholder="{{ t('logbook.placeholder_sog') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
                            style="border-color: var(--sky-blue);">
                 </div>
@@ -180,7 +180,7 @@
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">📏 {{ t('logbook.log_speed') }}</label>
                     <input type="number" name="log_kn" min="0" step="0.1"
                            value="{% if entry and entry.log_kn %}{{ entry.log_kn }}{% endif %}" 
-                           placeholder="z.B. 6.2" 
+                           placeholder="{{ t('logbook.placeholder_stw') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
                            style="border-color: var(--sky-blue);">
                 </div>
@@ -189,7 +189,7 @@
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">📊 {{ t('logbook.distance_today') }}</label>
                     <input type="number" name="dist_day_nm" min="0" step="0.1"
                            value="{% if entry and entry.dist_day_nm %}{{ entry.dist_day_nm }}{% endif %}" 
-                           placeholder="z.B. 42.3" 
+                           placeholder="{{ t('logbook.placeholder_log') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
                            style="border-color: var(--sky-blue);">
                 </div>
@@ -225,7 +225,7 @@
                 </select>
                 <input type="text" id="wind_direction_manual" 
                        value="{% if entry and entry.wind_direction %}{{ entry.wind_direction }}{% endif %}" 
-                       placeholder="z.B. NNW" 
+                       placeholder="{{ t('logbook.placeholder_wind_dir') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
                        style="border-color: var(--sky-blue);"
                        data-field="wind_direction"
@@ -262,7 +262,7 @@
                 </select>
                 <input type="text" id="wind_strength_manual" 
                        value="{% if entry and entry.wind_strength %}{{ entry.wind_strength }}{% endif %}" 
-                       placeholder="z.B. 4 Bft" 
+                       placeholder="{{ t('logbook.placeholder_wind_force') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
                        style="border-color: var(--sky-blue);"
                        data-field="wind_strength"
@@ -311,7 +311,7 @@
                 </select>
                 <input type="text" id="visibility_manual" 
                        value="{% if entry and entry.visibility %}{{ entry.visibility }}{% endif %}" 
-                       placeholder="z.B. gut, 5 nm" 
+                       placeholder="{{ t('logbook.placeholder_visibility') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
                        style="border-color: var(--sky-blue);"
                        data-field="visibility"
@@ -329,7 +329,7 @@
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌡️ {{ t('logbook.temperature') }} (°C)</label>
                 <input type="number" name="temperature" step="0.1" 
                        value="{% if entry and entry.temperature %}{{ entry.temperature }}{% endif %}" 
-                       placeholder="z.B. 18.5" 
+                       placeholder="{{ t('logbook.placeholder_temp') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
                        style="border-color: var(--sky-blue);">
             </div>
@@ -351,7 +351,7 @@
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">📊 {{ t('logbook.pressure') }}</label>
                     <input type="number" name="pressure_hpa" min="900" max="1100" step="1"
                            value="{% if entry and entry.pressure_hpa %}{{ entry.pressure_hpa }}{% endif %}" 
-                           placeholder="z.B. 1013" 
+                           placeholder="{{ t('logbook.placeholder_pressure') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
                            style="border-color: var(--sky-blue);">
                 </div>
@@ -372,7 +372,7 @@
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">📡 {{ t('logbook.weather_source') }}</label>
                     <input type="text" name="weather_source" 
                            value="{% if entry and entry.weather_source %}{{ entry.weather_source }}{% endif %}" 
-                           placeholder="z.B. Seewetterbericht, DWD" 
+                           placeholder="{{ t('logbook.placeholder_weather_source') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
                            style="border-color: var(--sky-blue);">
                 </div>
@@ -416,7 +416,7 @@
                         <label class="block font-medium mb-2" style="color: var(--navy-deep);">🔧 {{ t('logbook.engine_hours_total') }}</label>
                         <input type="number" name="eng_hours_total" min="0" step="0.1"
                                value="{% if entry and entry.eng_hours_total %}{{ entry.eng_hours_total }}{% endif %}" 
-                               placeholder="z.B. 1234.5" 
+                               placeholder="{{ t('logbook.placeholder_engine_hours') }}" 
                                class="w-full px-4 py-3 border rounded-lg text-lg" 
                                style="border-color: var(--sky-blue);">
                     </div>
@@ -441,7 +441,7 @@
                         <label class="block font-medium mb-2" style="color: var(--navy-deep);">⛽ {{ t('logbook.fuel_level') }}</label>
                         <input type="number" name="fuel_level_l" min="0" step="1"
                                value="{% if entry and entry.fuel_level_l %}{{ entry.fuel_level_l }}{% endif %}" 
-                               placeholder="z.B. 80" 
+                               placeholder="{{ t('logbook.placeholder_rpm') }}" 
                                class="w-full px-4 py-3 border rounded-lg text-lg" 
                                style="border-color: var(--sky-blue);">
                     </div>
@@ -487,7 +487,7 @@
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">🔧 {{ t('logbook.engine_hours') }}</label>
                 <input type="number" name="engine_hours" step="0.1" 
                        value="{% if entry and entry.engine_hours %}{{ entry.engine_hours }}{% endif %}" 
-                       placeholder="z.B. 1234.5" 
+                       placeholder="{{ t('logbook.placeholder_log_reading') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
                        style="border-color: var(--sky-blue);">
             </div>
@@ -496,7 +496,7 @@
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏁 {{ t('logbook.departure') }}</label>
                 <input type="text" name="departure" 
                        value="{% if entry and entry.departure %}{{ entry.departure }}{% else %}Fredericia DK{% endif %}" 
-                       placeholder="z.B. Rostock" 
+                       placeholder="{{ t('logbook.placeholder_departure') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
                        style="border-color: var(--sky-blue);">
             </div>
@@ -505,7 +505,7 @@
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏁 {{ t('logbook.destination') }}</label>
                 <input type="text" name="destination" 
                        value="{% if entry and entry.destination %}{{ entry.destination }}{% endif %}" 
-                       placeholder="z.B. Gedser" 
+                       placeholder="{{ t('logbook.placeholder_destination') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
                        style="border-color: var(--sky-blue);">
             </div>
@@ -529,9 +529,9 @@
                            class="w-full h-3 rounded-lg appearance-none cursor-pointer"
                            style="background: linear-gradient(to right, var(--sea-foam) 0%, var(--navy-deep) 100%);">
                     <div class="flex justify-between text-xs mt-1" style="color: var(--navy-deep);">
-                        <span>0% (eingerollt)</span>
+                        <span>{{ t('logbook.furl_label_0') }}</span>
                         <span>50%</span>
-                        <span>100% (voll gesetzt)</span>
+                        <span>{{ t('logbook.furl_label_100') }}</span>
                     </div>
                 </div>
                 
@@ -556,9 +556,9 @@
                                 class="w-full px-4 py-3 border rounded-lg text-lg" 
                                 style="border-color: var(--sky-blue);">
                             <option value="">{{ t('common.select_option') }}</option>
-                            <option value="Genua gesetzt" {% if entry and entry.headsail == 'Genua gesetzt' %}selected{% endif %}>Genua gesetzt</option>
-                            <option value="Genua teilweise" {% if entry and entry.headsail == 'Genua teilweise' %}selected{% endif %}>Genua teilweise</option>
-                            <option value="Genua geborgen" {% if entry and entry.headsail == 'Genua geborgen' %}selected{% endif %}>Genua geborgen</option>
+                            <option value="Genua gesetzt" {% if entry and entry.headsail == 'Genua gesetzt' %}selected{% endif %}>{{ t('logbook.headsail_set') }}</option>
+                            <option value="Genua teilweise" {% if entry and entry.headsail == 'Genua teilweise' %}selected{% endif %}>{{ t('logbook.headsail_partial') }}</option>
+                            <option value="Genua geborgen" {% if entry and entry.headsail == 'Genua geborgen' %}selected{% endif %}>{{ t('logbook.headsail_furled') }}</option>
                         </select>
                     </div>
                     
@@ -566,7 +566,7 @@
                         <label class="block font-medium mb-2" style="color: var(--navy-deep);">⚙️ {{ t('logbook.sail_action') }}</label>
                         <input type="text" name="sail_action" 
                                value="{% if entry and entry.sail_action %}{{ entry.sail_action }}{% endif %}" 
-                               placeholder="z.B. Segel gesetzt, gerefft, geborgen" 
+                               placeholder="{{ t('logbook.placeholder_sail_action') }}" 
                                class="w-full px-4 py-3 border rounded-lg text-lg" 
                                style="border-color: var(--sky-blue);">
                     </div>
@@ -679,21 +679,25 @@
 <script src="/static/js/logbook-quick-fill.js"></script>
 <script>
 const i18n = {
-    furl_in: '{{ t("logbook.furl_in") }}',
-    furl_out: '{{ t("logbook.furl_out") }}',
-    furled_in: '{{ t("logbook.furled_in") }}',
-    furled_out: '{{ t("logbook.furled_out") }}',
-    gps_alert: '{{ t("logbook.gps_alert") }}',
-    weather_error: '{{ t("logbook.weather_error") }}',
-    geo_not_supported: '{{ t("logbook.geo_not_supported") }}',
-    location_blocked: '{{ t("logbook.location_blocked") }}',
-    gps_unavailable: '{{ t("logbook.gps_unavailable") }}',
-    gps_timeout: '{{ t("logbook.gps_timeout") }}',
-    file_selected: '{{ t("logbook.file_selected") }}',
-    ios_settings: '{{ t("logbook.ios_gps_settings") | safe }}',
-    android_settings: '{{ t("logbook.android_gps_settings") | safe }}',
-    safari_settings: '{{ t("logbook.safari_gps_settings") | safe }}',
-    browser_settings: '{{ t("logbook.browser_gps_settings") | safe }}',
+    furl_in: {{ t("logbook.furl_in") | tojson }},
+    furl_out: {{ t("logbook.furl_out") | tojson }},
+    furled_in: {{ t("logbook.furled_in") | tojson }},
+    furled_out: {{ t("logbook.furled_out") | tojson }},
+    gps_alert: {{ t("logbook.gps_alert") | tojson }},
+    weather_error: {{ t("logbook.weather_error") | tojson }},
+    geo_not_supported: {{ t("logbook.geo_not_supported") | tojson }},
+    location_blocked: {{ t("logbook.location_blocked") | tojson }},
+    gps_unavailable: {{ t("logbook.gps_unavailable") | tojson }},
+    gps_timeout: {{ t("logbook.gps_timeout") | tojson }},
+    file_selected: {{ t("logbook.file_selected") | tojson }},
+    ios_settings: {{ t("logbook.ios_gps_settings") | tojson }},
+    android_settings: {{ t("logbook.android_gps_settings") | tojson }},
+    safari_settings: {{ t("logbook.safari_gps_settings") | tojson }},
+    browser_settings: {{ t("logbook.browser_gps_settings") | tojson }},
+    motor_on: {{ t("logbook.motor_on") | tojson }},
+    motor_off: {{ t("logbook.motor_off") | tojson }},
+    motor_on_set: {{ t("logbook.motor_on_set") | tojson }},
+    motor_off_set: {{ t("logbook.motor_off_set") | tojson }},
 };
 
 // Phase A: Motor Toggle Buttons with Auto-Calculation
@@ -702,9 +706,9 @@ document.getElementById('motor-on-btn').addEventListener('click', function() {
     const localISOString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
     document.getElementById('engine_on_time').value = localISOString;
     document.getElementById('engine_on').value = '1';
-    this.textContent = '✅ Motor AN gesetzt!';
+    this.textContent = '✅ ' + i18n.motor_on_set;
     setTimeout(() => {
-        this.textContent = '▶️ Motor AN';
+        this.textContent = '▶️ ' + i18n.motor_on;
     }, 2000);
     
     // Trigger motor hours calculation
@@ -716,9 +720,9 @@ document.getElementById('motor-off-btn').addEventListener('click', function() {
     const localISOString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
     document.getElementById('engine_off_time').value = localISOString;
     document.getElementById('engine_on').value = '0';
-    this.textContent = '✅ Motor AUS gesetzt!';
+    this.textContent = '✅ ' + i18n.motor_off_set;
     setTimeout(() => {
-        this.textContent = '⏸️ Motor AUS';
+        this.textContent = '⏸️ ' + i18n.motor_off;
     }, 2000);
     
     // Trigger motor hours calculation
