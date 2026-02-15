@@ -25,6 +25,7 @@ def login_saas(
 
     request.session["saas_user_id"] = user.id
     request.session["account_id"] = user.account_id
+    request.session["saas_email"] = user.email
 
     request.session.pop("user_id", None)
     request.session.pop("role", None)
@@ -63,6 +64,10 @@ def whoami(request: Request, db: Session = Depends(get_db)):
 def logout_saas(request: Request):
     request.session.pop("saas_user_id", None)
     request.session.pop("account_id", None)
+    request.session.pop("saas_email", None)
+    if request.headers.get("accept", "").startswith("text/html") or request.headers.get("content-type", "").startswith("application/x-www-form-urlencoded"):
+        from starlette.responses import RedirectResponse
+        return RedirectResponse(url="/login-saas", status_code=303)
     return {"ok": True}
 
 

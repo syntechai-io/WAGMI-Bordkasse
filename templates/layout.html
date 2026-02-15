@@ -245,37 +245,81 @@
                             🚪 Logout
                         </a>
                     </div>
+                    {% elif request.session.get('saas_user_id') %}
+                    <div class="border-l border-sky-300 pl-6 ml-2 flex items-center space-x-4">
+                        <span class="text-sm">👤 {{ request.session.get('saas_email', 'User') }}</span>
+                        <form action="/logout-saas" method="POST" class="m-0 inline">
+                            {{ csrf_input | safe }}
+                            <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold transition hover:scale-105 text-white" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
+                                🚪 Logout
+                            </button>
+                        </form>
+                    </div>
                     {% endif %}
                 </div>
             </div>
             <div id="mobile-menu" class="hidden lg:hidden pb-4 overflow-y-auto" style="max-height: calc(100vh - 64px);">
-                <a href="/" class="block py-2 hover:text-sky-200 transition touch-action">🧭 Dashboard</a>
-                <a href="/trips/" class="block py-2 hover:text-sky-200 transition touch-action">⛵ Törns</a>
-                <a href="/crew" class="block py-2 hover:text-sky-200 transition touch-action">👥 Crew</a>
-                <a href="/groups" class="block py-2 hover:text-sky-200 transition touch-action">🔗 Gruppen</a>
-                {% if request.session.get('role') == 'admin' %}
-                <a href="/trips/passwords" class="block py-2 hover:text-sky-200 transition touch-action">🔐 Passwörter</a>
-                {% endif %}
-                <a href="/logbook" class="block py-2 hover:text-sky-200 transition touch-action">📓 Logbuch</a>
-                <a href="/deposits" class="block py-2 hover:text-sky-200 transition touch-action">💰 Einzahlungen</a>
-                <a href="/expenses" class="block py-2 hover:text-sky-200 transition touch-action">⚓ Ausgaben</a>
-                <a href="/templates" class="block py-2 hover:text-sky-200 transition touch-action">📋 Vorlagen</a>
-                <a href="/balances" class="block py-2 hover:text-sky-200 transition touch-action">📊 Salden</a>
-                <a href="/settlement" class="block py-2 hover:text-sky-200 transition touch-action">⛵ Ausgleich</a>
-                <a href="/export/csv" class="block py-2 hover:text-sky-200 transition touch-action">📋 Export</a>
-                {% if request.session.get('saas_user_id') %}
-                <a href="/billing" class="block py-2 hover:text-sky-200 transition touch-action">💳 Billing</a>
-                {% endif %}
-                {% if request.session.get('role') == 'admin' %}
-                <a href="/admin/billing" class="block py-2 hover:text-sky-200 transition touch-action">🔧 Admin Billing</a>
-                {% endif %}
-                <a href="/help" class="block py-2 hover:text-sky-200 transition touch-action">📖 Anleitung</a>
+                <a href="/" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">🧭 Dashboard</a>
+                <a href="/trips/" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">⛵ Törns</a>
+                <a href="/logbook" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">📓 Logbuch</a>
+
+                <div class="mobile-section border-b border-sky-400/30">
+                    <button class="w-full py-3 hover:text-sky-200 transition touch-action flex items-center justify-between mobile-section-toggle">
+                        <span>💰 Finanzen</span>
+                        <svg class="w-4 h-4 transition-transform mobile-section-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="mobile-section-content hidden pl-4 pb-2">
+                        <a href="/deposits" class="block py-2 hover:text-sky-200 transition touch-action text-sm">💰 Einzahlungen</a>
+                        <a href="/expenses" class="block py-2 hover:text-sky-200 transition touch-action text-sm">⚓ Ausgaben</a>
+                        <a href="/templates" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📋 Vorlagen</a>
+                        <a href="/balances" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📊 Salden</a>
+                        <a href="/settlement" class="block py-2 hover:text-sky-200 transition touch-action text-sm">⛵ Ausgleich</a>
+                    </div>
+                </div>
+
+                <div class="mobile-section border-b border-sky-400/30">
+                    <button class="w-full py-3 hover:text-sky-200 transition touch-action flex items-center justify-between mobile-section-toggle">
+                        <span>📝 Verwaltung</span>
+                        <svg class="w-4 h-4 transition-transform mobile-section-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="mobile-section-content hidden pl-4 pb-2">
+                        <a href="/crew" class="block py-2 hover:text-sky-200 transition touch-action text-sm">👥 Crew</a>
+                        <a href="/groups" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔗 Gruppen</a>
+                        {% if request.session.get('role') == 'admin' %}
+                        <a href="/trips/passwords" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔐 Passwörter</a>
+                        {% endif %}
+                        <a href="/export/csv" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📋 Export</a>
+                        {% if request.session.get('saas_user_id') %}
+                        <a href="/billing" class="block py-2 hover:text-sky-200 transition touch-action text-sm">💳 Billing</a>
+                        {% endif %}
+                        {% if request.session.get('role') == 'admin' %}
+                        <a href="/admin/billing" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔧 Admin Billing</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <a href="/help" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">📖 Anleitung</a>
+
                 {% if request.session.get('user_id') %}
                 <div class="border-t border-sky-300 pt-4 mt-4">
                     <div class="text-sm mb-2">👤 Angemeldet als: <strong>{{ request.session.get('username', 'User') }}</strong></div>
-                    <a href="/logout" class="block px-4 py-2 rounded-lg text-center font-semibold transition" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
+                    <a href="/logout" class="block px-4 py-2 rounded-lg text-center font-semibold transition text-white" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
                         🚪 Logout
                     </a>
+                </div>
+                {% elif request.session.get('saas_user_id') %}
+                <div class="border-t border-sky-300 pt-4 mt-4">
+                    <div class="text-sm mb-2">👤 Angemeldet als: <strong>{{ request.session.get('saas_email', 'User') }}</strong></div>
+                    <form action="/logout-saas" method="POST" class="m-0">
+                        {{ csrf_input | safe }}
+                        <button type="submit" class="block w-full px-4 py-2 rounded-lg text-center font-semibold transition text-white" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
+                            🚪 Logout
+                        </button>
+                    </form>
                 </div>
                 {% endif %}
             </div>
@@ -307,6 +351,18 @@
         mobileMenuLinks.forEach(link => {
             link.addEventListener('click', function() {
                 mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Collapsible mobile sections
+        const mobileSectionToggles = mobileMenu.querySelectorAll('.mobile-section-toggle');
+        mobileSectionToggles.forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const section = this.closest('.mobile-section');
+                const content = section.querySelector('.mobile-section-content');
+                const arrow = section.querySelector('.mobile-section-arrow');
+                content.classList.toggle('hidden');
+                arrow.style.transform = content.classList.contains('hidden') ? '' : 'rotate(180deg)';
             });
         });
         
