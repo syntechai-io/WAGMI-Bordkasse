@@ -1,18 +1,14 @@
 from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import User, CrewMember, Trip, TripStatus
 from limiter_config import limiter
-from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from services.trip import TripService
+from template_helpers import create_templates
 
 router = APIRouter()
-templates = Jinja2Templates(
-    directory="templates",
-    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
-)
+templates = create_templates()
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request, db: Session = Depends(get_db)):

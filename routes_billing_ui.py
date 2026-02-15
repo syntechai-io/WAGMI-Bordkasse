@@ -19,6 +19,7 @@ from billing_stripe import (
     PRICE_YEARLY,
 )
 from template_helpers import create_templates
+from i18n import get_lang, t as i18n_t
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -153,26 +154,30 @@ async def billing_ui_portal(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/billing/ui/success")
 async def billing_ui_success(request: Request):
+    lang = get_lang(request)
+    _t = lambda key: i18n_t(lang, key)
     return templates.TemplateResponse("billing_result.html", {
         "request": request,
-        "title": "Abo aktiviert",
+        "title": _t("billing.success_title"),
         "icon": "🎉",
-        "message": "Vielen Dank! Ihr Abonnement wird in Kürze aktiviert.",
-        "sub_message": "Stripe verarbeitet die Zahlung — dies kann einige Sekunden dauern.",
-        "link_text": "Zum Billing",
+        "message": _t("billing.success_msg"),
+        "sub_message": _t("billing.success_sub"),
+        "link_text": _t("billing.go_to_billing"),
         "link_url": "/billing",
     })
 
 
 @router.get("/billing/ui/cancel")
 async def billing_ui_cancel(request: Request):
+    lang = get_lang(request)
+    _t = lambda key: i18n_t(lang, key)
     return templates.TemplateResponse("billing_result.html", {
         "request": request,
-        "title": "Checkout abgebrochen",
+        "title": _t("billing.cancel_title"),
         "icon": "↩️",
-        "message": "Der Checkout wurde abgebrochen.",
-        "sub_message": "Sie können jederzeit erneut ein Upgrade starten.",
-        "link_text": "Zum Billing",
+        "message": _t("billing.cancel_msg"),
+        "sub_message": _t("billing.cancel_sub"),
+        "link_text": _t("billing.go_to_billing"),
         "link_url": "/billing",
     })
 

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from db import get_db
 from models import Trip
 from services.trip import TripService
+from i18n import get_lang, t as i18n_t
 
 
 def trip_context_processor(request: Request) -> Dict[str, Any]:
@@ -15,25 +16,20 @@ def trip_context_processor(request: Request) -> Dict[str, Any]:
         "selected_trip": None
     }
     
-    # Get database session and ensure proper cleanup
     db_generator = get_db()
     try:
         db = next(db_generator)
         
-        # Get all trips for trip selector (admin only)
         if request.session.get("role") == "admin":
             all_trips = db.query(Trip).order_by(Trip.start_date.desc()).all()
             context["all_trips"] = all_trips
         
-        # Get currently selected trip
         selected_trip = TripService.get_selected_trip(request, db)
         context["selected_trip"] = selected_trip
         
     except Exception:
-        # Fallback if database is not available
         pass
     finally:
-        # Properly close the database session generator
         try:
             next(db_generator)
         except StopIteration:
@@ -42,13 +38,27 @@ def trip_context_processor(request: Request) -> Dict[str, Any]:
     return context
 
 
+def i18n_context_processor(request: Request) -> Dict[str, Any]:
+    """Add i18n helpers to all template contexts"""
+    lang = get_lang(request)
+
+    def _t(key: str, **kwargs) -> str:
+        return i18n_t(lang, key, **kwargs)
+
+    return {
+        "lang": lang,
+        "t": _t,
+    }
+
+
 def create_templates() -> Jinja2Templates:
     """Create Jinja2Templates instance with CSRF token processor and trip context"""
     templates = Jinja2Templates(
         directory="templates",
         context_processors=[
             csrf_token_processor("csrftoken", "x-csrftoken"),
-            trip_context_processor
+            trip_context_processor,
+            i18n_context_processor,
         ]
     )
     return templates

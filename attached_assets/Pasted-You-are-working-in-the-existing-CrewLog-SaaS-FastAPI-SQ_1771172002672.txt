@@ -1,0 +1,131 @@
+You are working in the existing CrewLog SaaS FastAPI + SQLAlchemy + Jinja/HTMX codebase on Replit.
+
+Goal
+Implement session-based internationalization (i18n) with German as default and English as the first additional language, scalable to more languages later.
+
+Key requirements
+- Default language: de
+- Language selection is session-based: request.session["lang"]
+- Language source precedence:
+  1) explicit query param ?lang=en|de (one-time override, also persists to session)
+  2) session["lang"] (persistent)
+  3) Accept-Language header (best-effort de/en detection)
+  4) fallback: de
+- Provide a small language switch UI in the main navbar: DE | EN
+- Must be HTMX-friendly (no frontend rewrite). Switching language should reload the current page cleanly.
+- Add translation helper available in all Jinja templates: t("key", **vars)
+- Store translations in JSON files:
+  - locales/de.json
+  - locales/en.json
+- Fallback behavior: if key missing in selected language, fall back to German; if missing in German, show the key itself (so UI never breaks silently).
+- Keep changes minimal and incremental. Do not translate everything at once: start with Billing + Auth + Trips core UI strings.
+- No new heavy i18n frameworks. Do NOT introduce gettext. Use lightweight dictionary-based i18n.
+
+Implementation tasks
+
+A) Add locale files and loader
+1) Create folder: locales/
+2) Create locales/de.json and locales/en.json
+3) Implement a loader module: i18n.py
+   - load both JSON files at startup (or cached lazy-load)
+   - expose:
+     - get_lang(request) -> "de"|"en"
+     - set_lang(request, lang) -> stores to session
+     - t(request_or_lang, key, **vars) -> str
+       * resolves string from selected language dict
+       * fallback to de dict
+       * fallback to key if not found
+       * supports simple Python format placeholders: "Hello {name}"
+4) Ensure loader is robust:
+   - if locale files missing/invalid, log error and fall back to de-only
+
+B) Language detection + persistence
+1) Add a small middleware or dependency applied globally that:
+   - checks query param lang (de/en). If present, store to session["lang"].
+   - else keep session["lang"] if already set
+   - else try Accept-Language header:
+     - if header starts with "en" choose en
+     - if "de" choose de
+     - else de
+2) Ensure this runs for all normal web routes (Jinja pages) and does not break webhook routes (no session required).
+3) Ensure the chosen language is available to templates as `lang`.
+
+C) Jinja integration
+1) Register a Jinja global function `t` that templates can call without passing request:
+   - Option 1: `t(key, **vars)` reads current request lang from a context processor
+   - Option 2: inject a `t` callable per-request into template context
+2) Also make `lang` available in templates.
+
+D) Add language switch endpoint
+1) Implement POST /set-language (or /i18n/set-language)
+   - Accept form data: lang=de|en
+   - Set session["lang"] accordingly
+   - Redirect back:
+     - If `next` param provided, redirect to it
+     - Else redirect to Referer header
+     - Else "/"
+2) Also support GET /set-language?lang=en&next=/trips for simple linking (optional, but helpful).
+3) For HTMX: if request has HX-Request header, respond with HX-Redirect to next URL.
+
+E) Add language switch UI in navbar
+1) In the main base template (layout), add:
+   - "DE" link/button and "EN" link/button
+   - Highlight active language (e.g., bold/underline)
+2) The switch should:
+   - POST to /set-language with lang=de|en and next=current path
+   - Use HTMX if already present: hx-post + hx-vals with next
+   - or simple links to /set-language?lang=en&next=/current/path
+3) Ensure it works even when user is not logged in (login page language selection).
+
+F) First translation pass (minimum viable)
+Translate only key UI areas initially:
+1) Login pages (legacy + SaaS)
+2) Billing pages:
+   - /billing
+   - /billing/ui/success
+   - /billing/ui/cancel
+   - /admin/billing and account detail (admin can remain German first if needed, but add keys at least for headers)
+3) Trips list + core actions labels (create trip, archive, close, open, etc.)
+Approach:
+- Replace hardcoded strings in templates with t("...") keys
+- Add corresponding entries in de.json and en.json
+- Keep the keys namespaced, e.g.:
+  - nav.billing
+  - nav.trips
+  - auth.login
+  - billing.plan
+  - billing.upgrade_monthly
+  - billing.manage
+  - trips.create
+  - common.cancel
+  - common.save
+
+G) Developer ergonomics
+1) Add a tiny helper script or dev note:
+   - if a template uses a missing key, the UI will show the key (by design). This indicates translation still needed.
+2) Keep dictionaries flat or shallow nested (your choice), but consistent.
+
+H) Testing checklist (must execute and report)
+1) Default language with no session: German
+2) Switch to English:
+   - click EN in navbar
+   - verify session persists across pages
+3) Query param override:
+   - open /billing?lang=en sets session and shows EN
+4) Fallback:
+   - remove one EN key temporarily and ensure it falls back to German, not breaking the page
+5) HTMX navigation:
+   - ensure language switch does not break HTMX actions and pages reload cleanly
+
+Deliverables
+- locales/de.json, locales/en.json with initial keys populated
+- i18n.py with get_lang/set_lang/t
+- middleware/dependency wiring in main.py
+- /set-language route
+- navbar language switch UI
+- updated templates for Billing/Auth/Trips using t("...")
+
+Constraints
+- No major refactor; minimal changes.
+- Keep legacy + SaaS modes working unchanged.
+- Do not apply i18n logic to Stripe webhook processing (should remain session-free and stable).

@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Request, Depends, Form
-from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import RedirectResponse, HTMLResponse
-from fastapi.templating import Jinja2Templates
+from template_helpers import create_templates
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from db import get_db
@@ -12,10 +11,7 @@ from datetime import date
 from typing import Optional
 
 router = APIRouter(prefix="/deposits", tags=["deposits"])
-templates = Jinja2Templates(
-    directory="templates",
-    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
-)
+templates = create_templates()
 
 @router.get("", response_class=HTMLResponse)
 async def list_deposits(request: Request, db: Session = Depends(get_db)):

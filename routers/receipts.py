@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException
-from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import FileResponse, RedirectResponse, HTMLResponse
-from fastapi.templating import Jinja2Templates
+from template_helpers import create_templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Receipt, Expense
@@ -10,10 +9,7 @@ import uuid
 import logging
 
 router = APIRouter(prefix="/receipts", tags=["receipts"])
-templates = Jinja2Templates(
-    directory="templates",
-    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
-)
+templates = create_templates()
 
 logger = logging.getLogger(__name__)
 

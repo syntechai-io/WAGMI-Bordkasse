@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Request, Depends, Form, UploadFile, File, HTTPException, Query
-from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse, StreamingResponse, JSONResponse, Response
-from fastapi.templating import Jinja2Templates
+from template_helpers import create_templates
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
 from db import get_db
@@ -17,10 +16,7 @@ from logbook_pdf_template import render_logbook_pdf
 from weather_service import WeatherService
 
 router = APIRouter(prefix="/logbook", tags=["logbook"])
-templates = Jinja2Templates(
-    directory="templates",
-    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
-)
+templates = create_templates()
 
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/jpg"}
 MAX_FILE_SIZE = 10 * 1024 * 1024

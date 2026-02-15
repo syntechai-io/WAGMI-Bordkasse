@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
-from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
+from template_helpers import create_templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import CrewMember, CrewGroup
@@ -10,10 +9,7 @@ from services.trip import TripService
 from typing import Optional
 
 router = APIRouter(tags=["groups"])
-templates = Jinja2Templates(
-    directory="templates",
-    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
-)
+templates = create_templates()
 
 @router.get("/groups", response_class=HTMLResponse)
 async def show_groups(request: Request, db: Session = Depends(get_db)):

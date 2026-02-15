@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Request, Depends
-from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import StreamingResponse, RedirectResponse, HTMLResponse, Response
-from fastapi.templating import Jinja2Templates
+from template_helpers import create_templates
 from sqlalchemy.orm import Session, joinedload
 from db import get_db
 from models import CrewMember, Deposit, Expense
@@ -33,10 +32,7 @@ def sanitize_csv_value(value: Any) -> str:
     return str_value
 
 router = APIRouter(prefix="/export", tags=["export"])
-templates = Jinja2Templates(
-    directory="templates",
-    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
-)
+templates = create_templates()
 
 @router.get("/csv", response_class=HTMLResponse)
 async def export_page(request: Request, db: Session = Depends(get_db)):

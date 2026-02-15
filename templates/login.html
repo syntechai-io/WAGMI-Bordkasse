@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="{{ lang|default('de') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1e3a5f">
-    <title>Login - WAGMI CrewLog</title>
+    <title>{{ t('auth.login') }} - WAGMI CrewLog</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -79,19 +79,26 @@
 </head>
 <body>
     <div class="w-full max-w-md px-4">
+        <!-- Language Switch -->
+        <div class="flex justify-end mb-4 text-sm">
+            <a href="/set-language?lang=de&next=/login" class="px-2 py-1 rounded text-white transition {% if lang == 'de' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">DE</a>
+            <span class="text-white/40 mx-1">|</span>
+            <a href="/set-language?lang=en&next=/login" class="px-2 py-1 rounded text-white transition {% if lang == 'en' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">EN</a>
+        </div>
+
         <!-- Logo -->
         <div class="text-center mb-8">
             <div class="ship-wheel mb-4 flex justify-center">
                 <img src="/static/logo.png" alt="WAGMI CrewLog Logo" class="w-24 h-24 object-contain">
             </div>
             <h1 class="text-4xl font-bold text-white mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 2px;">WAGMI CrewLog</h1>
-            <p class="text-sky-200">Maritime Logbook Login</p>
+            <p class="text-sky-200">{{ t('auth.subtitle') }}</p>
         </div>
         
         <!-- Login Card -->
         <div class="porthole-card p-8">
             <div class="text-center mb-6 wave-border pb-4">
-                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">🔐 LOGIN</h2>
+                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">🔐 {{ t('auth.login_title') }}</h2>
             </div>
             
             {% if error %}
@@ -107,7 +114,7 @@
                 {{ csrf_input | safe }}
                 <div>
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">
-                        👤 Benutzername
+                        👤 {{ t('auth.username') }}
                     </label>
                     <input 
                         type="text" 
@@ -116,12 +123,12 @@
                         autofocus
                         class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none focus:border-ocean-blue transition" 
                         style="border-color: var(--sky-blue);"
-                        placeholder="Benutzername eingeben">
+                        placeholder="{{ t('auth.username_placeholder') }}">
                 </div>
                 
                 <div>
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">
-                        🔑 Passwort
+                        🔑 {{ t('auth.password') }}
                     </label>
                     <input 
                         type="password" 
@@ -134,39 +141,39 @@
                 
                 <div>
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">
-                        ⛵ Törn (optional für Admin, erforderlich für Crew)
+                        ⛵ {{ t('auth.trip_label') }}
                     </label>
                     <select 
                         name="trip_id" 
                         class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none focus:border-ocean-blue transition" 
                         style="border-color: var(--sky-blue);">
-                        <option value="">-- Kein Törn ausgewählt --</option>
+                        <option value="">{{ t('auth.trip_no_selection') }}</option>
                         {% for trip in trips %}
                         <option value="{{ trip.id }}">{{ trip.name }} ({{ trip.start_date }})</option>
                         {% endfor %}
                     </select>
                     <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.6;">
-                        Global-Admin: Leer lassen | Törn-Admin/Crew: Törn auswählen
+                        {{ t('auth.trip_hint') }}
                     </p>
                 </div>
                 
                 <button 
                     type="submit" 
                     class="w-full ocean-gradient text-white font-bold py-4 px-4 rounded-lg text-lg transition transform hover:scale-105">
-                    ⛵ Einloggen
+                    ⛵ {{ t('auth.submit') }}
                 </button>
             </form>
             
             <div class="mt-4 text-center">
                 <button onclick="toggleLoginMode()" id="toggle-btn" class="text-sm font-medium underline" style="color: var(--ocean-blue);">
-                    Mit E-Mail einloggen (SaaS)
+                    {{ t('auth.saas_switch') }}
                 </button>
             </div>
         </div>
 
         <div id="saas-login-card" class="porthole-card p-8 mt-4 hidden">
             <div class="text-center mb-6 wave-border pb-4">
-                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">📧 SAAS LOGIN</h2>
+                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">📧 {{ t('auth.saas_login_title') }}</h2>
             </div>
 
             <div id="saas-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 hidden" role="alert">
@@ -179,7 +186,7 @@
             <form id="saas-form" class="space-y-6" onsubmit="return handleSaasLogin(event)">
                 <div>
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">
-                        📧 E-Mail
+                        📧 {{ t('auth.email') }}
                     </label>
                     <input
                         type="email"
@@ -188,12 +195,12 @@
                         required
                         class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition"
                         style="border-color: var(--sky-blue);"
-                        placeholder="name@example.com">
+                        placeholder="{{ t('auth.email_placeholder') }}">
                 </div>
 
                 <div>
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">
-                        🔑 Passwort
+                        🔑 {{ t('auth.password') }}
                     </label>
                     <input
                         type="password"
@@ -209,13 +216,13 @@
                     type="submit"
                     class="w-full text-white font-bold py-4 px-4 rounded-lg text-lg transition transform hover:scale-105"
                     style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
-                    📧 Mit E-Mail einloggen
+                    📧 {{ t('auth.saas_submit') }}
                 </button>
             </form>
 
             <div class="mt-4 text-center">
                 <button onclick="toggleLoginMode()" class="text-sm font-medium underline" style="color: var(--ocean-blue);">
-                    Zurück zum klassischen Login
+                    {{ t('auth.saas_back') }}
                 </button>
             </div>
         </div>
@@ -250,11 +257,11 @@
             if (res.ok && data.ok) {
                 window.location.href = '/trips/';
             } else {
-                errMsg.textContent = data.detail || 'Login fehlgeschlagen';
+                errMsg.textContent = data.detail || '{{ t("auth.login_failed") }}';
                 errBox.classList.remove('hidden');
             }
         } catch (err) {
-            errMsg.textContent = 'Verbindungsfehler';
+            errMsg.textContent = '{{ t("common.connection_error") }}';
             errBox.classList.remove('hidden');
         }
         return false;

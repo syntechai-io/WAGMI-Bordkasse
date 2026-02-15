@@ -1,17 +1,13 @@
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
-from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi.responses import RedirectResponse, HTMLResponse
-from fastapi.templating import Jinja2Templates
+from template_helpers import create_templates
 from sqlalchemy.orm import Session
 from typing import Optional
 from db import get_db
 from models import ExpenseTemplate, PaidFromEnum, SplitModeEnum, Currency
 
 router = APIRouter(prefix="/templates", tags=["templates"])
-templates = Jinja2Templates(
-    directory="templates",
-    context_processors=[csrf_token_processor("csrftoken", "x-csrftoken")]
-)
+templates = create_templates()
 
 @router.get("", response_class=HTMLResponse)
 async def list_templates(request: Request, db: Session = Depends(get_db)):

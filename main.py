@@ -30,6 +30,7 @@ from routers.api import router as api_router
 from routes_auth import router as saas_auth_router
 from routes_billing import router as billing_router
 from routes_billing_ui import router as billing_ui_router
+from i18n import set_lang, SUPPORTED_LANGS
 
 app = FastAPI(title="WAGMI CrewLog - Maritime Logbook & Bordkasse")
 
@@ -131,6 +132,32 @@ app.include_router(groups_router)
 app.include_router(saas_auth_router)
 app.include_router(billing_router)
 app.include_router(billing_ui_router)
+
+@app.get("/set-language")
+@app.post("/set-language")
+async def set_language(request: Request):
+    if request.method == "POST":
+        form = await request.form()
+        lang = form.get("lang", "de")
+        next_url = form.get("next", "/")
+    else:
+        lang = request.query_params.get("lang", "de")
+        next_url = request.query_params.get("next", "/")
+
+    if lang in SUPPORTED_LANGS:
+        set_lang(request, lang)
+
+    if not next_url or not next_url.startswith("/"):
+        next_url = "/"
+
+    is_htmx = request.headers.get("hx-request") == "true"
+    if is_htmx:
+        response = HTMLResponse("")
+        response.headers["HX-Redirect"] = next_url
+        return response
+
+    return RedirectResponse(url=next_url, status_code=303)
+
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):

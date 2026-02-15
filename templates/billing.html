@@ -1,35 +1,35 @@
 {% extends "layout.html" %}
 
-{% block title %}Billing - WAGMI CrewLog{% endblock %}
+{% block title %}{{ t('billing.title') }} - WAGMI CrewLog{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto space-y-6">
-    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">💳 Abonnement</h1>
+    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">💳 {{ t('billing.title') }}</h1>
 
     {% if status == "PAST_DUE" %}
     <div class="bg-red-50 border-2 border-red-400 rounded-xl p-4">
-        <p class="text-red-700 font-semibold">⚠️ Zahlungsproblem — bitte aktualisieren Sie Ihre Zahlungsmethode.</p>
+        <p class="text-red-700 font-semibold">⚠️ {{ t('billing.payment_issue') }}</p>
     </div>
     {% endif %}
 
     {% if over_limit and over_limit.over_limit %}
     <div class="bg-amber-50 border-2 border-amber-400 rounded-xl p-4">
-        <p class="text-amber-800 font-semibold mb-2">⚠️ Sie überschreiten die FREE-Plan-Limits</p>
+        <p class="text-amber-800 font-semibold mb-2">⚠️ {{ t('billing.over_limit_title') }}</p>
         <p class="text-amber-700 text-sm">
-            Ihr Plan ist FREE.
+            {{ t('billing.over_limit_plan') }}
             {% if over_limit.trips_over_limit %}
-            Sie haben {{ over_limit.active_trip_count }} aktive Törns (Limit: 1).
+            {{ t('billing.over_limit_trips', count=over_limit.active_trip_count) }}
             {% endif %}
             {% if over_limit.crew_over_limit %}
-            Einige Törns haben mehr als 4 Crew-Mitglieder.
+            {{ t('billing.over_limit_crew') }}
             {% endif %}
-            Ihre bestehenden Daten bleiben erhalten, aber Sie können keine neuen Törns erstellen oder Crew hinzufügen, bis Sie upgraden oder die Nutzung reduzieren.
+            {{ t('billing.over_limit_info') }}
         </p>
         <div class="mt-3 text-sm text-amber-600">
-            <p class="font-medium">Optionen:</p>
+            <p class="font-medium">{{ t('billing.over_limit_options') }}</p>
             <ul class="list-disc ml-5 mt-1 space-y-1">
-                <li>Upgraden Sie auf Skipper Plus (siehe unten)</li>
-                <li>Archivieren Sie zusätzliche Törns unter <a href="/trips/" class="underline font-semibold">Törns</a></li>
+                <li>{{ t('billing.over_limit_upgrade') }}</li>
+                <li>{{ t('billing.over_limit_archive') }} <a href="/trips/" class="underline font-semibold">{{ t('nav.trips') }}</a></li>
             </ul>
         </div>
     </div>
@@ -38,11 +38,11 @@
     <div class="bg-white porthole-card p-6 space-y-4">
         <div class="grid grid-cols-2 gap-4">
             <div>
-                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">Account</p>
+                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">{{ t('billing.account') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ account_name }}</p>
             </div>
             <div>
-                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">Plan</p>
+                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">{{ t('billing.plan') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--navy-deep);">
                     {% if plan == "SKIPPER_PLUS" %}
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-white" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">⭐ Skipper Plus</span>
@@ -52,19 +52,19 @@
                 </p>
             </div>
             <div>
-                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">Status</p>
+                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">{{ t('billing.status') }}</p>
                 <p class="text-lg font-semibold">
                     {% if status == "ACTIVE" %}
-                    <span class="text-green-600">Aktiv</span>
+                    <span class="text-green-600">{{ t('billing.status_active') }}</span>
                     {% elif status == "PAST_DUE" %}
-                    <span class="text-red-600">Zahlung ausstehend</span>
+                    <span class="text-red-600">{{ t('billing.status_past_due') }}</span>
                     {% else %}
-                    <span class="text-gray-500">Inaktiv</span>
+                    <span class="text-gray-500">{{ t('billing.status_inactive') }}</span>
                     {% endif %}
                 </p>
             </div>
             <div>
-                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">Verlängerung</p>
+                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">{{ t('billing.renewal') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ current_period_end }}</p>
             </div>
         </div>
@@ -73,31 +73,31 @@
     {% if is_owner %}
     <div class="bg-white porthole-card p-6">
         {% if plan == "FREE" %}
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">🚀 Upgrade auf Skipper Plus</h2>
-        <p class="text-sm mb-4" style="color: var(--navy-deep); opacity:0.7;">Unbegrenzte Törns, mehr Crew-Mitglieder, PDF-Export und mehr.</p>
+        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">🚀 {{ t('billing.upgrade_title') }}</h2>
+        <p class="text-sm mb-4" style="color: var(--navy-deep); opacity:0.7;">{{ t('billing.upgrade_desc') }}</p>
         <div class="flex flex-col sm:flex-row gap-3">
             <form hx-post="/billing/ui/checkout" hx-swap="none" class="flex-1">
                 {{ csrf_input | safe }}
                 <input type="hidden" name="interval" value="monthly">
                 <button type="submit" class="w-full text-white px-6 py-3 rounded-lg font-bold text-lg transition hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
-                    📅 Monatlich upgraden
+                    📅 {{ t('billing.upgrade_monthly') }}
                 </button>
             </form>
             <form hx-post="/billing/ui/checkout" hx-swap="none" class="flex-1">
                 {{ csrf_input | safe }}
                 <input type="hidden" name="interval" value="yearly">
                 <button type="submit" class="w-full text-white px-6 py-3 rounded-lg font-bold text-lg transition hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-                    📅 Jährlich upgraden
+                    📅 {{ t('billing.upgrade_yearly') }}
                 </button>
             </form>
         </div>
         {% else %}
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">⚙️ Abonnement verwalten</h2>
-        <p class="text-sm mb-4" style="color: var(--navy-deep); opacity:0.7;">Zahlungsmethode ändern, Plan anpassen oder kündigen.</p>
+        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">⚙️ {{ t('billing.manage_title') }}</h2>
+        <p class="text-sm mb-4" style="color: var(--navy-deep); opacity:0.7;">{{ t('billing.manage_desc') }}</p>
         <form hx-post="/billing/ui/portal" hx-swap="none">
             {{ csrf_input | safe }}
             <button type="submit" class="text-white px-6 py-3 rounded-lg font-bold transition hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
-                ⚙️ Billing-Portal öffnen
+                ⚙️ {{ t('billing.manage_portal') }}
             </button>
         </form>
         {% endif %}
@@ -105,7 +105,7 @@
     {% else %}
     <div class="bg-white porthole-card p-6">
         <p class="text-sm" style="color: var(--navy-deep); opacity:0.7;">
-            💡 Nur der Account-Inhaber kann das Abonnement verwalten. Bitte kontaktieren Sie den Inhaber.
+            💡 {{ t('billing.owner_only') }}
         </p>
     </div>
     {% endif %}

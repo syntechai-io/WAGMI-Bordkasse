@@ -11,7 +11,8 @@ Preferred communication style: Simple, everyday language.
 #### Backend Architecture
 **Framework**: FastAPI (Python) with modular routers.
 **Authentication**: Dual-mode session-based auth — legacy (admin/trip_admin/crew roles) and SaaS (email/password via `new_users` table with account scoping). Uses `werkzeug.security` for password hashing.
-**Template Engine**: Jinja2 for server-side rendering, integrated with HTMX.
+**Template Engine**: Jinja2 for server-side rendering, integrated with HTMX. All router templates use shared `create_templates()` factory from `template_helpers.py` for consistent context processors.
+**Internationalization (i18n)**: Session-based i18n with German (default) and English. `i18n.py` provides `get_lang()`, `set_lang()`, and `t()` helpers. Translations stored in `locales/de.json` and `locales/en.json` (flat key-value). Language detection: query param `?lang=` > session > Accept-Language header > default `de`. Fallback chain: selected language > German > raw key. `t()` function injected into all Jinja templates via context processor. Language switch UI in navbar (DE|EN links). Endpoint: `GET/POST /set-language` with HTMX support (HX-Redirect). Initial translation coverage: Login, Billing, Trips, Navigation, Footer.
 **Data Storage**: PostgreSQL with SQLAlchemy ORM.
 **Key Architectural Decisions**:
 - **Modular Router Structure**: Enhances maintainability and separation of concerns.

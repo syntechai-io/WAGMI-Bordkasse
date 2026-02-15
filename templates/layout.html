@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="{{ lang|default('de') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -163,16 +163,16 @@
                     </svg>
                 </button>
                 <div id="menu" class="hidden lg:flex lg:items-center lg:space-x-3 text-sm">
-                    <a href="/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">🧭 Dashboard</a>
-                    <a href="/trips/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⛵ Törns</a>
-                    <a href="/logbook" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📓 Logbuch</a>
+                    <a href="/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">🧭 {{ t('nav.dashboard') }}</a>
+                    <a href="/trips/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⛵ {{ t('nav.trips') }}</a>
+                    <a href="/logbook" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📓 {{ t('nav.logbook') }}</a>
                     
                     <!-- Trip Selector (Admin Only) -->
                     {% if request.session.get('role') == 'admin' and all_trips %}
                     <div class="relative nav-dropdown">
                         <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center text-xs" 
                                 aria-haspopup="true" aria-expanded="false">
-                            🎯 {{ selected_trip.name if selected_trip else 'Törn wählen' }}
+                            🎯 {{ selected_trip.name if selected_trip else t('nav.select_trip') }}
                             <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
@@ -196,18 +196,18 @@
                     <div class="relative nav-dropdown">
                         <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center" 
                                 aria-haspopup="true" aria-expanded="false">
-                            💰 Finanzen
+                            💰 {{ t('nav.finances') }}
                             <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
                         <div class="dropdown-content absolute hidden bg-white text-gray-800 rounded-lg shadow-lg mt-2 py-2 min-w-[200px] left-0" 
                              style="z-index: 1000;" role="menu">
-                            <a href="/deposits" class="block px-4 py-2 hover:bg-sky-100 transition">💰 Einzahlungen</a>
-                            <a href="/expenses" class="block px-4 py-2 hover:bg-sky-100 transition">⚓ Ausgaben</a>
-                            <a href="/templates" class="block px-4 py-2 hover:bg-sky-100 transition">📋 Vorlagen</a>
-                            <a href="/balances" class="block px-4 py-2 hover:bg-sky-100 transition">📊 Salden</a>
-                            <a href="/settlement" class="block px-4 py-2 hover:bg-sky-100 transition">⛵ Ausgleich</a>
+                            <a href="/deposits" class="block px-4 py-2 hover:bg-sky-100 transition">💰 {{ t('nav.deposits') }}</a>
+                            <a href="/expenses" class="block px-4 py-2 hover:bg-sky-100 transition">⚓ {{ t('nav.expenses') }}</a>
+                            <a href="/templates" class="block px-4 py-2 hover:bg-sky-100 transition">📋 {{ t('nav.templates') }}</a>
+                            <a href="/balances" class="block px-4 py-2 hover:bg-sky-100 transition">📊 {{ t('nav.balances') }}</a>
+                            <a href="/settlement" class="block px-4 py-2 hover:bg-sky-100 transition">⛵ {{ t('nav.settlement') }}</a>
                         </div>
                     </div>
                     
@@ -215,34 +215,42 @@
                     <div class="relative nav-dropdown">
                         <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center" 
                                 aria-haspopup="true" aria-expanded="false">
-                            📝 Verwaltung
+                            📝 {{ t('nav.admin') }}
                             <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
                         <div class="dropdown-content absolute hidden bg-white text-gray-800 rounded-lg shadow-lg mt-2 py-2 min-w-[200px] left-0" 
                              style="z-index: 1000;" role="menu">
-                            <a href="/crew" class="block px-4 py-2 hover:bg-sky-100 transition">👥 Crew</a>
-                            <a href="/groups" class="block px-4 py-2 hover:bg-sky-100 transition">🔗 Gruppen</a>
+                            <a href="/crew" class="block px-4 py-2 hover:bg-sky-100 transition">👥 {{ t('nav.crew') }}</a>
+                            <a href="/groups" class="block px-4 py-2 hover:bg-sky-100 transition">🔗 {{ t('nav.groups') }}</a>
                             {% if request.session.get('role') == 'admin' %}
-                            <a href="/trips/passwords" class="block px-4 py-2 hover:bg-sky-100 transition">🔐 Passwörter</a>
+                            <a href="/trips/passwords" class="block px-4 py-2 hover:bg-sky-100 transition">🔐 {{ t('nav.passwords') }}</a>
                             {% endif %}
-                            <a href="/export/csv" class="block px-4 py-2 hover:bg-sky-100 transition">📋 Export</a>
+                            <a href="/export/csv" class="block px-4 py-2 hover:bg-sky-100 transition">📋 {{ t('nav.export') }}</a>
                             {% if request.session.get('saas_user_id') %}
-                            <a href="/billing" class="block px-4 py-2 hover:bg-sky-100 transition">💳 Billing</a>
+                            <a href="/billing" class="block px-4 py-2 hover:bg-sky-100 transition">💳 {{ t('nav.billing') }}</a>
                             {% endif %}
                             {% if request.session.get('role') == 'admin' %}
-                            <a href="/admin/billing" class="block px-4 py-2 hover:bg-sky-100 transition">🔧 Admin Billing</a>
+                            <a href="/admin/billing" class="block px-4 py-2 hover:bg-sky-100 transition">🔧 {{ t('nav.admin_billing') }}</a>
                             {% endif %}
                         </div>
                     </div>
                     
-                    <a href="/help" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📖 Anleitung</a>
+                    <a href="/help" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📖 {{ t('nav.help') }}</a>
+
+                    <!-- Language Switch -->
+                    <div class="flex items-center space-x-1 ml-2 text-xs">
+                        <a href="/set-language?lang=de&next={{ request.url.path }}" class="px-1.5 py-0.5 rounded transition {% if lang == 'de' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">DE</a>
+                        <span class="opacity-40">|</span>
+                        <a href="/set-language?lang=en&next={{ request.url.path }}" class="px-1.5 py-0.5 rounded transition {% if lang == 'en' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">EN</a>
+                    </div>
+
                     {% if request.session.get('user_id') %}
                     <div class="border-l border-sky-300 pl-6 ml-2 flex items-center space-x-4">
                         <span class="text-sm">👤 {{ request.session.get('username', 'User') }}</span>
                         <a href="/logout" class="px-4 py-2 rounded-lg text-sm font-semibold transition hover:scale-105" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                            🚪 Logout
+                            🚪 {{ t('nav.logout') }}
                         </a>
                     </div>
                     {% elif request.session.get('saas_user_id') %}
@@ -251,7 +259,7 @@
                         <form action="/logout-saas" method="POST" class="m-0 inline">
                             {{ csrf_input | safe }}
                             <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold transition hover:scale-105 text-white" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                                🚪 Logout
+                                🚪 {{ t('nav.logout') }}
                             </button>
                         </form>
                     </div>
@@ -259,65 +267,72 @@
                 </div>
             </div>
             <div id="mobile-menu" class="hidden lg:hidden pb-4 overflow-y-auto" style="max-height: calc(100vh - 64px);">
-                <a href="/" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">🧭 Dashboard</a>
-                <a href="/trips/" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">⛵ Törns</a>
-                <a href="/logbook" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">📓 Logbuch</a>
+                <a href="/" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">🧭 {{ t('nav.dashboard') }}</a>
+                <a href="/trips/" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">⛵ {{ t('nav.trips') }}</a>
+                <a href="/logbook" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">📓 {{ t('nav.logbook') }}</a>
 
                 <div class="mobile-section border-b border-sky-400/30">
                     <button class="w-full py-3 hover:text-sky-200 transition touch-action flex items-center justify-between mobile-section-toggle">
-                        <span>💰 Finanzen</span>
+                        <span>💰 {{ t('nav.finances') }}</span>
                         <svg class="w-4 h-4 transition-transform mobile-section-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
                     <div class="mobile-section-content hidden pl-4 pb-2">
-                        <a href="/deposits" class="block py-2 hover:text-sky-200 transition touch-action text-sm">💰 Einzahlungen</a>
-                        <a href="/expenses" class="block py-2 hover:text-sky-200 transition touch-action text-sm">⚓ Ausgaben</a>
-                        <a href="/templates" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📋 Vorlagen</a>
-                        <a href="/balances" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📊 Salden</a>
-                        <a href="/settlement" class="block py-2 hover:text-sky-200 transition touch-action text-sm">⛵ Ausgleich</a>
+                        <a href="/deposits" class="block py-2 hover:text-sky-200 transition touch-action text-sm">💰 {{ t('nav.deposits') }}</a>
+                        <a href="/expenses" class="block py-2 hover:text-sky-200 transition touch-action text-sm">⚓ {{ t('nav.expenses') }}</a>
+                        <a href="/templates" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📋 {{ t('nav.templates') }}</a>
+                        <a href="/balances" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📊 {{ t('nav.balances') }}</a>
+                        <a href="/settlement" class="block py-2 hover:text-sky-200 transition touch-action text-sm">⛵ {{ t('nav.settlement') }}</a>
                     </div>
                 </div>
 
                 <div class="mobile-section border-b border-sky-400/30">
                     <button class="w-full py-3 hover:text-sky-200 transition touch-action flex items-center justify-between mobile-section-toggle">
-                        <span>📝 Verwaltung</span>
+                        <span>📝 {{ t('nav.admin') }}</span>
                         <svg class="w-4 h-4 transition-transform mobile-section-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
                     <div class="mobile-section-content hidden pl-4 pb-2">
-                        <a href="/crew" class="block py-2 hover:text-sky-200 transition touch-action text-sm">👥 Crew</a>
-                        <a href="/groups" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔗 Gruppen</a>
+                        <a href="/crew" class="block py-2 hover:text-sky-200 transition touch-action text-sm">👥 {{ t('nav.crew') }}</a>
+                        <a href="/groups" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔗 {{ t('nav.groups') }}</a>
                         {% if request.session.get('role') == 'admin' %}
-                        <a href="/trips/passwords" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔐 Passwörter</a>
+                        <a href="/trips/passwords" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔐 {{ t('nav.passwords') }}</a>
                         {% endif %}
-                        <a href="/export/csv" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📋 Export</a>
+                        <a href="/export/csv" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📋 {{ t('nav.export') }}</a>
                         {% if request.session.get('saas_user_id') %}
-                        <a href="/billing" class="block py-2 hover:text-sky-200 transition touch-action text-sm">💳 Billing</a>
+                        <a href="/billing" class="block py-2 hover:text-sky-200 transition touch-action text-sm">💳 {{ t('nav.billing') }}</a>
                         {% endif %}
                         {% if request.session.get('role') == 'admin' %}
-                        <a href="/admin/billing" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔧 Admin Billing</a>
+                        <a href="/admin/billing" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔧 {{ t('nav.admin_billing') }}</a>
                         {% endif %}
                     </div>
                 </div>
 
-                <a href="/help" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">📖 Anleitung</a>
+                <a href="/help" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">📖 {{ t('nav.help') }}</a>
+
+                <!-- Mobile Language Switch -->
+                <div class="flex items-center space-x-3 py-3 border-b border-sky-400/30">
+                    <span class="text-sm opacity-70">🌐</span>
+                    <a href="/set-language?lang=de&next={{ request.url.path }}" class="px-2 py-1 rounded text-sm transition {% if lang == 'de' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">DE</a>
+                    <a href="/set-language?lang=en&next={{ request.url.path }}" class="px-2 py-1 rounded text-sm transition {% if lang == 'en' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">EN</a>
+                </div>
 
                 {% if request.session.get('user_id') %}
                 <div class="border-t border-sky-300 pt-4 mt-4">
-                    <div class="text-sm mb-2">👤 Angemeldet als: <strong>{{ request.session.get('username', 'User') }}</strong></div>
+                    <div class="text-sm mb-2">👤 {{ t('nav.logged_in_as') }}: <strong>{{ request.session.get('username', 'User') }}</strong></div>
                     <a href="/logout" class="block px-4 py-2 rounded-lg text-center font-semibold transition text-white" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                        🚪 Logout
+                        🚪 {{ t('nav.logout') }}
                     </a>
                 </div>
                 {% elif request.session.get('saas_user_id') %}
                 <div class="border-t border-sky-300 pt-4 mt-4">
-                    <div class="text-sm mb-2">👤 Angemeldet als: <strong>{{ request.session.get('saas_email', 'User') }}</strong></div>
+                    <div class="text-sm mb-2">👤 {{ t('nav.logged_in_as') }}: <strong>{{ request.session.get('saas_email', 'User') }}</strong></div>
                     <form action="/logout-saas" method="POST" class="m-0">
                         {{ csrf_input | safe }}
                         <button type="submit" class="block w-full px-4 py-2 rounded-lg text-center font-semibold transition text-white" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                            🚪 Logout
+                            🚪 {{ t('nav.logout') }}
                         </button>
                     </form>
                 </div>
@@ -332,8 +347,8 @@
 
     <footer class="ocean-gradient text-white text-center py-6 mt-12 wave-border" style="transform: scaleY(-1);">
         <div style="transform: scaleY(-1);">
-            <p class="text-sm font-semibold">⚓ WAGMI CrewLog v1.0 - Maritime Logbook & Bordkasse ⚓</p>
-            <p class="text-xs opacity-80 mt-2">Professionelles Logbuch für Segelcrew • Ausgaben & Abrechnung</p>
+            <p class="text-sm font-semibold">⚓ {{ t('footer.title') }} ⚓</p>
+            <p class="text-xs opacity-80 mt-2">{{ t('footer.subtitle') }}</p>
         </div>
     </footer>
 
