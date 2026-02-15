@@ -43,3 +43,6 @@ run = ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
 
 [userenv.development]
 APP_BASE_URL = "https://4ab24e3a-e318-4ff7-8dab-80d71ab1b725-00-19fomh9w0v1z9.riker.replit.dev"
+
+[userenv.shared]
+STRIPE_WEBHOOK_SECRET = "whsec_FQxtTmFAxpjAPqsDxfhCWA2NIOxBW0UK"
