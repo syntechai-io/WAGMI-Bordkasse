@@ -81,7 +81,7 @@
                         <td class="px-6 py-4" style="color: var(--navy-deep);">{{ deposit.note or '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                             <a href="/deposits/{{ deposit.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ {{ t('common.edit') }}</a>
-                            <form action="/deposits/{{ deposit.id }}/delete" method="post" class="inline" onsubmit="return confirm('Einzahlung wirklich löschen?')">
+                            <form action="/deposits/{{ deposit.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ t('common.confirm_delete_deposit') }}')">
                                 {{ csrf_input | safe }}
                                 <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
                             </form>

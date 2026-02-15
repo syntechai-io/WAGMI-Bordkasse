@@ -31,7 +31,7 @@
                    class="ocean-gradient text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm">
                     ✏️ {{ t('common.edit') }}
                 </a>
-                <form action="/logbook/{{ entry.id }}/delete" method="post" class="inline" onsubmit="return confirm('Eintrag wirklich löschen?')">
+                <form action="/logbook/{{ entry.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ t('common.confirm_delete_entry') }}')">
                     {{ csrf_input | safe }}
                     <button type="submit" 
                             class="text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm" 
@@ -182,7 +182,7 @@
                     </div>
                     {% endif %}
                     <div class="p-2 border-t" style="border-color: var(--sky-blue);">
-                        <form action="/logbook/photos/{{ photo.id }}/delete" method="post" class="inline" onsubmit="return confirm('Foto wirklich löschen?')">
+                        <form action="/logbook/photos/{{ photo.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ t('common.confirm_delete_photo') }}')">
                             {{ csrf_input | safe }}
                             <button type="submit" class="text-sm hover:underline touch-action" style="color: var(--coral);">
                                 🗑️ {{ t('common.delete') }}
@@ -242,7 +242,7 @@
                 
                 photoInput.addEventListener('change', function(e) {
                     if (e.target.files.length > 0) {
-                        document.getElementById('photoFileName').textContent = '✓ Datei ausgewählt: ' + e.target.files[0].name;
+                        document.getElementById('photoFileName').textContent = '{{ t("common.file_selected") }}' + e.target.files[0].name;
                         document.getElementById('uploadButton').disabled = false;
                         document.getElementById('uploadButton').classList.remove('opacity-50');
                     }

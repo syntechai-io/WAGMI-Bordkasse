@@ -82,7 +82,7 @@
                                style="color: var(--ocean-blue);">
                                 ✏️ {{ t('common.edit') }}
                             </a>
-                            <form action="/logbook/{{ entry.id }}/delete" method="post" class="inline" onsubmit="return confirm('Eintrag wirklich löschen?')">
+                            <form action="/logbook/{{ entry.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ t('common.confirm_delete_entry') }}')">
                                 {{ csrf_input | safe }}
                                 <button type="submit" 
                                         class="text-sm hover:underline touch-action px-3 py-1 rounded" 

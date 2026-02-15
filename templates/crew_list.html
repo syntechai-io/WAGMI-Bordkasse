@@ -90,7 +90,7 @@
                                 {% else %}
                                 <button onclick="showDeactivateModal({{ member.id }}, '{{ member.name }}')" class="hover:underline touch-action" style="color: #ff9800;">🚪 {{ t('crew.deactivate') }}</button>
                                 {% endif %}
-                                <form action="/crew/{{ member.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ member.name }} wirklich löschen?')">
+                                <form action="/crew/{{ member.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ t('common.confirm_delete_name').replace('{name}', member.name) }}')">
                                     {{ csrf_input | safe }}
                                     <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
                                 </form>

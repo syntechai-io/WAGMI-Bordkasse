@@ -115,7 +115,7 @@
                     {% endfor %}
                 </div>
                 <div id="percentage_warning" class="hidden mt-3 text-sm font-medium" style="color: var(--coral);">
-                    ⚠️ Die Summe der Prozentsätze beträgt <span id="percentage_sum">0</span>% (sollte 100% sein)
+                    ⚠️ {{ t('expense.percentage_warning') }} <span id="percentage_sum">0</span>% {{ t('expense.percentage_should_be') }}
                 </div>
             </div>
             
@@ -233,7 +233,7 @@
         if (e.target.files.length > 0) {
             const file = e.target.files[0];
             const fileName = document.getElementById('receiptFileName');
-            fileName.textContent = '✓ Datei ausgewählt: ' + file.name;
+            fileName.textContent = '{{ t("common.file_selected") }}' + file.name;
         }
     });
 </script>

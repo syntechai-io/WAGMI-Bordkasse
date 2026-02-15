@@ -406,9 +406,9 @@
                         <select name="engine_on" id="engine_on" 
                                 class="w-full px-4 py-3 border rounded-lg text-lg" 
                                 style="border-color: var(--sky-blue);">
-                            <option value="">-- Unbekannt --</option>
-                            <option value="1" {% if entry and entry.engine_on %}selected{% endif %}>✅ Ja, Motor läuft</option>
-                            <option value="0" {% if entry and entry.engine_on == False %}selected{% endif %}>❌ Nein, Motor aus</option>
+                            <option value="">-- {{ t('logbook.unknown') }} --</option>
+                            <option value="1" {% if entry and entry.engine_on %}selected{% endif %}>✅ {{ t('logbook.engine_yes') }}</option>
+                            <option value="0" {% if entry and entry.engine_on == False %}selected{% endif %}>❌ {{ t('logbook.engine_no') }}</option>
                         </select>
                     </div>
                     
@@ -461,15 +461,15 @@
                         style="border-color: var(--sky-blue);"
                         data-field="sail_plan">
                     <option value="">{{ t('common.select_option') }}</option>
-                    <option value="Motor / keine Segel" {% if entry and entry.sail_plan == 'Motor / keine Segel' %}selected{% endif %}>🚤 Motor / keine Segel</option>
-                    <option value="Großsegel" {% if entry and entry.sail_plan == 'Großsegel' %}selected{% endif %}>⛵ Großsegel</option>
-                    <option value="Genua" {% if entry and entry.sail_plan == 'Genua' %}selected{% endif %}>🎐 Genua</option>
-                    <option value="Großsegel + Genua" {% if entry and entry.sail_plan == 'Großsegel + Genua' %}selected{% endif %}>⛵ Großsegel + Genua</option>
-                    <option value="Keine Segel" {% if entry and entry.sail_plan == 'Keine Segel' %}selected{% endif %}>⚓ Keine Segel</option>
+                    <option value="Motor / keine Segel" {% if entry and entry.sail_plan == 'Motor / keine Segel' %}selected{% endif %}>🚤 {{ t('logbook.sail_motor_none') }}</option>
+                    <option value="Großsegel" {% if entry and entry.sail_plan == 'Großsegel' %}selected{% endif %}>⛵ {{ t('logbook.sail_mainsail') }}</option>
+                    <option value="Genua" {% if entry and entry.sail_plan == 'Genua' %}selected{% endif %}>🎐 {{ t('logbook.sail_genoa') }}</option>
+                    <option value="Großsegel + Genua" {% if entry and entry.sail_plan == 'Großsegel + Genua' %}selected{% endif %}>⛵ {{ t('logbook.sail_main_genoa') }}</option>
+                    <option value="Keine Segel" {% if entry and entry.sail_plan == 'Keine Segel' %}selected{% endif %}>⚓ {{ t('logbook.sail_none') }}</option>
                 </select>
                 <input type="text" id="sail_plan_manual" 
                        value="{% if entry and entry.sail_plan %}{{ entry.sail_plan }}{% endif %}" 
-                       placeholder="z.B. Groß + Genua" 
+                       placeholder="{{ t('logbook.sail_placeholder') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
                        style="border-color: var(--sky-blue);"
                        data-field="sail_plan"
@@ -540,12 +540,12 @@
                     <button type="button" id="furl-in-btn" 
                             class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition touch-action text-sm" 
                             style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%);">
-                        ⬅️ Groß einrollen (0%)
+                        ⬅️ {{ t('logbook.furl_in') }}
                     </button>
                     <button type="button" id="furl-out-btn" 
                             class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition touch-action text-sm" 
                             style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-                        ➡️ Groß ausrollen (100%)
+                        ➡️ {{ t('logbook.furl_out') }}
                     </button>
                 </div>
                 
@@ -588,19 +588,19 @@
                             class="w-full px-4 py-3 border rounded-lg text-lg" 
                             style="border-color: var(--sky-blue);">
                         <option value="">{{ t('common.select_option') }}</option>
-                        <option value="Manöver" {% if entry and entry.event_category == 'Manöver' %}selected{% endif %}>⚓ Manöver</option>
-                        <option value="Wetterwechsel" {% if entry and entry.event_category == 'Wetterwechsel' %}selected{% endif %}>🌦️ Wetterwechsel</option>
-                        <option value="Sichtung" {% if entry and entry.event_category == 'Sichtung' %}selected{% endif %}>👁️ Sichtung</option>
-                        <option value="Reparatur" {% if entry and entry.event_category == 'Reparatur' %}selected{% endif %}>🔧 Reparatur</option>
-                        <option value="Notfall" {% if entry and entry.event_category == 'Notfall' %}selected{% endif %}>🚨 Notfall</option>
-                        <option value="Sonstiges" {% if entry and entry.event_category == 'Sonstiges' %}selected{% endif %}>📌 Sonstiges</option>
+                        <option value="Manöver" {% if entry and entry.event_category == 'Manöver' %}selected{% endif %}>⚓ {{ t('logbook.event_maneuver') }}</option>
+                        <option value="Wetterwechsel" {% if entry and entry.event_category == 'Wetterwechsel' %}selected{% endif %}>🌦️ {{ t('logbook.event_weather_change') }}</option>
+                        <option value="Sichtung" {% if entry and entry.event_category == 'Sichtung' %}selected{% endif %}>👁️ {{ t('logbook.event_sighting') }}</option>
+                        <option value="Reparatur" {% if entry and entry.event_category == 'Reparatur' %}selected{% endif %}>🔧 {{ t('logbook.event_repair') }}</option>
+                        <option value="Notfall" {% if entry and entry.event_category == 'Notfall' %}selected{% endif %}>🚨 {{ t('logbook.event_emergency') }}</option>
+                        <option value="Sonstiges" {% if entry and entry.event_category == 'Sonstiges' %}selected{% endif %}>📌 {{ t('logbook.event_other') }}</option>
                     </select>
                 </div>
                 
                 <div>
                     <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 {{ t('logbook.event_details') }}</label>
                     <textarea name="event_details" rows="3" 
-                              placeholder="Detaillierte Beschreibung des Ereignisses..." 
+                              placeholder="{{ t('logbook.event_details_placeholder') }}" 
                               class="w-full px-4 py-3 border rounded-lg text-lg" 
                               style="border-color: var(--sky-blue);">{% if entry and entry.event_details %}{{ entry.event_details }}{% endif %}</textarea>
                 </div>
@@ -626,7 +626,7 @@
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">👥 {{ t('logbook.watch') }} (Mehrfachauswahl)</label>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">👥 {{ t('logbook.watch') }} ({{ t('logbook.multi_select') }})</label>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
                 {% for member in crew_members %}
                 <label class="flex items-center space-x-2 cursor-pointer">
@@ -646,7 +646,7 @@
         <div>
             <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 {{ t('common.notes') }}</label>
             <textarea name="notes" rows="4" 
-                      placeholder="Besondere Vorkommnisse, Beobachtungen..." 
+                      placeholder="{{ t('logbook.notes_placeholder') }}" 
                       class="w-full px-4 py-3 border rounded-lg text-lg" 
                       style="border-color: var(--sky-blue);">{% if entry and entry.notes %}{{ entry.notes }}{% endif %}</textarea>
         </div>
@@ -654,7 +654,7 @@
         <div>
             <label class="block font-medium mb-2" style="color: var(--navy-deep);">✅ {{ t('logbook.safety_checks_label') }}</label>
             <textarea name="safety_checks" rows="3" 
-                      placeholder="z.B. Rettungsmittel geprüft, Bilge kontrolliert..." 
+                      placeholder="{{ t('logbook.safety_placeholder') }}" 
                       class="w-full px-4 py-3 border rounded-lg text-lg" 
                       style="border-color: var(--sky-blue);">{% if entry and entry.safety_checks_completed %}{{ entry.safety_checks_completed }}{% endif %}</textarea>
         </div>
@@ -678,6 +678,24 @@
 <script src="/static/js/logbook-quick-entry.js"></script>
 <script src="/static/js/logbook-quick-fill.js"></script>
 <script>
+const i18n = {
+    furl_in: '{{ t("logbook.furl_in") }}',
+    furl_out: '{{ t("logbook.furl_out") }}',
+    furled_in: '{{ t("logbook.furled_in") }}',
+    furled_out: '{{ t("logbook.furled_out") }}',
+    gps_alert: '{{ t("logbook.gps_alert") }}',
+    weather_error: '{{ t("logbook.weather_error") }}',
+    geo_not_supported: '{{ t("logbook.geo_not_supported") }}',
+    location_blocked: '{{ t("logbook.location_blocked") }}',
+    gps_unavailable: '{{ t("logbook.gps_unavailable") }}',
+    gps_timeout: '{{ t("logbook.gps_timeout") }}',
+    file_selected: '{{ t("logbook.file_selected") }}',
+    ios_settings: '{{ t("logbook.ios_gps_settings") | safe }}',
+    android_settings: '{{ t("logbook.android_gps_settings") | safe }}',
+    safari_settings: '{{ t("logbook.safari_gps_settings") | safe }}',
+    browser_settings: '{{ t("logbook.browser_gps_settings") | safe }}',
+};
+
 // Phase A: Motor Toggle Buttons with Auto-Calculation
 document.getElementById('motor-on-btn').addEventListener('click', function() {
     const now = new Date();
@@ -758,18 +776,18 @@ furlSlider.addEventListener('input', function() {
 document.getElementById('furl-in-btn').addEventListener('click', function() {
     furlSlider.value = 0;
     furlDisplay.textContent = '0%';
-    this.textContent = '✅ Eingerollt!';
+    this.textContent = '✅ ' + i18n.furled_in;
     setTimeout(() => {
-        this.textContent = '⬅️ Groß einrollen (0%)';
+        this.textContent = '⬅️ ' + i18n.furl_in;
     }, 2000);
 });
 
 document.getElementById('furl-out-btn').addEventListener('click', function() {
     furlSlider.value = 100;
     furlDisplay.textContent = '100%';
-    this.textContent = '✅ Ausgerollt!';
+    this.textContent = '✅ ' + i18n.furled_out;
     setTimeout(() => {
-        this.textContent = '➡️ Groß ausrollen (100%)';
+        this.textContent = '➡️ ' + i18n.furl_out;
     }, 2000);
 });
 
@@ -778,57 +796,10 @@ function getPermissionInstructions() {
     const isAndroid = /Android/.test(navigator.userAgent);
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     
-    if (isIOS) {
-        return `📱 iPhone/iPad Einstellungen:
-
-1. Öffne die Einstellungen-App
-2. Scrolle runter zu "Safari"
-3. Tippe auf "Standort"
-4. Wähle "Beim Verwenden erlauben"
-5. Lade diese Seite neu
-
-Oder in Safari direkt:
-• Tippe auf "aA" in der Adressleiste
-• Wähle "Website-Einstellungen"
-• Aktiviere "Standort"`;
-    } else if (isAndroid) {
-        return `📱 Android Chrome Einstellungen:
-
-1. Tippe auf die 3 Punkte (⋮) oben rechts
-2. Wähle "Einstellungen"
-3. Tippe auf "Website-Einstellungen"
-4. Tippe auf "Standort"
-5. Stelle sicher, dass Standort aktiviert ist
-6. Lade diese Seite neu
-
-Oder schnell:
-• Tippe auf das 🔒 Symbol in der Adressleiste
-• Wähle "Berechtigungen"
-• Aktiviere "Standort"`;
-    } else if (isSafari) {
-        return `💻 Safari Desktop Einstellungen:
-
-1. Gehe zu Safari > Einstellungen
-2. Klicke auf "Websites"
-3. Wähle "Standort" in der linken Liste
-4. Aktiviere Standort für wagmibordkasse.com
-5. Lade diese Seite neu`;
-    } else {
-        return `💻 Browser Einstellungen:
-
-Chrome/Edge:
-1. Klicke auf das 🔒 Symbol in der Adressleiste
-2. Wähle "Website-Einstellungen"
-3. Ändere "Standort" zu "Zulassen"
-4. Lade diese Seite neu
-
-Firefox:
-1. Klicke auf das ⓘ Symbol in der Adressleiste
-2. Klicke auf "Verbindung sicher"
-3. Klicke auf "Weitere Informationen"
-4. Wähle "Berechtigungen"
-5. Aktiviere "Standort"`;
-    }
+    if (isIOS) return i18n.ios_settings;
+    else if (isAndroid) return i18n.android_settings;
+    else if (isSafari) return i18n.safari_settings;
+    else return i18n.browser_settings;
 }
 
 // Hybrid Field Toggle Logic (Select/Manual Entry)
@@ -941,7 +912,7 @@ document.getElementById('weather-button').addEventListener('click', async functi
     const lon = parseFloat(lonInput.value);
     
     if (!lat || !lon) {
-        alert('⚠️ Bitte zuerst GPS-Position abrufen!\n\nDrücke auf "GPS-Position abrufen" um die Koordinaten zu setzen.');
+        alert(i18n.gps_alert);
         return;
     }
     
@@ -996,7 +967,7 @@ document.getElementById('weather-button').addEventListener('click', async functi
         
     } catch (error) {
         console.error('Weather fetch error:', error);
-        alert('❌ Wetterdaten konnten nicht abgerufen werden.\n\nBitte prüfe deine Internetverbindung und versuche es erneut.');
+        alert(i18n.weather_error);
         btn.textContent = originalText;
         btn.disabled = false;
     }
@@ -1012,7 +983,7 @@ document.getElementById('gps-button').addEventListener('click', async function()
     
     if (!('geolocation' in navigator)) {
         console.error('❌ Geolocation API not available');
-        alert('❌ Geolocation wird von diesem Browser nicht unterstützt.\n\nBitte verwende einen modernen Browser wie Chrome, Firefox, Safari oder Edge.');
+        alert(i18n.geo_not_supported);
         return;
     }
     console.log('✅ Geolocation API available');
@@ -1031,7 +1002,7 @@ document.getElementById('gps-button').addEventListener('click', async function()
                 console.error('🚫 Permission explicitly denied');
                 const instructions = getPermissionInstructions();
                 alert(`🚫 Standort-Zugriff blockiert!\n\n${instructions}`);
-                button.textContent = '🔒 Standort gesperrt - Einstellungen prüfen';
+                button.textContent = '🔒 ' + i18n.location_blocked;
                 setTimeout(() => {
                     button.textContent = '📍 GPS-Position abrufen';
                     button.disabled = false;
@@ -1116,12 +1087,12 @@ document.getElementById('gps-button').addEventListener('click', async function()
                     break;
                 case error.POSITION_UNAVAILABLE:
                     console.error('📡 Position unavailable - GPS signal issues');
-                    errorMessage = `📡 GPS-Signal nicht verfügbar!\n\nMögliche Lösungen:\n• Gehe nach draußen für besseren GPS-Empfang\n• Prüfe ob Standortdienste aktiviert sind\n• Versuche es in ein paar Sekunden erneut${debugInfo}`;
+                    errorMessage = i18n.gps_unavailable + debugInfo;
                     button.textContent = '📡 Kein Signal';
                     break;
                 case error.TIMEOUT:
                     console.error('⏱️ Timeout - GPS took too long (>10s)');
-                    errorMessage = `⏱️ GPS-Timeout!\n\nDie Position konnte nicht schnell genug ermittelt werden.\n\n• Prüfe deine GPS-Verbindung\n• Versuche es erneut${debugInfo}`;
+                    errorMessage = i18n.gps_timeout + debugInfo;
                     button.textContent = '⏱️ Timeout';
                     break;
                 default:

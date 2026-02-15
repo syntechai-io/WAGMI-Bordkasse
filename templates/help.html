@@ -358,35 +358,35 @@
                             <li>{{ t('help.trips_new_5') }}</li>
                         </ul>
                     </li>
-                    <li><strong>Törn bearbeiten:</strong> Törn-Details (Name, Boot, Heimathafen, etc.) nachträglich ändern</li>
-                    <li><strong>Archivierte Törns:</strong> Bleiben als Backup gespeichert und können angeschaut werden</li>
-                    <li><strong>Törn schließen:</strong> Abgeschlossene Törns werden für normale Crew-Mitglieder read-only</li>
+                    <li><strong>{{ t('help.trips_edit') }}</strong> {{ t('help.trips_edit_desc') }}</li>
+                    <li><strong>{{ t('help.trips_archived') }}</strong> {{ t('help.trips_archived_desc') }}</li>
+                    <li><strong>{{ t('help.trips_close') }}</strong> {{ t('help.trips_close_desc') }}</li>
                 </ul>
 
                 <div class="bg-purple-50 p-4 rounded-lg border-2 border-purple-200">
-                    <p class="font-semibold mb-2">💡 Törn-Tipps:</p>
+                    <p class="font-semibold mb-2">💡 {{ t('help.trips_tips_title') }}</p>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li><strong>Quick Start nutzen:</strong> Für WAGMI-Törns von Fredericia - spart 2-3 Minuten Einrichtungszeit</li>
-                        <li><strong>Solo-Sailing aktivieren:</strong> Bei Ein-Mann-Segeln für automatische Crew-Setup</li>
-                        <li><strong>Heimathafen-Koordinaten:</strong> Werden für ersten Logbuch-Eintrag bei Quick Start verwendet</li>
-                        <li><strong>Törns archivieren:</strong> Alter Törn wird automatisch archiviert, kein manueller Schritt nötig</li>
+                        <li>{{ t('help.trips_tip_quickstart')|safe }}</li>
+                        <li>{{ t('help.trips_tip_solo')|safe }}</li>
+                        <li>{{ t('help.trips_tip_homeport')|safe }}</li>
+                        <li>{{ t('help.trips_tip_archive')|safe }}</li>
                     </ul>
                 </div>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💱 Währungen & Ausland</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💱 {{ t('help.currency_title') }}</h2>
             <div class="mb-6">
-                <p class="mb-4">Die App unterstützt verschiedene Währungen für internationale Törns:</p>
+                <p class="mb-4">{{ t('help.currency_intro') }}</p>
                 <ul class="list-disc ml-6 space-y-2 mb-4">
-                    <li><strong>Unterstützte Währungen:</strong> EUR, DKK (Dänemark), SEK (Schweden), GBP (England)</li>
-                    <li><strong>Automatische Umrechnung:</strong> Die App holt sich täglich aktuelle Wechselkurse</li>
-                    <li><strong>Bei Einzahlungen/Ausgaben:</strong> 
+                    <li>{{ t('help.currency_supported')|safe }}</li>
+                    <li>{{ t('help.currency_auto')|safe }}</li>
+                    <li>{{ t('help.currency_usage')|safe }} 
                         <ul class="list-disc ml-6 mt-2">
-                            <li>Währung auswählen (z.B. DKK)</li>
-                            <li>Betrag in dieser Währung eingeben</li>
-                            <li>App rechnet automatisch in EUR um für die Abrechnung</li>
+                            <li>{{ t('help.currency_step1') }}</li>
+                            <li>{{ t('help.currency_step2') }}</li>
+                            <li>{{ t('help.currency_step3') }}</li>
                         </ul>
                     </li>
                 </ul>
@@ -394,128 +394,128 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📱 App auf Handy installieren (PWA)</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📱 {{ t('help.pwa_title') }}</h2>
             <div class="mb-6">
-                <p class="mb-4">Installiere die App auf dem Homescreen für bessere Nutzung:</p>
+                <p class="mb-4">{{ t('help.pwa_intro') }}</p>
                 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">iPhone/iPad (Safari):</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.pwa_ios_title') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
-                    <li>Öffne die App in Safari</li>
-                    <li>Tippe auf das <strong>Teilen-Symbol</strong> (Quadrat mit Pfeil nach oben)</li>
-                    <li>Scrolle runter und wähle <strong>"Zum Home-Bildschirm"</strong></li>
-                    <li>Bestätige mit <strong>"Hinzufügen"</strong></li>
-                    <li>Die App erscheint jetzt als Icon mit dem WAGMI-Logo auf deinem Homescreen!</li>
+                    <li>{{ t('help.pwa_ios_step1') }}</li>
+                    <li>{{ t('help.pwa_ios_step2')|safe }}</li>
+                    <li>{{ t('help.pwa_ios_step3')|safe }}</li>
+                    <li>{{ t('help.pwa_ios_step4')|safe }}</li>
+                    <li>{{ t('help.pwa_ios_step5') }}</li>
                 </ol>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">Android (Chrome):</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.pwa_android_title') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
-                    <li>Öffne die App in Chrome</li>
-                    <li>Tippe auf die <strong>drei Punkte</strong> (Menü)</li>
-                    <li>Wähle <strong>"Zum Startbildschirm hinzufügen"</strong></li>
-                    <li>Bestätige mit <strong>"Hinzufügen"</strong></li>
+                    <li>{{ t('help.pwa_android_step1') }}</li>
+                    <li>{{ t('help.pwa_android_step2')|safe }}</li>
+                    <li>{{ t('help.pwa_android_step3')|safe }}</li>
+                    <li>{{ t('help.pwa_android_step4')|safe }}</li>
                 </ol>
 
                 <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200">
-                    <p class="font-semibold mb-2">✨ Vorteile als installierte App:</p>
+                    <p class="font-semibold mb-2">✨ {{ t('help.pwa_benefits_title') }}</p>
                     <ul class="list-disc ml-6">
-                        <li>Schnellerer Zugriff direkt vom Homescreen</li>
-                        <li>Vollbild ohne Browser-Leiste für besseres App-Feeling</li>
-                        <li>WAGMI-Logo als App-Icon statt nur "W"</li>
-                        <li>GPS-Funktionen auch ohne Internet nutzbar</li>
+                        <li>{{ t('help.pwa_benefit1') }}</li>
+                        <li>{{ t('help.pwa_benefit2') }}</li>
+                        <li>{{ t('help.pwa_benefit3') }}</li>
+                        <li>{{ t('help.pwa_benefit4') }}</li>
                     </ul>
                 </div>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📋 Daten exportieren</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📋 {{ t('help.export_title') }}</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📊 Bordkasse Export (Einzahlungen & Ausgaben):</h3>
+                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📊 {{ t('help.export_bordkasse_title') }}</h3>
                 
                 <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 mb-4">
-                    <h4 class="font-bold mb-2">CSV Export:</h4>
-                    <p class="mb-2">Unter <strong>"📋 Export"</strong> kannst du alle Bordkasse-Daten als CSV-Datei herunterladen:</p>
+                    <h4 class="font-bold mb-2">{{ t('help.export_csv_title') }}</h4>
+                    <p class="mb-2">{{ t('help.export_csv_intro')|safe }}</p>
                     <ul class="list-disc ml-6 text-sm">
-                        <li>Alle Einzahlungen und Ausgaben mit Details</li>
-                        <li>Importierbar in Excel oder Google Sheets</li>
-                        <li>Ideal für eigene Auswertungen</li>
+                        <li>{{ t('help.export_csv1') }}</li>
+                        <li>{{ t('help.export_csv2') }}</li>
+                        <li>{{ t('help.export_csv3') }}</li>
                     </ul>
                 </div>
 
                 <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200 mb-4">
-                    <h4 class="font-bold mb-2">PDF Export:</h4>
-                    <p class="mb-2">Erstelle einen professionellen PDF-Bericht der Bordkasse mit:</p>
+                    <h4 class="font-bold mb-2">{{ t('help.export_pdf_title') }}</h4>
+                    <p class="mb-2">{{ t('help.export_pdf_intro') }}</p>
                     <ul class="list-disc ml-6 text-sm">
-                        <li>Kompletter Übersicht aller Einzahlungen und Ausgaben</li>
-                        <li>Salden und optimierte Ausgleichsberechnungen</li>
-                        <li>Maritimem Design mit WAGMI-Branding</li>
-                        <li>Perfekt für die Endabrechnung nach dem Törn</li>
+                        <li>{{ t('help.export_pdf1') }}</li>
+                        <li>{{ t('help.export_pdf2') }}</li>
+                        <li>{{ t('help.export_pdf3') }}</li>
+                        <li>{{ t('help.export_pdf4') }}</li>
                     </ul>
                 </div>
                 
-                <h3 class="text-xl font-semibold mb-3 mt-6" style="color: var(--navy-deep);">📓 Logbuch PDF Export:</h3>
-                <p class="mb-3">Das Logbuch kann in professionellem maritimen Format exportiert werden - ideal für offizielle Dokumentation:</p>
+                <h3 class="text-xl font-semibold mb-3 mt-6" style="color: var(--navy-deep);">📓 {{ t('help.export_logbook_title') }}</h3>
+                <p class="mb-3">{{ t('help.export_logbook_intro') }}</p>
                 
                 <div class="bg-amber-50 p-4 rounded-lg border-2 border-amber-200 mb-3">
-                    <h4 class="font-bold mb-2">📄 Einzelner Eintrag als PDF:</h4>
+                    <h4 class="font-bold mb-2">📄 {{ t('help.export_single_title') }}</h4>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li>In der Logbuch-Liste: Bei jedem Eintrag auf <strong>"📄 PDF"</strong> klicken</li>
-                        <li>Generiert eine einzelne Seite im Querformat mit Grid-Layout</li>
-                        <li>Zeigt Skipper, Crew-Roster und alle Eintragsdaten</li>
-                        <li>Traditionelles maritimes Tabellenformat</li>
+                        <li>{{ t('help.export_single1')|safe }}</li>
+                        <li>{{ t('help.export_single2') }}</li>
+                        <li>{{ t('help.export_single3') }}</li>
+                        <li>{{ t('help.export_single4') }}</li>
                     </ul>
                 </div>
 
                 <div class="bg-cyan-50 p-4 rounded-lg border-2 border-cyan-200 mb-3">
-                    <h4 class="font-bold mb-2">📖 Tages-Logbuch als PDF:</h4>
+                    <h4 class="font-bold mb-2">📖 {{ t('help.export_daily_title') }}</h4>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li>In der Tagesansicht: <strong>"📄 Tages-PDF"</strong> Button nutzen</li>
-                        <li>Alle Einträge eines Tages in einem Dokument</li>
-                        <li>Querformat mit 11 Spalten (Zeit, Position, Kurs, Fahrt, Log, Wind, Wetter, Motor, Segel, Wache, Bemerkungen)</li>
-                        <li>Kompakte Darstellung - mehrere Einträge pro Seite</li>
-                        <li>Entspricht offiziellen maritimen Logbuch-Standards</li>
+                        <li>{{ t('help.export_daily1')|safe }}</li>
+                        <li>{{ t('help.export_daily2') }}</li>
+                        <li>{{ t('help.export_daily3') }}</li>
+                        <li>{{ t('help.export_daily4') }}</li>
+                        <li>{{ t('help.export_daily5') }}</li>
                     </ul>
                 </div>
 
                 <div class="bg-purple-50 p-4 rounded-lg border-2 border-purple-200">
-                    <h4 class="font-bold mb-2">✨ PDF-Features:</h4>
+                    <h4 class="font-bold mb-2">✨ {{ t('help.export_features_title') }}</h4>
                     <ul class="list-disc ml-6 text-sm space-y-1">
-                        <li><strong>Skipper & Crew-Roster:</strong> Automatisch in jedem PDF enthalten</li>
-                        <li><strong>Schiffs-Informationen:</strong> Boot-Name, Heimathafen, Rufzeichen (falls vorhanden)</li>
-                        <li><strong>Koordinaten-Format:</strong> GPS-Position in Grad/Minuten (z.B. 55°33.2'N, 9°43.8'E)</li>
-                        <li><strong>Grid-Layout:</strong> Schwarze Gitterlinien für professionelles Erscheinungsbild</li>
-                        <li><strong>Druckfertig:</strong> Optimiert für A4 Querformat</li>
+                        <li>{{ t('help.export_feature1')|safe }}</li>
+                        <li>{{ t('help.export_feature2')|safe }}</li>
+                        <li>{{ t('help.export_feature3')|safe }}</li>
+                        <li>{{ t('help.export_feature4')|safe }}</li>
+                        <li>{{ t('help.export_feature5')|safe }}</li>
                     </ul>
                 </div>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">✏️ Fehler korrigieren</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">✏️ {{ t('help.corrections_title') }}</h2>
             <div class="mb-6">
-                <p class="mb-2">Du kannst Einzahlungen, Ausgaben und Logbuch-Einträge <strong>bearbeiten</strong> oder <strong>löschen</strong>:</p>
+                <p class="mb-2">{{ t('help.corrections_intro')|safe }}</p>
                 <ul class="list-disc ml-6 mb-4">
-                    <li>Auf der Übersichts-Seite: <strong>"✏️ Bearbeiten"</strong> oder <strong>"🗑️ Löschen"</strong> klicken</li>
-                    <li>Änderungen werden sofort übernommen</li>
-                    <li>Die Salden passen sich automatisch an</li>
+                    <li>{{ t('help.corrections_step1')|safe }}</li>
+                    <li>{{ t('help.corrections_step2') }}</li>
+                    <li>{{ t('help.corrections_step3') }}</li>
                 </ul>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">🧭 Navigation</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">🧭 {{ t('help.nav_title') }}</h2>
             <div class="mb-6">
                 <ul class="list-disc ml-6 space-y-1">
-                    <li><strong>Dashboard:</strong> 🧭 Startseite mit Übersicht</li>
-                    <li><strong>Törns:</strong> ⛵ Törn-Verwaltung & Archiv</li>
-                    <li><strong>Crew:</strong> 👥 Alle Crew-Mitglieder (Admin kann bearbeiten)</li>
-                    <li><strong>Logbuch:</strong> 📓 Digitales Logbuch mit GPS & Wetter</li>
-                    <li><strong>Einzahlungen:</strong> 💰 Geld ins Wallet einzahlen</li>
-                    <li><strong>Ausgaben:</strong> ⚓ Ausgaben erfassen und ansehen</li>
-                    <li><strong>Salden:</strong> 📊 Wer schuldet wem?</li>
-                    <li><strong>Ausgleich:</strong> ⛵ Minimale Überweisungen berechnen</li>
-                    <li><strong>Export:</strong> 📋 Daten als CSV/PDF exportieren</li>
-                    <li><strong>Anleitung:</strong> 📖 Diese Hilfe-Seite</li>
+                    <li>{{ t('help.nav_dashboard')|safe }}</li>
+                    <li>{{ t('help.nav_trips')|safe }}</li>
+                    <li>{{ t('help.nav_crew')|safe }}</li>
+                    <li>{{ t('help.nav_logbook')|safe }}</li>
+                    <li>{{ t('help.nav_deposits')|safe }}</li>
+                    <li>{{ t('help.nav_expenses')|safe }}</li>
+                    <li>{{ t('help.nav_balances')|safe }}</li>
+                    <li>{{ t('help.nav_settlement')|safe }}</li>
+                    <li>{{ t('help.nav_export')|safe }}</li>
+                    <li>{{ t('help.nav_guide')|safe }}</li>
                 </ul>
             </div>
 
@@ -535,8 +535,8 @@
 
             <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border-2" style="border-color: var(--sky-blue);">
                 <h2 class="text-2xl font-bold maritime-header mb-3" style="color: var(--ocean-blue);">❓ {{ t('help.faq_title') }}</h2>
-                <p class="mb-4">Bei Problemen oder Fragen: Sprich den Skipper oder Admin an!</p>
-                <p class="text-xl font-bold maritime-header" style="color: var(--sea-foam);">Schönen Törn und fair winds! ⛵🌊</p>
+                <p class="mb-4">{{ t('help.faq_contact') }}</p>
+                <p class="text-xl font-bold maritime-header" style="color: var(--sea-foam);">{{ t('help.faq_farewell') }} ⛵🌊</p>
             </div>
 
         </div>
