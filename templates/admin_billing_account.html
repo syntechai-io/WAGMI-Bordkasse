@@ -73,7 +73,21 @@
                 <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Stripe Subscription ID</p>
                 <p class="font-mono text-xs text-gray-500">{{ sub.stripe_subscription_id or "—" }}</p>
             </div>
+            <div>
+                <p class="font-medium" style="color: var(--navy-deep); opacity:0.6;">Letzter Webhook</p>
+                <p>{{ sub.webhook_received_at.strftime("%d.%m.%Y %H:%M") if sub.webhook_received_at else "—" }}</p>
+            </div>
         </div>
+
+        {% if sub.stripe_subscription_id %}
+        <div class="mt-4 pt-4 border-t border-sky-200">
+            <form hx-post="/admin/billing/reconcile/{{ account.id }}" hx-target="#reconcile-result" hx-swap="innerHTML" class="m-0 flex items-center gap-3">
+                {{ csrf_input | safe }}
+                <button type="submit" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:scale-105" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">🔄 Reconcile mit Stripe</button>
+                <span id="reconcile-result" class="text-sm"></span>
+            </form>
+        </div>
+        {% endif %}
         {% else %}
         <p class="text-gray-500">Kein Abonnement vorhanden.</p>
         {% endif %}

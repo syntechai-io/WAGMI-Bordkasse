@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import datetime, timedelta
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -12,6 +13,8 @@ from models import SaaSUser, Subscription, Account, PlanEnum, SubscriptionStatus
 from billing_stripe import (
     get_or_create_subscription_row,
     get_or_create_stripe_customer,
+    check_over_limit_state,
+    reconcile_subscription_from_stripe,
     PRICE_MONTHLY,
     PRICE_YEARLY,
 )
@@ -74,13 +77,19 @@ async def billing_page(request: Request, db: Session = Depends(get_db)):
     if sub.current_period_end:
         period_end_str = sub.current_period_end.strftime("%d.%m.%Y")
 
+    plan_value = sub.plan.value if sub.plan else PlanEnum.FREE.value
+    over_limit = {}
+    if plan_value == "FREE":
+        over_limit = check_over_limit_state(db, account_id)
+
     return templates.TemplateResponse("billing.html", {
         "request": request,
         "account_name": account.name if account else f"Account {account_id}",
         "is_owner": user.is_owner,
-        "plan": sub.plan.value if sub.plan else PlanEnum.FREE.value,
+        "plan": plan_value,
         "status": sub.status.value if sub.status else SubscriptionStatus.CANCELED.value,
         "current_period_end": period_end_str,
+        "over_limit": over_limit,
     })
 
 
@@ -189,6 +198,7 @@ async def admin_billing(request: Request, db: Session = Depends(get_db)):
             Subscription.stripe_customer_id,
             Subscription.stripe_subscription_id,
             Subscription.updated_at,
+            Subscription.webhook_received_at,
         )
         .outerjoin(Subscription, Subscription.account_id == Account.id)
         .outerjoin(
@@ -232,6 +242,25 @@ async def admin_billing(request: Request, db: Session = Depends(get_db)):
         .filter(Subscription.plan == PlanEnum.FREE)
         .scalar() or 0
     )
+    canceled_subs = (
+        db.query(func.count(Subscription.id))
+        .filter(Subscription.status == SubscriptionStatus.CANCELED)
+        .scalar() or 0
+    )
+
+    stale_cutoff = datetime.utcnow() - timedelta(days=7)
+    stale_webhook_count = (
+        db.query(func.count(Subscription.id))
+        .filter(
+            Subscription.stripe_subscription_id.isnot(None),
+            Subscription.status == SubscriptionStatus.ACTIVE,
+        )
+        .filter(
+            (Subscription.webhook_received_at == None) |
+            (Subscription.webhook_received_at < stale_cutoff)
+        )
+        .scalar() or 0
+    )
 
     return templates.TemplateResponse("admin_billing.html", {
         "request": request,
@@ -240,6 +269,8 @@ async def admin_billing(request: Request, db: Session = Depends(get_db)):
         "active_subs": active_subs,
         "past_due_subs": past_due_subs,
         "free_accounts": free_accounts,
+        "canceled_subs": canceled_subs,
+        "stale_webhook_count": stale_webhook_count,
         "status_filter": status_filter or "",
         "plan_filter": plan_filter or "",
         "q": q,
@@ -288,3 +319,30 @@ async def admin_billing_account(account_id: int, request: Request, db: Session =
         "members": members,
         "trip_count": trip_count,
     })
+
+
+@router.post("/admin/billing/reconcile/{account_id}")
+async def admin_reconcile(account_id: int, request: Request, db: Session = Depends(get_db)):
+    is_admin = request.session.get("role") == "admin"
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    result = reconcile_subscription_from_stripe(db, account_id)
+    db.commit()
+    logger.info("Admin reconcile account %s: %s", account_id, result)
+
+    if _is_htmx(request):
+        status_text = result.get("status", "unknown")
+        if status_text == "reconciled":
+            html = f'<span class="text-green-600 font-semibold">Reconciled: {result.get("old_plan")} -> {result.get("new_plan")}, {result.get("old_status")} -> {result.get("new_status")}</span>'
+        elif status_text == "no_stripe_subscription":
+            html = '<span class="text-gray-500">No Stripe subscription linked</span>'
+        elif status_text == "stripe_subscription_not_found":
+            html = '<span class="text-amber-600">Stripe sub not found, reset to FREE</span>'
+        else:
+            html = f'<span class="text-red-600">{result.get("error", "Unknown error")}</span>'
+        from starlette.responses import HTMLResponse
+        return HTMLResponse(html)
+
+    from fastapi.responses import JSONResponse
+    return JSONResponse(result)

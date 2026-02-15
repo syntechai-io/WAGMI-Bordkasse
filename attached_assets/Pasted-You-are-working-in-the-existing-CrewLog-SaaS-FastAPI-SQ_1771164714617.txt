@@ -1,0 +1,126 @@
+You are working in the existing CrewLog SaaS FastAPI + SQLAlchemy + Jinja/HTMX codebase on Replit.
+
+Context (already implemented and working)
+- SaaS tenant isolation via accounts + trips.account_id
+- Stripe billing fully wired:
+  - POST /billing/checkout
+  - POST /billing/portal
+  - POST /stripe/webhook (signature verified, updates subscriptions table)
+- Billing UI pages:
+  - /billing (owner can upgrade/manage)
+  - /admin/billing + account detail
+- Plan gating enforced: FREE limited to 1 active trip + 4 crew per trip
+
+Goal now (“Immediate Next Layer” hardening before i18n / iOS)
+Make billing + subscriptions production-safe and operationally robust by implementing:
+1) DB-level invariants and uniqueness constraints
+2) Strong webhook idempotency protections (no duplicates on retries)
+3) Downgrade handling (“soft enforcement”) so over-limit states are handled cleanly
+4) Admin observability for Stripe webhook freshness and plan integrity
+
+Hard requirements
+- Do NOT refactor frontend. Only minimal banners/status indicators as needed.
+- Do NOT delete user data automatically (no destructive actions).
+- Enforce correctness primarily by DB constraints + idempotent code.
+- Changes must be safe to run on existing data. Add “pre-check” queries before constraints.
+- Keep code lean and focused; no new frameworks.
+
+A) Database hardening (via Alembic migration or a safe SQL migration script)
+1) Pre-checks (must run and log results):
+   - Count duplicates in subscriptions by account_id:
+     SELECT account_id, COUNT(*) c FROM subscriptions GROUP BY account_id HAVING COUNT(*) > 1;
+   - Count duplicates by stripe_subscription_id (non-null):
+     SELECT stripe_subscription_id, COUNT(*) c FROM subscriptions
+     WHERE stripe_subscription_id IS NOT NULL
+     GROUP BY stripe_subscription_id HAVING COUNT(*) > 1;
+   - Count NULLs in subscriptions.plan/status/account_id:
+     SELECT COUNT(*) FROM subscriptions WHERE account_id IS NULL;
+     SELECT COUNT(*) FROM subscriptions WHERE plan IS NULL;
+     SELECT COUNT(*) FROM subscriptions WHERE status IS NULL;
+
+2) Add constraints ONLY if pre-checks are clean (or write an automatic cleanup step if needed, but do not delete rows silently; log and stop if unsafe):
+   - UNIQUE on subscriptions.account_id (one subscription row per account):
+     ALTER TABLE subscriptions ADD CONSTRAINT subscriptions_unique_account UNIQUE (account_id);
+   - UNIQUE index on stripe_subscription_id (non-null) to prevent webhook retry duplication:
+     CREATE UNIQUE INDEX IF NOT EXISTS ux_subscriptions_stripe_subscription_id
+     ON subscriptions (stripe_subscription_id)
+     WHERE stripe_subscription_id IS NOT NULL;
+   - Set defaults:
+     ALTER TABLE subscriptions ALTER COLUMN plan SET DEFAULT 'FREE';
+     ALTER TABLE subscriptions ALTER COLUMN status SET DEFAULT 'CANCELED';
+
+(If you are using Alembic, create a migration. If not, create scripts/db_hardening.sql and a one-time admin endpoint to run it with clear output.)
+
+B) Webhook idempotency hardening (code changes)
+In the /stripe/webhook handler:
+1) Ensure DB upsert logic is deterministic:
+   - Primary key for updates:
+     - If stripe_subscription_id is present: update by stripe_subscription_id (unique)
+     - Else: update by account_id
+2) Never create multiple subscription rows per account. If none exists, create exactly one.
+3) Always store:
+   - stripe_customer_id
+   - stripe_subscription_id
+   - status (ACTIVE/PAST_DUE/CANCELED)
+   - plan (SKIPPER_PLUS when status is active/trialing/past_due; FREE when canceled)
+   - current_period_end (from Stripe)
+   - updated_at
+4) Add a “webhook_received_at” timestamp column (optional but recommended) to subscriptions, updated on every webhook event. If adding a column is too risky, store it in a small new table stripe_webhook_events.
+
+C) Downgrade handling (“soft enforcement”)
+Implement a non-destructive downgrade strategy:
+1) Add a helper function: check_over_limit_state(db, account_id) -> dict
+   - counts active trips for account
+   - counts trip_members per trip
+   - compares to FREE limits
+2) When plan is FREE:
+   - Do NOT delete/close/archive anything.
+   - Block only new actions that would exceed limits (already done).
+   - Add UI banners:
+     - On Trips page and /billing page show:
+       “Your plan is FREE. You currently exceed FREE limits (X active trips / Y crew). You can keep existing data, but cannot create new trips or add crew until you upgrade or reduce usage.”
+3) Add a simple action helper (optional):
+   - Provide admin/owner guidance links (no automation):
+     - “Archive/close extra trips”
+     - “Remove extra crew members”
+   This is guidance only.
+
+D) Admin Observability
+Extend /admin/billing dashboard:
+1) Show:
+   - last_webhook_received_at (if you added it)
+   - or last Stripe event timestamp per account (if using events table)
+2) Add a top-level “Stripe health” widget:
+   - total accounts
+   - ACTIVE count
+   - PAST_DUE count
+   - CANCELED count
+   - accounts with webhook older than 7 days (stale)
+3) Add a “Reconcile subscription” admin action (safe):
+   - POST /admin/billing/reconcile/{account_id}
+   - Fetch Stripe subscription by stripe_subscription_id (if present)
+   - Recompute DB state and update row
+   - This is manual, admin-only, and logs results
+   - Do NOT create charges; only sync state
+
+E) Testing checklist (must execute and report)
+1) Webhook retry test:
+   - In Stripe dashboard, resend the same webhook event
+   - Confirm DB does not create duplicates and updated_at/webhook_received_at updates
+2) Cancel subscription:
+   - Ensure DB transitions to CANCELED/FREE and UI banners appear if over limits
+3) Over-limit scenario:
+   - Create >1 active trip on SKIPPER_PLUS
+   - Cancel subscription
+   - Confirm: existing trips remain, new trip creation blocked, banner appears
+4) Admin reconcile:
+   - Run reconcile on an account and confirm it updates DB correctly
+
+Deliverables
+- Migration (Alembic) or SQL script + safe runner
+- Updated webhook handler for deterministic upserts and webhook_received_at tracking
+- Over-limit banner logic (minimal template changes)
+- Admin dashboard enhancements (stale webhook detection + reconcile action)
+- Brief summary of what changed and how to test
+
+Keep it lean. No new frameworks. No destructive automation.

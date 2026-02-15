@@ -403,12 +403,13 @@ class Subscription(Base):
     __tablename__ = "subscriptions"
 
     id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(Integer, ForeignKey("accounts.id"), index=True, nullable=True)
-    plan = Column(SQLEnum(PlanEnum, name="planenum", create_type=False), nullable=False)
-    status = Column(SQLEnum(SubscriptionStatus, name="subscriptionstatus", create_type=False), nullable=False)
+    account_id = Column(Integer, ForeignKey("accounts.id"), index=True, nullable=True, unique=True)
+    plan = Column(SQLEnum(PlanEnum, name="planenum", create_type=False), nullable=False, default=PlanEnum.FREE)
+    status = Column(SQLEnum(SubscriptionStatus, name="subscriptionstatus", create_type=False), nullable=False, default=SubscriptionStatus.CANCELED)
     current_period_end = Column(DateTime, nullable=True)
     stripe_customer_id = Column(String, nullable=True)
     stripe_subscription_id = Column(String, nullable=True)
+    webhook_received_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 

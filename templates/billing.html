@@ -12,6 +12,29 @@
     </div>
     {% endif %}
 
+    {% if over_limit and over_limit.over_limit %}
+    <div class="bg-amber-50 border-2 border-amber-400 rounded-xl p-4">
+        <p class="text-amber-800 font-semibold mb-2">⚠️ Sie überschreiten die FREE-Plan-Limits</p>
+        <p class="text-amber-700 text-sm">
+            Ihr Plan ist FREE.
+            {% if over_limit.trips_over_limit %}
+            Sie haben {{ over_limit.active_trip_count }} aktive Törns (Limit: 1).
+            {% endif %}
+            {% if over_limit.crew_over_limit %}
+            Einige Törns haben mehr als 4 Crew-Mitglieder.
+            {% endif %}
+            Ihre bestehenden Daten bleiben erhalten, aber Sie können keine neuen Törns erstellen oder Crew hinzufügen, bis Sie upgraden oder die Nutzung reduzieren.
+        </p>
+        <div class="mt-3 text-sm text-amber-600">
+            <p class="font-medium">Optionen:</p>
+            <ul class="list-disc ml-5 mt-1 space-y-1">
+                <li>Upgraden Sie auf Skipper Plus (siehe unten)</li>
+                <li>Archivieren Sie zusätzliche Törns unter <a href="/trips/" class="underline font-semibold">Törns</a></li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="bg-white porthole-card p-6 space-y-4">
         <div class="grid grid-cols-2 gap-4">
             <div>

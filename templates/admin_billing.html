@@ -6,7 +6,7 @@
 <div class="space-y-6">
     <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">🔧 Admin Billing</h1>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div class="bg-white porthole-card p-4 text-center">
             <p class="text-2xl font-bold" style="color: var(--navy-deep);">{{ total_accounts }}</p>
             <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Accounts</p>
@@ -20,8 +20,16 @@
             <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Past Due</p>
         </div>
         <div class="bg-white porthole-card p-4 text-center">
-            <p class="text-2xl font-bold text-gray-500">{{ free_accounts }}</p>
+            <p class="text-2xl font-bold text-gray-500">{{ canceled_subs }}</p>
+            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Canceled</p>
+        </div>
+        <div class="bg-white porthole-card p-4 text-center">
+            <p class="text-2xl font-bold text-gray-400">{{ free_accounts }}</p>
             <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Free</p>
+        </div>
+        <div class="bg-white porthole-card p-4 text-center {% if stale_webhook_count > 0 %}border-2 border-amber-400{% endif %}">
+            <p class="text-2xl font-bold {% if stale_webhook_count > 0 %}text-amber-600{% else %}text-green-600{% endif %}">{{ stale_webhook_count }}</p>
+            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Stale Webhooks (>7d)</p>
         </div>
     </div>
 
@@ -52,10 +60,9 @@
                         <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Plan</th>
                         <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Status</th>
                         <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Verlängerung</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Stripe Customer</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Stripe Sub</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Aktualisiert</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);"></th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Webhook</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Stripe IDs</th>
+                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">Aktionen</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-sky-200">
@@ -82,18 +89,35 @@
                             <span class="text-gray-400">—</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-3">{{ row.current_period_end.strftime("%d.%m.%Y") if row.current_period_end else "—" }}</td>
-                        <td class="px-4 py-3 text-xs font-mono text-gray-500">{{ row.stripe_customer_id or "—" }}</td>
-                        <td class="px-4 py-3 text-xs font-mono text-gray-500">{{ row.stripe_subscription_id or "—" }}</td>
-                        <td class="px-4 py-3 text-xs text-gray-500">{{ row.updated_at.strftime("%d.%m.%Y %H:%M") if row.updated_at else "—" }}</td>
+                        <td class="px-4 py-3 text-xs">{{ row.current_period_end.strftime("%d.%m.%Y") if row.current_period_end else "—" }}</td>
+                        <td class="px-4 py-3 text-xs">
+                            {% if row.webhook_received_at %}
+                            {{ row.webhook_received_at.strftime("%d.%m.%Y %H:%M") }}
+                            {% else %}
+                            <span class="text-gray-400">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-xs font-mono text-gray-500">
+                            <div>{{ (row.stripe_customer_id or "—")[:16] }}</div>
+                            <div>{{ (row.stripe_subscription_id or "—")[:16] }}</div>
+                        </td>
                         <td class="px-4 py-3">
-                            <a href="/admin/billing/account/{{ row.account_id }}" class="text-sm font-semibold hover:underline" style="color: var(--ocean-blue);">Details</a>
+                            <div class="flex flex-col gap-1">
+                                <a href="/admin/billing/account/{{ row.account_id }}" class="text-xs font-semibold hover:underline" style="color: var(--ocean-blue);">Details</a>
+                                {% if row.stripe_subscription_id %}
+                                <form hx-post="/admin/billing/reconcile/{{ row.account_id }}" hx-target="#reconcile-{{ row.account_id }}" hx-swap="innerHTML" class="m-0">
+                                    {{ csrf_input | safe }}
+                                    <button type="submit" class="text-xs font-semibold hover:underline text-amber-600">Reconcile</button>
+                                </form>
+                                <span id="reconcile-{{ row.account_id }}" class="text-xs"></span>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
                     {% if not rows %}
                     <tr>
-                        <td colspan="10" class="px-4 py-8 text-center text-gray-400">Keine Ergebnisse</td>
+                        <td colspan="9" class="px-4 py-8 text-center text-gray-400">Keine Ergebnisse</td>
                     </tr>
                     {% endif %}
                 </tbody>

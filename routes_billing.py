@@ -16,6 +16,7 @@ from billing_stripe import (
     resolve_plan_and_status,
     get_account_id_from_metadata,
     get_account_id_from_customer,
+    reconcile_subscription_from_stripe,
     PRICE_MONTHLY,
     PRICE_YEARLY,
 )
