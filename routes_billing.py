@@ -27,17 +27,27 @@ router = APIRouter()
 APP_BASE_URL = os.getenv("APP_BASE_URL", "")
 
 
-def _require_saas_owner(request: Request, db: Session) -> tuple[SaaSUser, int]:
+def _require_billing_access(request: Request, db: Session) -> tuple[SaaSUser, int]:
     saas_user_id = request.session.get("saas_user_id")
     account_id = request.session.get("account_id")
-    if not saas_user_id or not account_id:
-        raise HTTPException(status_code=401, detail="SaaS login required")
-    user = db.query(SaaSUser).filter(SaaSUser.id == saas_user_id).first()
-    if not user or user.account_id != account_id:
-        raise HTTPException(status_code=401, detail="Invalid session")
-    if not user.is_owner:
-        raise HTTPException(status_code=403, detail="Only the account owner may manage billing")
-    return user, int(account_id)
+    if saas_user_id and account_id:
+        user = db.query(SaaSUser).filter(SaaSUser.id == saas_user_id).first()
+        if not user or user.account_id != account_id:
+            raise HTTPException(status_code=401, detail="Invalid session")
+        if not user.is_owner:
+            raise HTTPException(status_code=403, detail="Only the account owner may manage billing")
+        return user, int(account_id)
+
+    if request.session.get("role") == "admin":
+        owner = (
+            db.query(SaaSUser)
+            .filter(SaaSUser.account_id == 1, SaaSUser.is_owner.is_(True))
+            .first()
+        )
+        if owner:
+            return owner, 1
+
+    raise HTTPException(status_code=401, detail="Login required")
 
 
 @router.post("/billing/checkout")
@@ -51,7 +61,7 @@ async def billing_checkout(request: Request, db: Session = Depends(get_db)):
     if not price_id:
         raise HTTPException(status_code=500, detail="Stripe price not configured")
 
-    user, account_id = _require_saas_owner(request, db)
+    user, account_id = _require_billing_access(request, db)
     get_or_create_subscription_row(db, account_id)
     customer_id = get_or_create_stripe_customer(db, account_id, user)
     db.commit()
@@ -82,7 +92,7 @@ def billing_cancel():
 
 @router.post("/billing/portal")
 async def billing_portal(request: Request, db: Session = Depends(get_db)):
-    user, account_id = _require_saas_owner(request, db)
+    user, account_id = _require_billing_access(request, db)
     customer_id = get_or_create_stripe_customer(db, account_id, user)
     db.commit()
 

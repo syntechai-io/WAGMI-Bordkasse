@@ -44,12 +44,17 @@ async def trips_page(request: Request, db: Session = Depends(get_db)):
     account_id = get_active_account_id(request)
     current_plan = None
     is_saas_owner = False
+    is_legacy_admin = request.session.get("role") == "admin"
+
     if account_id:
         current_plan = get_effective_plan(account_id, db).value
         saas_uid = request.session.get("saas_user_id")
         if saas_uid:
             saas_user = db.query(SaaSUser).filter(SaaSUser.id == saas_uid).first()
             is_saas_owner = bool(saas_user and saas_user.is_owner)
+    elif is_legacy_admin:
+        current_plan = get_effective_plan(1, db).value
+        is_saas_owner = True
 
     return templates.TemplateResponse("trips.html", {
         "request": request,

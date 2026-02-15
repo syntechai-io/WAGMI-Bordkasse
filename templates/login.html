@@ -157,8 +157,66 @@
                 </button>
             </form>
             
-            <div class="mt-6 text-center text-sm" style="color: var(--navy-deep);">
-                <p>🌊 Kontaktieren Sie den Administrator für Login-Daten</p>
+            <div class="mt-4 text-center">
+                <button onclick="toggleLoginMode()" id="toggle-btn" class="text-sm font-medium underline" style="color: var(--ocean-blue);">
+                    Mit E-Mail einloggen (SaaS)
+                </button>
+            </div>
+        </div>
+
+        <div id="saas-login-card" class="porthole-card p-8 mt-4 hidden">
+            <div class="text-center mb-6 wave-border pb-4">
+                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">📧 SAAS LOGIN</h2>
+            </div>
+
+            <div id="saas-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 hidden" role="alert">
+                <div class="flex items-center">
+                    <span class="text-2xl mr-2">⚠️</span>
+                    <span id="saas-error-msg"></span>
+                </div>
+            </div>
+
+            <form id="saas-form" class="space-y-6" onsubmit="return handleSaasLogin(event)">
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
+                        📧 E-Mail
+                    </label>
+                    <input
+                        type="email"
+                        name="email"
+                        id="saas-email"
+                        required
+                        class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition"
+                        style="border-color: var(--sky-blue);"
+                        placeholder="name@example.com">
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
+                        🔑 Passwort
+                    </label>
+                    <input
+                        type="password"
+                        name="password"
+                        id="saas-password"
+                        required
+                        class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition"
+                        style="border-color: var(--sky-blue);"
+                        placeholder="••••••••">
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-full text-white font-bold py-4 px-4 rounded-lg text-lg transition transform hover:scale-105"
+                    style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                    📧 Mit E-Mail einloggen
+                </button>
+            </form>
+
+            <div class="mt-4 text-center">
+                <button onclick="toggleLoginMode()" class="text-sm font-medium underline" style="color: var(--ocean-blue);">
+                    Zurück zum klassischen Login
+                </button>
             </div>
         </div>
         
@@ -166,5 +224,41 @@
             <p>WAGMI CrewLog - Maritime Logbook & Bordkasse</p>
         </div>
     </div>
+    <script>
+    function toggleLoginMode() {
+        const legacyCard = document.querySelector('.porthole-card');
+        const saasCard = document.getElementById('saas-login-card');
+        legacyCard.classList.toggle('hidden');
+        saasCard.classList.toggle('hidden');
+    }
+    async function handleSaasLogin(e) {
+        e.preventDefault();
+        const errBox = document.getElementById('saas-error');
+        const errMsg = document.getElementById('saas-error-msg');
+        errBox.classList.add('hidden');
+        const form = new FormData();
+        form.append('email', document.getElementById('saas-email').value);
+        form.append('password', document.getElementById('saas-password').value);
+        try {
+            const csrfToken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+            const res = await fetch('/login-saas', {
+                method: 'POST',
+                body: form,
+                headers: { 'x-csrftoken': csrfToken }
+            });
+            const data = await res.json();
+            if (res.ok && data.ok) {
+                window.location.href = '/trips/';
+            } else {
+                errMsg.textContent = data.detail || 'Login fehlgeschlagen';
+                errBox.classList.remove('hidden');
+            }
+        } catch (err) {
+            errMsg.textContent = 'Verbindungsfehler';
+            errBox.classList.remove('hidden');
+        }
+        return false;
+    }
+    </script>
 </body>
 </html>
