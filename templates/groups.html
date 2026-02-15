@@ -4,47 +4,47 @@
 <div class="space-y-6">
     <!-- Breadcrumb navigation -->
     <div class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">
-        <a href="/" class="hover:underline">🧭 Dashboard</a> 
+        <a href="/" class="hover:underline">🧭 {{ t('nav.dashboard') }}</a> 
         <span class="mx-2">/</span>
-        <span class="font-semibold">👥 Settlement Groups</span>
+        <span class="font-semibold">👥 {{ t('group.title') }}</span>
     </div>
 
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">👥 Settlement Groups</h1>
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">👥 {{ t('group.title') }}</h1>
     </div>
 
     <!-- Success messages -->
     {% if request.query_params.get('success') == 'created' %}
     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg porthole-card" role="alert">
-        <strong class="font-bold">✅ Success!</strong>
-        <span class="block sm:inline">Settlement group created successfully.</span>
+        <strong class="font-bold">✅ {{ t('common.success_alert') }}</strong>
+        <span class="block sm:inline">{{ t('group.success_created') }}</span>
     </div>
     {% elif request.query_params.get('success') == 'updated' %}
     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg porthole-card" role="alert">
-        <strong class="font-bold">✅ Success!</strong>
-        <span class="block sm:inline">Settlement group updated successfully.</span>
+        <strong class="font-bold">✅ {{ t('common.success_alert') }}</strong>
+        <span class="block sm:inline">{{ t('group.success_updated') }}</span>
     </div>
     {% elif request.query_params.get('success') == 'deleted' %}
     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg porthole-card" role="alert">
-        <strong class="font-bold">✅ Success!</strong>
-        <span class="block sm:inline">Settlement group deleted successfully.</span>
+        <strong class="font-bold">✅ {{ t('common.success_alert') }}</strong>
+        <span class="block sm:inline">{{ t('group.success_deleted') }}</span>
     </div>
     {% elif request.query_params.get('success') == 'representative_changed' %}
     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg porthole-card" role="alert">
-        <strong class="font-bold">✅ Success!</strong>
-        <span class="block sm:inline">Group representative changed successfully.</span>
+        <strong class="font-bold">✅ {{ t('common.success_alert') }}</strong>
+        <span class="block sm:inline">{{ t('group.success_rep_changed') }}</span>
     </div>
     {% endif %}
 
     <!-- Error messages -->
     {% if request.query_params.get('error') == 'trip_closed' %}
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card" role="alert">
-        <strong class="font-bold">⚠️ Error!</strong>
-        <span class="block sm:inline">This trip is closed. Only admin can make changes.</span>
+        <strong class="font-bold">⚠️ {{ t('common.error_alert') }}</strong>
+        <span class="block sm:inline">{{ t('group.error_trip_closed') }}</span>
     </div>
     {% elif request.query_params.get('error') %}
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card" role="alert">
-        <strong class="font-bold">⚠️ Error!</strong>
+        <strong class="font-bold">⚠️ {{ t('common.error_alert') }}</strong>
         <span class="block sm:inline">{{ request.query_params.get('error') }}</span>
     </div>
     {% endif %}
@@ -52,33 +52,33 @@
     <!-- Create Group Form (Admin Only) -->
     {% if is_admin and is_editable %}
     <div class="bg-white porthole-card p-6">
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Create Settlement Group</h2>
+        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ {{ t('group.create_title') }}</h2>
         <form method="post" action="/groups/create" class="space-y-4">
             {{ csrf_input | safe }}
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👥 Group Name</label>
-                    <input type="text" name="group_name" required placeholder="e.g., Smith Family, Anna & Tom" 
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👥 {{ t('group.group_name') }}</label>
+                    <input type="text" name="group_name" required placeholder="{{ t('group.group_name_placeholder') }}" 
                            class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">💡 A descriptive name for the settlement group</p>
+                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('group.group_name_hint') }}</p>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👑 Representative</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👑 {{ t('group.representative') }}</label>
                     <select name="representative_id" id="representative_id" required 
                             class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-                        <option value="">-- Select Representative --</option>
+                        <option value="">{{ t('group.select_representative') }}</option>
                         {% for member in crew_members %}
                         <option value="{{ member.id }}">{{ member.code }} - {{ member.name }}</option>
                         {% endfor %}
                     </select>
-                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">💡 Person who settles for the entire group</p>
+                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('group.representative_hint') }}</p>
                 </div>
             </div>
             
             <div>
-                <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">👥 Group Members (including representative)</label>
+                <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">👥 {{ t('group.members_label') }}</label>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-3 border rounded-lg" style="border-color: var(--sky-blue); background: rgba(135, 206, 235, 0.05);">
                     {% for member in crew_members %}
                     <label class="flex items-center space-x-2 p-2 hover:bg-white rounded transition cursor-pointer">
@@ -89,11 +89,11 @@
                     {% endfor %}
                 </div>
                 <input type="hidden" name="member_ids" id="member_ids">
-                <p class="text-xs mt-2" style="color: var(--navy-deep); opacity: 0.7;">💡 Representative is automatically included</p>
+                <p class="text-xs mt-2" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('group.rep_auto_included') }}</p>
             </div>
             
             <button type="submit" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
-                ✅ Create Group
+                ✅ {{ t('group.create_submit') }}
             </button>
         </form>
     </div>
@@ -104,7 +104,7 @@
     <!-- Existing Groups -->
     <div class="bg-white porthole-card overflow-hidden">
         <div class="px-6 py-4" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
-            <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">📋 Existing Settlement Groups</h2>
+            <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">📋 {{ t('group.existing_groups') }}</h2>
         </div>
         
         {% if groups %}
@@ -115,7 +115,7 @@
                     <div>
                         <h3 class="text-lg font-bold" style="color: var(--ocean-blue);">👥 {{ group.name }}</h3>
                         <p class="text-sm mt-1" style="color: var(--navy-deep); opacity: 0.7;">
-                            👑 <strong>Representative:</strong> {{ group.representative }}
+                            👑 <strong>{{ t('group.representative') }}:</strong> {{ group.representative }}
                         </p>
                     </div>
                     {% if is_admin and is_editable %}
@@ -123,14 +123,14 @@
                         <button onclick="editGroup({{ group.id }}, '{{ group.name }}', {{ group.member_ids }}, {{ group.representative_id }})" 
                                 class="px-3 py-1 rounded-lg text-sm font-semibold text-white transition hover:scale-105"
                                 style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
-                            ✏️ Edit
+                            ✏️ {{ t('common.edit') }}
                         </button>
                         <form action="/groups/{{ group.id }}/delete" method="post" class="inline" 
                               onsubmit="return confirm('Delete group \'{{ group.name }}\'? Members will become independent again.')">
                             {{ csrf_input | safe }}
                             <button type="submit" class="px-3 py-1 rounded-lg text-sm font-semibold text-white transition hover:scale-105"
                                     style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                                🗑️ Delete
+                                🗑️ {{ t('common.delete') }}
                             </button>
                         </form>
                     </div>
@@ -149,11 +149,11 @@
         </div>
         {% else %}
         <div class="p-6 text-center" style="color: var(--navy-deep); opacity: 0.7;">
-            <p class="text-lg">📭 Noch keine Abrechnungsgruppen</p>
+            <p class="text-lg">📭 {{ t('group.no_groups') }}</p>
             {% if is_admin %}
-            <p class="text-sm mt-2">Erstellen Sie eine Gruppe, um mehrere Crew-Mitglieder gemeinsam abzurechnen</p>
+            <p class="text-sm mt-2">{{ t('group.no_groups_admin') }}</p>
             {% else %}
-            <p class="text-sm mt-2">Für diesen Törn wurden noch keine Gruppen erstellt</p>
+            <p class="text-sm mt-2">{{ t('group.no_groups_crew') }}</p>
             {% endif %}
         </div>
         {% endif %}
@@ -163,7 +163,7 @@
     {% if ungrouped_members %}
     <div class="bg-white porthole-card overflow-hidden">
         <div class="px-6 py-4" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
-            <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ Einzelne Mitglieder</h2>
+            <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ {{ t('group.ungrouped_members') }}</h2>
         </div>
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -180,13 +180,13 @@
 
     <!-- Help Section -->
     <div class="bg-blue-50 border border-blue-200 rounded-lg porthole-card p-6">
-        <h3 class="text-lg font-bold mb-3" style="color: var(--navy-deep);">💡 Über Abrechnungsgruppen</h3>
+        <h3 class="text-lg font-bold mb-3" style="color: var(--navy-deep);">💡 {{ t('group.about_title') }}</h3>
         <div class="space-y-2 text-sm" style="color: var(--navy-deep);">
-            <p>• <strong>Abrechnungsgruppen</strong> fassen mehrere Crew-Mitglieder für die Endabrechnung zusammen</p>
-            <p>• Der <strong>Vertreter</strong> übernimmt die Zahlung/Erstattung für die gesamte Gruppe</p>
-            <p>• Jedes Mitglied kann nur in einer Gruppe sein</p>
-            <p>• Mitglieder einer Gruppe können nicht gelöscht werden, bis sie aus der Gruppe entfernt wurden</p>
-            <p>• Perfekt für Familien oder Paare, die zusammen abrechnen</p>
+            <p>• {{ t('group.about_1') }}</p>
+            <p>• {{ t('group.about_2') }}</p>
+            <p>• {{ t('group.about_3') }}</p>
+            <p>• {{ t('group.about_4') }}</p>
+            <p>• {{ t('group.about_5') }}</p>
         </div>
     </div>
 </div>
@@ -197,7 +197,7 @@
     <div class="bg-white rounded-lg porthole-card max-w-2xl w-full max-h-screen overflow-y-auto">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">✏️ Edit Group</h2>
+                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">✏️ {{ t('group.edit_title') }}</h2>
                 <button onclick="closeEditModal()" class="text-2xl hover:text-red-500">&times;</button>
             </div>
             
@@ -205,14 +205,14 @@
                 {{ csrf_input | safe }}
                 
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👥 Group Name</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👥 {{ t('group.group_name') }}</label>
                     <input type="text" id="edit_group_name" readonly 
                            class="w-full px-3 py-2 border rounded-lg bg-gray-100" style="border-color: var(--sky-blue);">
-                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">💡 To change the name, delete and recreate the group</p>
+                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('group.name_readonly_hint') }}</p>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">👥 Group Members</label>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">👥 {{ t('group.edit_members') }}</label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto p-3 border rounded-lg" style="border-color: var(--sky-blue); background: rgba(135, 206, 235, 0.05);">
                         {% for member in crew_members %}
                         <label class="flex items-center space-x-2 p-2 hover:bg-white rounded transition cursor-pointer">
@@ -227,12 +227,12 @@
                 
                 <div class="flex space-x-3">
                     <button type="submit" class="flex-1 ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
-                        ✅ Update Members
+                        ✅ {{ t('group.update_members') }}
                     </button>
                     <button type="button" onclick="closeEditModal()" 
                             class="flex-1 px-6 py-2 rounded-lg font-semibold transition" 
                             style="background: #e0e0e0; color: var(--navy-deep);">
-                        ❌ Cancel
+                        ❌ {{ t('common.cancel') }}
                     </button>
                 </div>
             </form>

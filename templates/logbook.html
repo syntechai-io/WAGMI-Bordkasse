@@ -3,9 +3,9 @@
 {% block content %}
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📓 Logbuch</h1>
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📓 {{ t('logbook.title') }}</h1>
         <a href="/logbook/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
-            ➕ Neuer Eintrag
+            ➕ {{ t('logbook.new_entry') }}
         </a>
     </div>
 
@@ -33,7 +33,7 @@
                             📅 {{ day_entries[0].entry_date.strftime('%d.%m.%Y') }}
                         </h2>
                         <span class="text-sm px-3 py-1 rounded-full" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.2) 0%, rgba(52, 152, 219, 0.2) 100%); color: var(--ocean-blue);">
-                            📖 Tagesansicht →
+                            📖 {{ t('logbook.daily_view') }} →
                         </span>
                     </div>
                 </a>
@@ -55,7 +55,7 @@
                     <div class="flex justify-between items-start mb-3">
                         <div>
                             <h3 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">
-                                ⏱️ {{ entry.entry_date.strftime('%H:%M') }} Uhr
+                                ⏱️ {{ entry.entry_date.strftime('%H:%M') }} {{ t('logbook.time_label') }}
                                 {% if entry.maneuver_type %}
                                     {% if entry.maneuver_type == 'departure' %}🚢
                                     {% elif entry.maneuver_type == 'sail_change' %}⛵
@@ -80,14 +80,14 @@
                             <a href="/logbook/{{ entry.id }}/edit" 
                                class="text-sm hover:underline touch-action px-3 py-1 rounded" 
                                style="color: var(--ocean-blue);">
-                                ✏️ Bearbeiten
+                                ✏️ {{ t('common.edit') }}
                             </a>
                             <form action="/logbook/{{ entry.id }}/delete" method="post" class="inline" onsubmit="return confirm('Eintrag wirklich löschen?')">
                                 {{ csrf_input | safe }}
                                 <button type="submit" 
                                         class="text-sm hover:underline touch-action px-3 py-1 rounded" 
                                         style="color: var(--coral);">
-                                    🗑️ Löschen
+                                    🗑️ {{ t('common.delete') }}
                                 </button>
                             </form>
                         </div>
@@ -96,7 +96,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                         {% if entry.latitude and entry.longitude %}
                         <div class="text-sm">
-                            <span style="color: var(--navy-deep); opacity: 0.7;">📍 Position:</span>
+                            <span style="color: var(--navy-deep); opacity: 0.7;">📍 {{ t('logbook.position') }}:</span>
                             <span class="font-medium ml-1" style="color: var(--navy-deep);">
                                 {{ "%.4f"|format(entry.latitude) }}°, {{ "%.4f"|format(entry.longitude) }}°
                             </span>
@@ -105,7 +105,7 @@
                         
                         {% if entry.wind_direction or entry.wind_strength %}
                         <div class="text-sm">
-                            <span style="color: var(--navy-deep); opacity: 0.7;">💨 Wind:</span>
+                            <span style="color: var(--navy-deep); opacity: 0.7;">💨 {{ t('logbook.wind') }}:</span>
                             <span class="font-medium ml-1" style="color: var(--navy-deep);">
                                 {% if entry.wind_direction %}{{ entry.wind_direction }}{% endif %}
                                 {% if entry.wind_strength %}{{ entry.wind_strength }}{% endif %}
@@ -115,14 +115,14 @@
                         
                         {% if entry.sea_state %}
                         <div class="text-sm">
-                            <span style="color: var(--navy-deep); opacity: 0.7;">🌊 Seegang:</span>
+                            <span style="color: var(--navy-deep); opacity: 0.7;">🌊 {{ t('logbook.sea_state') }}:</span>
                             <span class="font-medium ml-1" style="color: var(--navy-deep);">
-                                {% if entry.sea_state.value == 'calm' %}Ruhig
-                                {% elif entry.sea_state.value == 'slight' %}Leicht
-                                {% elif entry.sea_state.value == 'moderate' %}Mäßig
-                                {% elif entry.sea_state.value == 'rough' %}Rau
-                                {% elif entry.sea_state.value == 'very_rough' %}Sehr rau
-                                {% elif entry.sea_state.value == 'high' %}Hoch
+                                {% if entry.sea_state.value == 'calm' %}{{ t('logbook.sea_calm') }}
+                                {% elif entry.sea_state.value == 'slight' %}{{ t('logbook.sea_slight') }}
+                                {% elif entry.sea_state.value == 'moderate' %}{{ t('logbook.sea_moderate') }}
+                                {% elif entry.sea_state.value == 'rough' %}{{ t('logbook.sea_rough') }}
+                                {% elif entry.sea_state.value == 'very_rough' %}{{ t('logbook.sea_very_rough') }}
+                                {% elif entry.sea_state.value == 'high' %}{{ t('logbook.sea_high') }}
                                 {% else %}{{ entry.sea_state.value }}{% endif %}
                             </span>
                         </div>
@@ -130,7 +130,7 @@
                         
                         {% if entry.temperature %}
                         <div class="text-sm">
-                            <span style="color: var(--navy-deep); opacity: 0.7;">🌡️ Temperatur:</span>
+                            <span style="color: var(--navy-deep); opacity: 0.7;">🌡️ {{ t('logbook.temperature') }}:</span>
                             <span class="font-medium ml-1" style="color: var(--navy-deep);">{{ entry.temperature }}°C</span>
                         </div>
                         {% endif %}
@@ -138,7 +138,7 @@
                     
                     {% if entry.crew_on_watch %}
                     <div class="mb-3">
-                        <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👥 Wache:</span>
+                        <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👥 {{ t('logbook.watch') }}:</span>
                         <div class="inline-flex flex-wrap gap-2 ml-2">
                             {% for watch in entry.crew_on_watch %}
                             <span class="inline-block px-3 py-1 rounded-full text-sm font-medium text-white" 
@@ -159,7 +159,7 @@
                     <a href="/logbook/{{ entry.id }}" 
                        class="inline-block mt-3 text-sm font-medium touch-action hover:underline" 
                        style="color: var(--ocean-blue);">
-                        👁️ Details anzeigen →
+                        👁️ {{ t('logbook.show_details') }} →
                     </a>
                 </div>
             </div>
@@ -170,10 +170,10 @@
     </div> {# Close entriesContainer #}
     {% else %}
     <div class="bg-white porthole-card p-12 text-center">
-        <p class="text-xl maritime-header mb-4" style="color: var(--navy-deep);">📓 Noch keine Logbuch-Einträge</p>
-        <p class="mb-6" style="color: var(--navy-deep); opacity: 0.7;">Erstelle deinen ersten Eintrag für diesen Törn</p>
+        <p class="text-xl maritime-header mb-4" style="color: var(--navy-deep);">📓 {{ t('logbook.no_entries') }}</p>
+        <p class="mb-6" style="color: var(--navy-deep); opacity: 0.7;">{{ t('logbook.no_entries_desc') }}</p>
         <a href="/logbook/new" class="ocean-gradient text-white px-6 py-3 rounded-lg transition touch-action font-semibold inline-block">
-            ➕ Ersten Eintrag erstellen
+            ➕ {{ t('logbook.create_first') }}
         </a>
     </div>
     {% endif %}

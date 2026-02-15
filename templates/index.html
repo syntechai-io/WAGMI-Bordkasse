@@ -29,9 +29,9 @@ function setCurrentLocalTime(inputId) {
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl md:text-4xl font-bold maritime-header" style="color: var(--navy-deep);">🧭 Dashboard</h1>
+        <h1 class="text-3xl md:text-4xl font-bold maritime-header" style="color: var(--navy-deep);">🧭 {{ t('dashboard.title') }}</h1>
         <div class="text-right">
-            <p class="text-xs md:text-sm" style="color: var(--navy-deep); opacity: 0.7;">Ausgewählter Törn:</p>
+            <p class="text-xs md:text-sm" style="color: var(--navy-deep); opacity: 0.7;">{{ t('dashboard.selected_trip') }}</p>
             <p class="text-lg md:text-xl font-bold maritime-header" style="color: var(--ocean-blue);">⛵ {{ active_trip.name }}</p>
         </div>
     </div>
@@ -42,8 +42,8 @@ function setCurrentLocalTime(inputId) {
         <div class="flex items-center space-x-3">
             <div class="text-3xl">🔒</div>
             <div>
-                <p class="font-bold text-orange-800">Dieser Törn wurde geschlossen</p>
-                <p class="text-sm text-orange-700">Nur der Admin kann noch Änderungen vornehmen. Du kannst alle Daten ansehen, aber keine Einträge hinzufügen oder bearbeiten.</p>
+                <p class="font-bold text-orange-800">{{ t('dashboard.trip_closed') }}</p>
+                <p class="text-sm text-orange-700">{{ t('dashboard.trip_closed_desc') }}</p>
             </div>
         </div>
     </div>
@@ -54,8 +54,8 @@ function setCurrentLocalTime(inputId) {
         <div class="flex items-center justify-center space-x-4">
             <div class="text-6xl">⚡📓</div>
             <div class="text-left">
-                <h3 class="text-2xl font-bold maritime-header">Schnell-Logbuch</h3>
-                <p class="text-base opacity-90 font-medium">Jetzt Position erfassen!</p>
+                <h3 class="text-2xl font-bold maritime-header">{{ t('dashboard.quick_log') }}</h3>
+                <p class="text-base opacity-90 font-medium">{{ t('dashboard.quick_log_desc') }}</p>
             </div>
             <div class="text-4xl">→</div>
         </div>
@@ -69,8 +69,8 @@ function setCurrentLocalTime(inputId) {
             <div class="flex items-center justify-center space-x-3">
                 <div class="text-5xl">⚡</div>
                 <div class="text-left">
-                    <h3 class="text-2xl font-bold maritime-header">Quick Start WAGMI</h3>
-                    <p class="text-sm opacity-90">Neuen Törn ab Fredericia starten!</p>
+                    <h3 class="text-2xl font-bold maritime-header">{{ t('dashboard.quick_start') }}</h3>
+                    <p class="text-sm opacity-90">{{ t('dashboard.quick_start_desc') }}</p>
                 </div>
                 <div class="text-3xl">→</div>
             </div>
@@ -82,14 +82,14 @@ function setCurrentLocalTime(inputId) {
     <div class="grid grid-cols-2 gap-4 md:hidden">
         <!-- Total Expenses - Info Card (non-interactive, visually distinct) -->
         <div class="bg-white porthole-card border-2 border-gray-200" style="min-height: 80px; padding: 16px;">
-            <p class="text-xs font-medium mb-1" style="color: var(--navy-deep);">💸 Ausgaben</p>
+            <p class="text-xs font-medium mb-1" style="color: var(--navy-deep);">💸 {{ t('dashboard.expenses_label') }}</p>
             <p class="text-2xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(total_expenses) }} €</p>
         </div>
         
         <!-- Expense Entry - Action Card (interactive, accessible size) -->
         <a href="/expenses" class="text-white rounded-xl text-center transition transform hover:scale-105 touch-action shadow-lg flex flex-col justify-center items-center" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%); min-height: 80px; padding: 16px;">
             <div class="text-4xl mb-1">⚓</div>
-            <p class="text-sm font-bold maritime-header">Ausgabe</p>
+            <p class="text-sm font-bold maritime-header">{{ t('dashboard.expense_action') }}</p>
         </a>
     </div>
     
@@ -97,22 +97,22 @@ function setCurrentLocalTime(inputId) {
     <div class="grid grid-cols-2 gap-4 md:hidden">
         <a href="/logbook" class="text-white rounded-xl text-center transition transform hover:scale-105 touch-action shadow-lg flex flex-col justify-center items-center" style="background: linear-gradient(135deg, #87ceeb 0%, #4682b4 100%); min-height: 72px; padding: 14px;">
             <div class="text-4xl mb-1">📓</div>
-            <p class="text-sm font-bold maritime-header">Alle Einträge</p>
+            <p class="text-sm font-bold maritime-header">{{ t('dashboard.all_entries') }}</p>
         </a>
         
         <a href="/crew" class="text-white rounded-xl text-center transition transform hover:scale-105 touch-action shadow-lg flex flex-col justify-center items-center" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #005a8c 100%); min-height: 72px; padding: 14px;">
             <div class="text-4xl mb-1">👥</div>
-            <p class="text-sm font-bold maritime-header">Crew</p>
+            <p class="text-sm font-bold maritime-header">{{ t('dashboard.crew_label') }}</p>
         </a>
         
         <a href="/balances" class="text-white rounded-xl text-center transition transform hover:scale-105 touch-action shadow-lg flex flex-col justify-center items-center" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); min-height: 72px; padding: 14px;">
             <div class="text-4xl mb-1">📊</div>
-            <p class="text-sm font-bold maritime-header">Salden</p>
+            <p class="text-sm font-bold maritime-header">{{ t('dashboard.balances_label') }}</p>
         </a>
         
         <a href="/settlement" class="text-white rounded-xl text-center transition transform hover:scale-105 touch-action shadow-lg flex flex-col justify-center items-center" style="background: linear-gradient(135deg, #8e44ad 0%, #6c3483 100%); min-height: 72px; padding: 14px;">
             <div class="text-4xl mb-1">⛵</div>
-            <p class="text-sm font-bold maritime-header">Ausgleich</p>
+            <p class="text-sm font-bold maritime-header">{{ t('dashboard.settlement_label') }}</p>
         </a>
     </div>
 
@@ -120,32 +120,32 @@ function setCurrentLocalTime(inputId) {
     <div class="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- LEFT COLUMN: Logbook -->
         <div class="space-y-6">
-            <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">📓 Logbuch</h2>
+            <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">📓 {{ t('dashboard.logbook_section') }}</h2>
             
             <!-- Logbook Action -->
             <a href="/logbook" class="block text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
                 <div class="text-6xl mb-3">📓</div>
-                <h3 class="text-xl font-bold maritime-header">Logbuch führen</h3>
-                <p class="text-sm opacity-90 mt-2">Position & Wetter erfassen</p>
+                <h3 class="text-xl font-bold maritime-header">{{ t('dashboard.keep_logbook') }}</h3>
+                <p class="text-sm opacity-90 mt-2">{{ t('dashboard.keep_logbook_desc') }}</p>
             </a>
             
             <!-- Crew Management -->
             <a href="/crew" class="block ocean-gradient text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg">
                 <div class="text-6xl mb-3">👥</div>
-                <h3 class="text-xl font-bold maritime-header">Crew verwalten</h3>
-                <p class="text-sm opacity-90 mt-2">Crew-Mitglieder ansehen</p>
+                <h3 class="text-xl font-bold maritime-header">{{ t('dashboard.manage_crew') }}</h3>
+                <p class="text-sm opacity-90 mt-2">{{ t('dashboard.manage_crew_desc') }}</p>
             </a>
         </div>
         
         <!-- RIGHT COLUMN: Expenses -->
         <div class="space-y-6">
-            <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ Bordkasse</h2>
+            <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ {{ t('dashboard.bordkasse_section') }}</h2>
             
             <!-- Total Expenses Card -->
             <div class="bg-white porthole-card p-8">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-lg font-medium mb-2" style="color: var(--navy-deep);">💸 Gesamt Ausgaben</p>
+                        <p class="text-lg font-medium mb-2" style="color: var(--navy-deep);">💸 {{ t('dashboard.total_expenses') }}</p>
                         <p class="text-4xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(total_expenses) }} €</p>
                     </div>
                     <div class="text-7xl">💸</div>
@@ -155,15 +155,15 @@ function setCurrentLocalTime(inputId) {
             <!-- Expense Action -->
             <a href="/expenses" class="block text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
                 <div class="text-6xl mb-3">⚓</div>
-                <h3 class="text-xl font-bold maritime-header">Ausgabe erfassen</h3>
-                <p class="text-sm opacity-90 mt-2">Einkauf oder Rechnung buchen</p>
+                <h3 class="text-xl font-bold maritime-header">{{ t('dashboard.record_expense') }}</h3>
+                <p class="text-sm opacity-90 mt-2">{{ t('dashboard.record_expense_desc') }}</p>
             </a>
             
             <!-- Settlement -->
             <a href="/settlement" class="block text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
                 <div class="text-6xl mb-3">⛵</div>
-                <h3 class="text-xl font-bold maritime-header">Ausgleich anzeigen</h3>
-                <p class="text-sm opacity-90 mt-2">Minimale Überweisungen</p>
+                <h3 class="text-xl font-bold maritime-header">{{ t('dashboard.show_settlement') }}</h3>
+                <p class="text-sm opacity-90 mt-2">{{ t('dashboard.show_settlement_desc') }}</p>
             </a>
         </div>
     </div>

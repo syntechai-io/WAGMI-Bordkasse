@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">{% if member %}⚓ Crew-Mitglied bearbeiten{% else %}➕ Neues Crew-Mitglied{% endif %}</h1>
+    <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">{% if member %}⚓ {{ t('crew.edit_member') }}{% else %}➕ {{ t('crew.new_member') }}{% endif %}</h1>
     
     {% if error %}
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card mb-4" role="alert">
-        <strong class="font-bold">⚠️ Fehler!</strong>
+        <strong class="font-bold">⚠️ {{ t('common.error_alert') }}</strong>
         <span class="block sm:inline">{{ error }}</span>
     </div>
     {% endif %}
@@ -14,19 +14,19 @@
     <form method="post" class="bg-white porthole-card p-6 space-y-4">
         {{ csrf_input | safe }}
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 Benutzername *</label>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 {{ t('crew.username') }} *</label>
             <input type="text" name="code" value="{% if member %}{{ member.code }}{% endif %}" required maxlength="20"
                 class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);">
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">👤 Name *</label>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">👤 {{ t('common.name') }} *</label>
             <input type="text" name="name" value="{% if member %}{{ member.name }}{% endif %}" required
                 class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);">
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏦 IBAN/Handle (optional)</label>
+            <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏦 {{ t('crew.iban_optional') }}</label>
             <input type="text" name="iban_or_handle" value="{% if member %}{{ member.iban_or_handle or '' }}{% endif %}"
                 class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);">
         </div>
@@ -40,10 +40,10 @@
                        {% if member and member.is_trip_admin %}checked{% endif %}
                        class="mt-1 w-5 h-5 text-amber-600 border-amber-300 rounded focus:ring-amber-500">
                 <div>
-                    <span class="block font-semibold text-amber-900">⚓ Törn-Admin berechtigen</span>
+                    <span class="block font-semibold text-amber-900">⚓ {{ t('crew.trip_admin_label') }}</span>
                     <span class="block text-sm text-amber-700 mt-1">
-                        Törn-Admins können diesen Törn auch nach Abschluss bearbeiten. Max. 2 Törn-Admins pro Törn.
-                        <br><strong>Hinweis:</strong> Nur Global-Admin kann Törn-Admins berechtigen.
+                        {{ t('crew.trip_admin_desc') }}
+                        <br><strong>{{ t('common.note') }}:</strong> {{ t('crew.trip_admin_note') }}
                     </span>
                 </div>
             </label>
@@ -54,10 +54,10 @@
         
         <div class="flex gap-4">
             <button type="submit" class="flex-1 ocean-gradient text-white font-bold py-3 px-4 rounded-lg transition touch-action">
-                💾 Speichern
+                💾 {{ t('common.save') }}
             </button>
             <a href="/crew" class="flex-1 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action" style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
-                ❌ Abbrechen
+                ❌ {{ t('common.cancel') }}
             </a>
         </div>
     </form>

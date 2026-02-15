@@ -2,14 +2,14 @@
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">💰 Einzahlungen</h1>
+    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">💰 {{ t('deposit.title') }}</h1>
     
     <div class="bg-white porthole-card p-6">
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Neue Einzahlung</h2>
+        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ {{ t('deposit.new_deposit') }}</h2>
         <form method="post" action="/deposits/new" class="grid grid-cols-1 md:grid-cols-5 gap-4">
             {{ csrf_input | safe }}
             <div>
-                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 Mitglied</label>
+                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 {{ t('common.member') }}</label>
                 <select name="member_id" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                     {% for member in crew_members %}
                     <option value="{{ member.id }}">{{ member.code }} - {{ member.name }}</option>
@@ -17,11 +17,11 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💵 Betrag</label>
+                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💵 {{ t('common.amount') }}</label>
                 <input type="number" name="amount" step="0.01" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
             </div>
             <div>
-                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💱 Währung</label>
+                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💱 {{ t('common.currency') }}</label>
                 <select name="currency" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                     <option value="EUR" selected>EUR (€)</option>
                     <option value="DKK">DKK (kr)</option>
@@ -30,16 +30,16 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 Datum</label>
+                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 {{ t('common.date') }}</label>
                 <input type="date" name="deposit_date" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
             </div>
             <div>
-                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📝 Notiz</label>
+                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📝 {{ t('common.note') }}</label>
                 <input type="text" name="note" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
             </div>
             <div class="md:col-span-5">
                 <button type="submit" class="text-white px-6 py-2 rounded-lg transition touch-action font-semibold" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-                    ✅ Einzahlung hinzufügen
+                    ✅ {{ t('deposit.add_deposit') }}
                 </button>
             </div>
         </form>
@@ -47,7 +47,7 @@
 
     {% if error %}
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card" role="alert">
-        <strong class="font-bold">⚠️ Fehler!</strong>
+        <strong class="font-bold">⚠️ {{ t('common.error_alert') }}</strong>
         <span class="block sm:inline">{{ error }}</span>
     </div>
     {% endif %}
@@ -59,11 +59,11 @@
             <table class="min-w-full">
                 <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Datum</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Mitglied</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Betrag</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Notiz</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aktionen</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('deposit.col_date') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('deposit.col_member') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('deposit.col_amount') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('deposit.col_note') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('deposit.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody id="depositsTableBody" class="divide-y divide-sky-200">
@@ -80,10 +80,10 @@
                         </td>
                         <td class="px-6 py-4" style="color: var(--navy-deep);">{{ deposit.note or '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                            <a href="/deposits/{{ deposit.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
+                            <a href="/deposits/{{ deposit.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ {{ t('common.edit') }}</a>
                             <form action="/deposits/{{ deposit.id }}/delete" method="post" class="inline" onsubmit="return confirm('Einzahlung wirklich löschen?')">
                                 {{ csrf_input | safe }}
-                                <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ Löschen</button>
+                                <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
                             </form>
                         </td>
                     </tr>

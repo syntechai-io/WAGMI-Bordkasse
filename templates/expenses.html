@@ -2,20 +2,20 @@
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ Ausgaben</h1>
+    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ {{ t('expense.title') }}</h1>
     
     <div class="bg-white porthole-card p-6">
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ Neue Ausgabe</h2>
+        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ {{ t('expense.new_expense') }}</h2>
         <form method="post" action="/expenses/new" enctype="multipart/form-data" class="space-y-4">
             {{ csrf_input | safe }}
             
             {% if expense_templates %}
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">
-                    📋 Schnellvorlage wählen (optional)
+                    📋 {{ t('expense.quick_template') }}
                 </label>
                 <select id="template_selector" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-                    <option value="">-- Manuelle Eingabe --</option>
+                    <option value="">{{ t('expense.manual_entry') }}</option>
                     {% for template in expense_templates %}
                     <option value="{{ template.id }}" 
                             data-category="{{ template.category }}"
@@ -28,26 +28,26 @@
                     </option>
                     {% endfor %}
                 </select>
-                <p class="text-xs mt-2" style="color: var(--navy-deep); opacity: 0.7;">💡 Alle Felder können nach Auswahl angepasst werden</p>
+                <p class="text-xs mt-2" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('expense.template_hint') }}</p>
             </div>
             {% endif %}
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 Bezahlt von</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 {{ t('expense.paid_by') }}</label>
                     <select name="payer_id" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-                        <option value="">🌐 External Charge (kein Crew-Mitglied)</option>
+                        <option value="">🌐 {{ t('expense.external_charge') }}</option>
                         {% for member in crew_members %}
                         <option value="{{ member.id }}">{{ member.code }} - {{ member.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 Datum</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 {{ t('common.date') }}</label>
                     <input type="date" name="expense_date" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📂 Kategorie</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📂 {{ t('common.category') }}</label>
                     <select name="category" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                         {% for cat in categories %}
                         <option value="{{ cat }}">{{ cat }}</option>
@@ -55,11 +55,11 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💵 Betrag</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💵 {{ t('common.amount') }}</label>
                     <input type="number" name="amount" step="0.01" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💱 Währung</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💱 {{ t('common.currency') }}</label>
                     <select name="currency" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                         <option value="EUR" selected>EUR (€)</option>
                         <option value="DKK">DKK (kr)</option>
@@ -68,26 +68,26 @@
                     </select>
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📝 Beschreibung</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📝 {{ t('common.description') }}</label>
                     <input type="text" name="description" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💰 Bezahlt aus</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💰 {{ t('expense.paid_from') }}</label>
                     <select name="paid_from" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-                        <option value="private" selected>Privat</option>
-                        <option value="wallet">Wallet (gemeinsame Kasse)</option>
+                        <option value="private" selected>{{ t('common.private') }}</option>
+                        <option value="wallet">{{ t('common.wallet') }}</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">🎯 Aufteilung</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">🎯 {{ t('expense.split_mode') }}</label>
                     <select name="split_mode" id="split_mode" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-                        <option value="equal">Gleichmäßig (alle)</option>
-                        <option value="participants">Teilnehmer auswählen</option>
-                        <option value="percentage">Prozent-Aufteilung</option>
+                        <option value="equal">{{ t('expense.split_equal') }}</option>
+                        <option value="participants">{{ t('expense.split_participants') }}</option>
+                        <option value="percentage">{{ t('expense.split_percentage') }}</option>
                     </select>
                 </div>
                 <div id="participants_div" class="md:col-span-2 hidden">
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👥 Teilnehmer</label>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👥 {{ t('expense.participants') }}</label>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {% for member in crew_members %}
                         <label class="flex items-center space-x-2">
@@ -98,8 +98,8 @@
                     </div>
                 </div>
                 <div id="percentage_div" class="md:col-span-2 hidden">
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📊 Prozent-Aufteilung</label>
-                    <p class="text-sm mb-2" style="color: var(--navy-deep); opacity: 0.8;">Die Prozentsätze müssen 100% ergeben</p>
+                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📊 {{ t('expense.split_percentage') }}</label>
+                    <p class="text-sm mb-2" style="color: var(--navy-deep); opacity: 0.8;">{{ t('expense.percentage_must_100') }}</p>
                     <div class="space-y-3">
                         {% for member in crew_members %}
                         <div class="flex items-center gap-3">
@@ -131,32 +131,32 @@
             <div class="rope-divider"></div>
             
             <div>
-                <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">📎 Beleg (optional)</label>
+                <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">📎 {{ t('expense.receipt_optional') }}</label>
                 <input type="file" id="receiptInput" accept="image/*,.pdf" class="hidden">
                 <div class="flex gap-3">
                     <button type="button" onclick="activateReceiptCamera()" 
                             class="flex-1 text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-center"
                             style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
-                        📷 Kamera
+                        📷 {{ t('common.camera') }}
                     </button>
                     <button type="button" onclick="activateReceiptFile()" 
                             class="flex-1 text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-center"
                             style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
-                        📁 Datei
+                        📁 {{ t('common.file') }}
                     </button>
                 </div>
                 <p id="receiptFileName" class="text-sm mt-2" style="color: var(--navy-deep); opacity: 0.7;"></p>
             </div>
             
             <button type="submit" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
-                ✅ Ausgabe hinzufügen
+                ✅ {{ t('expense.add_expense') }}
             </button>
         </form>
     </div>
 
     {% if error %}
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card" role="alert">
-        <strong class="font-bold">⚠️ Fehler!</strong>
+        <strong class="font-bold">⚠️ {{ t('common.error_alert') }}</strong>
         <span class="block sm:inline">{{ error }}</span>
     </div>
     {% endif %}
@@ -168,13 +168,13 @@
             <table class="min-w-full">
                 <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Datum</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Bezahlt von</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Kategorie</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Beschreibung</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Betrag</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Quelle</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aktionen</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_date') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_paid_by') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_category') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_description') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_amount') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_source') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody id="expensesTableBody" class="divide-y divide-sky-200">
@@ -199,10 +199,10 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                            <a href="/expenses/{{ expense.id }}/edit" class="hover:underline touch-action" onclick="event.stopPropagation()" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
+                            <a href="/expenses/{{ expense.id }}/edit" class="hover:underline touch-action" onclick="event.stopPropagation()" style="color: var(--ocean-blue);">✏️ {{ t('common.edit') }}</a>
                             <form action="/expenses/{{ expense.id }}/delete" method="post" class="inline" onsubmit="event.stopPropagation(); return confirm('Ausgabe wirklich löschen?')">
                                 {{ csrf_input | safe }}
-                                <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ Löschen</button>
+                                <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
                             </form>
                         </td>
                     </tr>

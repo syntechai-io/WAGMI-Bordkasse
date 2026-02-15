@@ -4,11 +4,11 @@
 <div class="max-w-4xl mx-auto space-y-6">
     <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">
-            📓 Logbuch-Eintrag
+            📓 {{ t('logbook.entry_detail') }}
         </h1>
         <a href="/logbook" class="text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm" 
            style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
-            ← Zurück zur Liste
+            ← {{ t('logbook.back_to_list') }}
         </a>
     </div>
     
@@ -16,7 +16,7 @@
         <div class="flex justify-between items-start mb-6">
             <div>
                 <h2 class="text-2xl font-bold maritime-header mb-2" style="color: var(--navy-deep);">
-                    {{ entry.entry_date.strftime('%d.%m.%Y %H:%M') }} Uhr
+                    {{ entry.entry_date.strftime('%d.%m.%Y %H:%M') }} {{ t('logbook.time_label') }}
                 </h2>
                 {% if entry.departure or entry.destination %}
                 <p class="text-lg" style="color: var(--ocean-blue);">
@@ -29,14 +29,14 @@
             <div class="flex gap-2">
                 <a href="/logbook/{{ entry.id }}/edit" 
                    class="ocean-gradient text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm">
-                    ✏️ Bearbeiten
+                    ✏️ {{ t('common.edit') }}
                 </a>
                 <form action="/logbook/{{ entry.id }}/delete" method="post" class="inline" onsubmit="return confirm('Eintrag wirklich löschen?')">
                     {{ csrf_input | safe }}
                     <button type="submit" 
                             class="text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm" 
                             style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                        🗑️ Löschen
+                        🗑️ {{ t('common.delete') }}
                     </button>
                 </form>
             </div>
@@ -46,17 +46,17 @@
         
         {% if entry.latitude or entry.longitude %}
         <div class="mb-6">
-            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">📍 Position</h3>
+            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">📍 {{ t('logbook.position') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {% if entry.latitude %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
-                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">Breitengrad:</span>
+                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">{{ t('logbook.latitude') }}:</span>
                     <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ "%.6f"|format(entry.latitude) }}°</p>
                 </div>
                 {% endif %}
                 {% if entry.longitude %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
-                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">Längengrad:</span>
+                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">{{ t('logbook.longitude') }}:</span>
                     <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ "%.6f"|format(entry.longitude) }}°</p>
                 </div>
                 {% endif %}
@@ -66,43 +66,43 @@
         
         {% if entry.wind_direction or entry.wind_strength or entry.sea_state or entry.visibility or entry.temperature %}
         <div class="mb-6">
-            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">🌤️ Wetter & Bedingungen</h3>
+            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">🌤️ {{ t('logbook.weather_conditions') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {% if entry.wind_direction %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
-                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💨 Windrichtung:</span>
+                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💨 {{ t('logbook.wind_direction') }}:</span>
                     <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ entry.wind_direction }}</p>
                 </div>
                 {% endif %}
                 {% if entry.wind_strength %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
-                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💨 Windstärke:</span>
+                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💨 {{ t('logbook.wind_strength') }}:</span>
                     <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ entry.wind_strength }}</p>
                 </div>
                 {% endif %}
                 {% if entry.sea_state %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
-                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🌊 Seegang:</span>
+                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🌊 {{ t('logbook.sea_state') }}:</span>
                     <p class="text-lg font-medium" style="color: var(--navy-deep);">
-                        {% if entry.sea_state.value == 'calm' %}Ruhig
-                        {% elif entry.sea_state.value == 'slight' %}Leicht
-                        {% elif entry.sea_state.value == 'moderate' %}Mäßig
-                        {% elif entry.sea_state.value == 'rough' %}Rau
-                        {% elif entry.sea_state.value == 'very_rough' %}Sehr rau
-                        {% elif entry.sea_state.value == 'high' %}Hoch
+                        {% if entry.sea_state.value == 'calm' %}{{ t('logbook.sea_calm') }}
+                        {% elif entry.sea_state.value == 'slight' %}{{ t('logbook.sea_slight') }}
+                        {% elif entry.sea_state.value == 'moderate' %}{{ t('logbook.sea_moderate') }}
+                        {% elif entry.sea_state.value == 'rough' %}{{ t('logbook.sea_rough') }}
+                        {% elif entry.sea_state.value == 'very_rough' %}{{ t('logbook.sea_very_rough') }}
+                        {% elif entry.sea_state.value == 'high' %}{{ t('logbook.sea_high') }}
                         {% else %}{{ entry.sea_state.value }}{% endif %}
                     </p>
                 </div>
                 {% endif %}
                 {% if entry.visibility %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
-                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👁️ Sicht:</span>
+                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👁️ {{ t('logbook.visibility') }}:</span>
                     <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ entry.visibility }}</p>
                 </div>
                 {% endif %}
                 {% if entry.temperature %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
-                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🌡️ Temperatur:</span>
+                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🌡️ {{ t('logbook.temperature') }}:</span>
                     <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ entry.temperature }}°C</p>
                 </div>
                 {% endif %}
@@ -112,17 +112,17 @@
         
         {% if entry.sail_plan or entry.engine_hours %}
         <div class="mb-6">
-            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">⛵ Schiffsdaten</h3>
+            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">⛵ {{ t('logbook.ship_data') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {% if entry.sail_plan %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
-                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">⛵ Segelplan:</span>
+                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">⛵ {{ t('logbook.sail_plan') }}:</span>
                     <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ entry.sail_plan }}</p>
                 </div>
                 {% endif %}
                 {% if entry.engine_hours %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
-                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🔧 Motorstunden:</span>
+                    <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🔧 {{ t('logbook.engine_hours') }}:</span>
                     <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ entry.engine_hours }}</p>
                 </div>
                 {% endif %}
@@ -132,7 +132,7 @@
         
         {% if entry.crew_on_watch %}
         <div class="mb-6">
-            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">👥 Crew auf Wache</h3>
+            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">👥 {{ t('logbook.crew_on_watch') }}</h3>
             <div class="flex flex-wrap gap-3">
                 {% for watch in entry.crew_on_watch %}
                 <div class="px-4 py-2 rounded-full text-white font-medium" 
@@ -146,7 +146,7 @@
         
         {% if entry.notes %}
         <div class="mb-6">
-            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">📝 Notizen</h3>
+            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">📝 {{ t('common.notes') }}</h3>
             <div class="p-4 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
                 <p style="color: var(--navy-deep); white-space: pre-wrap;">{{ entry.notes }}</p>
             </div>
@@ -155,7 +155,7 @@
         
         {% if entry.safety_checks_completed %}
         <div class="mb-6">
-            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">✅ Sicherheitschecks</h3>
+            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">✅ {{ t('logbook.safety_checks') }}</h3>
             <div class="p-4 rounded-lg" style="background: rgba(46, 204, 113, 0.1);">
                 <p style="color: var(--navy-deep); white-space: pre-wrap;">{{ entry.safety_checks_completed }}</p>
             </div>
@@ -165,7 +165,7 @@
         <div class="rope-divider"></div>
         
         <div class="mb-6">
-            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">📸 Fotos</h3>
+            <h3 class="text-lg font-bold maritime-header mb-3" style="color: var(--navy-deep);">📸 {{ t('logbook.photos') }}</h3>
             
             {% if entry.photos %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
@@ -185,7 +185,7 @@
                         <form action="/logbook/photos/{{ photo.id }}/delete" method="post" class="inline" onsubmit="return confirm('Foto wirklich löschen?')">
                             {{ csrf_input | safe }}
                             <button type="submit" class="text-sm hover:underline touch-action" style="color: var(--coral);">
-                                🗑️ Löschen
+                                🗑️ {{ t('common.delete') }}
                             </button>
                         </form>
                     </div>
@@ -193,36 +193,36 @@
                 {% endfor %}
             </div>
             {% else %}
-            <p class="text-sm mb-4" style="color: var(--navy-deep); opacity: 0.7;">Noch keine Fotos vorhanden</p>
+            <p class="text-sm mb-4" style="color: var(--navy-deep); opacity: 0.7;">{{ t('logbook.no_photos') }}</p>
             {% endif %}
             
             <form action="/logbook/{{ entry.id }}/photos/upload" method="post" enctype="multipart/form-data" class="space-y-3" id="photoUploadForm">
                 {{ csrf_input | safe }}
                 <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">📷 Neues Foto hinzufügen</label>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">📷 {{ t('logbook.add_photo') }}</label>
                     <input type="file" id="photoInput" accept="image/jpeg,image/png,image/jpg" required class="hidden">
                     <div class="flex gap-3">
                         <button type="button" onclick="activateCamera()" 
                                 class="flex-1 text-white px-4 py-3 rounded-lg transition touch-action font-semibold text-center"
                                 style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
-                            📷 Kamera öffnen
+                            📷 {{ t('logbook.open_camera') }}
                         </button>
                         <button type="button" onclick="activateFile()" 
                                 class="flex-1 text-white px-4 py-3 rounded-lg transition touch-action font-semibold text-center"
                                 style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
-                            📁 Datei wählen
+                            📁 {{ t('logbook.select_file') }}
                         </button>
                     </div>
                     <p id="photoFileName" class="text-sm mt-2" style="color: var(--navy-deep); opacity: 0.7;"></p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">💬 Bildunterschrift (optional)</label>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">💬 {{ t('logbook.caption') }} ({{ t('common.optional') }})</label>
                     <input type="text" name="caption" placeholder="z.B. Sonnenuntergang in der Ostsee" 
                            class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
                 </div>
                 <button type="submit" id="uploadButton" disabled class="text-white px-6 py-2 rounded-lg transition touch-action font-semibold opacity-50" 
                         style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-                    📤 Foto hochladen
+                    📤 {{ t('logbook.upload_photo') }}
                 </button>
             </form>
             <script>

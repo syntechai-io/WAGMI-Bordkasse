@@ -4,10 +4,10 @@
 <div class="max-w-6xl mx-auto">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">
-            📅 Tages-Logbuch
+            📅 {{ t('logbook.daily_title') }}
         </h1>
         <a href="/logbook" class="btn-secondary">
-            ← Zurück zur Übersicht
+            ← {{ t('logbook.back_to_overview') }}
         </a>
     </div>
     
@@ -18,17 +18,17 @@
                 <a href="/logbook/daily?date={{ prev_date }}" 
                    class="px-4 py-2 rounded-lg transition touch-action" 
                    style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%); color: white;">
-                    ← Vorheriger Tag
+                    ← {{ t('logbook.prev_day') }}
                 </a>
                 <a href="/logbook/daily?date={{ next_date }}" 
                    class="px-4 py-2 rounded-lg transition touch-action" 
                    style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%); color: white;">
-                    Nächster Tag →
+                    {{ t('logbook.next_day') }} →
                 </a>
             </div>
             
             <form method="get" class="flex gap-2 items-center">
-                <label class="font-medium" style="color: var(--navy-deep);">Datum wählen:</label>
+                <label class="font-medium" style="color: var(--navy-deep);">{{ t('logbook.select_date') }}</label>
                 <input type="date" name="date" value="{{ selected_date }}" 
                        class="px-4 py-2 border rounded-lg" 
                        style="border-color: var(--sky-blue);"
@@ -47,27 +47,27 @@
     <!-- Daily Summary -->
     <div class="bg-white porthole-card p-6 mb-6">
         <h3 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">
-            📊 Zusammenfassung
+            📊 {{ t('logbook.daily_summary') }}
         </h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
-                <div class="text-sm font-medium" style="color: var(--navy-deep);">Einträge</div>
+                <div class="text-sm font-medium" style="color: var(--navy-deep);">{{ t('logbook.entries_count') }}</div>
                 <div class="text-2xl font-bold" style="color: var(--sea-foam);">{{ summary.total_entries }}</div>
             </div>
             <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
-                <div class="text-sm font-medium" style="color: var(--navy-deep);">Distanz</div>
+                <div class="text-sm font-medium" style="color: var(--navy-deep);">{{ t('logbook.distance') }}</div>
                 <div class="text-2xl font-bold" style="color: var(--sea-foam);">
                     {% if summary.total_distance is not none %}{{ "%.1f"|format(summary.total_distance) }} nm{% else %}--{% endif %}
                 </div>
             </div>
             <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
-                <div class="text-sm font-medium" style="color: var(--navy-deep);">Motorstunden</div>
+                <div class="text-sm font-medium" style="color: var(--navy-deep);">{{ t('logbook.engine_hours') }}</div>
                 <div class="text-2xl font-bold" style="color: var(--sea-foam);">
                     {% if summary.total_engine_hours is not none %}{{ "%.1f"|format(summary.total_engine_hours) }} h{% else %}--{% endif %}
                 </div>
             </div>
             <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
-                <div class="text-sm font-medium" style="color: var(--navy-deep);">Route</div>
+                <div class="text-sm font-medium" style="color: var(--navy-deep);">{{ t('logbook.route') }}</div>
                 <div class="text-lg font-bold" style="color: var(--sea-foam);">
                     {% if summary.route %}{{ summary.route }}{% else %}--{% endif %}
                 </div>
@@ -78,7 +78,7 @@
             <a href="/logbook/export/pdf/daily?export_date={{ selected_date }}" 
                class="text-white px-6 py-2 rounded-lg transition touch-action inline-block font-semibold"
                style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                📄 Als PDF exportieren
+                📄 {{ t('logbook.pdf_export') }}
             </a>
         </div>
     </div>
@@ -101,23 +101,23 @@
                             {% else %}📝{% endif %}
                         </div>
                         <div class="text-xs font-medium mt-1" style="color: var(--navy-deep);">
-                            {% if entry.maneuver_type == 'departure' %}Ablegen
-                            {% elif entry.maneuver_type == 'sail_change' %}Segel
-                            {% elif entry.maneuver_type == 'motor' %}Motor
-                            {% elif entry.maneuver_type == 'anchor' %}Ankern
-                            {% elif entry.maneuver_type == 'weather' %}Wetter
-                            {% elif entry.maneuver_type == 'arrival' %}Anlegen
-                            {% else %}Eintrag{% endif %}
+                            {% if entry.maneuver_type == 'departure' %}{{ t('logbook.maneuver_departure') }}
+                            {% elif entry.maneuver_type == 'sail_change' %}{{ t('logbook.maneuver_sail_short') }}
+                            {% elif entry.maneuver_type == 'motor' %}{{ t('logbook.maneuver_motor') }}
+                            {% elif entry.maneuver_type == 'anchor' %}{{ t('logbook.maneuver_anchor') }}
+                            {% elif entry.maneuver_type == 'weather' %}{{ t('logbook.maneuver_weather') }}
+                            {% elif entry.maneuver_type == 'arrival' %}{{ t('logbook.maneuver_arrival') }}
+                            {% else %}{{ t('logbook.maneuver_entry') }}{% endif %}
                         </div>
                     </div>
                     
                     <div>
                         <div class="text-2xl font-bold" style="color: var(--navy-deep);">
-                            {{ entry.entry_date.strftime('%H:%M') }} Uhr
+                            {{ entry.entry_date.strftime('%H:%M') }} {{ t('logbook.time_label') }}
                         </div>
                         {% if entry.watch_leader %}
                         <div class="text-sm" style="color: var(--navy-deep);">
-                            Wachführer: {{ entry.watch_leader.name }}
+                            {{ t('logbook.watch_leader') }}: {{ entry.watch_leader.name }}
                         </div>
                         {% endif %}
                     </div>
@@ -128,7 +128,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
                         {% if entry.latitude and entry.longitude %}
                         <div>
-                            <span class="font-medium">Position:</span> 
+                            <span class="font-medium">{{ t('logbook.position') }}:</span> 
                             {{ "%.4f"|format(entry.latitude) }}°N, {{ "%.4f"|format(entry.longitude) }}°E
                         </div>
                         {% endif %}
@@ -139,19 +139,19 @@
                         <div><span class="font-medium">SOG:</span> {{ "%.1f"|format(entry.sog_kn) }} kn</div>
                         {% endif %}
                         {% if entry.wind_direction %}
-                        <div><span class="font-medium">Wind:</span> {{ entry.wind_direction }}</div>
+                        <div><span class="font-medium">{{ t('logbook.wind') }}:</span> {{ entry.wind_direction }}</div>
                         {% endif %}
                         {% if entry.wind_strength %}
-                        <div><span class="font-medium">Stärke:</span> {{ entry.wind_strength }}</div>
+                        <div><span class="font-medium">{{ t('logbook.wind_strength') }}:</span> {{ entry.wind_strength }}</div>
                         {% endif %}
                         {% if entry.sail_plan %}
-                        <div><span class="font-medium">Segel:</span> {{ entry.sail_plan }}</div>
+                        <div><span class="font-medium">{{ t('logbook.sail_plan') }}:</span> {{ entry.sail_plan }}</div>
                         {% endif %}
                     </div>
                     
                     {% if entry.notes %}
                     <div class="mt-2 p-2 rounded" style="background: rgba(52, 152, 219, 0.05);">
-                        <span class="font-medium">Notizen:</span> {{ entry.notes }}
+                        <span class="font-medium">{{ t('common.notes') }}:</span> {{ entry.notes }}
                     </div>
                     {% endif %}
                 </div>
@@ -161,7 +161,7 @@
                     <a href="/logbook/{{ entry.id }}" 
                        class="text-sm px-3 py-1 rounded transition whitespace-nowrap"
                        style="background: var(--sky-blue); color: white;">
-                        Details →
+                        {{ t('common.details') }} →
                     </a>
                 </div>
             </div>
@@ -173,14 +173,14 @@
     <div class="bg-white porthole-card p-12 text-center">
         <div class="text-6xl mb-4">📭</div>
         <h3 class="text-2xl font-bold mb-2" style="color: var(--navy-deep);">
-            Keine Einträge für diesen Tag
+            {{ t('logbook.no_daily_entries') }}
         </h3>
         <p class="text-gray-600 mb-6">
-            Für {{ selected_date_formatted }} wurden noch keine Logbuch-Einträge erstellt.
+            {{ t('logbook.no_daily_entries_desc', date=selected_date_formatted) }}
         </p>
         <a href="/logbook/new" 
            class="btn-primary inline-block">
-            ➕ Neuen Eintrag erstellen
+            ➕ {{ t('logbook.create_new') }}
         </a>
     </div>
     {% endif %}

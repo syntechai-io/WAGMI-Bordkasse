@@ -3,48 +3,48 @@
 {% block content %}
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📋 Ausgabendetails</h1>
-        <a href="/expenses" class="hover:underline touch-action" style="color: var(--ocean-blue);">← Zurück</a>
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📋 {{ t('expense.detail_title') }}</h1>
+        <a href="/expenses" class="hover:underline touch-action" style="color: var(--ocean-blue);">← {{ t('common.back') }}</a>
     </div>
     
     <div class="bg-white porthole-card p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📅 Datum</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📅 {{ t('common.date') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.date }}</p>
             </div>
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📂 Kategorie</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📂 {{ t('common.category') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.category }}</p>
             </div>
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👤 Bezahlt von</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👤 {{ t('expense.paid_by') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--navy-deep);">
                     {% if expense.payer %}
                         {{ expense.payer.code }} - {{ expense.payer.name }}
                     {% else %}
-                        🌐 External Charge
+                        🌐 {{ t('expense.external_charge') }}
                     {% endif %}
                 </p>
             </div>
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💵 Betrag</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💵 {{ t('common.amount') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--coral);">{{ "%.2f"|format(expense.amount_eur) }} €</p>
             </div>
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💰 Bezahlt aus</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💰 {{ t('expense.paid_from') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.paid_from.value }}</p>
             </div>
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🎯 Aufteilung</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🎯 {{ t('expense.split_mode') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.split_mode.value }}</p>
             </div>
             <div class="md:col-span-2">
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📝 Beschreibung</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📝 {{ t('common.description') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.description }}</p>
             </div>
             <div class="md:col-span-2">
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👥 Teilnehmer</p>
+                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👥 {{ t('expense.participants') }}</p>
                 <p class="text-lg" style="color: var(--navy-deep);">
                     {% for p in expense.participants %}
                         {{ p.member.code }}{% if not loop.last %}, {% endif %}
@@ -56,7 +56,7 @@
         <div class="rope-divider"></div>
         
         <div class="pt-4">
-            <h3 class="text-lg font-bold maritime-header mb-4" style="color: var(--navy-deep);">📎 Belege</h3>
+            <h3 class="text-lg font-bold maritime-header mb-4" style="color: var(--navy-deep);">📎 {{ t('expense.receipts') }}</h3>
             {% if expense.receipts %}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {% for receipt in expense.receipts %}
@@ -67,9 +67,9 @@
                 {% endfor %}
             </div>
             {% else %}
-            <p style="color: var(--navy-deep); opacity: 0.6;">Keine Belege vorhanden</p>
+            <p style="color: var(--navy-deep); opacity: 0.6;">{{ t('expense.no_receipts') }}</p>
             {% endif %}
-            <p class="text-sm mt-3" style="color: var(--navy-deep); opacity: 0.7;">💡 Tipp: Belege können beim Erstellen einer Ausgabe hochgeladen werden.</p>
+            <p class="text-sm mt-3" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('expense.receipt_tip') }}</p>
         </div>
     </div>
 </div>

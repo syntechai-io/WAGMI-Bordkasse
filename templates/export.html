@@ -2,25 +2,25 @@
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">📋 Daten exportieren</h1>
+    <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">📋 {{ t('export.title') }}</h1>
     
     <div class="bg-white porthole-card p-8 text-center">
         <div class="mb-6">
             <div class="text-6xl mb-4">📊</div>
-            <h2 class="text-2xl font-bold maritime-header mb-2" style="color: var(--navy-deep);">PDF Export</h2>
-            <p class="text-gray-600">Exportiere alle Crew-Mitglieder, Einzahlungen und Ausgaben als PDF-Datei.</p>
+            <h2 class="text-2xl font-bold maritime-header mb-2" style="color: var(--navy-deep);">{{ t('export.pdf_title') }}</h2>
+            <p class="text-gray-600">{{ t('export.pdf_desc') }}</p>
         </div>
         
         <div class="space-y-4">
             <div>
                 <a href="/export/pdf" target="_blank" download="crew_wallet_export.pdf" class="inline-block text-white px-8 py-4 rounded-lg transition transform hover:scale-105 touch-action font-semibold text-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #005a8c 100%);">
-                    📥 PDF herunterladen
+                    📥 {{ t('export.download_pdf') }}
                 </a>
             </div>
             
             <div>
                 <a href="/" class="inline-block text-white px-8 py-4 rounded-lg transition transform hover:scale-105 touch-action font-semibold text-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-                    🧭 Zurück zum Dashboard
+                    🧭 {{ t('common.back_to_dashboard') }}
                 </a>
             </div>
         </div>

@@ -3,15 +3,15 @@
 {% block content %}
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">👥 Crew-Mitglieder</h1>
+        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">👥 {{ t('crew.title') }}</h1>
         <a href="/crew/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
-            ➕ Neu
+            ➕ {{ t('common.new') }}
         </a>
     </div>
 
     {% if error %}
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card" role="alert">
-        <strong class="font-bold">⚠️ Fehler!</strong>
+        <strong class="font-bold">⚠️ {{ t('common.error_alert') }}</strong>
         <span class="block sm:inline">{{ error }}</span>
     </div>
     {% endif %}
@@ -21,12 +21,12 @@
             <table class="min-w-full">
                 <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Benutzername</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Rolle</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">IBAN/Handle</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">Aktionen</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('crew.username') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('common.name') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('crew.role') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('common.status') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('crew.iban_handle') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('common.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-sky-200">
@@ -44,7 +44,7 @@
                                     {% if member_groups[member.id].is_representative %}
                                     <span class="px-2 py-1 text-xs rounded-full text-white font-semibold" 
                                           style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
-                                        👑 Representative
+                                        👑 {{ t('crew.representative') }}
                                     </span>
                                     {% endif %}
                                 {% endif %}
@@ -54,7 +54,7 @@
                             {% if member.is_trip_admin %}
                             <span class="px-3 py-1 text-xs rounded-full text-white font-semibold" 
                                   style="background: linear-gradient(135deg, #8b4513 0%, #d2691e 100%);">
-                                ⚓ Törn-Admin
+                                ⚓ {{ t('crew.trip_admin') }}
                             </span>
                             {% else %}
                             <span class="text-sm" style="color: var(--navy-deep); opacity: 0.5;">Crew</span>
@@ -65,7 +65,7 @@
                             <div class="flex flex-col gap-1">
                                 <span class="px-2 py-1 text-xs rounded-full text-white font-semibold inline-block w-fit" 
                                       style="background: linear-gradient(135deg, #666 0%, #999 100%);">
-                                    🚪 Abgereist
+                                    🚪 {{ t('crew.departed') }}
                                 </span>
                                 <span class="text-xs" style="color: var(--navy-deep); opacity: 0.7;">
                                     {{ member.departed_at.strftime('%d.%m.%Y %H:%M') }}
@@ -74,25 +74,25 @@
                             {% else %}
                             <span class="px-2 py-1 text-xs rounded-full text-white font-semibold" 
                                   style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-                                ✅ Aktiv
+                                ✅ {{ t('common.active') }}
                             </span>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--navy-deep); opacity: 0.7;">{{ member.iban_or_handle or '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-y-2">
                             <div class="flex gap-2 flex-wrap">
-                                <a href="/crew/{{ member.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ Bearbeiten</a>
+                                <a href="/crew/{{ member.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ {{ t('common.edit') }}</a>
                                 {% if member.departed_at %}
                                 <form action="/crew/{{ member.id }}/reactivate" method="post" class="inline" onsubmit="return confirm('{{ member.name }} wieder aktivieren?')">
                                     {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action" style="color: var(--sea-foam);">🔄 Reaktivieren</button>
+                                    <button type="submit" class="hover:underline touch-action" style="color: var(--sea-foam);">🔄 {{ t('crew.reactivate') }}</button>
                                 </form>
                                 {% else %}
-                                <button onclick="showDeactivateModal({{ member.id }}, '{{ member.name }}')" class="hover:underline touch-action" style="color: #ff9800;">🚪 Deaktivieren</button>
+                                <button onclick="showDeactivateModal({{ member.id }}, '{{ member.name }}')" class="hover:underline touch-action" style="color: #ff9800;">🚪 {{ t('crew.deactivate') }}</button>
                                 {% endif %}
                                 <form action="/crew/{{ member.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ member.name }} wirklich löschen?')">
                                     {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ Löschen</button>
+                                    <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
                                 </form>
                             </div>
                         </td>
@@ -107,16 +107,15 @@
 <!-- Deactivate Modal -->
 <div id="deactivateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" onclick="hideDeactivateModal(event)">
     <div class="bg-white porthole-card p-6 max-w-md w-full mx-4" onclick="event.stopPropagation()">
-        <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">🚪 Crew-Mitglied deaktivieren</h2>
+        <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">🚪 {{ t('crew.deactivate_title') }}</h2>
         <p class="mb-4" style="color: var(--navy-deep);">
-            <span id="deactivateMemberName" class="font-semibold"></span> wird deaktiviert.
-            Bitte geben Sie das Datum und die Uhrzeit der Abreise an:
+            <span id="deactivateMemberName" class="font-semibold"></span> {{ t('crew.deactivate_desc', name='') }}
         </p>
         <form id="deactivateForm" method="post" action="" class="space-y-4">
             {{ csrf_input | safe }}
             <input type="hidden" name="timezone_offset" id="timezone_offset_input">
             <div>
-                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 Abreise Datum & Uhrzeit</label>
+                <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 {{ t('crew.departure_datetime') }}</label>
                 <input type="datetime-local" 
                        name="departed_at" 
                        id="departed_at_input"
@@ -124,7 +123,7 @@
                        class="w-full px-3 py-2 border rounded-lg" 
                        style="border-color: var(--sky-blue);">
                 <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">
-                    💡 Das Mitglied wird ab diesem Zeitpunkt nicht mehr in zukünftige Ausgaben-Aufteilungen einbezogen.
+                    💡 {{ t('crew.departure_hint') }}
                 </p>
             </div>
             <div class="flex gap-3 justify-end">
@@ -132,12 +131,12 @@
                         onclick="hideDeactivateModal()" 
                         class="px-4 py-2 rounded-lg border" 
                         style="border-color: var(--sky-blue); color: var(--navy-deep);">
-                    Abbrechen
+                    {{ t('common.cancel') }}
                 </button>
                 <button type="submit" 
                         class="px-4 py-2 rounded-lg text-white" 
                         style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">
-                    🚪 Deaktivieren
+                    🚪 {{ t('crew.deactivate') }}
                 </button>
             </div>
         </form>
