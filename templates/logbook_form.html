@@ -246,22 +246,22 @@
                         style="border-color: var(--sky-blue);"
                         data-field="wind_strength">
                     <option value="">{{ t('common.select_option') }}</option>
-                    <option value="0 Bft (0 kn) - Windstille" {% if entry and entry.wind_strength == '0 Bft (0 kn) - Windstille' %}selected{% endif %}>{{ t('logbook.bft0') }}</option>
-                    <option value="1 Bft (1-3 kn) - Leiser Zug" {% if entry and entry.wind_strength == '1 Bft (1-3 kn) - Leiser Zug' %}selected{% endif %}>{{ t('logbook.bft1') }}</option>
-                    <option value="2 Bft (4-6 kn) - Leichte Brise" {% if entry and entry.wind_strength == '2 Bft (4-6 kn) - Leichte Brise' %}selected{% endif %}>{{ t('logbook.bft2') }}</option>
-                    <option value="3 Bft (7-10 kn) - Schwache Brise" {% if entry and entry.wind_strength == '3 Bft (7-10 kn) - Schwache Brise' %}selected{% endif %}>{{ t('logbook.bft3') }}</option>
-                    <option value="4 Bft (11-16 kn) - Mäßige Brise" {% if entry and entry.wind_strength == '4 Bft (11-16 kn) - Mäßige Brise' %}selected{% endif %}>{{ t('logbook.bft4') }}</option>
-                    <option value="5 Bft (17-21 kn) - Frische Brise" {% if entry and entry.wind_strength == '5 Bft (17-21 kn) - Frische Brise' %}selected{% endif %}>{{ t('logbook.bft5') }}</option>
-                    <option value="6 Bft (22-27 kn) - Starker Wind" {% if entry and entry.wind_strength == '6 Bft (22-27 kn) - Starker Wind' %}selected{% endif %}>{{ t('logbook.bft6') }}</option>
-                    <option value="7 Bft (28-33 kn) - Steifer Wind" {% if entry and entry.wind_strength == '7 Bft (28-33 kn) - Steifer Wind' %}selected{% endif %}>{{ t('logbook.bft7') }}</option>
-                    <option value="8 Bft (34-40 kn) - Stürmischer Wind" {% if entry and entry.wind_strength == '8 Bft (34-40 kn) - Stürmischer Wind' %}selected{% endif %}>{{ t('logbook.bft8') }}</option>
-                    <option value="9 Bft (41-47 kn) - Sturm" {% if entry and entry.wind_strength == '9 Bft (41-47 kn) - Sturm' %}selected{% endif %}>{{ t('logbook.bft9') }}</option>
-                    <option value="10 Bft (48-55 kn) - Schwerer Sturm" {% if entry and entry.wind_strength == '10 Bft (48-55 kn) - Schwerer Sturm' %}selected{% endif %}>{{ t('logbook.bft10') }}</option>
-                    <option value="11 Bft (56-63 kn) - Orkanartiger Sturm" {% if entry and entry.wind_strength == '11 Bft (56-63 kn) - Orkanartiger Sturm' %}selected{% endif %}>{{ t('logbook.bft11') }}</option>
-                    <option value="12 Bft (64+ kn) - Orkan" {% if entry and entry.wind_strength == '12 Bft (64+ kn) - Orkan' %}selected{% endif %}>{{ t('logbook.bft12') }}</option>
+                    <option value="bft0" {% if entry and norm_wind(entry.wind_strength) == 'bft0' %}selected{% endif %}>{{ t('logbook.bft0') }}</option>
+                    <option value="bft1" {% if entry and norm_wind(entry.wind_strength) == 'bft1' %}selected{% endif %}>{{ t('logbook.bft1') }}</option>
+                    <option value="bft2" {% if entry and norm_wind(entry.wind_strength) == 'bft2' %}selected{% endif %}>{{ t('logbook.bft2') }}</option>
+                    <option value="bft3" {% if entry and norm_wind(entry.wind_strength) == 'bft3' %}selected{% endif %}>{{ t('logbook.bft3') }}</option>
+                    <option value="bft4" {% if entry and norm_wind(entry.wind_strength) == 'bft4' %}selected{% endif %}>{{ t('logbook.bft4') }}</option>
+                    <option value="bft5" {% if entry and norm_wind(entry.wind_strength) == 'bft5' %}selected{% endif %}>{{ t('logbook.bft5') }}</option>
+                    <option value="bft6" {% if entry and norm_wind(entry.wind_strength) == 'bft6' %}selected{% endif %}>{{ t('logbook.bft6') }}</option>
+                    <option value="bft7" {% if entry and norm_wind(entry.wind_strength) == 'bft7' %}selected{% endif %}>{{ t('logbook.bft7') }}</option>
+                    <option value="bft8" {% if entry and norm_wind(entry.wind_strength) == 'bft8' %}selected{% endif %}>{{ t('logbook.bft8') }}</option>
+                    <option value="bft9" {% if entry and norm_wind(entry.wind_strength) == 'bft9' %}selected{% endif %}>{{ t('logbook.bft9') }}</option>
+                    <option value="bft10" {% if entry and norm_wind(entry.wind_strength) == 'bft10' %}selected{% endif %}>{{ t('logbook.bft10') }}</option>
+                    <option value="bft11" {% if entry and norm_wind(entry.wind_strength) == 'bft11' %}selected{% endif %}>{{ t('logbook.bft11') }}</option>
+                    <option value="bft12" {% if entry and norm_wind(entry.wind_strength) == 'bft12' %}selected{% endif %}>{{ t('logbook.bft12') }}</option>
                 </select>
                 <input type="text" id="wind_strength_manual" 
-                       value="{% if entry and entry.wind_strength %}{{ entry.wind_strength }}{% endif %}" 
+                       value="{% if entry and entry.wind_strength %}{{ display_wind(entry.wind_strength) }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_wind_force') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
                        style="border-color: var(--sky-blue);"
@@ -303,14 +303,14 @@
                         style="border-color: var(--sky-blue);"
                         data-field="visibility">
                     <option value="">{{ t('common.select_option') }}</option>
-                    <option value="Sehr gut (>10 nm)" {% if entry and entry.visibility == 'Sehr gut (>10 nm)' %}selected{% endif %}>{{ t('logbook.visibility_very_good') }}</option>
-                    <option value="Gut (5-10 nm)" {% if entry and entry.visibility == 'Gut (5-10 nm)' %}selected{% endif %}>{{ t('logbook.visibility_good') }}</option>
-                    <option value="Mäßig (2-5 nm)" {% if entry and entry.visibility == 'Mäßig (2-5 nm)' %}selected{% endif %}>{{ t('logbook.visibility_moderate') }}</option>
-                    <option value="Schlecht (<2 nm)" {% if entry and entry.visibility == 'Schlecht (<2 nm)' %}selected{% endif %}>{{ t('logbook.visibility_poor') }}</option>
-                    <option value="Sehr schlecht (<1 nm)" {% if entry and entry.visibility == 'Sehr schlecht (<1 nm)' %}selected{% endif %}>{{ t('logbook.visibility_very_poor') }}</option>
+                    <option value="very_good" {% if entry and norm_vis(entry.visibility) == 'very_good' %}selected{% endif %}>{{ t('logbook.visibility_very_good') }}</option>
+                    <option value="good" {% if entry and norm_vis(entry.visibility) == 'good' %}selected{% endif %}>{{ t('logbook.visibility_good') }}</option>
+                    <option value="moderate" {% if entry and norm_vis(entry.visibility) == 'moderate' %}selected{% endif %}>{{ t('logbook.visibility_moderate') }}</option>
+                    <option value="poor" {% if entry and norm_vis(entry.visibility) == 'poor' %}selected{% endif %}>{{ t('logbook.visibility_poor') }}</option>
+                    <option value="very_poor" {% if entry and norm_vis(entry.visibility) == 'very_poor' %}selected{% endif %}>{{ t('logbook.visibility_very_poor') }}</option>
                 </select>
                 <input type="text" id="visibility_manual" 
-                       value="{% if entry and entry.visibility %}{{ entry.visibility }}{% endif %}" 
+                       value="{% if entry and entry.visibility %}{{ display_visibility(entry.visibility) }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_visibility') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
                        style="border-color: var(--sky-blue);"
@@ -461,14 +461,14 @@
                         style="border-color: var(--sky-blue);"
                         data-field="sail_plan">
                     <option value="">{{ t('common.select_option') }}</option>
-                    <option value="Motor / keine Segel" {% if entry and entry.sail_plan == 'Motor / keine Segel' %}selected{% endif %}>🚤 {{ t('logbook.sail_motor_none') }}</option>
-                    <option value="Großsegel" {% if entry and entry.sail_plan == 'Großsegel' %}selected{% endif %}>⛵ {{ t('logbook.sail_mainsail') }}</option>
-                    <option value="Genua" {% if entry and entry.sail_plan == 'Genua' %}selected{% endif %}>🎐 {{ t('logbook.sail_genoa') }}</option>
-                    <option value="Großsegel + Genua" {% if entry and entry.sail_plan == 'Großsegel + Genua' %}selected{% endif %}>⛵ {{ t('logbook.sail_main_genoa') }}</option>
-                    <option value="Keine Segel" {% if entry and entry.sail_plan == 'Keine Segel' %}selected{% endif %}>⚓ {{ t('logbook.sail_none') }}</option>
+                    <option value="motor_none" {% if entry and norm_sail(entry.sail_plan) == 'motor_none' %}selected{% endif %}>🚤 {{ t('logbook.sail_motor_none') }}</option>
+                    <option value="mainsail" {% if entry and norm_sail(entry.sail_plan) == 'mainsail' %}selected{% endif %}>⛵ {{ t('logbook.sail_mainsail') }}</option>
+                    <option value="genoa" {% if entry and norm_sail(entry.sail_plan) == 'genoa' %}selected{% endif %}>🎐 {{ t('logbook.sail_genoa') }}</option>
+                    <option value="main_genoa" {% if entry and norm_sail(entry.sail_plan) == 'main_genoa' %}selected{% endif %}>⛵ {{ t('logbook.sail_main_genoa') }}</option>
+                    <option value="no_sails" {% if entry and norm_sail(entry.sail_plan) == 'no_sails' %}selected{% endif %}>⚓ {{ t('logbook.sail_none') }}</option>
                 </select>
                 <input type="text" id="sail_plan_manual" 
-                       value="{% if entry and entry.sail_plan %}{{ entry.sail_plan }}{% endif %}" 
+                       value="{% if entry and entry.sail_plan %}{{ display_sail_plan(entry.sail_plan) }}{% endif %}" 
                        placeholder="{{ t('logbook.sail_placeholder') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
                        style="border-color: var(--sky-blue);"

@@ -1,0 +1,107 @@
+Problem
+When the app is in EN, logbook entry detail pages still show German strings after saving (e.g., “Sehr gut”, “Leiser Zug”, “Großsegel + Genua”). The session-based i18n works for navigation and forms, but logbook values are being stored as German labels and then rendered verbatim.
+
+Goal
+Make logbook entries language-neutral in storage and language-specific only at display time:
+- Store canonical codes/keys (or enums) in DB
+- Render localized labels using t() based on current session language
+- Backward compatible: existing rows that already contain German labels must still display correctly in EN (by mapping them to canonical keys on read, or via a one-time migration)
+
+Constraints
+- Do not rewrite the entire logbook module.
+- Minimal changes: adjust save + display for affected fields only.
+- Keep existing UI layout and flows.
+
+Scope (fields visible in screenshot)
+At minimum fix these fields that currently show German text:
+1) wind_strength / beaufort label (e.g., “Leiser Zug”)
+2) visibility label (e.g., “Sehr gut (>10 nm)”)
+3) sail plan label (e.g., “Großsegel + Genua”)
+Potentially also sea_state if it’s stored as text.
+
+Implementation Plan
+
+1) Identify which logbook model columns store display labels
+Search code for where these values are assigned on create/update. Typical patterns:
+- entry.visibility = "Sehr gut (>10 nm)"
+- entry.wind_strength_label = "Leiser Zug"
+- entry.sail_plan = "Großsegel + Genua"
+Confirm which columns are persisted.
+
+2) Introduce canonical value sets (keys) for these fields
+Create dictionaries/constants in a single place (e.g., constants/logbook_enums.py):
+
+Example (keys are canonical):
+VISIBILITY_LEVELS = {
+  "excellent_10nm": {"de": "Sehr gut (>10 nm)", "en": "Very good (>10 nm)"},
+  "good_5nm": {"de": "Gut (5–10 nm)", "en": "Good (5–10 nm)"},
+  ...
+}
+
+WIND_BFT_LABELS = {
+  1: {"de": "Leiser Zug", "en": "Light air"},
+  2: {"de": "Leichte Brise", "en": "Light breeze"},
+  ...
+}
+
+SAIL_PLANS = {
+  "main_genoa": {"de": "Großsegel + Genua", "en": "Mainsail + Genoa"},
+  "main_jib": {"de": "Großsegel + Fock", "en": "Mainsail + Jib"},
+  ...
+}
+
+Sea state similarly: "calm", "smooth", "moderate", "rough", etc.
+
+3) Change SAVE behavior: store canonical keys (not translated strings)
+On create/update handlers:
+- For visibility: save visibility_key (e.g., "excellent_10nm") not the German label
+- For wind: save beaufort integer already exists; if a label field exists, remove its usage and derive label at render time
+- For sail plan: save sail_plan_key (e.g., "main_genoa") not “Großsegel + Genua”
+If DB currently stores these as VARCHAR, you can store the key in the same column (no migration required).
+If the column names imply “label”, keep column but store keys anyway.
+
+4) Change DISPLAY behavior: translate keys at render time
+In templates:
+- Replace direct output like {{ entry.visibility }} with a helper:
+  {{ t("logbook.visibility." + entry.visibility_key) }}
+or if using dict mapping:
+  {{ localize_visibility(entry.visibility, lang) }}
+Add small helper methods (python-side) so templates stay simple:
+- entry.visibility_display(lang)
+- entry.wind_strength_display(lang)
+- entry.sail_plan_display(lang)
+
+These helpers must:
+- If value is already a canonical key -> translate using locale keys or dictionaries
+- If value is legacy German text -> map it to the right canonical key via reverse lookup, then translate
+
+5) Backward compatibility for existing rows
+Implement reverse maps:
+GERMAN_TO_VISIBILITY_KEY
+GERMAN_TO_SAILPLAN_KEY
+If entry.visibility contains “Sehr gut (>10 nm)”, map it to "excellent_10nm".
+Same for sail plan labels.
+
+Option A (recommended minimal): On read/display, if value is not a known key, try reverse-map from DE label -> key.
+Option B: one-time migration script that converts legacy rows in DB to keys. Only do if easy.
+
+6) Add i18n keys
+Add to locales:
+- logbook.visibility.excellent_10nm (de/en)
+- logbook.wind.bft_1 (de/en) OR use dynamic format from BFT label dict
+- logbook.sailplan.main_genoa (de/en)
+etc.
+
+7) Tests
+- Set language to EN
+- Create a logbook entry and choose visibility/wind/sail plan
+- View the entry detail: must render in EN
+- Switch to DE: same entry must render in DE
+- Verify an old entry that contains German labels renders correctly in EN (via reverse-map fallback)
+
+Deliverables
+- constants mapping file
+- updated create/update handlers to store keys
+- updated display helpers and template changes
+- updated locales de/en
+- short note on which fields were fixed and how to extend later

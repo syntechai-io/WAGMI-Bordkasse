@@ -15,6 +15,7 @@ import uuid
 import io
 from logbook_pdf_template import render_logbook_pdf
 from weather_service import WeatherService
+from constants.logbook_enums import normalize_wind, normalize_visibility, normalize_sail_plan
 
 router = APIRouter(prefix="/logbook", tags=["logbook"])
 templates = create_templates()
@@ -263,11 +264,11 @@ async def create_entry(
             latitude=latitude,
             longitude=longitude,
             wind_direction=wind_direction,
-            wind_strength=wind_strength,
+            wind_strength=normalize_wind(wind_strength),
             sea_state=sea_state_enum,
-            visibility=visibility,
+            visibility=normalize_visibility(visibility),
             temperature=temperature,
-            sail_plan=sail_plan,
+            sail_plan=normalize_sail_plan(sail_plan),
             engine_hours=engine_hours,
             departure=departure,
             destination=destination,
@@ -475,11 +476,11 @@ async def update_entry(
         entry.latitude = latitude
         entry.longitude = longitude
         entry.wind_direction = wind_direction
-        entry.wind_strength = wind_strength
+        entry.wind_strength = normalize_wind(wind_strength)
         entry.sea_state = sea_state_enum
-        entry.visibility = visibility
+        entry.visibility = normalize_visibility(visibility)
         entry.temperature = temperature
-        entry.sail_plan = sail_plan
+        entry.sail_plan = normalize_sail_plan(sail_plan)
         entry.engine_hours = engine_hours
         entry.departure = departure
         entry.destination = destination
@@ -635,11 +636,11 @@ async def create_addendum(
             latitude=parent_entry.latitude,
             longitude=parent_entry.longitude,
             wind_direction=parent_entry.wind_direction,
-            wind_strength=parent_entry.wind_strength,
+            wind_strength=normalize_wind(parent_entry.wind_strength),
             sea_state=parent_entry.sea_state,
-            visibility=parent_entry.visibility,
+            visibility=normalize_visibility(parent_entry.visibility),
             temperature=parent_entry.temperature,
-            sail_plan=parent_entry.sail_plan,
+            sail_plan=normalize_sail_plan(parent_entry.sail_plan),
             engine_hours=parent_entry.engine_hours,
             departure=parent_entry.departure,
             destination=parent_entry.destination,

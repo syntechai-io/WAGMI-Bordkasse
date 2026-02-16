@@ -108,7 +108,7 @@
                             <span style="color: var(--navy-deep); opacity: 0.7;">💨 {{ t('logbook.wind') }}:</span>
                             <span class="font-medium ml-1" style="color: var(--navy-deep);">
                                 {% if entry.wind_direction %}{{ entry.wind_direction }}{% endif %}
-                                {% if entry.wind_strength %}{{ entry.wind_strength }}{% endif %}
+                                {% if entry.wind_strength %}{{ display_wind(entry.wind_strength) }}{% endif %}
                             </span>
                         </div>
                         {% endif %}

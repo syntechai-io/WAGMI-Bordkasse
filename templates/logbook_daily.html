@@ -142,10 +142,10 @@
                         <div><span class="font-medium">{{ t('logbook.wind') }}:</span> {{ entry.wind_direction }}</div>
                         {% endif %}
                         {% if entry.wind_strength %}
-                        <div><span class="font-medium">{{ t('logbook.wind_strength') }}:</span> {{ entry.wind_strength }}</div>
+                        <div><span class="font-medium">{{ t('logbook.wind_strength') }}:</span> {{ display_wind(entry.wind_strength) }}</div>
                         {% endif %}
                         {% if entry.sail_plan %}
-                        <div><span class="font-medium">{{ t('logbook.sail_plan') }}:</span> {{ entry.sail_plan }}</div>
+                        <div><span class="font-medium">{{ t('logbook.sail_plan') }}:</span> {{ display_sail_plan(entry.sail_plan) }}</div>
                         {% endif %}
                     </div>
                     

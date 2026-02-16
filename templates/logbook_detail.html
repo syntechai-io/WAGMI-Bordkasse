@@ -77,7 +77,7 @@
                 {% if entry.wind_strength %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
                     <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💨 {{ t('logbook.wind_strength') }}:</span>
-                    <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ entry.wind_strength }}</p>
+                    <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ display_wind(entry.wind_strength) }}</p>
                 </div>
                 {% endif %}
                 {% if entry.sea_state %}
@@ -97,7 +97,7 @@
                 {% if entry.visibility %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
                     <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👁️ {{ t('logbook.visibility') }}:</span>
-                    <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ entry.visibility }}</p>
+                    <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ display_visibility(entry.visibility) }}</p>
                 </div>
                 {% endif %}
                 {% if entry.temperature %}
@@ -117,7 +117,7 @@
                 {% if entry.sail_plan %}
                 <div class="p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
                     <span class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">⛵ {{ t('logbook.sail_plan') }}:</span>
-                    <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ entry.sail_plan }}</p>
+                    <p class="text-lg font-medium" style="color: var(--navy-deep);">{{ display_sail_plan(entry.sail_plan) }}</p>
                 </div>
                 {% endif %}
                 {% if entry.engine_hours %}

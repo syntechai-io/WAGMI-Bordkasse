@@ -23,7 +23,7 @@ Preferred communication style: Simple, everyday language.
 - **Multi-Currency Support**: Integrates with the ECB API for daily exchange rates, with caching.
 - **Performance Optimization**: Addresses N+1 query problems through pre-aggregation, eager loading, and database indexes.
 - **Settlement Groups**: Allows combining crew members for simplified settlement transfers.
-- **Logbook System**: Comprehensive logbook entry with over 20 fields (navigation, weather, engine, events), including append-only compliance. Supports quick entry system with maneuver types and hybrid dropdown/manual input fields.
+- **Logbook System**: Comprehensive logbook entry with over 20 fields (navigation, weather, engine, events), including append-only compliance. Supports quick entry system with maneuver types and hybrid dropdown/manual input fields. **Language-neutral storage**: Wind strength (bft0-12), visibility (very_good/good/moderate/poor/very_poor), and sail plan (motor_none/mainsail/genoa/main_genoa/no_sails) use canonical English keys in DB. `constants/logbook_enums.py` provides normalize_* functions (applied on save) for backward-compatible migration of legacy German values, and display_* functions (applied at render time) for i18n-translated display. PDF export uses German locale via `_pdf_t()` helper.
 - **GPS Integration**: Enhanced GPS auto-pull for latitude, longitude, Speed Over Ground (SOG), and Course Over Ground (COG), with continuous foreground GPS tracking.
 - **Weather API Integration**: Open-Meteo API integration for automatic weather data retrieval (temperature, wind, pressure).
 - **Motor Hours Auto-Calculation**: JavaScript logic calculates engine runtime from on/off timestamps.

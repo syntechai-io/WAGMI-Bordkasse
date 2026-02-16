@@ -9,6 +9,11 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 import io
 import os
+from constants.logbook_enums import display_wind, display_visibility, display_sail_plan
+from i18n import t as _i18n_t
+
+def _pdf_t(key):
+    return _i18n_t("de", key)
 
 def render_logbook_pdf(
     entries: List[Any],
@@ -182,7 +187,7 @@ def render_logbook_pdf(
             if entry.wind_direction:
                 wind_parts.append(entry.wind_direction)
             if entry.wind_strength:
-                wind_parts.append(entry.wind_strength)
+                wind_parts.append(display_wind(entry.wind_strength, _pdf_t))
             wind_str = '<br/>'.join(wind_parts)
         
         # Weather (temperature and pressure)
