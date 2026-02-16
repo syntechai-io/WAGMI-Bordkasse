@@ -56,9 +56,9 @@ Uses a greedy matching algorithm to minimize transfers between debtors and credi
 **Design Principles**:
 - **Mobile-First Design**: Optimized for touch and responsiveness.
 - **UI v1 Design System**: Calm, Apple-inspired design with `static/ui_v1.css` providing CSS custom properties (--bg, --surface, --border, --text, --accent, --success, --warn, --danger) and reusable component classes (.btn, .card, .kpi-card, .tag, .dash-tile, .dash-hero, .topbar, .nav-item, .footer-bar). Replaces old maritime rainbow gradients with neutral white cards + subtle accent borders. Inter font throughout.
+- **Navigation**: Dual-mode responsive navigation. Desktop (>=1024px): horizontal nav in topbar with hover/click dropdowns. Mobile (<1024px): hamburger opens off-canvas drawer sidebar (dark navy, 280px width, translateX animation) with collapsible sections, close-on-link, ESC key, focus trapping, scroll lock. `static/ui_nav.js` handles all drawer behavior. Active route highlighting via JS pathname matching. All nav labels use i18n `t()` function.
 - **Professional PDF Export**: Themed PDF outputs.
 - **Responsive Dashboard**: Streamlined mobile navigation with a focus on quick logbook entry.
-- **Navigation Restructuring**: Prioritizes quick access to Logbook alongside Törns; streamlined dropdowns for other actions.
 
 ### External Dependencies
 

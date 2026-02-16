@@ -1,0 +1,59 @@
+Implement the next UI layer: Mobile-first navigation with a collapsible sidebar (drawer), while preserving all existing functionality.
+
+Non-negotiables
+- Do not change backend logic, routes, auth, billing, or HTMX behavior.
+- Do not rename endpoints, IDs, or hx-* attributes.
+- Keep all existing nav links and dropdown items; only change presentation/layout.
+- Desktop must remain usable; mobile must become significantly better.
+
+Goal
+- Replace “web header nav” feeling with an app-like navigation:
+  - Desktop: topbar remains, but nav can be left-aligned and cleaner.
+  - Mobile: hamburger opens a left drawer sidebar; drawer closes on navigation.
+- Keep language toggle and user/logout accessible.
+- Maintain accessibility: focus trapping in drawer, ESC closes, ARIA attributes.
+
+Implementation Plan (safe)
+
+A) Add drawer shell in base template
+- In the main base Jinja template (the shared header layout), wrap nav in a layout shell:
+  - Topbar (always visible): brand + hamburger + right-side controls (language, user, logout)
+  - Sidebar drawer:
+    - Contains the same nav links as the current top navigation (Dashboard, Trips, Logbook, Finances, Administration, Guide, Billing if present, Admin Billing if admin).
+- Do not remove current nav links; reuse them inside the sidebar.
+- Keep existing dropdown items (Finances/Admin) as collapsible sections in the sidebar.
+
+B) CSS + responsive behavior
+- On >=1024px (desktop): sidebar can be “static hidden” (off by default) and topbar shows horizontal nav OR keep sidebar collapsed.
+- On <1024px: hide horizontal nav; show hamburger; sidebar becomes off-canvas drawer.
+- Ensure content area uses max-width container and proper padding.
+
+C) JS behavior (minimal, no framework)
+- Add a tiny `static/ui_nav.js`:
+  - Toggle drawer open/close
+  - Close drawer when a nav link is clicked (mobile)
+  - Close on ESC
+  - Trap focus when open (basic implementation)
+  - Prevent background scroll when drawer is open
+
+D) Ensure HTMX safety
+- Do not interfere with hx-boost / hx-get links.
+- Do not add event handlers that prevent default navigation unless required; if you do, ensure it still navigates.
+
+E) Visual style
+- Sidebar background: dark accent/navy (SyntechAI tone) with high contrast text.
+- Active route highlighting:
+  - Determine active path server-side if already available, otherwise apply via JS based on window.location.pathname.
+- Icons: keep existing ones but reduce clutter.
+
+F) Regression checks
+- Desktop: all nav links work; dropdown equivalents in sidebar work.
+- Mobile: hamburger opens drawer; drawer closes on link click; no overlap with content.
+- Billing/admin pages accessible from nav.
+- i18n: nav labels still pulled from translations (do not re-hardcode strings).
+
+Deliverables
+- Updated base template with drawer structure
+- New/updated CSS to support drawer + responsive layout
+- New `ui_nav.js` and included in base template
+- Short summary of what was changed and how to extend the sidebar menu later

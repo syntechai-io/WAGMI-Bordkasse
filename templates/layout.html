@@ -81,10 +81,175 @@
     </style>
 </head>
 <body>
+    <!-- Overlay (mobile) -->
+    <div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
+
+    <!-- Off-canvas drawer (mobile) -->
+    <aside id="nav-drawer" class="nav-drawer" aria-hidden="true" aria-label="{{ t('nav.navigation') }}" role="navigation">
+        <div class="drawer-header">
+            <a href="/" class="drawer-brand">
+                <img src="/static/logo-nav.png" alt="CrewLog Logo">
+                <span>CrewLog</span>
+                {% if show_brand and boat_brand_name %}
+                <span class="drawer-boat-name">{{ boat_brand_name }}</span>
+                {% endif %}
+            </a>
+            <button id="drawer-close" class="drawer-close-btn" aria-label="{{ t('nav.close_menu') }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="drawer-body">
+            <a href="/" class="drawer-link">
+                <span class="drawer-icon">🧭</span> {{ t('nav.dashboard') }}
+            </a>
+            <a href="/trips/" class="drawer-link">
+                <span class="drawer-icon">⛵</span> {{ t('nav.trips') }}
+            </a>
+            <a href="/logbook" class="drawer-link">
+                <span class="drawer-icon">📓</span> {{ t('nav.logbook') }}
+            </a>
+
+            {% if request.session.get('role') == 'admin' and all_trips %}
+            <div class="drawer-divider"></div>
+            <button class="drawer-section-toggle" aria-expanded="false">
+                <span class="drawer-label">
+                    <span class="drawer-icon">🎯</span>
+                    {{ selected_trip.name if selected_trip else t('nav.select_trip') }}
+                </span>
+                <svg class="drawer-arrow w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div class="drawer-sub-links hidden">
+                {% for trip in all_trips %}
+                <form action="/trips/{{ trip.id }}/select" method="POST" class="m-0">
+                    {{ csrf_input | safe }}
+                    <button type="submit" class="drawer-link w-full text-left {% if selected_trip and selected_trip.id == trip.id %}drawer-link-active{% endif %}">
+                        {% if selected_trip and selected_trip.id == trip.id %}✓{% endif %} {{ trip.name }}
+                        <span style="font-size: 0.7rem; opacity: 0.5; margin-left: 0.5rem;">{{ trip.start_date.strftime('%d.%m.%Y') }}</span>
+                    </button>
+                </form>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="drawer-divider"></div>
+
+            <button class="drawer-section-toggle" aria-expanded="false">
+                <span class="drawer-label">
+                    <span class="drawer-icon">💰</span>
+                    {{ t('nav.finances') }}
+                </span>
+                <svg class="drawer-arrow w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div class="drawer-sub-links hidden">
+                <a href="/deposits" class="drawer-link">
+                    <span class="drawer-icon">💰</span> {{ t('nav.deposits') }}
+                </a>
+                <a href="/expenses" class="drawer-link">
+                    <span class="drawer-icon">⚓</span> {{ t('nav.expenses') }}
+                </a>
+                <a href="/templates" class="drawer-link">
+                    <span class="drawer-icon">📋</span> {{ t('nav.templates') }}
+                </a>
+                <a href="/balances" class="drawer-link">
+                    <span class="drawer-icon">📊</span> {{ t('nav.balances') }}
+                </a>
+                <a href="/settlement" class="drawer-link">
+                    <span class="drawer-icon">⛵</span> {{ t('nav.settlement') }}
+                </a>
+            </div>
+
+            <button class="drawer-section-toggle" aria-expanded="false">
+                <span class="drawer-label">
+                    <span class="drawer-icon">📝</span>
+                    {{ t('nav.admin') }}
+                </span>
+                <svg class="drawer-arrow w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div class="drawer-sub-links hidden">
+                <a href="/crew" class="drawer-link">
+                    <span class="drawer-icon">👥</span> {{ t('nav.crew') }}
+                </a>
+                <a href="/groups" class="drawer-link">
+                    <span class="drawer-icon">🔗</span> {{ t('nav.groups') }}
+                </a>
+                {% if request.session.get('role') == 'admin' %}
+                <a href="/trips/passwords" class="drawer-link">
+                    <span class="drawer-icon">🔐</span> {{ t('nav.passwords') }}
+                </a>
+                {% endif %}
+                <a href="/export/csv" class="drawer-link">
+                    <span class="drawer-icon">📋</span> {{ t('nav.export') }}
+                </a>
+                {% if request.session.get('saas_user_id') %}
+                <a href="/admin/boat" class="drawer-link">
+                    <span class="drawer-icon">⛵</span> {{ t('nav.boat_setup') }}
+                </a>
+                <a href="/billing" class="drawer-link">
+                    <span class="drawer-icon">💳</span> {{ t('nav.billing') }}
+                </a>
+                {% endif %}
+                {% if request.session.get('role') == 'admin' %}
+                <a href="/admin/billing" class="drawer-link">
+                    <span class="drawer-icon">🔧</span> {{ t('nav.admin_billing') }}
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="drawer-divider"></div>
+
+            <a href="/help" class="drawer-link">
+                <span class="drawer-icon">📖</span> {{ t('nav.help') }}
+            </a>
+
+            <div class="drawer-divider"></div>
+
+            <div style="padding: 0.5rem 1.15rem;">
+                <div class="lang-pill">
+                    <a href="/set-language?lang=de&next={{ request.url.path }}" class="{% if lang == 'de' %}lang-active{% endif %}" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">DE</a>
+                    <a href="/set-language?lang=en&next={{ request.url.path }}" class="{% if lang == 'en' %}lang-active{% endif %}" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">EN</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="drawer-footer">
+            {% if request.session.get('user_id') %}
+            <div class="drawer-user-info">{{ t('nav.logged_in_as') }}: <strong>{{ request.session.get('username', 'User') }}</strong></div>
+            <a href="/logout" class="drawer-logout-btn">{{ t('nav.logout') }}</a>
+            {% elif request.session.get('saas_user_id') %}
+            <div class="drawer-user-info">{{ t('nav.logged_in_as') }}: <strong>{{ request.session.get('saas_email', 'User') }}</strong></div>
+            <form action="/logout-saas" method="POST" class="m-0">
+                {{ csrf_input | safe }}
+                <button type="submit" class="drawer-logout-btn">{{ t('nav.logout') }}</button>
+            </form>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Topbar -->
     <nav class="topbar sticky top-0 z-50">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-12">
                 <div class="flex items-center space-x-2.5">
+                    <!-- Hamburger (mobile only) -->
+                    <button id="drawer-open" class="p-1.5 -ml-1.5 touch-action rounded-md" aria-label="{{ t('nav.open_menu') }}" aria-expanded="false" aria-controls="nav-drawer" style="display: none;">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <style>
+                        @media (max-width: 1023px) {
+                            #drawer-open { display: flex !important; }
+                        }
+                    </style>
                     <img src="/static/logo-nav.png" alt="CrewLog Logo" class="w-7 h-7 object-contain rounded-md" style="opacity: 0.85;">
                     <a href="/" class="flex items-baseline gap-1.5">
                         <span class="text-base font-bold text-white">CrewLog</span>
@@ -93,17 +258,13 @@
                         {% endif %}
                     </a>
                 </div>
-                <button id="menu-toggle" class="lg:hidden p-2 touch-action">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-                <div id="menu" class="hidden lg:flex lg:items-center lg:space-x-1 text-sm">
+
+                <!-- Desktop horizontal nav -->
+                <div class="desktop-nav flex items-center space-x-1 text-sm">
                     <a href="/" class="nav-item touch-action">🧭 {{ t('nav.dashboard') }}</a>
                     <a href="/trips/" class="nav-item touch-action">⛵ {{ t('nav.trips') }}</a>
                     <a href="/logbook" class="nav-item touch-action">📓 {{ t('nav.logbook') }}</a>
                     
-                    <!-- Trip Selector (Admin Only) -->
                     {% if request.session.get('role') == 'admin' and all_trips %}
                     <div class="relative nav-dropdown">
                         <button class="nav-item touch-action flex items-center text-xs" 
@@ -199,80 +360,6 @@
                     {% endif %}
                 </div>
             </div>
-            <div id="mobile-menu" class="hidden lg:hidden pb-4 overflow-y-auto" style="max-height: calc(100vh - 56px);">
-                <a href="/" class="block py-3 hover:text-white/90 transition touch-action border-b border-white/8">🧭 {{ t('nav.dashboard') }}</a>
-                <a href="/trips/" class="block py-3 hover:text-white/90 transition touch-action border-b border-white/8">⛵ {{ t('nav.trips') }}</a>
-                <a href="/logbook" class="block py-3 hover:text-white/90 transition touch-action border-b border-white/8">📓 {{ t('nav.logbook') }}</a>
-
-                <div class="mobile-section border-b border-white/8">
-                    <button class="w-full py-3 hover:text-white/90 transition touch-action flex items-center justify-between mobile-section-toggle">
-                        <span>💰 {{ t('nav.finances') }}</span>
-                        <svg class="w-4 h-4 transition-transform mobile-section-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div class="mobile-section-content hidden pl-4 pb-2">
-                        <a href="/deposits" class="block py-2 hover:text-white/90 transition touch-action text-sm">💰 {{ t('nav.deposits') }}</a>
-                        <a href="/expenses" class="block py-2 hover:text-white/90 transition touch-action text-sm">⚓ {{ t('nav.expenses') }}</a>
-                        <a href="/templates" class="block py-2 hover:text-white/90 transition touch-action text-sm">📋 {{ t('nav.templates') }}</a>
-                        <a href="/balances" class="block py-2 hover:text-white/90 transition touch-action text-sm">📊 {{ t('nav.balances') }}</a>
-                        <a href="/settlement" class="block py-2 hover:text-white/90 transition touch-action text-sm">⛵ {{ t('nav.settlement') }}</a>
-                    </div>
-                </div>
-
-                <div class="mobile-section border-b border-white/8">
-                    <button class="w-full py-3 hover:text-white/90 transition touch-action flex items-center justify-between mobile-section-toggle">
-                        <span>📝 {{ t('nav.admin') }}</span>
-                        <svg class="w-4 h-4 transition-transform mobile-section-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div class="mobile-section-content hidden pl-4 pb-2">
-                        <a href="/crew" class="block py-2 hover:text-white/90 transition touch-action text-sm">👥 {{ t('nav.crew') }}</a>
-                        <a href="/groups" class="block py-2 hover:text-white/90 transition touch-action text-sm">🔗 {{ t('nav.groups') }}</a>
-                        {% if request.session.get('role') == 'admin' %}
-                        <a href="/trips/passwords" class="block py-2 hover:text-white/90 transition touch-action text-sm">🔐 {{ t('nav.passwords') }}</a>
-                        {% endif %}
-                        <a href="/export/csv" class="block py-2 hover:text-white/90 transition touch-action text-sm">📋 {{ t('nav.export') }}</a>
-                        {% if request.session.get('saas_user_id') %}
-                        <a href="/admin/boat" class="block py-2 hover:text-white/90 transition touch-action text-sm">⛵ {{ t('nav.boat_setup') }}</a>
-                        <a href="/billing" class="block py-2 hover:text-white/90 transition touch-action text-sm">💳 {{ t('nav.billing') }}</a>
-                        {% endif %}
-                        {% if request.session.get('role') == 'admin' %}
-                        <a href="/admin/billing" class="block py-2 hover:text-white/90 transition touch-action text-sm">🔧 {{ t('nav.admin_billing') }}</a>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <a href="/help" class="block py-3 hover:text-white/90 transition touch-action border-b border-white/8">📖 {{ t('nav.help') }}</a>
-
-                <div class="flex items-center space-x-3 py-3 border-b border-white/8">
-                    <span class="text-sm opacity-70">🌐</span>
-                    <div class="lang-pill">
-                        <a href="/set-language?lang=de&next={{ request.url.path }}" class="{% if lang == 'de' %}lang-active{% endif %}" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">DE</a>
-                        <a href="/set-language?lang=en&next={{ request.url.path }}" class="{% if lang == 'en' %}lang-active{% endif %}" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">EN</a>
-                    </div>
-                </div>
-
-                {% if request.session.get('user_id') %}
-                <div class="border-t border-white/10 pt-4 mt-4">
-                    <div class="text-sm mb-2" style="color: rgba(255,255,255,0.7);">👤 {{ t('nav.logged_in_as') }}: <strong class="text-white">{{ request.session.get('username', 'User') }}</strong></div>
-                    <a href="/logout" class="block px-4 py-2 rounded-lg text-center font-medium transition text-white text-sm" style="background: rgba(255,255,255,0.12);">
-                        {{ t('nav.logout') }}
-                    </a>
-                </div>
-                {% elif request.session.get('saas_user_id') %}
-                <div class="border-t border-white/10 pt-4 mt-4">
-                    <div class="text-sm mb-2" style="color: rgba(255,255,255,0.7);">👤 {{ t('nav.logged_in_as') }}: <strong class="text-white">{{ request.session.get('saas_email', 'User') }}</strong></div>
-                    <form action="/logout-saas" method="POST" class="m-0">
-                        {{ csrf_input | safe }}
-                        <button type="submit" class="block w-full px-4 py-2 rounded-lg text-center font-medium transition text-white text-sm" style="background: rgba(255,255,255,0.12);">
-                            {{ t('nav.logout') }}
-                        </button>
-                    </form>
-                </div>
-                {% endif %}
-            </div>
         </div>
     </nav>
 
@@ -285,67 +372,36 @@
         <p class="mt-1">{{ t('footer.subtitle') }}</p>
     </footer>
 
+    <script src="/static/ui_nav.js"></script>
     <script>
-        // Mobile menu toggle
-        const menuToggle = document.getElementById('menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        
-        menuToggle.addEventListener('click', function() {
-            mobileMenu.classList.toggle('hidden');
-        });
-        
-        // Close mobile menu when clicking any navigation link
-        const mobileMenuLinks = mobileMenu.querySelectorAll('a');
-        mobileMenuLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                mobileMenu.classList.add('hidden');
-            });
-        });
-
-        // Collapsible mobile sections
-        const mobileSectionToggles = mobileMenu.querySelectorAll('.mobile-section-toggle');
-        mobileSectionToggles.forEach(toggle => {
-            toggle.addEventListener('click', function() {
-                const section = this.closest('.mobile-section');
-                const content = section.querySelector('.mobile-section-content');
-                const arrow = section.querySelector('.mobile-section-arrow');
-                content.classList.toggle('hidden');
-                arrow.style.transform = content.classList.contains('hidden') ? '' : 'rotate(180deg)';
-            });
-        });
-        
-        // Dropdown navigation for touch/click devices
+        // Dropdown navigation for touch/click devices (desktop)
         document.addEventListener('DOMContentLoaded', function() {
-            const dropdowns = document.querySelectorAll('.nav-dropdown');
+            var dropdowns = document.querySelectorAll('.nav-dropdown');
             
-            dropdowns.forEach(dropdown => {
-                const button = dropdown.querySelector('button');
+            dropdowns.forEach(function(dropdown) {
+                var button = dropdown.querySelector('button');
                 
-                // Toggle dropdown on click/touch
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    const isActive = dropdown.classList.contains('active');
+                    var isActive = dropdown.classList.contains('active');
                     
-                    // Close other dropdowns
-                    dropdowns.forEach(other => {
+                    dropdowns.forEach(function(other) {
                         if (other !== dropdown) {
                             other.classList.remove('active');
                             other.querySelector('button').setAttribute('aria-expanded', 'false');
                         }
                     });
                     
-                    // Toggle this dropdown
                     dropdown.classList.toggle('active');
                     button.setAttribute('aria-expanded', !isActive);
                 });
             });
             
-            // Close dropdowns when clicking outside
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.nav-dropdown')) {
-                    dropdowns.forEach(dropdown => {
+                    dropdowns.forEach(function(dropdown) {
                         dropdown.classList.remove('active');
                         dropdown.querySelector('button').setAttribute('aria-expanded', 'false');
                     });
