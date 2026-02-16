@@ -6,7 +6,7 @@
         <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">⛵ {{ t('trips.title') }}</h1>
         {% if request.session.get('role') == 'admin' or is_saas_owner %}
         <a href="/trips/wagmi/report" class="text-white px-4 py-2 rounded-lg hover:shadow-lg transition font-semibold" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
-            📊 {{ brand_label }} {{ t('trips.yearly_overview') }}
+            📊 {{ branding.brand_name }} {{ t('trips.yearly_overview') }}
         </a>
         {% endif %}
     </div>
@@ -21,7 +21,7 @@
                 <form method="post" action="/trips/quick-start" class="inline">
                     {{ csrf_input | safe }}
                     <button type="submit" class="w-full md:w-auto text-white px-6 py-3 rounded-lg transition touch-action font-bold text-lg shadow-lg hover:shadow-xl" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
-                        ⚡ {{ t('trips.quick_start') }} {{ brand_label }}
+                        ⚡ {{ t('trips.quick_start') }} {{ branding.brand_name }}
                     </button>
                 </form>
                 <p class="text-xs mt-1 text-center" style="color: var(--navy-deep); opacity: 0.7;">{{ t('trips.quick_start_hint') }}</p>

@@ -24,12 +24,47 @@
 
         <div class="porthole-card p-6 mb-6" style="background: white;">
             <h2 class="text-xl font-bold mb-4" style="color: var(--navy-deep);">🏷️ {{ t('admin.boat_setup.branding') }}</h2>
-            <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.boat_name') }} *</label>
-                <input type="text" name="boat_name" value="{{ boat_profile.boat_name }}" required maxlength="100"
-                    class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
-                    placeholder="{{ t('admin.boat_setup.boat_name_placeholder') }}"
-                    {% if not is_owner %}disabled{% endif %}>
+            <div class="space-y-4">
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.boat_name') }} *</label>
+                    <input type="text" name="boat_name" value="{{ boat_profile.boat_name }}" required maxlength="100"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        placeholder="{{ t('admin.boat_setup.boat_name_placeholder') }}"
+                        {% if not is_owner %}disabled{% endif %}>
+                    <p class="text-xs mt-1" style="color: var(--muted);">{{ t('admin.boat_setup.boat_name_hint') }}</p>
+                </div>
+                <div>
+                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.boat_type') }}</label>
+                    <input type="text" name="boat_type" value="{{ boat_profile.boat_type or '' }}" maxlength="100"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        placeholder="{{ t('admin.boat_setup.boat_type_placeholder') }}"
+                        {% if not is_owner %}disabled{% endif %}>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.logo_url') }}</label>
+                        <input type="url" name="logo_url" value="{{ boat_profile.logo_url or '' }}" maxlength="500"
+                            class="w-full px-4 py-3 border rounded-lg" style="border-color: var(--sky-blue);"
+                            placeholder="https://..."
+                            {% if not is_owner %}disabled{% endif %}>
+                        <p class="text-xs mt-1" style="color: var(--muted);">{{ t('admin.boat_setup.logo_url_hint') }}</p>
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.accent_color') }}</label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" name="accent_color" id="accent-color-picker"
+                                value="{{ boat_profile.accent_color or '#0B3A66' }}"
+                                class="w-12 h-12 rounded-lg border cursor-pointer" style="border-color: var(--sky-blue);"
+                                {% if not is_owner %}disabled{% endif %}>
+                            <input type="text" id="accent-color-text" 
+                                value="{{ boat_profile.accent_color or '' }}" maxlength="7"
+                                class="flex-1 px-4 py-3 border rounded-lg font-mono" style="border-color: var(--sky-blue);"
+                                placeholder="#0B3A66"
+                                {% if not is_owner %}disabled{% endif %}>
+                        </div>
+                        <p class="text-xs mt-1" style="color: var(--muted);">{{ t('admin.boat_setup.accent_color_hint') }}</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -175,6 +210,19 @@
 
 {% block scripts %}
 <script>
+    var colorPicker = document.getElementById('accent-color-picker');
+    var colorText = document.getElementById('accent-color-text');
+    if (colorPicker && colorText) {
+        colorPicker.addEventListener('input', function() {
+            colorText.value = this.value;
+        });
+        colorText.addEventListener('input', function() {
+            if (/^#[0-9a-fA-F]{6}$/.test(this.value)) {
+                colorPicker.value = this.value;
+            }
+        });
+    }
+
     document.querySelectorAll('input[name="main_type"]').forEach(function(radio) {
         radio.addEventListener('change', function() {
             var note = document.getElementById('reef-note');

@@ -13,6 +13,39 @@ from constants.logbook_enums import (
 )
 
 
+def _build_branding(bp=None):
+    defaults = {
+        "brand_name": "CrewLog",
+        "brand_subtitle": None,
+        "brand_logo_url": None,
+        "accent_color": None,
+        "home_port_name": None,
+        "home_port_lat": None,
+        "home_port_lon": None,
+        "is_default": True,
+    }
+    if not bp:
+        return defaults
+    if bp.boat_name and not bp.boat_name_is_default:
+        defaults["brand_name"] = bp.boat_name
+        defaults["is_default"] = False
+    boat_parts = []
+    if bp.boat_make:
+        boat_parts.append(bp.boat_make)
+    if bp.boat_model:
+        boat_parts.append(bp.boat_model)
+    if bp.boat_type:
+        boat_parts.append(bp.boat_type)
+    defaults["brand_subtitle"] = " ".join(boat_parts) if boat_parts else (bp.boat_type if bp.boat_type else None)
+    defaults["brand_logo_url"] = bp.logo_url if bp.logo_url else None
+    if bp.accent_color and bp.accent_color.startswith("#") and len(bp.accent_color) == 7:
+        defaults["accent_color"] = bp.accent_color
+    defaults["home_port_name"] = bp.home_port_name
+    defaults["home_port_lat"] = bp.home_port_lat
+    defaults["home_port_lon"] = bp.home_port_lon
+    return defaults
+
+
 def trip_context_processor(request: Request) -> Dict[str, Any]:
     """Add trip information and branding to all template contexts"""
     context = {
@@ -22,6 +55,7 @@ def trip_context_processor(request: Request) -> Dict[str, Any]:
         "show_brand": False,
         "brand_label": "CrewLog",
         "brand_is_default": True,
+        "branding": _build_branding(),
     }
     
     db_generator = get_db()
@@ -38,10 +72,12 @@ def trip_context_processor(request: Request) -> Dict[str, Any]:
         account_id = request.session.get("account_id")
         if account_id:
             bp = db.query(BoatProfile).filter(BoatProfile.account_id == account_id).first()
-            if bp and not bp.boat_name_is_default:
-                context["boat_brand_name"] = bp.boat_name
+            branding = _build_branding(bp)
+            context["branding"] = branding
+            if not branding["is_default"]:
+                context["boat_brand_name"] = branding["brand_name"]
                 context["show_brand"] = True
-                context["brand_label"] = bp.boat_name
+                context["brand_label"] = branding["brand_name"]
                 context["brand_is_default"] = False
         
     except Exception:

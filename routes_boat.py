@@ -41,6 +41,9 @@ async def save_boat_setup(
     boat_make: Optional[str] = Form(None),
     boat_model: Optional[str] = Form(None),
     boat_year: Optional[str] = Form(None),
+    boat_type: Optional[str] = Form(None),
+    logo_url: Optional[str] = Form(None),
+    accent_color: Optional[str] = Form(None),
     main_type: str = Form("FURLING"),
     headsail_genoa: Optional[str] = Form(None),
     headsail_jib: Optional[str] = Form(None),
@@ -68,6 +71,13 @@ async def save_boat_setup(
     bp.home_port_name = home_port_name.strip() if home_port_name and home_port_name.strip() else None
     bp.boat_make = boat_make.strip() if boat_make and boat_make.strip() else None
     bp.boat_model = boat_model.strip() if boat_model and boat_model.strip() else None
+    bp.boat_type = boat_type.strip() if boat_type and boat_type.strip() else None
+    bp.logo_url = logo_url.strip() if logo_url and logo_url.strip() else None
+    color = accent_color.strip() if accent_color and accent_color.strip() else None
+    if color and color.startswith("#") and len(color) == 7:
+        bp.accent_color = color
+    else:
+        bp.accent_color = None
     bp.updated_at = datetime.utcnow()
 
     try:

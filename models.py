@@ -496,6 +496,9 @@ class BoatProfile(Base):
     boat_make = Column(String(100), nullable=True)
     boat_model = Column(String(100), nullable=True)
     boat_year = Column(Integer, nullable=True)
+    boat_type = Column(String(100), nullable=True)
+    logo_url = Column(String(500), nullable=True)
+    accent_color = Column(String(7), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

@@ -7,7 +7,7 @@
     <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="{{ brand_label }}">
+    <meta name="apple-mobile-web-app-title" content="{{ branding.brand_name }}">
     <meta name="theme-color" content="#1e3a5f">
     <meta name="description" content="{{ t('common.meta_description') }}">
     
@@ -27,14 +27,31 @@
     <link rel="apple-touch-icon" sizes="120x120" href="/static/apple-touch-icon-120x120-v2.png">
     <link rel="apple-touch-icon" href="/static/apple-touch-icon-180x180-v2.png">
     
-    <title>{% block title %}{% if show_brand %}{{ brand_label }}{% endif %} CrewLog{% endblock %}</title>
+    <title>{% block title %}{% if not branding.is_default %}{{ branding.brand_name }} - {% endif %}CrewLog{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/ui_v1.css">
+    {% if branding.accent_color %}
     <style>
+        :root {
+            --accent: {{ branding.accent_color }};
+            --navy-deep: {{ branding.accent_color }};
+        }
+    </style>
+    {% endif %}
+    <style>
+        .topbar-brand-name {
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        @media (min-width: 768px) {
+            .topbar-brand-name { max-width: 200px; }
+        }
         @media (max-width: 640px) {
             body {
                 padding-bottom: 80px;
@@ -88,10 +105,16 @@
     <aside id="nav-drawer" class="nav-drawer" aria-hidden="true" aria-label="{{ t('nav.navigation') }}" role="navigation">
         <div class="drawer-header">
             <a href="/" class="drawer-brand">
+                {% if branding.brand_logo_url %}
+                <img src="{{ branding.brand_logo_url }}" alt="{{ branding.brand_name }}" style="max-height: 28px; width: auto; border-radius: 4px;">
+                {% else %}
                 <img src="/static/logo-nav.png" alt="CrewLog Logo">
+                {% endif %}
+                {% if not branding.is_default %}
+                <span class="drawer-boat-name" style="font-weight: 700;">{{ branding.brand_name }}</span>
+                <span style="font-size: 0.65rem; opacity: 0.5;">CrewLog</span>
+                {% else %}
                 <span>CrewLog</span>
-                {% if show_brand and boat_brand_name %}
-                <span class="drawer-boat-name">{{ boat_brand_name }}</span>
                 {% endif %}
             </a>
             <button id="drawer-close" class="drawer-close-btn" aria-label="{{ t('nav.close_menu') }}">
@@ -250,11 +273,17 @@
                             #drawer-open { display: flex !important; }
                         }
                     </style>
+                    {% if branding.brand_logo_url %}
+                    <img src="{{ branding.brand_logo_url }}" alt="{{ branding.brand_name }}" class="h-7 object-contain rounded-md" style="max-width: 40px;">
+                    {% else %}
                     <img src="/static/logo-nav.png" alt="CrewLog Logo" class="w-7 h-7 object-contain rounded-md" style="opacity: 0.85;">
-                    <a href="/" class="flex items-baseline gap-1.5">
+                    {% endif %}
+                    <a href="/" class="flex items-baseline gap-1.5 min-w-0">
+                        {% if not branding.is_default %}
+                        <span class="text-base font-bold text-white topbar-brand-name">{{ branding.brand_name }}</span>
+                        <span class="text-xs font-medium" style="color: rgba(255,255,255,0.45);">CrewLog</span>
+                        {% else %}
                         <span class="text-base font-bold text-white">CrewLog</span>
-                        {% if show_brand and boat_brand_name %}
-                        <span class="text-xs font-medium" style="color: rgba(255,255,255,0.45);">{{ boat_brand_name }}</span>
                         {% endif %}
                     </a>
                 </div>

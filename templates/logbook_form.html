@@ -498,7 +498,7 @@
             <div>
                 <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏁 {{ t('logbook.departure') }}</label>
                 <input type="text" name="departure" 
-                       value="{% if entry and entry.departure %}{{ entry.departure }}{% else %}Fredericia DK{% endif %}" 
+                       value="{% if entry and entry.departure %}{{ entry.departure }}{% elif branding.home_port_name %}{{ branding.home_port_name }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_departure') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
                        style="border-color: var(--sky-blue);">

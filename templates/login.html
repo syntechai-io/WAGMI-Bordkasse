@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a2f4a">
-    <title>{{ t('auth.login') }} - {% if show_brand %}{{ brand_label }}{% endif %} CrewLog</title>
+    <title>{{ t('auth.login') }} - {% if not branding.is_default %}{{ branding.brand_name }} - {% endif %}CrewLog</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,7 +55,7 @@
             <div class="logo-float mb-4 flex justify-center">
                 <img src="/static/logo.png" alt="CrewLog Logo" class="w-20 h-20 object-contain">
             </div>
-            <h1 class="text-3xl font-bold text-white mb-1" style="letter-spacing: -0.02em;">{% if show_brand %}{{ brand_label }}{% endif %} CrewLog</h1>
+            <h1 class="text-3xl font-bold text-white mb-1" style="letter-spacing: -0.02em;">{% if not branding.is_default %}{{ branding.brand_name }} {% endif %}CrewLog</h1>
             <p class="text-sm" style="color: rgba(255,255,255,0.6);">{{ t('auth.subtitle') }}</p>
         </div>
         
@@ -184,7 +184,7 @@
         </div>
         
         <div class="text-center mt-6 text-sm" style="color: rgba(255,255,255,0.4);">
-            <p>{% if show_brand %}{{ brand_label }}{% endif %} CrewLog</p>
+            <p>{% if not branding.is_default %}{{ branding.brand_name }} - {% endif %}CrewLog</p>
         </div>
     </div>
     <script>

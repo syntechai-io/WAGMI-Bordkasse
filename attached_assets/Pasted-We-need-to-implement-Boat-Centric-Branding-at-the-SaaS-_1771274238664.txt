@@ -1,0 +1,78 @@
+We need to implement Boat-Centric Branding at the SaaS Account level without breaking any existing functionality (auth, sessions, i18n, HTMX, billing, trip scoping). Do NOT refactor routes broadly. Make this change incremental and safe.
+
+CONTEXT:
+- App is FastAPI + Jinja2 + Tailwind CDN + HTMX.
+- SaaS is account-based (accounts table exists and trips.account_id exists).
+- There is already session-based i18n (DE/EN).
+- Current UI still shows WAGMI in places and “Test1” shows in header, but we want dynamic branding based on the boat/team.
+
+REQUIREMENTS:
+1) Add "boat profile" fields to the accounts table (single boat/team per account):
+   - boat_name (varchar, nullable)  // used for branding; if null fallback to account.name or "CrewLog"
+   - home_port_name (varchar, nullable) // optional
+   - home_port_lat (numeric/float nullable)
+   - home_port_lon (numeric/float nullable)
+   - boat_type (varchar nullable) // e.g. "Bavaria 32 Cruiser"
+   - main_sail_type (enum or varchar nullable) // for later sail profile: INMAST_FURLING | SLAB_REEFING etc. (keep simple: varchar)
+   - headsail_furling (boolean default true) // keep simple
+   - logo_url (varchar nullable) // optional (for later upload); for now allow a URL input
+   - accent_color (varchar nullable) // hex like #0B3A66, optional
+
+   Use Alembic migration if project has it; otherwise create a safe SQL migration script and run it. Must not drop anything.
+
+2) Create a minimal Account Settings UI page for account owners only:
+   - Route: GET/POST /settings/boat
+   - Displays a simple form to edit:
+     boat_name, boat_type, home_port_name, home_port_lat, home_port_lon, accent_color, logo_url.
+   - Add a "Use current GPS" button for home port lat/lon that uses browser geolocation and fills lat/lon fields (client-side JS only).
+   - home port is optional (allow blank).
+   - Validate accent_color loosely (must start with # and length 7) or ignore if invalid.
+   - Persist to accounts table.
+   - Ensure all labels are i18n keys (add DE/EN keys).
+   - Put link to this settings page in the navigation:
+     - Desktop: in Administration dropdown as "Boat Settings"
+     - Mobile drawer: under Administration section.
+
+3) Expose a single "branding" object to all templates:
+   - Implement a dependency or helper that reads current account_id from SaaS session.
+   - Load account record and compute:
+     brand_name = accounts.boat_name or accounts.name or "CrewLog"
+     brand_subtitle = accounts.boat_type (optional)
+     brand_logo_url = accounts.logo_url (optional)
+     accent_color = accounts.accent_color (optional, fallback to existing navy)
+     home_port defaults for logbook quick fill: name/lat/lon if present
+   - Make this available to Jinja templates as `branding`.
+
+   IMPORTANT: Do not break legacy mode. If no SaaS session/account, set branding to defaults (CrewLog + existing logo).
+
+4) Update UI to use branding:
+   - Header left: show brand_logo_url if present, else current app logo.
+   - Replace any remaining "WAGMI" hardcoded labels in templates with `branding.brand_name`.
+   - Example: "Quick Start WAGMI" becomes "Quick Start {{ branding.brand_name }}" (but must pass through i18n):
+     Provide an i18n key like dashboard.quick_start with a placeholder {boat}.
+     Same for Trips quick start button text.
+   - Where header currently shows "CrewLog Test1": adjust to show:
+       top line: branding.brand_name (boat name / account name)
+       second line: "CrewLog" (fixed product name) OR "CrewLog" + optional boat_type smaller.
+     Keep it clean and consistent on mobile and desktop.
+   - Ensure layout does not overflow on small screens (truncate long boat names with ellipsis).
+   - Make sure no functional routes change.
+
+5) Wire home port defaults into logbook creation:
+   - Wherever the logbook entry form currently defaults to Fredericia or uses fixed homeport, change it:
+     Use branding.home_port_name/lat/lon if set, otherwise keep existing behavior (no forced defaults).
+   - Home port should only be applied as default for new entries (do not overwrite existing saved entries).
+
+6) Security:
+   - Only account owners can edit boat settings.
+   - Non-owners can still see the branding in header but cannot change it.
+
+DELIVERABLES:
+- Migration applied.
+- New route + template for /settings/boat.
+- Navigation updated (desktop + mobile drawer).
+- Branding object available in base template.
+- Replace remaining hardcoded boat name references in UI with branding + i18n placeholder keys.
+- Do not break tests / do not break any existing page.
+
+After implementing, summarize exactly which templates were updated and list the new i18n keys added.

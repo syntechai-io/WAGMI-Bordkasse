@@ -32,7 +32,7 @@ def get_default_home_port(db: Session, account_id) -> str:
         bp = get_boat_profile_for_account(db, account_id)
         if bp and bp.home_port_name:
             return bp.home_port_name
-    return "Fredericia"
+    return ""
 
 
 def get_home_port_coords(db: Session, account_id):
