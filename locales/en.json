@@ -312,6 +312,7 @@
   "logbook.safety_placeholder": "e.g. Life-saving equipment checked, bilge inspected...",
   "logbook.notes_placeholder": "Special incidents, observations...",
   "logbook.submit_save": "Save Entry",
+  "logbook.submit_update": "Update",
   "logbook.pdf_export": "Export as PDF",
   "logbook.daily_summary": "Summary",
   "logbook.entries_count": "Entries",

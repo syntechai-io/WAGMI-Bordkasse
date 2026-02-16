@@ -312,6 +312,7 @@
   "logbook.safety_placeholder": "z.B. Rettungsmittel geprüft, Bilge kontrolliert...",
   "logbook.notes_placeholder": "Besondere Vorkommnisse, Beobachtungen...",
   "logbook.submit_save": "Eintrag speichern",
+  "logbook.submit_update": "Aktualisieren",
   "logbook.pdf_export": "Als PDF exportieren",
   "logbook.daily_summary": "Zusammenfassung",
   "logbook.entries_count": "Einträge",

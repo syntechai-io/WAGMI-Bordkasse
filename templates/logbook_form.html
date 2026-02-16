@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto logbook-form-wrapper">
     <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">
         {% if entry %}✏️ {{ t('logbook.edit_entry') }}{% else %}➕ {{ t('logbook.new_entry_title') }}{% endif %}
     </h1>
@@ -193,7 +193,9 @@
             </div>
         </details>
         
-        <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">🌤️ {{ t('logbook.weather_conditions') }}</h3>
+        <details class="logbook-section" open>
+        <summary>🌤️ {{ t('logbook.weather_conditions') }}</summary>
+        <div class="logbook-section-body">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="hybrid-field-container">
@@ -338,7 +340,7 @@
         </button>
         
         <!-- Phase A: Enhanced Weather Section -->
-        <details class="porthole-card p-4 mb-4 mt-4 cursor-pointer">
+        <details class="porthole-card p-4 mb-4 cursor-pointer">
             <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
                 ⛅ {{ t('logbook.weather_extended') }}
             </summary>
@@ -373,6 +375,9 @@
                            style="border-color: var(--sky-blue);">
                 </div>
             </div>
+        </details>
+
+        </div>
         </details>
         
         <div class="rope-divider"></div>
@@ -447,7 +452,9 @@
         
         <div class="rope-divider"></div>
         
-        <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">⛵ {{ t('logbook.ship_data') }}</h3>
+        <details class="logbook-section">
+        <summary>⛵ {{ t('logbook.ship_data') }}</summary>
+        <div class="logbook-section-body">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="hybrid-field-container">
@@ -627,6 +634,9 @@
                 </div>
             </div>
         </details>
+
+        </div>
+        </details>
         
         <div class="rope-divider"></div>
         
@@ -663,8 +673,10 @@
         
         <div class="rope-divider"></div>
         
-        <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">👥 {{ t('logbook.crew_watch_section') }}</h3>
-        
+        <details class="logbook-section">
+        <summary>👥 {{ t('logbook.crew_watch_section') }}</summary>
+        <div class="logbook-section-body">
+
         <div class="mb-4">
             <label class="block font-medium mb-2" style="color: var(--navy-deep);">⚓ {{ t('logbook.watch_leader') }}</label>
             <select name="watch_leader_id" 
@@ -713,11 +725,14 @@
                       style="border-color: var(--sky-blue);">{% if entry and entry.safety_checks_completed %}{{ entry.safety_checks_completed }}{% endif %}</textarea>
         </div>
         
+        </div>
+        </details>
+        
         <div class="rope-divider"></div>
         
-        <div class="flex gap-4">
-            <button type="submit" class="btn btn-primary flex-1 py-3 text-base touch-action">
-                💾 {% if entry %}Aktualisieren{% else %}{{ t('logbook.submit_save') }}{% endif %}
+        <div class="flex gap-4 logbook-bottom-actions">
+            <button type="submit" id="logbook-submit-btn" class="btn btn-primary flex-1 py-3 text-base touch-action">
+                💾 {% if entry %}{{ t('logbook.submit_update') }}{% else %}{{ t('logbook.submit_save') }}{% endif %}
             </button>
             <a href="{% if entry %}/logbook/{{ entry.id }}{% else %}/logbook{% endif %}" 
                class="btn btn-secondary flex-1 py-3 text-base text-center touch-action">
@@ -727,9 +742,24 @@
     </form>
 </div>
 
+<!-- Sticky bottom action bar (mobile only) -->
+<div class="logbook-sticky-bar">
+    <a href="{% if entry %}/logbook/{{ entry.id }}{% else %}/logbook{% endif %}" 
+       class="btn btn-ghost sticky-back touch-action" aria-label="{{ t('common.back') }}">
+        ← 
+    </a>
+    <button type="button" id="sticky-quick-fill" class="btn btn-primary touch-action">
+        ⚡ {{ t('logbook.quick_fill') }}
+    </button>
+    <button type="button" id="sticky-save" class="btn btn-secondary touch-action">
+        💾 {% if entry %}{{ t('logbook.submit_update') }}{% else %}{{ t('logbook.submit_save') }}{% endif %}
+    </button>
+</div>
+
 <script src="/static/js/logbook-gps.js"></script>
 <script src="/static/js/logbook-quick-entry.js"></script>
 <script src="/static/js/logbook-quick-fill.js"></script>
+<script src="/static/ui_mobile.js"></script>
 <script>
 const i18n = {
     furl_in: {{ t("logbook.furl_in") | tojson }},

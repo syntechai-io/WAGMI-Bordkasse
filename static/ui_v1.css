@@ -883,3 +883,188 @@ div[style*="linear-gradient(to right, var(--sea-foam)"] {
     padding: 0.55rem 1rem;
   }
 }
+
+/* ══════════════════════════════════════════
+   MOBILE TOUCH ERGONOMICS (<1024px)
+   ══════════════════════════════════════════ */
+@media (max-width: 1023px) {
+
+  /* A) Touch targets: min 44px height for all interactive elements */
+  .btn,
+  button,
+  input[type="submit"],
+  a.btn,
+  .maneuver-btn,
+  .touch-action {
+    min-height: 44px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  select,
+  textarea {
+    min-height: 44px;
+    padding: 0.55rem 0.75rem;
+  }
+
+  /* Checkbox/radio hit areas */
+  label:has(input[type="checkbox"]),
+  label:has(input[type="radio"]) {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0.35rem 0;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+  }
+
+  /* Form spacing */
+  .space-y-6 > * + * {
+    margin-top: 1.25rem;
+  }
+
+  /* Grid: single column on mobile, 2-col for maneuver tiles */
+  .grid.grid-cols-2.md\\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* H1 sizing */
+  h1 {
+    font-size: 1.35rem !important;
+  }
+
+  /* Labels readable */
+  label {
+    font-size: 0.88rem;
+  }
+
+  /* Avoid light grey on important text */
+  .font-medium,
+  .font-semibold,
+  .font-bold {
+    color: var(--text);
+  }
+
+  /* Reef radio pills: taller on mobile */
+  .peer-checked\\:bg-blue-600 + div,
+  label:has(input[type="radio"].peer) {
+    min-height: 44px;
+  }
+}
+
+/* ══════════════════════════════════════════
+   LOGBOOK MOBILE SECTIONS (accordions)
+   ══════════════════════════════════════════ */
+.logbook-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.logbook-section > summary {
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  -webkit-user-select: none;
+  user-select: none;
+  color: var(--text);
+  background: var(--surface);
+  transition: background 0.15s ease;
+}
+
+.logbook-section > summary:hover {
+  background: var(--surface-2);
+}
+
+.logbook-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.logbook-section > summary::after {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.logbook-section[open] > summary::after {
+  transform: rotate(45deg);
+}
+
+.logbook-section > .logbook-section-body {
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid var(--border-light);
+}
+
+/* ══════════════════════════════════════════
+   LOGBOOK STICKY ACTION BAR (mobile)
+   ══════════════════════════════════════════ */
+.logbook-sticky-bar {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .logbook-sticky-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+    padding: 0.6rem 0.75rem;
+    gap: 0.5rem;
+    align-items: center;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
+  .logbook-sticky-bar .btn {
+    flex: 1;
+    min-height: 44px;
+    justify-content: center;
+    font-size: 0.82rem;
+    padding: 0.5rem 0.5rem;
+    white-space: nowrap;
+  }
+
+  .logbook-sticky-bar .sticky-back {
+    flex: 0 0 auto;
+    min-width: 44px;
+    padding: 0.5rem;
+  }
+
+  /* Bottom padding to prevent content hiding behind sticky bar */
+  .logbook-form-wrapper {
+    padding-bottom: 80px;
+  }
+
+  /* Hide original bottom buttons on mobile (they're in sticky bar) */
+  .logbook-bottom-actions {
+    display: none;
+  }
+}

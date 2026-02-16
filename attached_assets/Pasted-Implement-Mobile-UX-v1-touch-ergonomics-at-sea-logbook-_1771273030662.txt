@@ -1,0 +1,69 @@
+Implement Mobile UX v1: touch ergonomics + “at-sea” logbook form improvements, WITHOUT changing backend logic, routes, or HTMX behavior.
+
+Non-negotiables
+- No backend changes. No route changes. No DB changes.
+- Do not rename form field names, IDs, or hx-* attributes.
+- Keep all existing actions working exactly as before.
+
+Goals
+1) Make all tap targets iOS-friendly (>=44px) and reduce accidental taps.
+2) Reduce vertical scrolling on the logbook create/edit form.
+3) Make primary actions easy to reach with one hand on mobile.
+4) Preserve desktop usability.
+
+A) Global touch ergonomics
+- Add a “mobile touch” CSS layer:
+  - Buttons, inputs, selects, and toggle chips min-height: 44px on <1024px
+  - Increase spacing between stacked elements
+  - Increase checkbox/radio hit areas (wrap label + input in a larger clickable container)
+  - Reduce dense grid columns on small screens: use single-column layout by default
+
+B) Logbook form: introduce a sticky action bar on mobile
+- On the logbook NEW/EDIT page only:
+  - Add a sticky bottom bar on <1024px with:
+    - Primary: Quick Fill (accent)
+    - Secondary: Save / Update (accent or secondary depending on your current design)
+    - Optional small button: Back
+- The sticky bar must not cover inputs:
+  - Add bottom padding to content equal to bar height.
+- Wire buttons to existing actions:
+  - Quick Fill triggers the same JS/action as the existing Quick Fill button (do not duplicate logic).
+  - Save triggers the existing submit button (programmatically click it).
+
+C) Logbook form: compress sections for mobile (visual-only)
+- Convert large section blocks into collapsible “accordions” on <1024px:
+  - Section headers remain visible: Position, Weather, Ship Data, Crew, Notes/Photos.
+  - Default open sections:
+    - Maneuver type + Date/Time
+    - Quick Fill
+    - Position
+  - Others collapsed by default to reduce scroll.
+- Implementation can be pure HTML+CSS (details/summary) OR minimal JS.
+- Must not break form submission and must keep values inside collapsed sections.
+
+D) Maneuver type buttons: mobile grid
+- On <1024px:
+  - Render maneuver type quick-entry buttons as a 2-column grid
+  - Ensure each tile has min-height 44px+ and clear label
+  - Keep existing onclick behavior and existing values.
+
+E) Improve readability
+- Ensure fonts scale sensibly on mobile:
+  - H1 smaller
+  - Labels readable (>=14px)
+  - Avoid huge empty margins
+- Keep high contrast for outdoor use:
+  - Avoid light grey on white for important text
+  - Maintain current SyntechAI accent system
+
+F) Regression checks
+- Logbook: Quick Fill, Get GPS, Start Tracking, Save/Update all still work.
+- Nothing overlaps: sticky bar doesn’t hide form fields or toasts.
+- Drawer navigation still works and closes on link click.
+- Desktop layout unchanged or improved (no regressions).
+
+Deliverables
+- CSS updates for touch targets and responsive layout
+- Minimal template changes to add sticky action bar and accordions (logbook form only)
+- Minimal JS (only if needed) in a new file static/ui_mobile.js or inside existing JS bundle
+- Short summary of selectors/components adjusted so we can iterate safely
