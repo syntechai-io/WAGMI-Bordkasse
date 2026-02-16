@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto logbook-form-wrapper">
+<div class="max-w-4xl mx-auto logbook-form-wrapper has-sticky-actions">
     <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">
         {% if entry %}✏️ {{ t('logbook.edit_entry') }}{% else %}➕ {{ t('logbook.new_entry_title') }}{% endif %}
     </h1>
@@ -79,7 +79,7 @@
         <div class="rope-divider"></div>
         
         <!-- Quick Fill Button -->
-        <div class="mb-4">
+        <div class="mb-4 js-original-quick-fill">
             <button type="button" id="quick-fill-button" 
                     class="btn btn-primary w-full py-4 text-lg shadow-lg hover:shadow-xl touch-action">
                 <span id="quick-fill-text">⚡ {{ t('logbook.quick_fill') }}</span>

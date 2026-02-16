@@ -1,0 +1,64 @@
+Mobile UX v1.1 – De-duplicate actions + sticky bar polish (NO backend changes)
+
+Context
+- We now have a sticky bottom action bar on mobile with Back / Quick Fill / Save.
+- The original in-page Quick Fill and Save buttons still exist and are visible, causing duplicates.
+
+Non-negotiables
+- Do not change routes, DB, API, models, or business logic.
+- Do not rename any form fields, ids, or hx-* attributes.
+- Keep the original buttons in the DOM (so existing JS/HTMX wiring remains), but adjust visibility/layout for mobile only.
+
+Goal
+- On mobile: user sees ONE set of primary actions (sticky bar).
+- On desktop: current layout stays unchanged.
+- Improve sticky bar behavior on iOS (safe area + keyboard + no overlap).
+
+Tasks
+
+A) Remove duplicate primary actions on mobile (visual only)
+1) Logbook NEW/EDIT page:
+   - Hide the original in-page “Quick Fill” button block on screens <1024px IF sticky bar is present.
+   - Hide the original in-page “Save Entry / Update Entry / Cancel” button row on screens <1024px IF sticky bar is present.
+   - Keep the elements in the DOM (display:none) so ui_mobile.js can still .click() them.
+
+Implementation hint:
+- Add a wrapper class around the original action areas (e.g. .js-original-actions and .js-original-save-row)
+- Add CSS:
+  @media (max-width: 1023px) { .has-sticky-actions .js-original-actions { display:none } ... }
+- Add class "has-sticky-actions" to body or a top container only on pages where sticky bar exists.
+
+B) Sticky bar iOS polish
+1) Respect iOS safe area:
+   - Add padding-bottom: env(safe-area-inset-bottom) to the sticky bar.
+2) Prevent overlap with content:
+   - Ensure content bottom padding >= sticky bar height + safe area.
+3) Keyboard friendliness (optional but recommended):
+   - When an input/textarea is focused, allow the sticky bar to remain visible but not cover input helpers.
+   - Do not use fixed positioning hacks that break scrolling.
+
+C) Sticky bar button semantics
+- Back button should match app navigation patterns:
+  - If you currently provide “Cancel”, use that same target for Back on NEW entry.
+  - If EDIT entry, Back should go to list/detail as currently implemented.
+- Ensure Save uses the correct existing submit (create vs update) by clicking the existing button, not submitting a different form.
+
+D) Details/accordion affordance consistency
+- In screenshot, some accordions show a chevron, others show a “play” triangle.
+  - Make the indicator consistent:
+    - Use one style (chevron) for all collapsibles.
+    - Rotate chevron on open (CSS only).
+- Increase summary hit area to 44px and improve spacing.
+
+E) Verification checklist
+- Mobile: only one Quick Fill visible, only one Save visible.
+- Desktop: original in-page buttons visible as before, sticky bar hidden.
+- Quick Fill still works and populates the same fields.
+- Save still works for create and update.
+- No console errors.
+
+Deliverables
+- Small template changes limited to logbook new/edit template(s) to add wrapper classes and has-sticky-actions marker
+- CSS changes (mobile-only) in existing stylesheet
+- Minimal ui_mobile.js adjustments only if needed (prefer CSS)
+- Short note listing the selectors you introduced so we can iterate safely

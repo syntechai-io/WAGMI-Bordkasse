@@ -10,7 +10,6 @@
         var originalBtn = document.getElementById('quick-fill-button');
         if (originalBtn) {
           originalBtn.click();
-          originalBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       });
     }

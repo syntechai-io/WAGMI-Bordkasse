@@ -975,6 +975,7 @@ div[style*="linear-gradient(to right, var(--sea-foam)"] {
 
 .logbook-section > summary {
   padding: 0.85rem 1rem;
+  min-height: 44px;
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
@@ -1013,6 +1014,37 @@ div[style*="linear-gradient(to right, var(--sea-foam)"] {
   transform: rotate(45deg);
 }
 
+.logbook-form-wrapper details.porthole-card > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.logbook-form-wrapper details.porthole-card > summary::-webkit-details-marker {
+  display: none;
+}
+
+.logbook-form-wrapper details.porthole-card > summary::after {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.logbook-form-wrapper details.porthole-card[open] > summary::after {
+  transform: rotate(45deg);
+}
+
 .logbook-section > .logbook-section-body {
   padding: 0.75rem 1rem 1rem;
   border-top: 1px solid var(--border-light);
@@ -1033,10 +1065,11 @@ div[style*="linear-gradient(to right, var(--sea-foam)"] {
     left: 0;
     right: 0;
     z-index: 900;
-    background: var(--surface);
+    background: rgba(255,255,255,0.92);
     border-top: 1px solid var(--border);
     box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
     padding: 0.6rem 0.75rem;
+    padding-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px));
     gap: 0.5rem;
     align-items: center;
     -webkit-backdrop-filter: blur(12px);
@@ -1058,13 +1091,15 @@ div[style*="linear-gradient(to right, var(--sea-foam)"] {
     padding: 0.5rem;
   }
 
-  /* Bottom padding to prevent content hiding behind sticky bar */
   .logbook-form-wrapper {
-    padding-bottom: 80px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   }
 
-  /* Hide original bottom buttons on mobile (they're in sticky bar) */
-  .logbook-bottom-actions {
+  .has-sticky-actions .js-original-quick-fill {
+    display: none;
+  }
+
+  .has-sticky-actions .logbook-bottom-actions {
     display: none;
   }
 }
