@@ -1,0 +1,64 @@
+Proceed with UI v1 skin, but refine it to be more SyntechAI/Apple-like. Keep ALL functionality and HTMX behavior unchanged.
+
+Non-negotiables
+- Do not touch backend logic, routes, auth, billing, or HTMX.
+- Do not rename IDs or hx-* attributes.
+- Prefer CSS mapping over mass template rewrites.
+
+Goal of this pass
+- Keep the new calm UI, but remove remaining “rainbow UI”.
+- Introduce ONE brand accent (SyntechAI blue) and use semantic colors only for actual status.
+- Make header lighter + clearer hierarchy (boat name small, CrewLog primary).
+- Make buttons consistent (no default green/orange/blue mix).
+
+A) Enforce a single accent system
+- Define in CSS variables:
+  --accent: #0B5CAB
+  --accent-2: #094B8D
+  --success, --warn, --danger remain but MUST be used only for status messages/badges/alerts.
+- Update dashboard tile left borders:
+  - Remove per-tile colors (red/green/purple).
+  - Use either:
+    (Option 1) a single accent border for all tiles, OR
+    (Option 2) neutral border for all tiles and a small accent icon chip.
+  Choose Option 1 for minimal changes.
+
+B) Standardize buttons across the app
+Define:
+- .btn-primary = accent background
+- .btn-secondary = white surface + border
+- .btn-ghost = transparent + accent text
+- .btn-danger = danger background
+Then remap existing button classes/selectors so that:
+- “Quick Fill” becomes primary (accent blue), not orange.
+- “Get GPS Position” becomes secondary.
+- “Start GPS Tracking” becomes secondary or ghost.
+- Remove default green/orange/blue button backgrounds unless semantic.
+
+Important: do NOT change button text, endpoints, or JS hooks. Only styling/classes.
+
+C) Header polish (no structural rewrite)
+- Keep current nav and links, but adjust CSS:
+  - Reduce overall height and padding
+  - Slightly reduce icon size and set icon opacity to ~0.8 (hover 1.0)
+  - Boat name (e.g. Test1) smaller + muted
+  - “CrewLog” remains prominent
+  - Language toggle styled as a small segmented control (pill) aligned right
+  - Email text uses muted color and truncates (ellipsis) on smaller widths
+
+D) Improve content width & spacing
+- Add a max-width container for main page content (e.g. 1180px) with auto margins.
+- Ensure forms (logbook create/edit) are constrained and have consistent spacing.
+- Maintain mobile responsiveness.
+
+E) Regression checklist
+Verify visually and functionally:
+- Dashboard tiles clickable as before
+- Logbook create/edit: Quick Fill, GPS, tracking unchanged
+- Trips create/list unchanged
+- Billing UI unchanged
+- No HTMX actions broken
+
+Deliverable
+- CSS updates + minimal template class tweaks only where necessary.
+- Short summary: which old button/tile selectors were remapped to the new system.

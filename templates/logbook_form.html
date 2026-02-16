@@ -81,8 +81,7 @@
         <!-- Quick Fill Button -->
         <div class="mb-4">
             <button type="button" id="quick-fill-button" 
-                    class="w-full text-white px-6 py-4 rounded-lg transition touch-action font-bold text-lg shadow-lg hover:shadow-xl" 
-                    style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                    class="btn btn-primary w-full py-4 text-lg shadow-lg hover:shadow-xl touch-action">
                 <span id="quick-fill-text">⚡ {{ t('logbook.quick_fill') }}</span>
                 <span id="quick-fill-spinner" class="hidden">
                     <span class="animate-pulse">⏳</span> {{ t('logbook.quick_fill_loading') }}
@@ -119,20 +118,18 @@
         
         <div class="flex gap-2">
             <button type="button" id="gps-button" 
-                    class="flex-1 text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm" 
-                    style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                    class="btn btn-secondary flex-1 touch-action text-sm">
                 📍 {{ t('logbook.gps_get_position') }}
             </button>
             <button type="button" id="gps-tracking-toggle" 
-                    class="flex-1 text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-sm" 
-                    style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%);">
+                    class="btn btn-secondary flex-1 touch-action text-sm">
                 🎯 {{ t('logbook.gps_start_tracking') }}
             </button>
         </div>
         
         <!-- GPS Tracking Banner (hidden by default) -->
         <div id="gps-tracking-banner" class="hidden mt-3 p-3 rounded-lg porthole-card" 
-             style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%); border: 2px solid var(--sea-foam);">
+             style="background: var(--accent-light); border: 2px solid var(--accent);">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="animate-pulse">
@@ -336,8 +333,7 @@
         </div>
         
         <button type="button" id="weather-button" 
-                class="w-full text-white px-4 py-3 rounded-lg transition touch-action font-semibold mb-4" 
-                style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                class="btn btn-secondary w-full py-3 touch-action mb-4">
             🌤️ {{ t('logbook.weather_auto_fetch') }}
         </button>
         
@@ -390,12 +386,12 @@
                 <div class="flex gap-2 mb-4">
                     <button type="button" id="motor-on-btn" 
                             class="flex-1 text-white font-bold py-3 px-4 rounded-lg transition touch-action" 
-                            style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%);">
+                            style="background: var(--success);">
                         ▶️ {{ t('logbook.engine_on') }}
                     </button>
                     <button type="button" id="motor-off-btn" 
                             class="flex-1 text-white font-bold py-3 px-4 rounded-lg transition touch-action" 
-                            style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                            style="background: var(--danger);">
                         ⏸️ {{ t('logbook.engine_off') }}
                     </button>
                 </div>
@@ -549,7 +545,7 @@
                     <input type="range" name="main_furl_pct" id="main_furl_slider" min="0" max="100" step="5"
                            value="{% if entry and entry.main_furl_pct %}{{ entry.main_furl_pct }}{% else %}0{% endif %}"
                            class="w-full h-3 rounded-lg appearance-none cursor-pointer"
-                           style="background: linear-gradient(to right, var(--sea-foam) 0%, var(--navy-deep) 100%);">
+                           style="background: linear-gradient(to right, var(--accent) 0%, var(--accent-2) 100%);">
                     <div class="flex justify-between text-xs mt-1" style="color: var(--navy-deep);">
                         <span>{{ t('logbook.furl_label_0') }}</span>
                         <span>50%</span>
@@ -593,7 +589,7 @@
                             <input type="range" name="headsail_furl_percent" id="headsail_furl_slider" min="0" max="100" step="5"
                                    value="{% if entry and entry.headsail_furl_percent %}{{ entry.headsail_furl_percent }}{% else %}0{% endif %}"
                                    class="w-full h-3 rounded-lg appearance-none cursor-pointer"
-                                   style="background: linear-gradient(to right, var(--sea-foam) 0%, var(--sky-blue) 100%);">
+                                   style="background: linear-gradient(to right, var(--accent) 0%, var(--accent-2) 100%);">
                         </div>
                         {% endif %}
                         {% else %}
@@ -720,12 +716,11 @@
         <div class="rope-divider"></div>
         
         <div class="flex gap-4">
-            <button type="submit" class="flex-1 ocean-gradient text-white font-bold py-3 px-4 rounded-lg transition touch-action">
+            <button type="submit" class="btn btn-primary flex-1 py-3 text-base touch-action">
                 💾 {% if entry %}Aktualisieren{% else %}{{ t('logbook.submit_save') }}{% endif %}
             </button>
             <a href="{% if entry %}/logbook/{{ entry.id }}{% else %}/logbook{% endif %}" 
-               class="flex-1 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action" 
-               style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
+               class="btn btn-secondary flex-1 py-3 text-base text-center touch-action">
                 ❌ {{ t('common.cancel') }}
             </a>
         </div>
@@ -1210,14 +1205,18 @@ trackingToggleBtn.addEventListener('click', function() {
 // Handle GPS tracking events
 document.addEventListener('gps-tracking-started', () => {
     trackingToggleBtn.textContent = '⏸️ GPS-Tracking stoppen';
-    trackingToggleBtn.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+    trackingToggleBtn.style.background = 'var(--danger)';
+    trackingToggleBtn.style.color = '#fff';
+    trackingToggleBtn.style.borderColor = 'var(--danger)';
     trackingBanner.classList.remove('hidden');
     statusText.textContent = 'Warte auf GPS-Signal...';
 });
 
 document.addEventListener('gps-tracking-stopped', () => {
     trackingToggleBtn.textContent = '🎯 GPS-Tracking starten';
-    trackingToggleBtn.style.background = 'linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%)';
+    trackingToggleBtn.style.background = 'var(--surface)';
+    trackingToggleBtn.style.color = 'var(--text)';
+    trackingToggleBtn.style.borderColor = 'var(--border)';
     trackingBanner.classList.add('hidden');
 });
 

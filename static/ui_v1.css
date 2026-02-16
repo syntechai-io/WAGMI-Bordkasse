@@ -8,9 +8,9 @@
   --text-secondary: #5f6b7a;
   --muted: #8b95a5;
 
-  --accent: #0a6abf;
+  --accent: #0B5CAB;
   --accent-light: #e8f2fc;
-  --accent-2: #0d7fd9;
+  --accent-2: #094B8D;
 
   --success: #1a9a5c;
   --success-light: #e6f7ef;
@@ -30,12 +30,14 @@
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
 
   --navy-deep: #1a2f4a;
-  --ocean-blue: #0a6abf;
-  --sea-foam: #1a9a5c;
-  --coral: #d93636;
-  --sky-blue: #c5ddf0;
+
+  /* Legacy aliases → map to accent/border system */
+  --ocean-blue: #0B5CAB;
+  --sky-blue: #0B5CAB;
+  --sea-foam: #0B5CAB;
+  --coral: var(--danger);
   --cream: #f7f8fa;
-  --sand: #bfab8f;
+  --sand: #8b95a5;
 }
 
 body {
@@ -67,6 +69,14 @@ a:hover {
   border-radius: var(--radius-sm);
 }
 
+/* ── Content container ── */
+.content-container {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── Buttons ── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -114,6 +124,17 @@ a:hover {
   color: var(--text);
 }
 
+.btn-ghost {
+  background: transparent;
+  color: var(--accent);
+  border-color: transparent;
+}
+
+.btn-ghost:hover {
+  background: var(--accent-light);
+  color: var(--accent-2);
+}
+
 .btn-danger {
   background: var(--danger);
   color: #fff;
@@ -122,17 +143,6 @@ a:hover {
 
 .btn-danger:hover {
   background: #c52f2f;
-  color: #fff;
-}
-
-.btn-success {
-  background: var(--success);
-  color: #fff;
-  border-color: var(--success);
-}
-
-.btn-success:hover {
-  background: #158a50;
   color: #fff;
 }
 
@@ -146,6 +156,7 @@ a:hover {
   font-size: 1rem;
 }
 
+/* ── Cards ── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -186,10 +197,7 @@ a:hover {
   background: var(--accent);
 }
 
-.kpi-card.kpi-success::before { background: var(--success); }
-.kpi-card.kpi-warn::before { background: var(--warn); }
-.kpi-card.kpi-danger::before { background: var(--coral); }
-
+/* ── Tags ── */
 .tag {
   display: inline-flex;
   align-items: center;
@@ -227,6 +235,7 @@ a:hover {
   border-color: transparent;
 }
 
+/* ── Page title ── */
 .page-title {
   font-size: 1.5rem;
   font-weight: 700;
@@ -241,6 +250,7 @@ a:hover {
   }
 }
 
+/* ── Topbar / Header ── */
 .topbar {
   background: var(--navy-deep);
   color: #fff;
@@ -260,9 +270,9 @@ a:hover {
 }
 
 .nav-item {
-  padding: 0.4rem 0.6rem;
+  padding: 0.35rem 0.55rem;
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 500;
   transition: background 0.15s ease, color 0.15s ease;
 }
@@ -272,6 +282,55 @@ a:hover {
   color: #fff;
 }
 
+/* ── Language toggle pill ── */
+.lang-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 0;
+}
+
+.lang-pill a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: all 0.15s ease;
+  color: rgba(255,255,255,0.55);
+}
+
+.lang-pill a:hover {
+  color: rgba(255,255,255,0.85);
+}
+
+.lang-pill a.lang-active {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+/* ── User email truncate ── */
+.user-email-truncate {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@media (min-width: 1024px) {
+  .user-email-truncate {
+    max-width: 180px;
+  }
+}
+
+/* ── Legacy class overrides ── */
 .ocean-gradient {
   background: var(--navy-deep);
 }
@@ -304,6 +363,7 @@ a:hover {
   margin: 1.5rem 0;
 }
 
+/* ── Dashboard tiles ── */
 .dash-tile {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -352,11 +412,6 @@ a:hover {
   color: var(--text);
 }
 
-.dash-tile-accent::before { background: var(--accent); }
-.dash-tile-success::before { background: var(--success); }
-.dash-tile-warn::before { background: var(--warn); }
-.dash-tile-purple::before { background: #7c3aed; }
-
 .dash-hero {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -391,10 +446,7 @@ a:hover {
   color: #fff;
 }
 
-.dash-hero-success {
-  border-left-color: var(--success);
-}
-
+/* ── Form inputs ── */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -421,6 +473,7 @@ textarea:focus {
   outline: none;
 }
 
+/* ── Dropdowns ── */
 .dropdown-content {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -445,10 +498,12 @@ textarea:focus {
   }
 }
 
+/* ── Login surface ── */
 .login-surface {
   background: linear-gradient(180deg, var(--navy-deep) 0%, #0d3b5e 100%);
 }
 
+/* ── Tables ── */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -475,6 +530,7 @@ tr:hover td {
   background: var(--surface-2);
 }
 
+/* ── Alerts ── */
 .alert {
   padding: 0.85rem 1.1rem;
   border-radius: var(--radius);
@@ -502,6 +558,7 @@ tr:hover td {
   border: 1px solid rgba(217,54,54,0.2);
 }
 
+/* ── Footer ── */
 .footer-bar {
   background: var(--navy-deep);
   color: rgba(255,255,255,0.6);
@@ -516,6 +573,45 @@ tr:hover td {
   color: rgba(255,255,255,0.85);
 }
 
+/* ── Global overrides: remap old gradient action buttons to accent ── */
+/* Only target buttons and links (action elements), NOT spans/badges (status) */
+button[style*="linear-gradient(135deg, #f39c12"],
+a[style*="linear-gradient(135deg, #f39c12"] {
+  background: var(--accent) !important;
+  border: none !important;
+}
+
+button[style*="linear-gradient(135deg, var(--sea-foam)"],
+a[style*="linear-gradient(135deg, var(--sea-foam)"] {
+  background: var(--accent) !important;
+  border: none !important;
+}
+
+button[style*="linear-gradient(135deg, var(--sky-blue)"],
+a[style*="linear-gradient(135deg, var(--sky-blue)"] {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+button[style*="linear-gradient(135deg, #27ae60"],
+a[style*="linear-gradient(135deg, #27ae60"] {
+  background: var(--accent) !important;
+  border: none !important;
+}
+
+button[style*="linear-gradient(135deg, var(--ocean-blue)"],
+a[style*="linear-gradient(135deg, var(--ocean-blue)"] {
+  background: var(--accent) !important;
+  border: none !important;
+}
+
+/* Override gradient progress bars to solid accent */
+div[style*="linear-gradient(to right, var(--sea-foam)"] {
+  background: var(--accent) !important;
+}
+
+/* ── Responsive ── */
 @media (max-width: 640px) {
   .page-title {
     font-size: 1.25rem;

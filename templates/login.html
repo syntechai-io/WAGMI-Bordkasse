@@ -44,10 +44,11 @@
 </head>
 <body>
     <div class="w-full max-w-md px-4">
-        <div class="flex justify-end mb-4 text-sm">
-            <a href="/set-language?lang=de&next=/login" class="px-2 py-1 rounded text-white transition {% if lang == 'de' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">DE</a>
-            <span class="text-white/40 mx-1">|</span>
-            <a href="/set-language?lang=en&next=/login" class="px-2 py-1 rounded text-white transition {% if lang == 'en' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">EN</a>
+        <div class="flex justify-end mb-4">
+            <div class="lang-pill">
+                <a href="/set-language?lang=de&next=/login" class="{% if lang == 'de' %}lang-active{% endif %}" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">DE</a>
+                <a href="/set-language?lang=en&next=/login" class="{% if lang == 'en' %}lang-active{% endif %}" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">EN</a>
+            </div>
         </div>
 
         <div class="text-center mb-8">

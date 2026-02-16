@@ -54,7 +54,7 @@ function setCurrentLocalTime(inputId) {
     {% if request.session.get('role') == 'admin' %}
     <form method="post" action="/trips/quick-start" class="hidden md:block">
         {{ csrf_input | safe }}
-        <button type="submit" class="w-full dash-hero touch-action text-left" style="border-left-color: var(--warn);">
+        <button type="submit" class="w-full dash-hero touch-action text-left">
             <div class="text-3xl">⚡</div>
             <div class="flex-1">
                 <h3 class="text-lg font-bold">{{ t('dashboard.quick_start') }} {{ brand_label }}</h3>
@@ -66,34 +66,34 @@ function setCurrentLocalTime(inputId) {
     {% endif %}
     
     <div class="grid grid-cols-2 gap-3 md:hidden">
-        <div class="kpi-card kpi-danger">
+        <div class="kpi-card">
             <p class="text-xs font-medium mb-1" style="color: var(--text-secondary);">{{ t('dashboard.expenses_label') }}</p>
             <p class="text-2xl font-bold" style="color: var(--text);">{{ "%.2f"|format(total_expenses) }} €</p>
         </div>
         
-        <a href="/expenses" class="dash-tile dash-tile-success touch-action" style="min-height: 80px;">
+        <a href="/expenses" class="dash-tile touch-action" style="min-height: 80px;">
             <div class="tile-icon">⚓</div>
             <p class="tile-label">{{ t('dashboard.expense_action') }}</p>
         </a>
     </div>
     
     <div class="grid grid-cols-2 gap-3 md:hidden">
-        <a href="/logbook" class="dash-tile dash-tile-accent touch-action" style="min-height: 72px;">
+        <a href="/logbook" class="dash-tile touch-action" style="min-height: 72px;">
             <div class="tile-icon">📓</div>
             <p class="tile-label">{{ t('dashboard.all_entries') }}</p>
         </a>
         
-        <a href="/crew" class="dash-tile dash-tile-accent touch-action" style="min-height: 72px;">
+        <a href="/crew" class="dash-tile touch-action" style="min-height: 72px;">
             <div class="tile-icon">👥</div>
             <p class="tile-label">{{ t('dashboard.crew_label') }}</p>
         </a>
         
-        <a href="/balances" class="dash-tile dash-tile-purple touch-action" style="min-height: 72px;">
+        <a href="/balances" class="dash-tile touch-action" style="min-height: 72px;">
             <div class="tile-icon">📊</div>
             <p class="tile-label">{{ t('dashboard.balances_label') }}</p>
         </a>
         
-        <a href="/settlement" class="dash-tile dash-tile-purple touch-action" style="min-height: 72px;">
+        <a href="/settlement" class="dash-tile touch-action" style="min-height: 72px;">
             <div class="tile-icon">⛵</div>
             <p class="tile-label">{{ t('dashboard.settlement_label') }}</p>
         </a>
@@ -125,7 +125,7 @@ function setCurrentLocalTime(inputId) {
         <div class="space-y-4">
             <h2 class="text-lg font-bold" style="color: var(--text);">{{ t('dashboard.bordkasse_section') }}</h2>
             
-            <div class="kpi-card kpi-danger">
+            <div class="kpi-card">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium mb-1" style="color: var(--text-secondary);">{{ t('dashboard.total_expenses') }}</p>
@@ -135,7 +135,7 @@ function setCurrentLocalTime(inputId) {
                 </div>
             </div>
             
-            <a href="/expenses" class="dash-hero dash-hero-success touch-action">
+            <a href="/expenses" class="dash-hero touch-action">
                 <div class="text-4xl opacity-70">⚓</div>
                 <div class="flex-1">
                     <h3 class="text-base font-bold">{{ t('dashboard.record_expense') }}</h3>
@@ -144,7 +144,7 @@ function setCurrentLocalTime(inputId) {
                 <div class="text-xl" style="color: var(--muted);">→</div>
             </a>
             
-            <a href="/settlement" class="dash-hero touch-action" style="border-left-color: #7c3aed;">
+            <a href="/settlement" class="dash-hero touch-action">
                 <div class="text-4xl opacity-70">⛵</div>
                 <div class="flex-1">
                     <h3 class="text-base font-bold">{{ t('dashboard.show_settlement') }}</h3>
