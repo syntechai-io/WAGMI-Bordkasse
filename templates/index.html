@@ -43,29 +43,29 @@ function setCurrentLocalTime(inputId) {
     {% endif %}
     
     <a href="/logbook/new" class="dash-hero dash-hero-primary block md:hidden touch-action" style="min-height: 80px;">
-        <div class="text-4xl">📓</div>
+        <div class="text-2xl">📓</div>
         <div class="flex-1">
-            <h3 class="text-lg font-bold">{{ t('dashboard.quick_log') }}</h3>
+            <h3 class="text-base font-bold">{{ t('dashboard.quick_log') }}</h3>
             <p class="text-sm opacity-80">{{ t('dashboard.quick_log_desc') }}</p>
         </div>
-        <div class="text-2xl opacity-60">→</div>
+        <div class="text-lg opacity-50">→</div>
     </a>
     
     {% if request.session.get('role') == 'admin' %}
     <form method="post" action="/trips/quick-start" class="hidden md:block">
         {{ csrf_input | safe }}
         <button type="submit" class="w-full dash-hero touch-action text-left">
-            <div class="text-3xl">⚡</div>
+            <div class="text-xl" style="color: var(--accent);">⚡</div>
             <div class="flex-1">
-                <h3 class="text-lg font-bold">{{ t('dashboard.quick_start') }} {{ branding.brand_name }}</h3>
+                <h3 class="text-base font-bold">{{ t('dashboard.quick_start') }} {{ branding.brand_name }}</h3>
                 <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.quick_start_desc') }}</p>
             </div>
-            <div class="text-xl" style="color: var(--muted);">→</div>
+            <div class="text-base" style="color: var(--muted);">→</div>
         </button>
     </form>
     {% endif %}
     
-    <div class="grid grid-cols-2 gap-3 md:hidden">
+    <div class="grid grid-cols-2 gap-4 md:hidden">
         <div class="kpi-card">
             <p class="text-xs font-medium mb-1" style="color: var(--text-secondary);">{{ t('dashboard.expenses_label') }}</p>
             <p class="text-2xl font-bold" style="color: var(--text);">{{ "%.2f"|format(total_expenses) }} €</p>
@@ -77,7 +77,7 @@ function setCurrentLocalTime(inputId) {
         </a>
     </div>
     
-    <div class="grid grid-cols-2 gap-3 md:hidden">
+    <div class="grid grid-cols-2 gap-4 md:hidden">
         <a href="/logbook" class="dash-tile touch-action" style="min-height: 72px;">
             <div class="tile-icon">📓</div>
             <p class="tile-label">{{ t('dashboard.all_entries') }}</p>
@@ -101,29 +101,29 @@ function setCurrentLocalTime(inputId) {
 
     <div class="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="space-y-4">
-            <h2 class="text-lg font-bold" style="color: var(--text);">{{ t('dashboard.logbook_section') }}</h2>
+            <h2 class="font-bold" style="color: var(--text);">{{ t('dashboard.logbook_section') }}</h2>
             
             <a href="/logbook" class="dash-hero touch-action">
-                <div class="text-4xl opacity-70">📓</div>
+                <div class="text-2xl opacity-45">📓</div>
                 <div class="flex-1">
                     <h3 class="text-base font-bold">{{ t('dashboard.keep_logbook') }}</h3>
                     <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.keep_logbook_desc') }}</p>
                 </div>
-                <div class="text-xl" style="color: var(--muted);">→</div>
+                <div class="text-base" style="color: var(--muted);">→</div>
             </a>
             
             <a href="/crew" class="dash-hero touch-action">
-                <div class="text-4xl opacity-70">👥</div>
+                <div class="text-2xl opacity-45">👥</div>
                 <div class="flex-1">
                     <h3 class="text-base font-bold">{{ t('dashboard.manage_crew') }}</h3>
                     <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.manage_crew_desc') }}</p>
                 </div>
-                <div class="text-xl" style="color: var(--muted);">→</div>
+                <div class="text-base" style="color: var(--muted);">→</div>
             </a>
         </div>
         
         <div class="space-y-4">
-            <h2 class="text-lg font-bold" style="color: var(--text);">{{ t('dashboard.bordkasse_section') }}</h2>
+            <h2 class="font-bold" style="color: var(--text);">{{ t('dashboard.bordkasse_section') }}</h2>
             
             <div class="kpi-card">
                 <div class="flex items-center justify-between">
@@ -131,26 +131,26 @@ function setCurrentLocalTime(inputId) {
                         <p class="text-sm font-medium mb-1" style="color: var(--text-secondary);">{{ t('dashboard.total_expenses') }}</p>
                         <p class="text-3xl font-bold" style="color: var(--text);">{{ "%.2f"|format(total_expenses) }} €</p>
                     </div>
-                    <div class="text-5xl opacity-20">💸</div>
+                    <div class="text-3xl opacity-15">💸</div>
                 </div>
             </div>
             
             <a href="/expenses" class="dash-hero touch-action">
-                <div class="text-4xl opacity-70">⚓</div>
+                <div class="text-2xl opacity-45">⚓</div>
                 <div class="flex-1">
                     <h3 class="text-base font-bold">{{ t('dashboard.record_expense') }}</h3>
                     <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.record_expense_desc') }}</p>
                 </div>
-                <div class="text-xl" style="color: var(--muted);">→</div>
+                <div class="text-base" style="color: var(--muted);">→</div>
             </a>
             
             <a href="/settlement" class="dash-hero touch-action">
-                <div class="text-4xl opacity-70">⛵</div>
+                <div class="text-2xl opacity-45">⛵</div>
                 <div class="flex-1">
                     <h3 class="text-base font-bold">{{ t('dashboard.show_settlement') }}</h3>
                     <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.show_settlement_desc') }}</p>
                 </div>
-                <div class="text-xl" style="color: var(--muted);">→</div>
+                <div class="text-base" style="color: var(--muted);">→</div>
             </a>
         </div>
     </div>

@@ -1,0 +1,44 @@
+We now want Dashboard UI simplification (neutral system) without changing backend logic or routes. Keep everything working (HTMX, i18n, mobile drawer, billing, forms).
+
+CURRENT STATE:
+- Dashboard cards still have colored side borders and some multi-color accents.
+- We want a calmer “Apple-like marine” UI: neutral cards, one accent color, consistent typography, consistent spacing.
+
+REQUIREMENTS:
+1) Design tokens (CSS variables) in a single place:
+   - Add CSS variables in static/styles.css (or existing main CSS file) for:
+     --bg, --surface, --surface-2, --text, --muted, --border,
+     --accent (use branding.accent_color if set; else default navy),
+     --accent-2 (lighter),
+     --danger, --success, --warning.
+   - Use these variables for buttons/cards.
+   - If branding.accent_color exists, inject it via inline style in base template as:
+     :root { --accent: {{ branding.accent_color }}; }
+     with safe fallback.
+
+2) Dashboard card redesign:
+   - Remove multi-colored left borders on cards.
+   - Use one subtle accent: either a thin top border or small icon badge.
+   - Keep icons, but reduce visual weight (smaller, muted).
+   - Ensure readability in bright sunlight: strong contrast, bigger primary labels.
+
+3) Typography:
+   - Normalize headings: page title (H1) 32px, section title 18-20px, body 14-16px.
+   - Increase line-height slightly.
+   - Ensure max-width for text blocks so they don’t stretch too wide on desktop.
+
+4) Buttons:
+   - Define 3 button styles only:
+     primary (accent), secondary (neutral), danger (red).
+   - Ensure all primary actions use primary style consistently across dashboard.
+   - Do not change button semantics or form submissions.
+
+5) Mobile:
+   - Keep sticky bars and drawer untouched.
+   - Ensure dashboard cards stack nicely with consistent spacing (16px gap).
+
+DELIVERABLES:
+- Updated CSS tokens + minimal template class changes.
+- Dashboard becomes neutral and consistent with SyntechAI styling.
+- No removal of features, only visual updates.
+- Summarize changed files and what changed.
