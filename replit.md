@@ -55,7 +55,7 @@ Uses a greedy matching algorithm to minimize transfers between debtors and credi
 **Technology Stack**: Jinja2, Tailwind CSS (CDN), HTMX.
 **Design Principles**:
 - **Mobile-First Design**: Optimized for touch and responsiveness.
-- **Maritime UI Theme**: Nautical aesthetic with custom colors and components.
+- **UI v1 Design System**: Calm, Apple-inspired design with `static/ui_v1.css` providing CSS custom properties (--bg, --surface, --border, --text, --accent, --success, --warn, --danger) and reusable component classes (.btn, .card, .kpi-card, .tag, .dash-tile, .dash-hero, .topbar, .nav-item, .footer-bar). Replaces old maritime rainbow gradients with neutral white cards + subtle accent borders. Inter font throughout.
 - **Professional PDF Export**: Themed PDF outputs.
 - **Responsive Dashboard**: Streamlined mobile navigation with a focus on quick logbook entry.
 - **Navigation Restructuring**: Prioritizes quick access to Logbook alongside Törns; streamlined dropdowns for other actions.

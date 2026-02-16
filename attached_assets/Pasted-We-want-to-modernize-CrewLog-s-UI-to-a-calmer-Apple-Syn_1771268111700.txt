@@ -1,0 +1,70 @@
+We want to modernize CrewLog’s UI to a calmer, Apple/SyntechAI-style design WITHOUT breaking any existing functionality, routes, or HTMX behavior. This is a “skin + shared layout” change only.
+
+Non-negotiables
+- Do not change backend logic, endpoints, query logic, auth, or SaaS/billing functionality.
+- Do not rename routes or break HTMX targets.
+- Do not restructure templates deeply. Only adjust shared base templates and CSS classes.
+- Preserve all existing links, buttons, IDs, and hx-* attributes.
+- If a page uses inline styles, keep them working (but you may replace with classes if safe).
+
+Scope (v1)
+1) Introduce a SyntechAI-aligned design token system (CSS variables) and new component classes
+2) Update header/nav styling (same structure, cleaner visuals, avoid overlapping brand)
+3) Update dashboard tiles/cards styling to remove rainbow gradients but keep same layout and links
+4) Apply consistent typography, spacing, and button styles across all pages
+
+Implementation Steps
+
+A) Add a new CSS file and tokens
+- Create `static/ui_v1.css` (or similar) and load it globally in the base template.
+- Define CSS variables:
+  --bg, --surface, --surface-2, --border, --text, --muted
+  --accent, --accent-2
+  --success, --warn, --danger
+- Define base typography, link styles, focus rings (visible), and standard spacing.
+
+B) Add reusable component classes (do not require HTML rewrites everywhere)
+Create classes that can be applied with minimal edits:
+- `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`
+- `.card`, `.card-header`, `.card-body`
+- `.tag` for small pills
+- `.page-title` for H1 title blocks
+- `.topbar` / `.nav-item` improvements
+- `.kpi-card` style for the “Total Expenses” type boxes
+
+C) Update base template header/nav styling (minimal HTML edits)
+- Keep the same DOM structure and links.
+- Reduce header height, remove heavy gradients; use accent as a flat color.
+- Ensure brand area (boat name + CrewLog) is stacked and never overlaps nav:
+  - boat name (small, semi-bold)
+  - CrewLog (bigger, bold)
+- Improve nav spacing and hover states.
+- Keep language toggle working as-is.
+
+D) Dashboard: remove rainbow gradients but keep the layout and click targets
+- Do not change dashboard routes/links.
+- Replace tile backgrounds with `.card` + subtle accent left border or small icon badge.
+- Maintain existing icons/images but tone them down (smaller, reduced opacity).
+- Ensure contrast is strong and readable in sunlight.
+
+E) Apply globally with minimal risk
+- Prefer styling existing classes/selectors rather than editing many templates.
+- Where templates use unique classes (e.g., `.dashboard-tile-blue`), map them in CSS to new neutral styles rather than changing the HTML across the app.
+  Example: `.tile-blue, .tile-green, .tile-purple` all become neutral card backgrounds.
+
+F) Regression checklist
+After changes, verify:
+- Login works (legacy + SaaS)
+- Trips page (create, list, archive)
+- Logbook entry create/edit/view
+- Expenses add/view/settle
+- Billing pages + admin billing dashboard
+- No HTMX actions broken
+
+Deliverables
+- New CSS file with tokens + components
+- Base template updated to include it
+- Minimal template edits only if necessary (header brand stack, optional dashboard wrapper classes)
+- Short summary of what selectors were mapped to new design so future pages can follow the same pattern
+
+Important: keep “WAGMI” out of branding; boat name is dynamic already. Do not hardcode any boat name.

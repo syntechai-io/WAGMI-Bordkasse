@@ -5,71 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#1e3a5f">
+    <meta name="theme-color" content="#1a2f4a">
     <title>{{ t('auth.login') }} - {% if show_brand %}{{ brand_label }}{% endif %} CrewLog</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/ui_v1.css">
     <style>
-        :root {
-            --navy-deep: #1e3a5f;
-            --ocean-blue: #0077be;
-            --sea-foam: #2ecc71;
-            --coral: #ff6b35;
-            --sand: #d4a574;
-            --sky-blue: #87ceeb;
-            --cream: #f8f9fa;
-        }
-        
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, #1e3a5f 0%, #0077be 100%);
+            background: linear-gradient(180deg, #1a2f4a 0%, #0d3b5e 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
-        .maritime-header {
-            font-family: 'Bebas Neue', sans-serif;
-            letter-spacing: 1px;
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
         }
         
-        .porthole-card {
-            background: white;
-            border: 3px solid var(--sky-blue);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 119, 190, 0.3);
+        .logo-float {
+            animation: gentleFloat 4s ease-in-out infinite;
         }
         
-        .ship-wheel {
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        @keyframes float {
+        @keyframes gentleFloat {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .ocean-gradient {
-            background: linear-gradient(135deg, var(--ocean-blue) 0%, #005a8c 100%);
-        }
-        
-        .wave-border {
-            border-bottom: 3px solid var(--sky-blue);
-            position: relative;
-        }
-        
-        .wave-border::after {
-            content: '〜〜〜';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--sky-blue);
-            font-size: 20px;
-            letter-spacing: 10px;
+            50% { transform: translateY(-6px); }
         }
         
         input {
@@ -79,161 +44,151 @@
 </head>
 <body>
     <div class="w-full max-w-md px-4">
-        <!-- Language Switch -->
         <div class="flex justify-end mb-4 text-sm">
             <a href="/set-language?lang=de&next=/login" class="px-2 py-1 rounded text-white transition {% if lang == 'de' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">DE</a>
             <span class="text-white/40 mx-1">|</span>
             <a href="/set-language?lang=en&next=/login" class="px-2 py-1 rounded text-white transition {% if lang == 'en' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">EN</a>
         </div>
 
-        <!-- Logo -->
         <div class="text-center mb-8">
-            <div class="ship-wheel mb-4 flex justify-center">
-                <img src="/static/logo.png" alt="CrewLog Logo" class="w-24 h-24 object-contain">
+            <div class="logo-float mb-4 flex justify-center">
+                <img src="/static/logo.png" alt="CrewLog Logo" class="w-20 h-20 object-contain">
             </div>
-            <h1 class="text-4xl font-bold text-white mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 2px;">{% if show_brand %}{{ brand_label }}{% endif %} CrewLog</h1>
-            <p class="text-sky-200">{{ t('auth.subtitle') }}</p>
+            <h1 class="text-3xl font-bold text-white mb-1" style="letter-spacing: -0.02em;">{% if show_brand %}{{ brand_label }}{% endif %} CrewLog</h1>
+            <p class="text-sm" style="color: rgba(255,255,255,0.6);">{{ t('auth.subtitle') }}</p>
         </div>
         
-        <!-- Login Card -->
-        <div class="porthole-card p-8">
-            <div class="text-center mb-6 wave-border pb-4">
-                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">🔐 {{ t('auth.login_title') }}</h2>
+        <div class="login-card p-8">
+            <div class="text-center mb-6 pb-4" style="border-bottom: 1px solid var(--border-light);">
+                <h2 class="text-xl font-bold" style="color: var(--text);">{{ t('auth.login_title') }}</h2>
             </div>
             
             {% if error %}
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
-                <div class="flex items-center">
-                    <span class="text-2xl mr-2">⚠️</span>
-                    <span>{{ error }}</span>
-                </div>
+            <div class="alert alert-danger mb-4" role="alert">
+                <span>{{ error }}</span>
             </div>
             {% endif %}
             
-            <form method="post" action="/login" class="space-y-6">
+            <form method="post" action="/login" class="space-y-5">
                 {{ csrf_input | safe }}
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
-                        👤 {{ t('auth.username') }}
+                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text);">
+                        {{ t('auth.username') }}
                     </label>
                     <input 
                         type="text" 
                         name="username" 
                         required 
                         autofocus
-                        class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none focus:border-ocean-blue transition" 
-                        style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 rounded-lg text-base" 
+                        style="border: 1px solid var(--border);"
                         placeholder="{{ t('auth.username_placeholder') }}">
                 </div>
                 
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
-                        🔑 {{ t('auth.password') }}
+                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text);">
+                        {{ t('auth.password') }}
                     </label>
                     <input 
                         type="password" 
                         name="password" 
                         required 
-                        class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none focus:border-ocean-blue transition" 
-                        style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 rounded-lg text-base" 
+                        style="border: 1px solid var(--border);"
                         placeholder="••••••••">
                 </div>
                 
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
-                        ⛵ {{ t('auth.trip_label') }}
+                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text);">
+                        {{ t('auth.trip_label') }}
                     </label>
                     <select 
                         name="trip_id" 
-                        class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none focus:border-ocean-blue transition" 
-                        style="border-color: var(--sky-blue);">
+                        class="w-full px-4 py-3 rounded-lg text-base" 
+                        style="border: 1px solid var(--border);">
                         <option value="">{{ t('auth.trip_no_selection') }}</option>
                         {% for trip in trips %}
                         <option value="{{ trip.id }}">{{ trip.name }} ({{ trip.start_date }})</option>
                         {% endfor %}
                     </select>
-                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.6;">
+                    <p class="text-xs mt-1" style="color: var(--muted);">
                         {{ t('auth.trip_hint') }}
                     </p>
                 </div>
                 
                 <button 
                     type="submit" 
-                    class="w-full ocean-gradient text-white font-bold py-4 px-4 rounded-lg text-lg transition transform hover:scale-105">
-                    ⛵ {{ t('auth.submit') }}
+                    class="btn btn-primary w-full py-3 text-base">
+                    {{ t('auth.submit') }}
                 </button>
             </form>
             
             <div class="mt-4 text-center">
-                <button onclick="toggleLoginMode()" id="toggle-btn" class="text-sm font-medium underline" style="color: var(--ocean-blue);">
+                <button onclick="toggleLoginMode()" id="toggle-btn" class="text-sm font-medium" style="color: var(--accent);">
                     {{ t('auth.saas_switch') }}
                 </button>
             </div>
         </div>
 
-        <div id="saas-login-card" class="porthole-card p-8 mt-4 hidden">
-            <div class="text-center mb-6 wave-border pb-4">
-                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">📧 {{ t('auth.saas_login_title') }}</h2>
+        <div id="saas-login-card" class="login-card p-8 mt-4 hidden">
+            <div class="text-center mb-6 pb-4" style="border-bottom: 1px solid var(--border-light);">
+                <h2 class="text-xl font-bold" style="color: var(--text);">{{ t('auth.saas_login_title') }}</h2>
             </div>
 
-            <div id="saas-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 hidden" role="alert">
-                <div class="flex items-center">
-                    <span class="text-2xl mr-2">⚠️</span>
-                    <span id="saas-error-msg"></span>
-                </div>
+            <div id="saas-error" class="alert alert-danger mb-4 hidden" role="alert">
+                <span id="saas-error-msg"></span>
             </div>
 
-            <form id="saas-form" class="space-y-6" onsubmit="return handleSaasLogin(event)">
+            <form id="saas-form" class="space-y-5" onsubmit="return handleSaasLogin(event)">
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
-                        📧 {{ t('auth.email') }}
+                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text);">
+                        {{ t('auth.email') }}
                     </label>
                     <input
                         type="email"
                         name="email"
                         id="saas-email"
                         required
-                        class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition"
-                        style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 rounded-lg text-base"
+                        style="border: 1px solid var(--border);"
                         placeholder="{{ t('auth.email_placeholder') }}">
                 </div>
 
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
-                        🔑 {{ t('auth.password') }}
+                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text);">
+                        {{ t('auth.password') }}
                     </label>
                     <input
                         type="password"
                         name="password"
                         id="saas-password"
                         required
-                        class="w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition"
-                        style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 rounded-lg text-base"
+                        style="border: 1px solid var(--border);"
                         placeholder="••••••••">
                 </div>
 
                 <button
                     type="submit"
-                    class="w-full text-white font-bold py-4 px-4 rounded-lg text-lg transition transform hover:scale-105"
-                    style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
-                    📧 {{ t('auth.saas_submit') }}
+                    class="btn btn-primary w-full py-3 text-base">
+                    {{ t('auth.saas_submit') }}
                 </button>
             </form>
 
             <div class="mt-4 text-center">
-                <button onclick="toggleLoginMode()" class="text-sm font-medium underline" style="color: var(--ocean-blue);">
+                <button onclick="toggleLoginMode()" class="text-sm font-medium" style="color: var(--accent);">
                     {{ t('auth.saas_back') }}
                 </button>
             </div>
         </div>
         
-        <div class="text-center mt-6 text-sky-200 text-sm">
-            <p>{% if show_brand %}{{ brand_label }}{% endif %} CrewLog - Maritime Logbook & Bordkasse</p>
+        <div class="text-center mt-6 text-sm" style="color: rgba(255,255,255,0.4);">
+            <p>{% if show_brand %}{{ brand_label }}{% endif %} CrewLog</p>
         </div>
     </div>
     <script>
     function toggleLoginMode() {
-        const legacyCard = document.querySelector('.porthole-card');
+        const legacyCard = document.querySelector('.login-card');
         const saasCard = document.getElementById('saas-login-card');
         legacyCard.classList.toggle('hidden');
         saasCard.classList.toggle('hidden');

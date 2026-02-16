@@ -2,7 +2,6 @@
 
 {% block content %}
 <script>
-// Capture device timezone and store in session storage for all datetime inputs
 function getDeviceTimezone() {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
@@ -14,10 +13,8 @@ function getLocalISOString() {
     return localTime.toISOString().slice(0, 16);
 }
 
-// Set timezone in session storage on page load
 sessionStorage.setItem('deviceTimezone', getDeviceTimezone());
 
-// Helper function to set datetime fields to current local time
 function setCurrentLocalTime(inputId) {
     const input = document.getElementById(inputId);
     if (input) {
@@ -27,143 +24,133 @@ function setCurrentLocalTime(inputId) {
 </script>
 
 <div class="space-y-6">
-    <!-- Header -->
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl md:text-4xl font-bold maritime-header" style="color: var(--navy-deep);">🧭 {{ t('dashboard.title') }}</h1>
+        <h1 class="page-title">{{ t('dashboard.title') }}</h1>
         <div class="text-right">
-            <p class="text-xs md:text-sm" style="color: var(--navy-deep); opacity: 0.7;">{{ t('dashboard.selected_trip') }}</p>
-            <p class="text-lg md:text-xl font-bold maritime-header" style="color: var(--ocean-blue);">⛵ {{ active_trip.name }}</p>
+            <p class="text-xs" style="color: var(--muted);">{{ t('dashboard.selected_trip') }}</p>
+            <p class="text-base font-semibold" style="color: var(--accent);">{{ active_trip.name }}</p>
         </div>
     </div>
     
-    <!-- Read-Only Warning for Crew on Closed Trips -->
     {% if not is_editable and request.session.get('role') == 'crew' %}
-    <div class="bg-orange-50 border-2 border-orange-400 rounded-lg p-4">
-        <div class="flex items-center space-x-3">
-            <div class="text-3xl">🔒</div>
-            <div>
-                <p class="font-bold text-orange-800">{{ t('dashboard.trip_closed') }}</p>
-                <p class="text-sm text-orange-700">{{ t('dashboard.trip_closed_desc') }}</p>
-            </div>
+    <div class="alert alert-warn">
+        <div class="text-xl">🔒</div>
+        <div>
+            <p class="font-bold">{{ t('dashboard.trip_closed') }}</p>
+            <p class="text-sm mt-0.5">{{ t('dashboard.trip_closed_desc') }}</p>
         </div>
     </div>
     {% endif %}
     
-    <!-- MOBILE: Primary Quick Log Action (Top Priority) -->
-    <a href="/logbook/new" class="block md:hidden text-white rounded-2xl text-center transition transform hover:scale-105 touch-action shadow-xl" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); min-height: 96px; padding: 24px;">
-        <div class="flex items-center justify-center space-x-4">
-            <div class="text-6xl">⚡📓</div>
-            <div class="text-left">
-                <h3 class="text-2xl font-bold maritime-header">{{ t('dashboard.quick_log') }}</h3>
-                <p class="text-base opacity-90 font-medium">{{ t('dashboard.quick_log_desc') }}</p>
-            </div>
-            <div class="text-4xl">→</div>
+    <a href="/logbook/new" class="dash-hero dash-hero-primary block md:hidden touch-action" style="min-height: 80px;">
+        <div class="text-4xl">📓</div>
+        <div class="flex-1">
+            <h3 class="text-lg font-bold">{{ t('dashboard.quick_log') }}</h3>
+            <p class="text-sm opacity-80">{{ t('dashboard.quick_log_desc') }}</p>
         </div>
+        <div class="text-2xl opacity-60">→</div>
     </a>
     
-    <!-- Quick Start Button (Admin only, hidden on mobile to prioritize logbook) -->
     {% if request.session.get('role') == 'admin' %}
     <form method="post" action="/trips/quick-start" class="hidden md:block">
         {{ csrf_input | safe }}
-        <button type="submit" class="w-full text-white rounded-2xl p-6 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
-            <div class="flex items-center justify-center space-x-3">
-                <div class="text-5xl">⚡</div>
-                <div class="text-left">
-                    <h3 class="text-2xl font-bold maritime-header">{{ t('dashboard.quick_start') }} {{ brand_label }}</h3>
-                    <p class="text-sm opacity-90">{{ t('dashboard.quick_start_desc') }}</p>
-                </div>
-                <div class="text-3xl">→</div>
+        <button type="submit" class="w-full dash-hero touch-action text-left" style="border-left-color: var(--warn);">
+            <div class="text-3xl">⚡</div>
+            <div class="flex-1">
+                <h3 class="text-lg font-bold">{{ t('dashboard.quick_start') }} {{ brand_label }}</h3>
+                <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.quick_start_desc') }}</p>
             </div>
+            <div class="text-xl" style="color: var(--muted);">→</div>
         </button>
     </form>
     {% endif %}
     
-    <!-- MOBILE: Simplified Navigation Cards -->
-    <div class="grid grid-cols-2 gap-4 md:hidden">
-        <!-- Total Expenses - Info Card (non-interactive, visually distinct) -->
-        <div class="bg-white porthole-card border-2 border-gray-200" style="min-height: 80px; padding: 16px;">
-            <p class="text-xs font-medium mb-1" style="color: var(--navy-deep);">💸 {{ t('dashboard.expenses_label') }}</p>
-            <p class="text-2xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(total_expenses) }} €</p>
+    <div class="grid grid-cols-2 gap-3 md:hidden">
+        <div class="kpi-card kpi-danger">
+            <p class="text-xs font-medium mb-1" style="color: var(--text-secondary);">{{ t('dashboard.expenses_label') }}</p>
+            <p class="text-2xl font-bold" style="color: var(--text);">{{ "%.2f"|format(total_expenses) }} €</p>
         </div>
         
-        <!-- Expense Entry - Action Card (interactive, accessible size) -->
-        <a href="/expenses" class="text-white rounded-xl text-center transition transform hover:scale-105 touch-action shadow-lg flex flex-col justify-center items-center" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%); min-height: 80px; padding: 16px;">
-            <div class="text-4xl mb-1">⚓</div>
-            <p class="text-sm font-bold maritime-header">{{ t('dashboard.expense_action') }}</p>
+        <a href="/expenses" class="dash-tile dash-tile-success touch-action" style="min-height: 80px;">
+            <div class="tile-icon">⚓</div>
+            <p class="tile-label">{{ t('dashboard.expense_action') }}</p>
         </a>
     </div>
     
-    <!-- MOBILE: Secondary Actions -->
-    <div class="grid grid-cols-2 gap-4 md:hidden">
-        <a href="/logbook" class="text-white rounded-xl text-center transition transform hover:scale-105 touch-action shadow-lg flex flex-col justify-center items-center" style="background: linear-gradient(135deg, #87ceeb 0%, #4682b4 100%); min-height: 72px; padding: 14px;">
-            <div class="text-4xl mb-1">📓</div>
-            <p class="text-sm font-bold maritime-header">{{ t('dashboard.all_entries') }}</p>
+    <div class="grid grid-cols-2 gap-3 md:hidden">
+        <a href="/logbook" class="dash-tile dash-tile-accent touch-action" style="min-height: 72px;">
+            <div class="tile-icon">📓</div>
+            <p class="tile-label">{{ t('dashboard.all_entries') }}</p>
         </a>
         
-        <a href="/crew" class="text-white rounded-xl text-center transition transform hover:scale-105 touch-action shadow-lg flex flex-col justify-center items-center" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, #005a8c 100%); min-height: 72px; padding: 14px;">
-            <div class="text-4xl mb-1">👥</div>
-            <p class="text-sm font-bold maritime-header">{{ t('dashboard.crew_label') }}</p>
+        <a href="/crew" class="dash-tile dash-tile-accent touch-action" style="min-height: 72px;">
+            <div class="tile-icon">👥</div>
+            <p class="tile-label">{{ t('dashboard.crew_label') }}</p>
         </a>
         
-        <a href="/balances" class="text-white rounded-xl text-center transition transform hover:scale-105 touch-action shadow-lg flex flex-col justify-center items-center" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); min-height: 72px; padding: 14px;">
-            <div class="text-4xl mb-1">📊</div>
-            <p class="text-sm font-bold maritime-header">{{ t('dashboard.balances_label') }}</p>
+        <a href="/balances" class="dash-tile dash-tile-purple touch-action" style="min-height: 72px;">
+            <div class="tile-icon">📊</div>
+            <p class="tile-label">{{ t('dashboard.balances_label') }}</p>
         </a>
         
-        <a href="/settlement" class="text-white rounded-xl text-center transition transform hover:scale-105 touch-action shadow-lg flex flex-col justify-center items-center" style="background: linear-gradient(135deg, #8e44ad 0%, #6c3483 100%); min-height: 72px; padding: 14px;">
-            <div class="text-4xl mb-1">⛵</div>
-            <p class="text-sm font-bold maritime-header">{{ t('dashboard.settlement_label') }}</p>
+        <a href="/settlement" class="dash-tile dash-tile-purple touch-action" style="min-height: 72px;">
+            <div class="tile-icon">⛵</div>
+            <p class="tile-label">{{ t('dashboard.settlement_label') }}</p>
         </a>
     </div>
 
-    <!-- DESKTOP: Two-Column Layout: Logbook (Left) | Expenses (Right) -->
     <div class="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- LEFT COLUMN: Logbook -->
-        <div class="space-y-6">
-            <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">📓 {{ t('dashboard.logbook_section') }}</h2>
+        <div class="space-y-4">
+            <h2 class="text-lg font-bold" style="color: var(--text);">{{ t('dashboard.logbook_section') }}</h2>
             
-            <!-- Logbook Action -->
-            <a href="/logbook" class="block text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
-                <div class="text-6xl mb-3">📓</div>
-                <h3 class="text-xl font-bold maritime-header">{{ t('dashboard.keep_logbook') }}</h3>
-                <p class="text-sm opacity-90 mt-2">{{ t('dashboard.keep_logbook_desc') }}</p>
+            <a href="/logbook" class="dash-hero touch-action">
+                <div class="text-4xl opacity-70">📓</div>
+                <div class="flex-1">
+                    <h3 class="text-base font-bold">{{ t('dashboard.keep_logbook') }}</h3>
+                    <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.keep_logbook_desc') }}</p>
+                </div>
+                <div class="text-xl" style="color: var(--muted);">→</div>
             </a>
             
-            <!-- Crew Management -->
-            <a href="/crew" class="block ocean-gradient text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg">
-                <div class="text-6xl mb-3">👥</div>
-                <h3 class="text-xl font-bold maritime-header">{{ t('dashboard.manage_crew') }}</h3>
-                <p class="text-sm opacity-90 mt-2">{{ t('dashboard.manage_crew_desc') }}</p>
+            <a href="/crew" class="dash-hero touch-action">
+                <div class="text-4xl opacity-70">👥</div>
+                <div class="flex-1">
+                    <h3 class="text-base font-bold">{{ t('dashboard.manage_crew') }}</h3>
+                    <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.manage_crew_desc') }}</p>
+                </div>
+                <div class="text-xl" style="color: var(--muted);">→</div>
             </a>
         </div>
         
-        <!-- RIGHT COLUMN: Expenses -->
-        <div class="space-y-6">
-            <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ {{ t('dashboard.bordkasse_section') }}</h2>
+        <div class="space-y-4">
+            <h2 class="text-lg font-bold" style="color: var(--text);">{{ t('dashboard.bordkasse_section') }}</h2>
             
-            <!-- Total Expenses Card -->
-            <div class="bg-white porthole-card p-8">
+            <div class="kpi-card kpi-danger">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-lg font-medium mb-2" style="color: var(--navy-deep);">💸 {{ t('dashboard.total_expenses') }}</p>
-                        <p class="text-4xl font-bold" style="color: var(--coral);">{{ "%.2f"|format(total_expenses) }} €</p>
+                        <p class="text-sm font-medium mb-1" style="color: var(--text-secondary);">{{ t('dashboard.total_expenses') }}</p>
+                        <p class="text-3xl font-bold" style="color: var(--text);">{{ "%.2f"|format(total_expenses) }} €</p>
                     </div>
-                    <div class="text-7xl">💸</div>
+                    <div class="text-5xl opacity-20">💸</div>
                 </div>
             </div>
             
-            <!-- Expense Action -->
-            <a href="/expenses" class="block text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
-                <div class="text-6xl mb-3">⚓</div>
-                <h3 class="text-xl font-bold maritime-header">{{ t('dashboard.record_expense') }}</h3>
-                <p class="text-sm opacity-90 mt-2">{{ t('dashboard.record_expense_desc') }}</p>
+            <a href="/expenses" class="dash-hero dash-hero-success touch-action">
+                <div class="text-4xl opacity-70">⚓</div>
+                <div class="flex-1">
+                    <h3 class="text-base font-bold">{{ t('dashboard.record_expense') }}</h3>
+                    <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.record_expense_desc') }}</p>
+                </div>
+                <div class="text-xl" style="color: var(--muted);">→</div>
             </a>
             
-            <!-- Settlement -->
-            <a href="/settlement" class="block text-white rounded-2xl p-8 text-center transition transform hover:scale-105 touch-action shadow-lg" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
-                <div class="text-6xl mb-3">⛵</div>
-                <h3 class="text-xl font-bold maritime-header">{{ t('dashboard.show_settlement') }}</h3>
-                <p class="text-sm opacity-90 mt-2">{{ t('dashboard.show_settlement_desc') }}</p>
+            <a href="/settlement" class="dash-hero touch-action" style="border-left-color: #7c3aed;">
+                <div class="text-4xl opacity-70">⛵</div>
+                <div class="flex-1">
+                    <h3 class="text-base font-bold">{{ t('dashboard.show_settlement') }}</h3>
+                    <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.show_settlement_desc') }}</p>
+                </div>
+                <div class="text-xl" style="color: var(--muted);">→</div>
             </a>
         </div>
     </div>

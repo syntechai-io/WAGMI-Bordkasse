@@ -32,24 +32,9 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/ui_v1.css">
     <style>
-        :root {
-            --navy-deep: #1e3a5f;
-            --ocean-blue: #0077be;
-            --sea-foam: #2ecc71;
-            --coral: #ff6b35;
-            --sand: #d4a574;
-            --sky-blue: #87ceeb;
-            --cream: #f8f9fa;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, #e3f2fd 0%, #f8f9fa 100%);
-            min-height: 100vh;
-        }
-        
         @media (max-width: 640px) {
             body {
                 padding-bottom: 80px;
@@ -62,41 +47,6 @@
         
         input, select, textarea {
             font-size: 16px;
-        }
-        
-        .maritime-header {
-            font-family: 'Bebas Neue', sans-serif;
-            letter-spacing: 1px;
-        }
-        
-        .wave-border {
-            position: relative;
-        }
-        
-        .wave-border::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(255,255,255,0.3) 10px, rgba(255,255,255,0.3) 20px);
-        }
-        
-        .rope-divider {
-            height: 3px;
-            background: repeating-linear-gradient(90deg, var(--sand) 0px, var(--sand) 8px, transparent 8px, transparent 16px);
-            margin: 1.5rem 0;
-        }
-        
-        .porthole-card {
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(30, 58, 95, 0.1), inset 0 1px 0 rgba(255,255,255,0.1);
-            border: 2px solid rgba(135, 206, 235, 0.3);
-        }
-        
-        .ocean-gradient {
-            background: linear-gradient(135deg, var(--navy-deep) 0%, var(--ocean-blue) 100%);
         }
         
         .anchor-icon::before {
@@ -119,47 +69,28 @@
             margin-right: 0.5rem;
         }
         
-        /* Dropdown Navigation Styles */
         .nav-dropdown {
             position: relative;
         }
         
-        /* Show dropdown on hover (desktop mouse) */
         .nav-dropdown:hover .dropdown-content,
-        /* Show dropdown on focus (keyboard navigation) */
         .nav-dropdown:focus-within .dropdown-content,
-        /* Show dropdown when active class is added (touch/click) */
         .nav-dropdown.active .dropdown-content {
             display: block;
-        }
-        
-        .dropdown-content {
-            animation: fadeIn 0.2s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
     </style>
 </head>
 <body>
-    <nav class="ocean-gradient text-white shadow-lg sticky top-0 z-50 wave-border">
+    <nav class="topbar sticky top-0 z-50">
         <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
+            <div class="flex items-center justify-between h-14">
                 <div class="flex items-center space-x-3">
-                    <img src="/static/logo-nav.png" alt="CrewLog Logo" class="w-10 h-10 object-contain">
-                    <a href="/" class="flex flex-col leading-tight" style="font-family: 'Inter', sans-serif; letter-spacing: 1px;">
+                    <img src="/static/logo-nav.png" alt="CrewLog Logo" class="w-8 h-8 object-contain rounded-md">
+                    <a href="/" class="flex flex-col leading-tight">
                         {% if show_brand and boat_brand_name %}
-                        <span class="text-sm font-semibold opacity-90">{{ boat_brand_name }}</span>
+                        <span class="text-xs font-semibold" style="color: rgba(255,255,255,0.7);">{{ boat_brand_name }}</span>
                         {% endif %}
-                        <span class="text-xl font-bold">CrewLog</span>
+                        <span class="text-lg font-bold text-white">CrewLog</span>
                     </a>
                 </div>
                 <button id="menu-toggle" class="lg:hidden p-2 touch-action">
@@ -167,15 +98,15 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
-                <div id="menu" class="hidden lg:flex lg:items-center lg:space-x-3 text-sm">
-                    <a href="/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">🧭 {{ t('nav.dashboard') }}</a>
-                    <a href="/trips/" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">⛵ {{ t('nav.trips') }}</a>
-                    <a href="/logbook" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📓 {{ t('nav.logbook') }}</a>
+                <div id="menu" class="hidden lg:flex lg:items-center lg:space-x-1 text-sm">
+                    <a href="/" class="nav-item touch-action">🧭 {{ t('nav.dashboard') }}</a>
+                    <a href="/trips/" class="nav-item touch-action">⛵ {{ t('nav.trips') }}</a>
+                    <a href="/logbook" class="nav-item touch-action">📓 {{ t('nav.logbook') }}</a>
                     
                     <!-- Trip Selector (Admin Only) -->
                     {% if request.session.get('role') == 'admin' and all_trips %}
                     <div class="relative nav-dropdown">
-                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center text-xs" 
+                        <button class="nav-item touch-action flex items-center text-xs" 
                                 aria-haspopup="true" aria-expanded="false">
                             🎯 {{ selected_trip.name if selected_trip else t('nav.select_trip') }}
                             <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,9 +128,8 @@
                     </div>
                     {% endif %}
                     
-                    <!-- Finanzen Dropdown -->
                     <div class="relative nav-dropdown">
-                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center" 
+                        <button class="nav-item touch-action flex items-center" 
                                 aria-haspopup="true" aria-expanded="false">
                             💰 {{ t('nav.finances') }}
                             <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,9 +146,8 @@
                         </div>
                     </div>
                     
-                    <!-- Verwaltung Dropdown -->
                     <div class="relative nav-dropdown">
-                        <button class="py-2 lg:py-0 hover:text-sky-200 transition touch-action flex items-center" 
+                        <button class="nav-item touch-action flex items-center" 
                                 aria-haspopup="true" aria-expanded="false">
                             📝 {{ t('nav.admin') }}
                             <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,7 +172,7 @@
                         </div>
                     </div>
                     
-                    <a href="/help" class="block py-2 lg:py-0 hover:text-sky-200 transition touch-action">📖 {{ t('nav.help') }}</a>
+                    <a href="/help" class="nav-item touch-action">📖 {{ t('nav.help') }}</a>
 
                     <!-- Language Switch -->
                     <div class="flex items-center space-x-1 ml-2 text-xs">
@@ -253,93 +182,92 @@
                     </div>
 
                     {% if request.session.get('user_id') %}
-                    <div class="border-l border-sky-300 pl-6 ml-2 flex items-center space-x-4">
-                        <span class="text-sm">👤 {{ request.session.get('username', 'User') }}</span>
-                        <a href="/logout" class="px-4 py-2 rounded-lg text-sm font-semibold transition hover:scale-105" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                            🚪 {{ t('nav.logout') }}
+                    <div class="border-l border-white/15 pl-4 ml-2 flex items-center space-x-3">
+                        <span class="text-xs" style="color: rgba(255,255,255,0.7);">👤 {{ request.session.get('username', 'User') }}</span>
+                        <a href="/logout" class="px-3 py-1.5 rounded-md text-xs font-medium transition text-white" style="background: rgba(255,255,255,0.12);">
+                            {{ t('nav.logout') }}
                         </a>
                     </div>
                     {% elif request.session.get('saas_user_id') %}
-                    <div class="border-l border-sky-300 pl-6 ml-2 flex items-center space-x-4">
-                        <span class="text-sm">👤 {{ request.session.get('saas_email', 'User') }}</span>
+                    <div class="border-l border-white/15 pl-4 ml-2 flex items-center space-x-3">
+                        <span class="text-xs" style="color: rgba(255,255,255,0.7);">👤 {{ request.session.get('saas_email', 'User') }}</span>
                         <form action="/logout-saas" method="POST" class="m-0 inline">
                             {{ csrf_input | safe }}
-                            <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold transition hover:scale-105 text-white" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                                🚪 {{ t('nav.logout') }}
+                            <button type="submit" class="px-3 py-1.5 rounded-md text-xs font-medium transition text-white" style="background: rgba(255,255,255,0.12);">
+                                {{ t('nav.logout') }}
                             </button>
                         </form>
                     </div>
                     {% endif %}
                 </div>
             </div>
-            <div id="mobile-menu" class="hidden lg:hidden pb-4 overflow-y-auto" style="max-height: calc(100vh - 64px);">
-                <a href="/" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">🧭 {{ t('nav.dashboard') }}</a>
-                <a href="/trips/" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">⛵ {{ t('nav.trips') }}</a>
-                <a href="/logbook" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">📓 {{ t('nav.logbook') }}</a>
+            <div id="mobile-menu" class="hidden lg:hidden pb-4 overflow-y-auto" style="max-height: calc(100vh - 56px);">
+                <a href="/" class="block py-3 hover:text-white/90 transition touch-action border-b border-white/8">🧭 {{ t('nav.dashboard') }}</a>
+                <a href="/trips/" class="block py-3 hover:text-white/90 transition touch-action border-b border-white/8">⛵ {{ t('nav.trips') }}</a>
+                <a href="/logbook" class="block py-3 hover:text-white/90 transition touch-action border-b border-white/8">📓 {{ t('nav.logbook') }}</a>
 
-                <div class="mobile-section border-b border-sky-400/30">
-                    <button class="w-full py-3 hover:text-sky-200 transition touch-action flex items-center justify-between mobile-section-toggle">
+                <div class="mobile-section border-b border-white/8">
+                    <button class="w-full py-3 hover:text-white/90 transition touch-action flex items-center justify-between mobile-section-toggle">
                         <span>💰 {{ t('nav.finances') }}</span>
                         <svg class="w-4 h-4 transition-transform mobile-section-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
                     <div class="mobile-section-content hidden pl-4 pb-2">
-                        <a href="/deposits" class="block py-2 hover:text-sky-200 transition touch-action text-sm">💰 {{ t('nav.deposits') }}</a>
-                        <a href="/expenses" class="block py-2 hover:text-sky-200 transition touch-action text-sm">⚓ {{ t('nav.expenses') }}</a>
-                        <a href="/templates" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📋 {{ t('nav.templates') }}</a>
-                        <a href="/balances" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📊 {{ t('nav.balances') }}</a>
-                        <a href="/settlement" class="block py-2 hover:text-sky-200 transition touch-action text-sm">⛵ {{ t('nav.settlement') }}</a>
+                        <a href="/deposits" class="block py-2 hover:text-white/90 transition touch-action text-sm">💰 {{ t('nav.deposits') }}</a>
+                        <a href="/expenses" class="block py-2 hover:text-white/90 transition touch-action text-sm">⚓ {{ t('nav.expenses') }}</a>
+                        <a href="/templates" class="block py-2 hover:text-white/90 transition touch-action text-sm">📋 {{ t('nav.templates') }}</a>
+                        <a href="/balances" class="block py-2 hover:text-white/90 transition touch-action text-sm">📊 {{ t('nav.balances') }}</a>
+                        <a href="/settlement" class="block py-2 hover:text-white/90 transition touch-action text-sm">⛵ {{ t('nav.settlement') }}</a>
                     </div>
                 </div>
 
-                <div class="mobile-section border-b border-sky-400/30">
-                    <button class="w-full py-3 hover:text-sky-200 transition touch-action flex items-center justify-between mobile-section-toggle">
+                <div class="mobile-section border-b border-white/8">
+                    <button class="w-full py-3 hover:text-white/90 transition touch-action flex items-center justify-between mobile-section-toggle">
                         <span>📝 {{ t('nav.admin') }}</span>
                         <svg class="w-4 h-4 transition-transform mobile-section-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
                     <div class="mobile-section-content hidden pl-4 pb-2">
-                        <a href="/crew" class="block py-2 hover:text-sky-200 transition touch-action text-sm">👥 {{ t('nav.crew') }}</a>
-                        <a href="/groups" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔗 {{ t('nav.groups') }}</a>
+                        <a href="/crew" class="block py-2 hover:text-white/90 transition touch-action text-sm">👥 {{ t('nav.crew') }}</a>
+                        <a href="/groups" class="block py-2 hover:text-white/90 transition touch-action text-sm">🔗 {{ t('nav.groups') }}</a>
                         {% if request.session.get('role') == 'admin' %}
-                        <a href="/trips/passwords" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔐 {{ t('nav.passwords') }}</a>
+                        <a href="/trips/passwords" class="block py-2 hover:text-white/90 transition touch-action text-sm">🔐 {{ t('nav.passwords') }}</a>
                         {% endif %}
-                        <a href="/export/csv" class="block py-2 hover:text-sky-200 transition touch-action text-sm">📋 {{ t('nav.export') }}</a>
+                        <a href="/export/csv" class="block py-2 hover:text-white/90 transition touch-action text-sm">📋 {{ t('nav.export') }}</a>
                         {% if request.session.get('saas_user_id') %}
-                        <a href="/admin/boat" class="block py-2 hover:text-sky-200 transition touch-action text-sm">⛵ {{ t('nav.boat_setup') }}</a>
-                        <a href="/billing" class="block py-2 hover:text-sky-200 transition touch-action text-sm">💳 {{ t('nav.billing') }}</a>
+                        <a href="/admin/boat" class="block py-2 hover:text-white/90 transition touch-action text-sm">⛵ {{ t('nav.boat_setup') }}</a>
+                        <a href="/billing" class="block py-2 hover:text-white/90 transition touch-action text-sm">💳 {{ t('nav.billing') }}</a>
                         {% endif %}
                         {% if request.session.get('role') == 'admin' %}
-                        <a href="/admin/billing" class="block py-2 hover:text-sky-200 transition touch-action text-sm">🔧 {{ t('nav.admin_billing') }}</a>
+                        <a href="/admin/billing" class="block py-2 hover:text-white/90 transition touch-action text-sm">🔧 {{ t('nav.admin_billing') }}</a>
                         {% endif %}
                     </div>
                 </div>
 
-                <a href="/help" class="block py-3 hover:text-sky-200 transition touch-action border-b border-sky-400/30">📖 {{ t('nav.help') }}</a>
+                <a href="/help" class="block py-3 hover:text-white/90 transition touch-action border-b border-white/8">📖 {{ t('nav.help') }}</a>
 
-                <!-- Mobile Language Switch -->
-                <div class="flex items-center space-x-3 py-3 border-b border-sky-400/30">
+                <div class="flex items-center space-x-3 py-3 border-b border-white/8">
                     <span class="text-sm opacity-70">🌐</span>
                     <a href="/set-language?lang=de&next={{ request.url.path }}" class="px-2 py-1 rounded text-sm transition {% if lang == 'de' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">DE</a>
                     <a href="/set-language?lang=en&next={{ request.url.path }}" class="px-2 py-1 rounded text-sm transition {% if lang == 'en' %}bg-white/20 font-bold{% else %}hover:bg-white/10{% endif %}">EN</a>
                 </div>
 
                 {% if request.session.get('user_id') %}
-                <div class="border-t border-sky-300 pt-4 mt-4">
-                    <div class="text-sm mb-2">👤 {{ t('nav.logged_in_as') }}: <strong>{{ request.session.get('username', 'User') }}</strong></div>
-                    <a href="/logout" class="block px-4 py-2 rounded-lg text-center font-semibold transition text-white" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                        🚪 {{ t('nav.logout') }}
+                <div class="border-t border-white/10 pt-4 mt-4">
+                    <div class="text-sm mb-2" style="color: rgba(255,255,255,0.7);">👤 {{ t('nav.logged_in_as') }}: <strong class="text-white">{{ request.session.get('username', 'User') }}</strong></div>
+                    <a href="/logout" class="block px-4 py-2 rounded-lg text-center font-medium transition text-white text-sm" style="background: rgba(255,255,255,0.12);">
+                        {{ t('nav.logout') }}
                     </a>
                 </div>
                 {% elif request.session.get('saas_user_id') %}
-                <div class="border-t border-sky-300 pt-4 mt-4">
-                    <div class="text-sm mb-2">👤 {{ t('nav.logged_in_as') }}: <strong>{{ request.session.get('saas_email', 'User') }}</strong></div>
+                <div class="border-t border-white/10 pt-4 mt-4">
+                    <div class="text-sm mb-2" style="color: rgba(255,255,255,0.7);">👤 {{ t('nav.logged_in_as') }}: <strong class="text-white">{{ request.session.get('saas_email', 'User') }}</strong></div>
                     <form action="/logout-saas" method="POST" class="m-0">
                         {{ csrf_input | safe }}
-                        <button type="submit" class="block w-full px-4 py-2 rounded-lg text-center font-semibold transition text-white" style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
-                            🚪 {{ t('nav.logout') }}
+                        <button type="submit" class="block w-full px-4 py-2 rounded-lg text-center font-medium transition text-white text-sm" style="background: rgba(255,255,255,0.12);">
+                            {{ t('nav.logout') }}
                         </button>
                     </form>
                 </div>
@@ -352,11 +280,9 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="ocean-gradient text-white text-center py-6 mt-12 wave-border" style="transform: scaleY(-1);">
-        <div style="transform: scaleY(-1);">
-            <p class="text-sm font-semibold">⚓ {{ t('footer.title') }} ⚓</p>
-            <p class="text-xs opacity-80 mt-2">{{ t('footer.subtitle') }}</p>
-        </div>
+    <footer class="footer-bar">
+        <p><strong>{{ t('footer.title') }}</strong></p>
+        <p class="mt-1">{{ t('footer.subtitle') }}</p>
     </footer>
 
     <script>
