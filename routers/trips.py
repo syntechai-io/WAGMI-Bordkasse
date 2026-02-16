@@ -20,6 +20,21 @@ def _get_account_id(request: Request) -> int:
     return int(account_id)
 
 
+def _is_admin_or_owner(request: Request, db: Session) -> bool:
+    if request.session.get("role") == "admin":
+        return True
+    saas_uid = request.session.get("saas_user_id")
+    session_account = request.session.get("account_id")
+    if saas_uid and session_account:
+        saas_user = db.query(SaaSUser).filter(
+            SaaSUser.id == saas_uid,
+            SaaSUser.account_id == session_account
+        ).first()
+        if saas_user and saas_user.is_owner:
+            return True
+    return False
+
+
 def _scoped_trip_query(db, request):
     """Return a Trip query scoped to account_id when SaaS session exists."""
     q = db.query(Trip)
@@ -66,10 +81,10 @@ async def quick_start_trip(
     db: Session = Depends(get_db)
 ):
     """Create a quick start trip with user's defaults and first logbook entry"""
-    if request.session.get("role") != "admin":
+    if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can create trips")
     
-    user_id = request.session.get("user_id")
+    user_id = request.session.get("user_id") or request.session.get("saas_user_id")
     if not user_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
@@ -100,7 +115,7 @@ async def create_trip(
     db: Session = Depends(get_db)
 ):
     """Create a new trip"""
-    if request.session.get("role") != "admin":
+    if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can create trips")
     
     account_id = _get_account_id(request)
@@ -168,7 +183,7 @@ async def activate_trip(
     db: Session = Depends(get_db)
 ):
     """Set a trip as active — scoped to account when SaaS session exists"""
-    if request.session.get("role") != "admin":
+    if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can activate trips")
     
     trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
@@ -195,7 +210,7 @@ async def archive_trip(
     db: Session = Depends(get_db)
 ):
     """Archive a trip — scoped to account"""
-    if request.session.get("role") != "admin":
+    if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can archive trips")
     
     trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
@@ -217,7 +232,7 @@ async def close_trip(
     db: Session = Depends(get_db)
 ):
     """Close a trip — scoped to account"""
-    if request.session.get("role") != "admin":
+    if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can close trips")
     
     trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
@@ -236,7 +251,7 @@ async def reopen_trip(
     db: Session = Depends(get_db)
 ):
     """Reopen a trip — scoped to account"""
-    if request.session.get("role") != "admin":
+    if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can reopen trips")
     
     trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
@@ -266,7 +281,7 @@ async def select_trip(
 @router.get("/passwords", response_class=HTMLResponse)
 async def passwords_page(request: Request, db: Session = Depends(get_db)):
     """Password management page (admin only)"""
-    if request.session.get("role") != "admin":
+    if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can manage passwords")
     
     active_trip = TripService.get_selected_trip(request, db)
@@ -300,7 +315,7 @@ async def update_passwords(
     db: Session = Depends(get_db)
 ):
     """Update trip passwords (admin only)"""
-    if request.session.get("role") != "admin":
+    if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can manage passwords")
     
     active_trip = TripService.get_selected_trip(request, db)
@@ -328,7 +343,7 @@ async def update_passwords(
 @router.get("/wagmi/report", response_class=HTMLResponse)
 async def wagmi_annual_report(request: Request, db: Session = Depends(get_db)):
     """WAGMI yearly sailing report (admin only)"""
-    if request.session.get("role") != "admin":
+    if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can view reports")
     
     yearly_stats = WagmiAnnualReportService.get_yearly_report(db, start_year=2026)
