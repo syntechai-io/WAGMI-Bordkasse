@@ -4,14 +4,14 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">⛵ {{ t('trips.title') }}</h1>
-        {% if request.session.get('role') == 'admin' %}
+        {% if request.session.get('role') == 'admin' or is_saas_owner %}
         <a href="/trips/wagmi/report" class="text-white px-4 py-2 rounded-lg hover:shadow-lg transition font-semibold" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
             📊 {{ t('trips.yearly_overview') }}
         </a>
         {% endif %}
     </div>
     
-    {% if request.session.get('role') == 'admin' %}
+    {% if request.session.get('role') == 'admin' or is_saas_owner %}
     <div class="bg-white porthole-card p-6">
         <div class="flex flex-col md:flex-row gap-4 mb-4">
             <div class="flex-1">
@@ -100,7 +100,7 @@
                                 <button type="submit" class="hover:underline touch-action" style="color: var(--ocean-blue);">👁️ {{ t('trips.action_view') }}</button>
                             </form>
                             
-                            {% if request.session.get('role') == 'admin' %}
+                            {% if request.session.get('role') == 'admin' or is_saas_owner %}
                                 {% if trip.is_closed == 0 %}
                                 <form action="/trips/{{ trip.id }}/close" method="post" class="inline">
                                     {{ csrf_input | safe }}
@@ -168,7 +168,7 @@
         <p class="text-sm font-semibold mb-2" style="color: var(--navy-deep);">💡 {{ t('trips.help_title') }}</p>
         <ul class="text-sm space-y-1" style="color: var(--navy-deep);">
             <li><strong>👁️ {{ t('trips.action_view') }}:</strong> {{ t('trips.help_view') }}</li>
-            {% if request.session.get('role') == 'admin' %}
+            {% if request.session.get('role') == 'admin' or is_saas_owner %}
             <li><strong>🔒 {{ t('trips.action_close') }}:</strong> {{ t('trips.help_close') }}</li>
             <li><strong>🔓 {{ t('trips.action_reopen') }}:</strong> {{ t('trips.help_reopen') }}</li>
             <li><strong>✅ {{ t('trips.action_activate') }}:</strong> {{ t('trips.help_activate') }}</li>
