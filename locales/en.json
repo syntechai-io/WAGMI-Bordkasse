@@ -1023,5 +1023,8 @@
   "logbook.reef_full": "Full",
   "logbook.reef_level": "Reef",
   "logbook.extra_sail": "Extra Sail",
-  "logbook.headsail_furl_percent": "Headsail Furl %"
+  "logbook.headsail_furl_percent": "Headsail Furl %",
+  "offline.title": "You're offline",
+  "offline.message": "You appear to be offline. Core navigation works, but some actions like saving entries or syncing data require an internet connection.",
+  "offline.retry": "Try again"
 }

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -159,6 +159,21 @@ async def set_language(request: Request):
         return response
 
     return RedirectResponse(url=next_url, status_code=303)
+
+
+@app.get("/sw.js")
+async def service_worker():
+    return FileResponse(
+        "static/sw.js",
+        media_type="application/javascript",
+        headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"}
+    )
+
+
+@app.get("/offline", response_class=HTMLResponse)
+async def offline_page(request: Request):
+    templates = create_templates()
+    return templates.TemplateResponse("offline.html", {"request": request})
 
 
 @app.get("/", response_class=HTMLResponse)

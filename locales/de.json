@@ -1023,5 +1023,8 @@
   "logbook.reef_full": "Voll",
   "logbook.reef_level": "Reff",
   "logbook.extra_sail": "Zusatzsegel",
-  "logbook.headsail_furl_percent": "Vorsegel Rollung %"
+  "logbook.headsail_furl_percent": "Vorsegel Rollung %",
+  "offline.title": "Du bist offline",
+  "offline.message": "Du scheinst offline zu sein. Die grundlegende Navigation funktioniert, aber einige Aktionen wie das Speichern von Einträgen oder die Datensynchronisation benötigen eine Internetverbindung.",
+  "offline.retry": "Erneut versuchen"
 }

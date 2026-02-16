@@ -10,6 +10,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     EXCLUDED_PATHS = [
         "/login",
         "/offline",
+        "/sw.js",
         "/static",
         "/favicon.ico",
         "/api",

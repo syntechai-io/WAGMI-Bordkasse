@@ -1,12 +1,12 @@
 {
-  "name": "WAGMI CrewLog",
-  "short_name": "WAGMI",
-  "description": "Maritime Crew Logbook und Bordkasse für Segelcrew zum Verwalten von Ausgaben, Logbuch und Abrechnung",
+  "name": "CrewLog",
+  "short_name": "CrewLog",
+  "description": "Maritime Logbook & Bordkasse",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#1e3a5f",
-  "theme_color": "#1e3a5f",
+  "background_color": "#1a2f4a",
+  "theme_color": "#1a2f4a",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -23,19 +23,16 @@
     }
   ],
   "categories": ["finance", "productivity", "utilities"],
-  "screenshots": [],
   "shortcuts": [
     {
-      "name": "Neuer Logbuch-Eintrag",
-      "short_name": "Logbuch",
-      "description": "Neuen Logbuch-Eintrag erstellen",
+      "name": "New Logbook Entry",
+      "short_name": "Logbook",
       "url": "/logbook/new",
       "icons": [{ "src": "/static/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Neue Ausgabe",
-      "short_name": "Ausgabe",
-      "description": "Neue Ausgabe erfassen",
+      "name": "New Expense",
+      "short_name": "Expense",
       "url": "/expenses/new",
       "icons": [{ "src": "/static/icon-192.png", "sizes": "192x192" }]
     }
