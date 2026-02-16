@@ -33,7 +33,7 @@ from routes_billing_ui import router as billing_ui_router
 from routes_boat import router as boat_router
 from i18n import set_lang, SUPPORTED_LANGS
 
-app = FastAPI(title="WAGMI CrewLog - Maritime Logbook & Bordkasse")
+app = FastAPI(title="CrewLog - Maritime Logbook & Bordkasse")
 
 # Use shared limiter instance
 app.state.limiter = limiter

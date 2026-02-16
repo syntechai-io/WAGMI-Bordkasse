@@ -1,12 +1,12 @@
-// Service Worker for WAGMI CrewLog - Maritime Logbook & Bordkasse PWA
+// Service Worker for CrewLog - Maritime Logbook & Bordkasse PWA
 // Version 1.0 - Basic offline support planned for future
 
-const CACHE_NAME = 'wagmi-crewlog-v1';
+const CACHE_NAME = 'crewlog-v1';
 const urlsToCache = [
   '/',
   '/static/manifest.json',
-  '/static/icon-192.png',
-  '/static/icon-512.png'
+  '/static/logo-crewlog-192.png',
+  '/static/logo-crewlog-512.png'
 ];
 
 // Install event - cache basic resources

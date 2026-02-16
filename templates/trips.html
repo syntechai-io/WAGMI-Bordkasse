@@ -5,7 +5,7 @@
     <div class="flex items-center justify-between">
         <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">⛵ {{ t('trips.title') }}</h1>
         {% if request.session.get('role') == 'admin' or is_saas_owner %}
-        <a href="/trips/wagmi/report" class="text-white px-4 py-2 rounded-lg hover:shadow-lg transition font-semibold" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+        <a href="/trips/yearly/report" class="text-white px-4 py-2 rounded-lg hover:shadow-lg transition font-semibold" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
             📊 {{ branding.brand_name }} {{ t('trips.yearly_overview') }}
         </a>
         {% endif %}

@@ -340,19 +340,23 @@ async def update_passwords(
     
     return RedirectResponse(url="/trips/passwords", status_code=303)
 
-@router.get("/wagmi/report", response_class=HTMLResponse)
-async def wagmi_annual_report(request: Request, db: Session = Depends(get_db)):
-    """WAGMI yearly sailing report (admin only)"""
+@router.get("/yearly/report", response_class=HTMLResponse)
+async def yearly_annual_report(request: Request, db: Session = Depends(get_db)):
+    """Yearly sailing report (admin only)"""
     if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can view reports")
     
     yearly_stats = WagmiAnnualReportService.get_yearly_report(db, start_year=2026)
     
-    # Sort years in descending order (most recent first)
     sorted_years = sorted(yearly_stats.keys(), reverse=True)
     
-    return templates.TemplateResponse("wagmi_report.html", {
+    return templates.TemplateResponse("yearly_report.html", {
         "request": request,
         "yearly_stats": yearly_stats,
         "sorted_years": sorted_years
     })
+
+@router.get("/wagmi/report", response_class=HTMLResponse)
+async def wagmi_report_redirect(request: Request):
+    """Backward-compatible redirect from old WAGMI report URL"""
+    return RedirectResponse(url="/trips/yearly/report", status_code=301)

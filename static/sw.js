@@ -1,13 +1,12 @@
-const CACHE_NAME = 'crewlog-v1';
+const CACHE_NAME = 'crewlog-v2';
 
 const STATIC_ASSETS = [
   '/static/ui_v1.css',
   '/static/ui_nav.js',
   '/static/manifest.json',
-  '/static/icon-192.png',
-  '/static/icon-512.png',
-  '/static/logo.png',
-  '/static/logo-nav.png',
+  '/static/logo-crewlog.svg',
+  '/static/logo-crewlog-192.png',
+  '/static/logo-crewlog-512.png',
   '/offline'
 ];
 
