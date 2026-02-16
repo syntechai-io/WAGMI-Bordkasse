@@ -1,0 +1,65 @@
+We need to keep the current Trips page layout and functionality exactly as-is, but remove remaining hardcoded “WAGMI” strings and replace them with the dynamic boat name from the Boat Profile (account-scoped). In the screenshot the header shows “Test1” but buttons still say “Quick Start WAGMI” and “WAGMI Yearly Overview”. Also, trip creation is “making problems” (likely missing template vars / inconsistent context in HTMX renders). Fix this reliably.
+
+Requirements
+- Do NOT change any business logic or flows (trip creation, quick start, archiving, plan gating).
+- Only change UI text and template context wiring so boat name is dynamic.
+- Do not reference `boat_profile` directly in templates unless guaranteed; instead inject stable `brand_*` variables into context in ALL render paths.
+- Use i18n for new/changed labels (t()).
+
+Step 1 — Create one branding helper for templates
+Add a helper function (e.g., in services/branding.py or utils/template_context.py):
+
+get_branding_context(db, request) -> dict with:
+- brand_boat_name: actual boat profile boat_name if exists else None
+- brand_is_default: bool (boat_profile.boat_name_is_default) if available else True
+- brand_label: string shown to user:
+    - if SaaS session AND boat_profile exists AND boat_name_is_default == false: use boat_name
+    - else: use "CrewLog" (or localized t("app.name") if your base templates support it)
+- brand_quickstart_label: string or parts to render “Quick Start <brand_label>”
+Return a dict.
+
+Important: This must work in SaaS mode and legacy mode without crashing.
+
+Step 2 — Ensure EVERY template render gets branding context
+Wherever you build template context (common render helper, middleware, or per-route):
+- Merge in get_branding_context() results.
+This includes:
+- GET /trips
+- Any HTMX partial render route that returns trips page fragments
+- Dashboard render if it reuses navbar/base template
+Do NOT miss partials, otherwise “trip creation made problems” will persist.
+
+Step 3 — Replace hardcoded WAGMI strings in Trips UI
+In templates (especially templates/trips.html, maybe templates/dashboard.html):
+Replace:
+- “Quick Start WAGMI” => use i18n + brand_label
+  Example:
+    {{ t("trips.quick_start") }} {{ brand_label }}
+- “WAGMI Yearly Overview” => use i18n + brand_label
+  Example:
+    {{ brand_label }} {{ t("reports.yearly_overview") }}
+Also search for any other literal “WAGMI” occurrences in templates and replace similarly.
+
+Step 4 — Keep layout but make button text dynamic
+Do not change CSS classes or button placement.
+Only change the inner text nodes.
+
+Step 5 — i18n keys
+Add or ensure keys exist (de/en):
+- trips.quick_start = “Quick Start”
+- reports.yearly_overview = “Yearly Overview”
+If they already exist, reuse them.
+
+Step 6 — Verify trip creation “problems”
+Run the server and confirm:
+- Trips page loads without template errors
+- Create Trip works (normal form POST)
+- Quick Start works
+- No missing-variable errors in logs during HTMX updates
+- Button labels show “Quick Start Test1” and “Test1 Yearly Overview” for account whose boat name is Test1.
+
+Deliverables
+- Updated helper + context injection
+- Updated templates with dynamic labels
+- Updated locale keys
+- Brief list of files changed and how to verify

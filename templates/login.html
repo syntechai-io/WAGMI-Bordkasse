@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1e3a5f">
-    <title>{{ t('auth.login') }} - WAGMI CrewLog</title>
+    <title>{{ t('auth.login') }} - {% if show_brand %}{{ brand_label }}{% endif %} CrewLog</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -89,9 +89,9 @@
         <!-- Logo -->
         <div class="text-center mb-8">
             <div class="ship-wheel mb-4 flex justify-center">
-                <img src="/static/logo.png" alt="WAGMI CrewLog Logo" class="w-24 h-24 object-contain">
+                <img src="/static/logo.png" alt="CrewLog Logo" class="w-24 h-24 object-contain">
             </div>
-            <h1 class="text-4xl font-bold text-white mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 2px;">WAGMI CrewLog</h1>
+            <h1 class="text-4xl font-bold text-white mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: 2px;">{% if show_brand %}{{ brand_label }}{% endif %} CrewLog</h1>
             <p class="text-sky-200">{{ t('auth.subtitle') }}</p>
         </div>
         
@@ -228,7 +228,7 @@
         </div>
         
         <div class="text-center mt-6 text-sky-200 text-sm">
-            <p>WAGMI CrewLog - Maritime Logbook & Bordkasse</p>
+            <p>{% if show_brand %}{{ brand_label }}{% endif %} CrewLog - Maritime Logbook & Bordkasse</p>
         </div>
     </div>
     <script>

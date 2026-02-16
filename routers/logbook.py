@@ -869,7 +869,7 @@ async def export_single_entry_pdf(request: Request, entry_id: int, db: Session =
             outfile=pdf_buffer,
             meta={
                 'title': f'Logbuch-Eintrag {entry.entry_date.strftime("%Y-%m-%d %H:%M")}',
-                'creator': 'WAGMI Bordkasse'
+                'creator': 'CrewLog Bordkasse'
             },
             entry_id=entry.id,
             trip_name=active_trip.name,
@@ -967,7 +967,7 @@ async def export_daily_pdf(
             outfile=pdf_buffer,
             meta={
                 'title': f'Tageslogbuch {target_date.strftime("%d.%m.%Y")}',
-                'creator': 'WAGMI Bordkasse'
+                'creator': 'CrewLog Bordkasse'
             },
             summary=summary,
             trip_name=active_trip.name,

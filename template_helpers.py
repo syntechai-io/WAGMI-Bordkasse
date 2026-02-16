@@ -10,12 +10,14 @@ from i18n import get_lang, t as i18n_t
 
 
 def trip_context_processor(request: Request) -> Dict[str, Any]:
-    """Add trip information to all template contexts"""
+    """Add trip information and branding to all template contexts"""
     context = {
         "all_trips": [],
         "selected_trip": None,
         "boat_brand_name": None,
         "show_brand": False,
+        "brand_label": "CrewLog",
+        "brand_is_default": True,
     }
     
     db_generator = get_db()
@@ -35,6 +37,8 @@ def trip_context_processor(request: Request) -> Dict[str, Any]:
             if bp and not bp.boat_name_is_default:
                 context["boat_brand_name"] = bp.boat_name
                 context["show_brand"] = True
+                context["brand_label"] = bp.boat_name
+                context["brand_is_default"] = False
         
     except Exception:
         pass

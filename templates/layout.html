@@ -7,7 +7,7 @@
     <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="WAGMI">
+    <meta name="apple-mobile-web-app-title" content="{{ brand_label }}">
     <meta name="theme-color" content="#1e3a5f">
     <meta name="description" content="{{ t('common.meta_description') }}">
     
@@ -27,7 +27,7 @@
     <link rel="apple-touch-icon" sizes="120x120" href="/static/apple-touch-icon-120x120-v2.png">
     <link rel="apple-touch-icon" href="/static/apple-touch-icon-180x180-v2.png">
     
-    <title>{% block title %}WAGMI CrewLog{% endblock %}</title>
+    <title>{% block title %}{% if show_brand %}{{ brand_label }}{% endif %} CrewLog{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">

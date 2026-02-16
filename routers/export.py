@@ -159,7 +159,7 @@ async def download_pdf(request: Request, db: Session = Depends(get_db)):
     )
     
     # Title
-    elements.append(Paragraph("⚓ WAGMI Bordkasse - Export", title_style))
+    elements.append(Paragraph("⚓ CrewLog Bordkasse - Export", title_style))
     elements.append(Paragraph(f"Trip: {active_trip.name}", styles['Normal']))
     elements.append(Spacer(1, 0.3*inch))
     

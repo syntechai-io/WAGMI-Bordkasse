@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}{{ t('admin_billing.title') }} - WAGMI CrewLog{% endblock %}
+{% block title %}{{ t('admin_billing.title') }} - {% if show_brand %}{{ brand_label }}{% endif %} CrewLog{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
