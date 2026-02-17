@@ -1,0 +1,41 @@
+We already implemented Calm Maritime v3, but we must VERIFY it against real UI behavior and fix any remaining “black on navy” regressions.
+
+DO NOT change backend logic, routes, forms, JS behavior, or mobile. Desktop-only changes allowed (@media min-width:1024px). Keep everything already built.
+
+STEP 1 — EVIDENCE-BASED AUDIT (required)
+1) In the browser, inspect the topbar elements and confirm computed color values for:
+   - brand text, nav links, user name, logout button, language toggle text
+   - hover state (a:hover), active state, visited state (a:visited)
+   - svg icon fill AND stroke
+2) Open every dropdown (Finances/Administration etc) and confirm:
+   - dropdown items remain dark text on white background
+   - topbar trigger text remains white on navy
+3) Identify any selector that causes dark text on navy (specific CSS file + selector).
+
+STEP 2 — PATCH ONLY IF THE AUDIT FINDS ISSUES
+If ANY dark-on-navy issue exists, apply the smallest possible CSS patch in static/ui_desktop_skin.css and ensure it loads last.
+
+Requirements for the patch:
+A) Guardrail must be LIMITED to header/footer wrappers only.
+   Use existing wrappers if present (e.g. .navy-shell, footer wrapper). If not present, add minimal wrapper classes in templates/layout.html:
+   - add class="navy-shell" to the topbar container ONLY
+   - add class="navy-shell-footer" to the footer container ONLY
+B) Inside @media (min-width: 1024px), enforce near-white text for header/footer:
+   .navy-shell, .navy-shell * { color: #F8FAFC !important; }
+   .navy-shell a, .navy-shell a:visited, .navy-shell a:hover { color: #F8FAFC !important; }
+   .navy-shell button, .navy-shell .btn { color: #F8FAFC !important; }
+   .navy-shell svg, .navy-shell svg * { fill: #F8FAFC !important; stroke: #F8FAFC !important; }
+   And same for .navy-shell-footer (footer only).
+C) EXCLUDE dropdown menus from the guardrail so dropdown text stays readable:
+   - Identify dropdown menu container selectors (e.g. .dropdown-menu, .nav-dropdown, .menu-panel).
+   - Add exclusion rules so dropdown items keep normal dark text:
+     .navy-shell .dropdown-menu, .navy-shell .dropdown-menu * { color: inherit !important; fill: currentColor !important; stroke: currentColor !important; }
+   Adjust selectors to match actual DOM.
+D) Ensure ui_desktop_skin.css loads AFTER all other CSS.
+E) If a service worker precaches assets, bump cache version and include ui_desktop_skin.css in precache list.
+
+STEP 3 — REPORT
+Respond with:
+- Which selectors/files caused any dark-on-navy issues (if found)
+- Exactly which minimal changes were applied (files + line-level summary)
+- Confirm dropdown menus remain dark-on-white while topbar stays white-on-navy
