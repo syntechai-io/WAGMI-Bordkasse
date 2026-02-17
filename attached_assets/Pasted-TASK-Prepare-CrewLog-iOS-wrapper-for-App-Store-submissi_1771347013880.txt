@@ -1,0 +1,87 @@
+TASK: Prepare CrewLog iOS wrapper for App Store submission compliance (Stripe SaaS model), without changing backend subscription logic.
+
+CONSTRAINTS
+- Do NOT replace Stripe with Apple IAP.
+- Do NOT remove Stripe billing from the web app.
+- The iOS app must function as a multi-platform SaaS reader app compliant with Apple 3.1.3(b).
+- No unnecessary refactors.
+
+GOAL
+Harden the iOS wrapper and web behavior so Apple review cannot reject the app for payment policy violations.
+
+STEP 1 — Hide Upgrade Buttons in iOS App
+Inside the web templates:
+
+When running inside the iOS native app:
+- Hide:
+   - “Upgrade to Skipper Plus”
+   - “Monthly / Yearly” checkout buttons
+- Allow:
+   - Login
+   - Full feature usage if subscription already active
+   - “Manage Subscription” only if it opens external browser
+
+Implementation:
+- Add a global flag:
+   window.IS_NATIVE_IOS = true (set via Capacitor bridge)
+- In billing/trips template:
+   if window.IS_NATIVE_IOS → hide upgrade buttons
+- Keep billing fully visible in browser.
+
+STEP 2 — App Store Payment Disclaimer
+Add a subtle note in the iOS app billing page:
+
+"Subscriptions are managed via our website."
+
+Only show this if running in iOS wrapper.
+Do NOT include direct external links.
+
+STEP 3 — Remove Any Direct Stripe Mentions in iOS
+Ensure:
+- No visible “Stripe” branding in UI
+- No “Pay via Stripe” text
+- Only neutral wording: “Upgrade on website”
+
+STEP 4 — Privacy Policy & Terms Link
+Add permanent footer links:
+- Privacy Policy
+- Terms of Service
+
+These must:
+- Open externally in Safari via Capacitor Browser plugin
+- Exist before App Store submission
+
+STEP 5 — Info.plist Compliance Review
+Ensure:
+- No unnecessary permissions
+- Location usage string clearly states maritime logbook function
+- No background location unless required
+- No Bluetooth / tracking declarations
+
+STEP 6 — App Transport Security
+Verify ATS:
+- All endpoints HTTPS
+- No insecure loads
+
+STEP 7 — Versioning Strategy
+Prepare:
+- Bundle ID placeholder
+- Version 1.0.0
+- Build 1
+- Document semantic versioning for future releases
+
+STEP 8 — Create APP_STORE_CHECKLIST.md
+Include:
+- Stripe policy explanation
+- Why app qualifies as multi-platform SaaS
+- Where subscriptions are purchased (web)
+- Test credentials for Apple review
+- Steps to reproduce subscription login
+- What reviewers should test
+
+DELIVERABLES
+- iOS app compliant with Apple payment rules
+- Upgrade buttons hidden in native app only
+- Billing remains fully functional in browser
+- No Stripe references inside native UI
+- Documentation ready for submission

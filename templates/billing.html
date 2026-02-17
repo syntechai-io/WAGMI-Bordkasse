@@ -13,7 +13,7 @@
     {% endif %}
 
     {% if over_limit and over_limit.over_limit %}
-    <div class="bg-amber-50 border-2 border-amber-400 rounded-xl p-4">
+    <div class="bg-amber-50 border-2 border-amber-400 rounded-xl p-4" data-ios-hide>
         <p class="text-amber-800 font-semibold mb-2">⚠️ {{ t('billing.over_limit_title') }}</p>
         <p class="text-amber-700 text-sm">
             {{ t('billing.over_limit_plan') }}
@@ -71,7 +71,7 @@
     </div>
 
     {% if is_owner %}
-    <div class="bg-white porthole-card p-6">
+    <div class="bg-white porthole-card p-6" data-ios-hide>
         {% if plan == "FREE" %}
         <h2 class="text-xl font-bold maritime-header mb-4">🚀 {{ t('billing.upgrade_title') }}</h2>
         <p class="text-sm mb-4 ui-muted">{{ t('billing.upgrade_desc') }}</p>
@@ -101,6 +101,12 @@
             </button>
         </form>
         {% endif %}
+    </div>
+
+    <div class="bg-white porthole-card p-6" data-ios-only style="display:none;">
+        <p class="text-sm ui-muted text-center">
+            {{ t('billing.ios_web_managed') }}
+        </p>
     </div>
     {% else %}
     <div class="bg-white porthole-card p-6">

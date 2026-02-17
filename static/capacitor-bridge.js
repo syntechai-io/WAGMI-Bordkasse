@@ -3,6 +3,8 @@
 
   if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
 
+  window.IS_NATIVE_IOS = true;
+
   var Browser = null;
   try {
     Browser = window.Capacitor.Plugins.Browser;
@@ -28,6 +30,30 @@
       window.open(url, '_system');
     }
   }
+
+  window._crewlogOpenExternal = openExternal;
+
+  function hideNativePaymentUI() {
+    var selectors = [
+      '[data-ios-hide]',
+      '[data-stripe-external]'
+    ];
+    selectors.forEach(function(sel) {
+      var els = document.querySelectorAll(sel);
+      els.forEach(function(el) { el.style.display = 'none'; });
+    });
+
+    var iosOnly = document.querySelectorAll('[data-ios-only]');
+    iosOnly.forEach(function(el) { el.style.display = ''; });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hideNativePaymentUI);
+  } else {
+    hideNativePaymentUI();
+  }
+  document.body.addEventListener('htmx:afterSwap', hideNativePaymentUI);
+  document.body.addEventListener('htmx:afterSettle', hideNativePaymentUI);
 
   var _origAssign = Object.getOwnPropertyDescriptor(window.location.__proto__, 'href');
   if (_origAssign && _origAssign.set) {
@@ -56,7 +82,17 @@
     }
   }, true);
 
-  var origXHRSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
+  document.addEventListener('click', function(e) {
+    var anchor = e.target.closest('a[data-footer-legal]');
+    if (!anchor) return;
+    var href = anchor.href || anchor.getAttribute('href');
+    if (href) {
+      e.preventDefault();
+      e.stopPropagation();
+      openExternal(href);
+    }
+  }, true);
+
   var origXHROpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function() {
     this._crewlogUrl = arguments[1];

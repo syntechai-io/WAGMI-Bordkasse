@@ -135,6 +135,18 @@ app.include_router(billing_router)
 app.include_router(billing_ui_router)
 app.include_router(boat_router)
 
+@app.get("/privacy")
+async def privacy_policy(request: Request):
+    from i18n import get_lang, t as _t
+    lang = get_lang(request)
+    return templates.TemplateResponse("privacy.html", {"request": request})
+
+@app.get("/terms")
+async def terms_of_service(request: Request):
+    from i18n import get_lang, t as _t
+    lang = get_lang(request)
+    return templates.TemplateResponse("terms.html", {"request": request})
+
 @app.get("/set-language")
 @app.post("/set-language")
 async def set_language(request: Request):

@@ -12,7 +12,7 @@
     </div>
 
     {% if request.query_params.get('upgrade_required') %}
-    <div class="rounded-xl p-4" style="background: #fef3c7; border: 1px solid #f59e0b;">
+    <div class="rounded-xl p-4" style="background: #fef3c7; border: 1px solid #f59e0b;" data-ios-hide>
         <p class="font-semibold" style="color: #92400e;">⚠️ {{ t('billing.over_limit_title') }}</p>
         <p class="text-sm mt-1" style="color: #92400e;">{{ t('billing.over_limit_info') }}</p>
         <a href="/billing" class="inline-block mt-2 text-white px-4 py-2 rounded-lg font-semibold text-sm" style="background: var(--accent);">
@@ -144,7 +144,7 @@
     </div>
     
     {% if is_saas_owner and current_plan == 'FREE' %}
-    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-lg p-4">
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-lg p-4" data-ios-hide>
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
                 <p class="font-bold">🚀 {{ t('trips.upgrade_title') }}</p>
@@ -161,7 +161,7 @@
         </div>
     </div>
     {% elif is_saas_owner and current_plan == 'SKIPPER_PLUS' %}
-    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-4">
+    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-4" data-ios-hide>
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
                 <p class="font-bold">✅ {{ t('trips.active_plan') }}</p>

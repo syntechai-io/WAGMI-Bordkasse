@@ -11,10 +11,6 @@ const config: CapacitorConfig = {
       'crewlog.app',
       '*.crewlog.app',
       '*.replit.dev',
-      '*.stripe.com',
-      'checkout.stripe.com',
-      'billing.stripe.com',
-      'js.stripe.com',
     ],
   },
   plugins: {

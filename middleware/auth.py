@@ -20,6 +20,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/billing/ui/success",
         "/billing/ui/cancel",
         "/set-language",
+        "/privacy",
+        "/terms",
     ]
     
     async def dispatch(self, request, call_next):
