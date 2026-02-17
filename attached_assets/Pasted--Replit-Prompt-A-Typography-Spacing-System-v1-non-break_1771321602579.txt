@@ -1,0 +1,80 @@
+✅ Replit Prompt (A): Typography + Spacing System v1 (non-breaking)
+
+Goal: Introduce a consistent, Apple-leaning typography + spacing system across the app without changing routes, logic, forms, or JS behavior. Keep all existing classes working. Only add new tokens + minimal overrides and apply them safely to layout wrappers and headings.
+
+Instructions to Replit (copy/paste):
+
+We want a non-breaking UI refinement pass (“UI v1.1”) focusing ONLY on typography and spacing consistency. Do not change any backend logic, route handlers, form names, POST targets, JS selectors, or element IDs.
+Keep the existing UI structure. We are allowed to add new CSS variables, new utility classes, and lightly refactor templates only where it is purely presentational (headings, margins, paddings).
+All functional behavior must remain identical.
+
+1) Add a design tokens layer (CSS variables)
+	1.	Locate the main CSS file that controls global styles (e.g., static/styles.css or similar).
+	2.	Add a :root {} token set for:
+	•	Font family stack (system-first, Apple-like)
+	•	Font sizes scale
+	•	Line heights
+	•	Spacing scale
+	•	Border radius scale
+	•	Shadows (subtle, consistent)
+	3.	Keep current colors as-is for now (we handle color cleanup in Phase B). Only introduce typography/spacing tokens.
+
+Add:
+	•	--font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+	•	A size scale: --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl
+	•	Line heights: --lh-tight, --lh-normal, --lh-relaxed
+	•	Spacing: --space-1..--space-10 (4px grid: 4/8/12/16/20/24/32/40/48/64)
+	•	Radius: --r-sm, --r-md, --r-lg, --r-xl
+	•	Shadow: --shadow-sm, --shadow-md
+
+2) Apply typography baseline globally (non-breaking)
+	•	Set body font-family to var(--font-sans).
+	•	Set base font-size to 16px and line-height to var(--lh-normal).
+	•	Normalize headings h1/h2/h3 with consistent margins and weights, but DO NOT remove existing classes; just set defaults.
+	•	Ensure form labels, inputs, buttons inherit consistent font sizing.
+
+3) Create safe UI utility classes (additive only)
+
+Add utility classes, do not remove old ones:
+	•	.ui-container (max width + horizontal padding responsive)
+	•	.ui-section (vertical spacing block)
+	•	.ui-card (padding + radius + shadow)
+	•	.ui-title, .ui-subtitle, .ui-muted
+	•	.ui-stack (vertical spacing)
+	•	.ui-row (horizontal spacing)
+	•	.ui-divider (thin neutral divider)
+
+These should be “opt-in” classes. We will apply them gradually.
+
+4) Minimal template refactor: layout wrapper + page headings
+	•	Update only the shared layout template (e.g., templates/layout.html) to wrap the main page content in:
+	•	<main class="ui-container ui-section"> ... </main>
+	•	For each page template that has a large heading (Dashboard, Trips, Logbook list, New Logbook Entry, Billing pages):
+	•	Add .ui-title to the main heading element.
+	•	Add .ui-subtitle to any subheading/helper text.
+	•	Keep existing icons and elements; just adjust spacing:
+	•	Replace ad-hoc <br> spacing with .ui-stack where safe.
+	•	Ensure top page heading has consistent margin-bottom.
+
+5) Do NOT touch:
+	•	Any JS files except to ensure no selectors break (should be unnecessary)
+	•	Any name="" attributes in forms
+	•	Any id="" attributes
+	•	Any endpoint URLs
+	•	Any business logic / queries / SQLAlchemy models
+
+6) Visual acceptance criteria
+	•	Headings use consistent size hierarchy across all pages.
+	•	Form sections look less cramped; spacing is uniform.
+	•	No colors changed yet.
+	•	Desktop and mobile both render without overflow regressions.
+
+7) Deliverables
+	•	Commit/summary of changed files
+	•	List of templates updated (only layout + 3–5 highest-traffic pages)
+	•	Before/after screenshots not required, but verify manually that:
+	•	Trips creation still works
+	•	Logbook entry creation still works
+	•	i18n toggle still works
+	•	mobile drawer still works
+	•	sticky action bar still works

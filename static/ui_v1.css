@@ -1,4 +1,5 @@
 :root {
+  /* ── Color tokens (unchanged) ── */
   --bg: #f7f8fa;
   --surface: #ffffff;
   --surface-2: #f1f3f5;
@@ -20,11 +21,42 @@
   --danger: #d93636;
   --danger-light: #fde8e8;
 
+  /* ── Typography tokens ── */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --lh-tight: 1.25;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.65;
+
+  /* ── Spacing tokens (4px grid) ── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 2rem;
+  --space-8: 2.5rem;
+  --space-9: 3rem;
+  --space-10: 4rem;
+
+  /* ── Radius tokens ── */
   --radius-sm: 6px;
   --radius: 10px;
   --radius-lg: 14px;
   --radius-xl: 18px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
 
+  /* ── Shadow tokens ── */
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
   --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
@@ -41,27 +73,134 @@
   --sand: #8b95a5;
 }
 
+/* ── Global typography baseline ── */
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: var(--lh-normal);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6 {
   color: var(--text);
   font-weight: 700;
-  line-height: 1.35;
+  line-height: var(--lh-tight);
+  margin-bottom: var(--space-3);
 }
 
-h1 { font-size: 1.75rem; letter-spacing: -0.02em; }
-h2 { font-size: 1.2rem; letter-spacing: -0.01em; }
-h3 { font-size: 1rem; }
+h1 { font-size: var(--text-2xl); letter-spacing: -0.02em; }
+h2 { font-size: var(--text-lg); letter-spacing: -0.01em; }
+h3 { font-size: var(--text-base); }
 
-p, li, td, label { line-height: 1.55; }
+p, li, td, label {
+  line-height: var(--lh-relaxed);
+}
+
+label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
 
 .prose-width { max-width: 680px; }
+
+/* ── UI utility classes (opt-in, additive) ── */
+.ui-container {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .ui-container {
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+}
+
+.ui-section {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .ui-section {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+}
+
+.ui-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+}
+
+.ui-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: var(--lh-tight);
+  margin-bottom: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .ui-title {
+    font-size: var(--text-3xl);
+  }
+}
+
+.ui-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--lh-normal);
+  margin-bottom: var(--space-4);
+}
+
+.ui-muted {
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: var(--lh-normal);
+}
+
+.ui-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ui-stack-sm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ui-stack-lg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.ui-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.ui-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: var(--space-4) 0;
+  border: none;
+}
 
 a {
   color: var(--accent);
