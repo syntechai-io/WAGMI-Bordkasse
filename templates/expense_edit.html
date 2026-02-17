@@ -29,7 +29,7 @@
                 <label class="block font-medium mb-2">📂 {{ t('common.category') }} *</label>
                 <select name="category" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
                     {% for cat in categories %}
-                    <option value="{{ cat }}" {% if expense and expense.category == cat %}selected{% endif %}>{% if cat == 'Proviant' %}{{ t('expense.cat_proviant') }}{% elif cat == 'Getränke' %}{{ t('expense.cat_getraenke') }}{% elif cat == 'Mooring' %}{{ t('expense.cat_mooring') }}{% elif cat == 'Diesel' %}{{ t('expense.cat_diesel') }}{% elif cat == 'Wasser' %}{{ t('expense.cat_wasser') }}{% elif cat == 'Strom' %}{{ t('expense.cat_strom') }}{% elif cat == 'Gas' %}{{ t('expense.cat_gas') }}{% elif cat == 'Taxi/Transfer' %}{{ t('expense.cat_taxi') }}{% elif cat == 'Restaurant' %}{{ t('expense.cat_restaurant') }}{% elif cat == 'Eintritte' %}{{ t('expense.cat_eintritte') }}{% elif cat == 'Sonstiges' %}{{ t('expense.cat_sonstiges') }}{% else %}{{ cat }}{% endif %}</option>
+                    <option value="{{ cat }}" {% if expense and norm_expense_cat(expense.category) == cat %}selected{% endif %}>{{ display_expense_cat(cat) }}</option>
                     {% endfor %}
                 </select>
             </div>

@@ -7,6 +7,8 @@ from models import CrewMember, Deposit, Expense
 from services.trip import TripService
 from settlement import compute_settlement
 from routers.balances import calculate_balances
+from i18n import get_lang, t as i18n_t
+from constants.expense_enums import display_expense_category
 import io
 import csv
 from typing import Any
@@ -81,6 +83,8 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
     writer.writerow([])
     writer.writerow(["EXPENSES"])
     writer.writerow(["ID", "Payer Code", "Payer Name", "Date", "Category", "Description", "Amount EUR", "Paid From", "Split Mode", "Participants"])
+    lang = get_lang(request)
+    _t = lambda key, **kw: i18n_t(lang, key, **kw)
     for expense in db.query(Expense).options(
         joinedload(Expense.payer),
         joinedload(Expense.participants).joinedload('member')
@@ -91,7 +95,7 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
             sanitize_csv_value(expense.payer.code),
             sanitize_csv_value(expense.payer.name),
             sanitize_csv_value(expense.date),
-            sanitize_csv_value(expense.category),
+            sanitize_csv_value(display_expense_category(expense.category, _t)),
             sanitize_csv_value(expense.description),
             sanitize_csv_value(expense.amount_eur),
             sanitize_csv_value(expense.paid_from.value),
@@ -216,6 +220,8 @@ async def download_pdf(request: Request, db: Session = Depends(get_db)):
     
     # Expenses
     elements.append(Paragraph("📊 Expenses", section_style))
+    lang_pdf = get_lang(request)
+    _t_pdf = lambda key, **kw: i18n_t(lang_pdf, key, **kw)
     expense_data = [["ID", "Payer", "Date", "Category", "Description", "Amount EUR", "From", "Split"]]
     for expense in db.query(Expense).options(joinedload(Expense.payer)).filter(Expense.trip_id == active_trip.id).all():
         desc = str(expense.description)
@@ -223,7 +229,7 @@ async def download_pdf(request: Request, db: Session = Depends(get_db)):
             str(expense.id),
             str(expense.payer.code),
             str(expense.date),
-            str(expense.category),
+            display_expense_category(expense.category, _t_pdf),
             desc[:30] + "..." if len(desc) > 30 else desc,
             f"€{expense.amount_eur:.2f}",
             str(expense.paid_from.value),

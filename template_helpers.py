@@ -13,6 +13,9 @@ from constants.logbook_enums import (
     display_wind, display_visibility, display_sail_plan,
     display_event_category, display_sea_state,
 )
+from constants.expense_enums import (
+    normalize_expense_category, display_expense_category,
+)
 
 
 def _build_branding(bp=None):
@@ -127,6 +130,12 @@ def i18n_context_processor(request: Request) -> Dict[str, Any]:
     def _display_sea_state(value):
         return display_sea_state(value, _t)
 
+    def _display_expense_category(value):
+        return display_expense_category(value, _t)
+
+    def _normalize_expense_category_val(value):
+        return normalize_expense_category(value) if value else ""
+
     return {
         "lang": lang,
         "t": _t,
@@ -139,6 +148,8 @@ def i18n_context_processor(request: Request) -> Dict[str, Any]:
         "norm_vis": _normalize_visibility_val,
         "norm_sail": _normalize_sail_plan_val,
         "norm_event": _normalize_event_category_val,
+        "display_expense_cat": _display_expense_category,
+        "norm_expense_cat": _normalize_expense_category_val,
     }
 
 

@@ -15,7 +15,7 @@
             </div>
             <div>
                 <p class="text-sm ui-muted">📂 {{ t('common.category') }}</p>
-                <p class="text-lg font-semibold">{% if expense.category == 'Proviant' %}{{ t('expense.cat_proviant') }}{% elif expense.category == 'Getränke' %}{{ t('expense.cat_getraenke') }}{% elif expense.category == 'Mooring' %}{{ t('expense.cat_mooring') }}{% elif expense.category == 'Diesel' %}{{ t('expense.cat_diesel') }}{% elif expense.category == 'Wasser' %}{{ t('expense.cat_wasser') }}{% elif expense.category == 'Strom' %}{{ t('expense.cat_strom') }}{% elif expense.category == 'Gas' %}{{ t('expense.cat_gas') }}{% elif expense.category == 'Taxi/Transfer' %}{{ t('expense.cat_taxi') }}{% elif expense.category == 'Restaurant' %}{{ t('expense.cat_restaurant') }}{% elif expense.category == 'Eintritte' %}{{ t('expense.cat_eintritte') }}{% elif expense.category == 'Sonstiges' %}{{ t('expense.cat_sonstiges') }}{% else %}{{ expense.category }}{% endif %}</p>
+                <p class="text-lg font-semibold">{{ display_expense_cat(expense.category) }}</p>
             </div>
             <div>
                 <p class="text-sm ui-muted">👤 {{ t('expense.paid_by') }}</p>

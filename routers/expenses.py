@@ -13,6 +13,7 @@ from typing import List, Optional
 from pathlib import Path
 import uuid
 import logging
+from constants.expense_enums import EXPENSE_CATEGORY_KEYS, normalize_expense_category
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ def get_active_crew_at_datetime(db: Session, trip_id: int, expense_datetime: dat
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 templates = create_templates()
 
-CATEGORIES = ["Proviant", "Getränke", "Mooring", "Diesel", "Wasser", "Strom", "Gas", "Taxi/Transfer", "Restaurant", "Eintritte", "Sonstiges"]
+CATEGORIES = EXPENSE_CATEGORY_KEYS
 
 ALLOWED_CONTENT_TYPES = {"application/pdf", "image/jpeg", "image/png"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -126,7 +127,7 @@ async def create_expense(
             payer_id=payer_id_value,
             date=expense_date_obj,
             occurred_at=occurred_timestamp,  # Expense occurred on the selected date at noon
-            category=category,
+            category=normalize_expense_category(category),
             description=description,
             amount=amount,
             currency=currency_enum,
@@ -379,7 +380,7 @@ async def update_expense(
         
         expense.payer_id = payer_id_value  # type: ignore[assignment]
         expense.date = date.fromisoformat(expense_date)  # type: ignore[assignment]
-        expense.category = category  # type: ignore[assignment]
+        expense.category = normalize_expense_category(category)  # type: ignore[assignment]
         expense.description = description  # type: ignore[assignment]
         expense.amount = amount  # type: ignore[assignment]
         expense.currency = currency_enum  # type: ignore[assignment]

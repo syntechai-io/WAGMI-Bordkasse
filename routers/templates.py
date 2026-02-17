@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from db import get_db
 from models import ExpenseTemplate, PaidFromEnum, SplitModeEnum, Currency
+from constants.expense_enums import normalize_expense_category
 
 router = APIRouter(prefix="/templates", tags=["templates"])
 templates = create_templates()
@@ -58,7 +59,7 @@ async def create_template(
     
     template = ExpenseTemplate(
         name=name,
-        category=category,
+        category=normalize_expense_category(category),
         default_amount=amount_value,
         currency=Currency(currency),
         paid_from=PaidFromEnum(paid_from),
@@ -117,7 +118,7 @@ async def update_template(
             amount_value = None
     
     template.name = name
-    template.category = category
+    template.category = normalize_expense_category(category)
     template.default_amount = amount_value
     template.currency = Currency(currency)
     template.paid_from = PaidFromEnum(paid_from)

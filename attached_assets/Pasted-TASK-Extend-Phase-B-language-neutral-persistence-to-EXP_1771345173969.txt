@@ -1,0 +1,60 @@
+TASK: Extend Phase B language-neutral persistence to EXPENSE CATEGORIES (Finances/Expenses) to eliminate future EN/DE drift. Keep all existing functionality unchanged.
+
+CONTEXT
+UI currently shows English labels for expense categories, but we must ensure the DATABASE stores language-neutral codes, not localized labels, to avoid mixed-language exports, filtering inconsistencies, and regression of the “EN shows DE after save” class of issues.
+
+NON-NEGOTIABLES
+- Do NOT break existing expense creation, edit, list, settlement calculations, exports.
+- Keep routes, forms, and JS behavior unchanged.
+- Prefer minimal changes: mapping + normalization + i18n rendering.
+- Backwards compatible: legacy stored values (German or English labels) must still render correctly.
+
+STEP 1 — Audit (report before changing)
+Find where expense category values are:
+- Defined (enum/list)
+- Rendered in templates (dropdown + list + detail + exports if any)
+- Written to DB (create/update paths)
+
+STEP 2 — Define canonical codes
+Introduce canonical codes for expense categories (example set):
+PROVISIONS, BEVERAGES, MOORING, DIESEL, WATER, ELECTRICITY, GAS, TAXI_TRANSFER, RESTAURANT, ADMISSIONS, OTHER
+Confirm this matches current dropdown options exactly (same count/order).
+
+STEP 3 — Normalization on write (3 save paths)
+Implement:
+- norm_expense_category(value) -> code
+This must accept:
+- canonical codes
+- English labels currently shown
+- German legacy labels (e.g., Proviant, Getränke, Liegeplatz/Hafengebühren, Diesel, Wasser, Strom, Gas, Taxi/Transfer, Restaurant, Eintritte, Sonstiges)
+On expense create/update and any copy/addendum logic:
+- Always write the canonical CODE to DB.
+- If DB schema currently has only one category column, store the CODE in that same column (no new columns unless absolutely necessary).
+- If schema already has *_code and *_label, use *_code.
+
+STEP 4 — Rendering via i18n (no hardcoded labels)
+Create i18n keys in both locales:
+- enum.expense_category.PROVISIONS
+- enum.expense_category.BEVERAGES
+... etc.
+Update templates to display:
+- t("enum.expense_category." + expense.category_code_or_value)
+If a legacy label is encountered on read, map label->code first, then render via t().
+
+STEP 5 — Optional small migration (safe)
+If there are legacy rows:
+- Run a one-time migration that converts existing stored labels to codes.
+- Report how many rows were migrated, by category.
+
+STEP 6 — Verification checklist (must provide)
+- Create expense in EN: stored value is CODE; UI displays EN label.
+- Switch to DE: same record displays DE label (no data change).
+- Existing old records (with German stored labels) still render correctly in EN/DE and do not create duplicate categories in grouping/filters.
+- Settlement calculations unchanged.
+
+DELIVERABLES
+- Files changed list
+- Mapping table: CODE <-> EN label <-> DE label (including legacy synonyms accepted)
+- Confirmation of storage format (what exactly is persisted in DB)
+
+Proceed now, starting with STEP 1 audit output.

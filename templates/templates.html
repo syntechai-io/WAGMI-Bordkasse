@@ -35,7 +35,7 @@
                     {% for template in expense_templates %}
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--accent);">{{ template.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{% if template.category == 'Proviant' %}{{ t('expense.cat_proviant') }}{% elif template.category == 'Getränke' %}{{ t('expense.cat_getraenke') }}{% elif template.category == 'Mooring' %}{{ t('expense.cat_mooring') }}{% elif template.category == 'Diesel' %}{{ t('expense.cat_diesel') }}{% elif template.category == 'Wasser' %}{{ t('expense.cat_wasser') }}{% elif template.category == 'Strom' %}{{ t('expense.cat_strom') }}{% elif template.category == 'Gas' %}{{ t('expense.cat_gas') }}{% elif template.category == 'Taxi/Transfer' %}{{ t('expense.cat_taxi') }}{% elif template.category == 'Restaurant' %}{{ t('expense.cat_restaurant') }}{% elif template.category == 'Eintritte' %}{{ t('expense.cat_eintritte') }}{% elif template.category == 'Sonstiges' %}{{ t('expense.cat_sonstiges') }}{% else %}{{ template.category }}{% endif %}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ display_expense_cat(template.category) }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             {% if template.default_amount %}
                                 {{ "%.2f"|format(template.default_amount) }} {{ template.currency.value }}
