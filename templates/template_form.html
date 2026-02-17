@@ -2,34 +2,34 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">{% if template %}⚓ {{ t('template.edit_title') }}{% else %}➕ {{ t('template.new_title') }}{% endif %}</h1>
+    <h1 class="text-3xl font-bold maritime-header mb-6">{% if template %}⚓ {{ t('template.edit_title') }}{% else %}➕ {{ t('template.new_title') }}{% endif %}</h1>
     
     <form method="post" class="bg-white porthole-card p-6 space-y-4">
         {{ csrf_input | safe }}
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 {{ t('common.name') }} *</label>
+            <label class="block font-medium mb-2">📝 {{ t('common.name') }} *</label>
             <input type="text" name="name" value="{% if template %}{{ template.name }}{% endif %}" required maxlength="100"
-                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);"
+                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border); focus:ring-color: var(--accent);"
                 placeholder="{{ t('template.placeholder_desc') }}">
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏷️ {{ t('common.category') }} *</label>
+            <label class="block font-medium mb-2">🏷️ {{ t('common.category') }} *</label>
             <input type="text" name="category" value="{% if template %}{{ template.category }}{% endif %}" required maxlength="50"
-                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);"
+                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border); focus:ring-color: var(--accent);"
                 placeholder="{{ t('template.placeholder_name') }}">
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">💵 {{ t('template.default_amount') }}</label>
+            <label class="block font-medium mb-2">💵 {{ t('template.default_amount') }}</label>
             <input type="number" name="default_amount" step="0.01" min="0.01" value="{% if template and template.default_amount %}{{ template.default_amount }}{% endif %}"
-                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);"
+                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border); focus:ring-color: var(--accent);"
                 placeholder="{{ t('template.default_amount_placeholder') }}">
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">💱 {{ t('common.currency') }}</label>
-            <select name="currency" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
+            <label class="block font-medium mb-2">💱 {{ t('common.currency') }}</label>
+            <select name="currency" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
                 {% for curr in currency_options %}
                 <option value="{{ curr }}" {% if template and template.currency.value == curr %}selected{% elif not template and curr == 'EUR' %}selected{% endif %}>{{ curr }}</option>
                 {% endfor %}
@@ -37,16 +37,16 @@
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">💰 {{ t('expense.paid_from') }}</label>
-            <select name="paid_from" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
+            <label class="block font-medium mb-2">💰 {{ t('expense.paid_from') }}</label>
+            <select name="paid_from" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
                 <option value="wallet" {% if template and template.paid_from.value == 'wallet' %}selected{% elif not template %}selected{% endif %}>💰 {{ t('template.paid_wallet') }}</option>
                 <option value="private" {% if template and template.paid_from.value == 'private' %}selected{% endif %}>👤 {{ t('template.paid_private') }}</option>
             </select>
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">🎯 {{ t('template.split_mode') }}</label>
-            <select name="split_mode" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);">
+            <label class="block font-medium mb-2">🎯 {{ t('template.split_mode') }}</label>
+            <select name="split_mode" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
                 <option value="equal" {% if template and template.split_mode.value == 'equal' %}selected{% elif not template %}selected{% endif %}>⚖️ {{ t('template.split_equal_all') }}</option>
                 <option value="participants" {% if template and template.split_mode.value == 'participants' %}selected{% endif %}>👥 {{ t('template.split_participants_select') }}</option>
                 <option value="percentage" {% if template and template.split_mode.value == 'percentage' %}selected{% endif %}>📊 {{ t('template.split_percentage') }}</option>
@@ -63,7 +63,7 @@
             <button type="submit" class="flex-1 ocean-gradient text-white font-bold py-3 px-4 rounded-lg transition touch-action">
                 💾 {{ t('common.save') }}
             </button>
-            <a href="/templates" class="flex-1 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action" style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
+            <a href="/templates" class="flex-1 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action" style="background: var(--muted);">
                 ❌ {{ t('common.cancel') }}
             </a>
         </div>

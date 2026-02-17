@@ -3,14 +3,14 @@
 {% block content %}
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">📊 {{ t('report.title') }}</h1>
-        <a href="/trips/" class="text-white px-4 py-2 rounded-lg hover:opacity-90 transition" style="background: var(--ocean-blue);">
+        <h1 class="text-4xl font-bold maritime-header">📊 {{ t('report.title') }}</h1>
+        <a href="/trips/" class="text-white px-4 py-2 rounded-lg hover:opacity-90 transition" style="background: var(--accent);">
             ← {{ t('report.back_to_trips') }}
         </a>
     </div>
     
     <div class="bg-white porthole-card p-6">
-        <p class="text-sm mb-4" style="color: var(--navy-deep); opacity: 0.8;">
+        <p class="text-sm mb-4 ui-muted">
             {{ t('report.overview_desc') }}
         </p>
     </div>
@@ -18,9 +18,9 @@
     {% for year in sorted_years %}
     {% set year_data = yearly_stats[year] %}
     <div class="bg-white porthole-card overflow-hidden">
-        <div class="p-6" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
+        <div class="p-6" style="background: var(--surface-2);">
             <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">
+                <h2 class="text-2xl font-bold maritime-header">
                     🗓️ {{ year }}
                     {% if year_data.trip_count == 0 %}
                     <span class="text-sm font-normal opacity-60">({{ t('report.no_trips') }})</span>
@@ -28,7 +28,7 @@
                 </h2>
                 {% if year_data.trip_count > 0 %}
                 <div class="text-right">
-                    <div class="text-sm font-medium" style="color: var(--navy-deep); opacity: 0.7;">
+                    <div class="text-sm font-medium ui-muted">
                         {{ year_data.trip_count }} {{ t('report.trips_label') }}
                     </div>
                 </div>
@@ -38,26 +38,26 @@
             {% if year_data.trip_count > 0 %}
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
                 <div class="text-center p-3 rounded-lg" style="background: rgba(255,255,255,0.7);">
-                    <div class="text-2xl font-bold" style="color: var(--ocean-blue);">{{ year_data.total_nm }}</div>
-                    <div class="text-xs font-medium" style="color: var(--navy-deep); opacity: 0.7;">{{ t('report.nautical_miles') }}</div>
+                    <div class="text-2xl font-bold" style="color: var(--accent);">{{ year_data.total_nm }}</div>
+                    <div class="text-xs font-medium ui-muted">{{ t('report.nautical_miles') }}</div>
                 </div>
                 <div class="text-center p-3 rounded-lg" style="background: rgba(255,255,255,0.7);">
-                    <div class="text-2xl font-bold" style="color: var(--sea-foam);">{{ year_data.motor_hours }}</div>
-                    <div class="text-xs font-medium" style="color: var(--navy-deep); opacity: 0.7;">{{ t('report.motor_hours') }}</div>
+                    <div class="text-2xl font-bold" style="color: var(--success);">{{ year_data.motor_hours }}</div>
+                    <div class="text-xs font-medium ui-muted">{{ t('report.motor_hours') }}</div>
                 </div>
                 <div class="text-center p-3 rounded-lg" style="background: rgba(255,255,255,0.7);">
-                    <div class="text-2xl font-bold" style="color: var(--sky-blue);">{{ year_data.sail_hours }}</div>
-                    <div class="text-xs font-medium" style="color: var(--navy-deep); opacity: 0.7;">{{ t('report.sail_hours') }}</div>
+                    <div class="text-2xl font-bold" style="color: var(--border);">{{ year_data.sail_hours }}</div>
+                    <div class="text-xs font-medium ui-muted">{{ t('report.sail_hours') }}</div>
                 </div>
                 <div class="text-center p-3 rounded-lg" style="background: rgba(255,255,255,0.7);">
-                    <div class="text-2xl font-bold" style="color: {% if year_data.incidents > 0 %}var(--coral){% else %}var(--sea-foam){% endif %};">
+                    <div class="text-2xl font-bold" style="color: {% if year_data.incidents > 0 %}var(--coral){% else %}var(--success){% endif %};">
                         {{ year_data.incidents }}
                     </div>
-                    <div class="text-xs font-medium" style="color: var(--navy-deep); opacity: 0.7;">{{ t('report.incidents') }}</div>
+                    <div class="text-xs font-medium ui-muted">{{ t('report.incidents') }}</div>
                 </div>
                 <div class="text-center p-3 rounded-lg" style="background: rgba(255,255,255,0.7);">
-                    <div class="text-2xl font-bold" style="color: var(--navy-deep);">{{ year_data.trip_count }}</div>
-                    <div class="text-xs font-medium" style="color: var(--navy-deep); opacity: 0.7;">{{ t('report.trips_label') }}</div>
+                    <div class="text-2xl font-bold">{{ year_data.trip_count }}</div>
+                    <div class="text-xs font-medium ui-muted">{{ t('report.trips_label') }}</div>
                 </div>
             </div>
             {% endif %}
@@ -66,26 +66,26 @@
         {% if year_data.trip_count > 0 %}
         <div class="overflow-x-auto">
             <table class="min-w-full">
-                <thead style="background: rgba(30, 58, 95, 0.03);">
+                <thead style="background: var(--surface-2);">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('report.col_trip') }}</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('report.col_period') }}</th>
-                        <th class="px-4 py-3 text-center text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('report.col_nm') }}</th>
-                        <th class="px-4 py-3 text-center text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('report.col_motor') }}</th>
-                        <th class="px-4 py-3 text-center text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('report.col_sail') }}</th>
-                        <th class="px-4 py-3 text-center text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('report.col_incidents') }}</th>
-                        <th class="px-4 py-3 text-center text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('report.col_status') }}</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">{{ t('report.col_trip') }}</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">{{ t('report.col_period') }}</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium uppercase">{{ t('report.col_nm') }}</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium uppercase">{{ t('report.col_motor') }}</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium uppercase">{{ t('report.col_sail') }}</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium uppercase">{{ t('report.col_incidents') }}</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium uppercase">{{ t('report.col_status') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-sky-100">
                     {% for trip in year_data.trips %}
                     <tr class="hover:bg-sky-50 transition">
                         <td class="px-4 py-3">
-                            <a href="/trips/{{ trip.id }}/select" class="font-semibold hover:underline" style="color: var(--ocean-blue);">
+                            <a href="/trips/{{ trip.id }}/select" class="font-semibold hover:underline" style="color: var(--accent);">
                                 {{ trip.name }}
                             </a>
                         </td>
-                        <td class="px-4 py-3 text-sm" style="color: var(--navy-deep);">
+                        <td class="px-4 py-3 text-sm">
                             {{ trip.start_date }} 
                             {% if trip.end_date %}
                             → {{ trip.end_date }}
@@ -93,25 +93,25 @@
                             <span class="text-xs opacity-60">({{ t('report.status_active') | lower }})</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-3 text-center font-medium" style="color: var(--ocean-blue);">
+                        <td class="px-4 py-3 text-center font-medium" style="color: var(--accent);">
                             {{ trip.nautical_miles }}
                         </td>
-                        <td class="px-4 py-3 text-center font-medium" style="color: var(--sea-foam);">
+                        <td class="px-4 py-3 text-center font-medium" style="color: var(--success);">
                             {{ trip.motor_hours }}
                         </td>
-                        <td class="px-4 py-3 text-center font-medium" style="color: var(--sky-blue);">
+                        <td class="px-4 py-3 text-center font-medium" style="color: var(--border);">
                             {{ trip.sail_hours }}
                         </td>
-                        <td class="px-4 py-3 text-center font-medium" style="color: {% if trip.incidents > 0 %}var(--coral){% else %}var(--navy-deep); opacity: 0.5{% endif %};">
+                        <td class="px-4 py-3 text-center font-medium {% if trip.incidents == 0 %}ui-muted{% endif %}" style="color: {% if trip.incidents > 0 %}var(--coral){% endif %};">
                             {{ trip.incidents }}
                         </td>
                         <td class="px-4 py-3 text-center">
                             {% if trip.status == 'active' %}
-                            <span class="text-xs px-2 py-1 rounded-full font-semibold" style="background: var(--sea-foam); color: white;">
+                            <span class="text-xs px-2 py-1 rounded-full font-semibold" style="background: var(--success); color: white;">
                                 {{ t('report.status_active') }}
                             </span>
                             {% else %}
-                            <span class="text-xs px-2 py-1 rounded-full font-medium" style="background: rgba(0,0,0,0.1); color: var(--navy-deep);">
+                            <span class="text-xs px-2 py-1 rounded-full font-medium" style="background: rgba(0,0,0,0.1);">
                                 {{ t('report.status_archived') }}
                             </span>
                             {% endif %}
@@ -127,7 +127,7 @@
     
     {% if not sorted_years %}
     <div class="bg-white porthole-card p-8 text-center">
-        <p class="text-lg" style="color: var(--navy-deep); opacity: 0.6;">
+        <p class="text-lg ui-muted">
             {{ t('report.no_trips_yet') }}
         </p>
     </div>

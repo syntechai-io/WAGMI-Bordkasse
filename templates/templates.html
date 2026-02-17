@@ -3,7 +3,7 @@
 {% block content %}
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📋 {{ t('template.title') }}</h1>
+        <h1 class="text-3xl font-bold maritime-header">📋 {{ t('template.title') }}</h1>
         {% if request.session.get('role') == 'admin' %}
         <a href="/templates/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
             ➕ {{ t('common.new') }}
@@ -19,38 +19,38 @@
         {% if expense_templates %}
         <div class="overflow-x-auto">
             <table class="min-w-full">
-                <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
+                <thead style="background: var(--surface-2);">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('template.col_name') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('template.col_category') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('template.col_amount') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('template.col_paid_from') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('template.col_split') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_name') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_category') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_amount') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_paid_from') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_split') }}</th>
                         {% if request.session.get('role') == 'admin' %}
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('template.col_actions') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_actions') }}</th>
                         {% endif %}
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-sky-200">
                     {% for template in expense_templates %}
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--ocean-blue);">{{ template.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{% if template.category == 'Proviant' %}{{ t('expense.cat_proviant') }}{% elif template.category == 'Getränke' %}{{ t('expense.cat_getraenke') }}{% elif template.category == 'Mooring' %}{{ t('expense.cat_mooring') }}{% elif template.category == 'Diesel' %}{{ t('expense.cat_diesel') }}{% elif template.category == 'Wasser' %}{{ t('expense.cat_wasser') }}{% elif template.category == 'Strom' %}{{ t('expense.cat_strom') }}{% elif template.category == 'Gas' %}{{ t('expense.cat_gas') }}{% elif template.category == 'Taxi/Transfer' %}{{ t('expense.cat_taxi') }}{% elif template.category == 'Restaurant' %}{{ t('expense.cat_restaurant') }}{% elif template.category == 'Eintritte' %}{{ t('expense.cat_eintritte') }}{% elif template.category == 'Sonstiges' %}{{ t('expense.cat_sonstiges') }}{% else %}{{ template.category }}{% endif %}</td>
-                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">
+                        <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--accent);">{{ template.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{% if template.category == 'Proviant' %}{{ t('expense.cat_proviant') }}{% elif template.category == 'Getränke' %}{{ t('expense.cat_getraenke') }}{% elif template.category == 'Mooring' %}{{ t('expense.cat_mooring') }}{% elif template.category == 'Diesel' %}{{ t('expense.cat_diesel') }}{% elif template.category == 'Wasser' %}{{ t('expense.cat_wasser') }}{% elif template.category == 'Strom' %}{{ t('expense.cat_strom') }}{% elif template.category == 'Gas' %}{{ t('expense.cat_gas') }}{% elif template.category == 'Taxi/Transfer' %}{{ t('expense.cat_taxi') }}{% elif template.category == 'Restaurant' %}{{ t('expense.cat_restaurant') }}{% elif template.category == 'Eintritte' %}{{ t('expense.cat_eintritte') }}{% elif template.category == 'Sonstiges' %}{{ t('expense.cat_sonstiges') }}{% else %}{{ template.category }}{% endif %}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                             {% if template.default_amount %}
                                 {{ "%.2f"|format(template.default_amount) }} {{ template.currency.value }}
                             {% else %}
                                 <span style="opacity: 0.5;">-</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             {% if template.paid_from.value == 'wallet' %}
                                 💰 {{ t('template.paid_wallet') }}
                             {% else %}
                                 👤 {{ t('template.paid_private') }}
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             {% if template.split_mode.value == 'equal' %}
                                 ⚖️ {{ t('template.split_equal') }}
                             {% elif template.split_mode.value == 'participants' %}
@@ -61,7 +61,7 @@
                         </td>
                         {% if request.session.get('role') == 'admin' %}
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                            <a href="/templates/{{ template.id }}/edit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✏️ {{ t('common.edit') }}</a>
+                            <a href="/templates/{{ template.id }}/edit" class="hover:underline touch-action" style="color: var(--accent);">✏️ {{ t('common.edit') }}</a>
                             <form action="/templates/{{ template.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ t('template.confirm_delete') }}')">
                                 {{ csrf_input | safe }}
                                 <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
@@ -74,7 +74,7 @@
             </table>
         </div>
         {% else %}
-        <div class="p-8 text-center" style="color: var(--navy-deep); opacity: 0.6;">
+        <div class="p-8 text-center ui-muted">
             <p class="text-lg">📋 {{ t('template.no_templates') }}</p>
             {% if request.session.get('role') == 'admin' %}
             <p class="text-sm mt-2">{{ t('template.create_first') }}</p>

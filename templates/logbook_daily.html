@@ -3,7 +3,7 @@
 {% block content %}
 <div class="max-w-6xl mx-auto">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">
+        <h1 class="text-3xl font-bold maritime-header">
             📅 {{ t('logbook.daily_title') }}
         </h1>
         <a href="/logbook" class="btn-secondary">
@@ -16,28 +16,26 @@
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2">
                 <a href="/logbook/daily?date={{ prev_date }}" 
-                   class="px-4 py-2 rounded-lg transition touch-action" 
-                   style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%); color: white;">
+                   class="btn btn-primary px-4 py-2 rounded-lg transition touch-action text-white">
                     ← {{ t('logbook.prev_day') }}
                 </a>
                 <a href="/logbook/daily?date={{ next_date }}" 
-                   class="px-4 py-2 rounded-lg transition touch-action" 
-                   style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%); color: white;">
+                   class="btn btn-primary px-4 py-2 rounded-lg transition touch-action text-white">
                     {{ t('logbook.next_day') }} →
                 </a>
             </div>
             
             <form method="get" class="flex gap-2 items-center">
-                <label class="font-medium" style="color: var(--navy-deep);">{{ t('logbook.select_date') }}</label>
+                <label class="font-medium">{{ t('logbook.select_date') }}</label>
                 <input type="date" name="date" value="{{ selected_date }}" 
                        class="px-4 py-2 border rounded-lg" 
-                       style="border-color: var(--sky-blue);"
+                       style="border-color: var(--border);"
                        onchange="this.form.submit()">
             </form>
         </div>
         
         <div class="mt-4 text-center">
-            <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">
+            <h2 class="text-2xl font-bold maritime-header">
                 {{ selected_date_formatted }}
             </h2>
         </div>
@@ -46,29 +44,29 @@
     {% if entries %}
     <!-- Daily Summary -->
     <div class="bg-white porthole-card p-6 mb-6">
-        <h3 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">
+        <h3 class="text-xl font-bold maritime-header mb-4">
             📊 {{ t('logbook.daily_summary') }}
         </h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
-                <div class="text-sm font-medium" style="color: var(--navy-deep);">{{ t('logbook.entries_count') }}</div>
-                <div class="text-2xl font-bold" style="color: var(--sea-foam);">{{ summary.total_entries }}</div>
+            <div class="text-center p-4 rounded-lg" style="background: var(--surface-2);">
+                <div class="text-sm font-medium">{{ t('logbook.entries_count') }}</div>
+                <div class="text-2xl font-bold" style="color: var(--success);">{{ summary.total_entries }}</div>
             </div>
-            <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
-                <div class="text-sm font-medium" style="color: var(--navy-deep);">{{ t('logbook.distance') }}</div>
-                <div class="text-2xl font-bold" style="color: var(--sea-foam);">
+            <div class="text-center p-4 rounded-lg" style="background: var(--surface-2);">
+                <div class="text-sm font-medium">{{ t('logbook.distance') }}</div>
+                <div class="text-2xl font-bold" style="color: var(--success);">
                     {% if summary.total_distance is not none %}{{ "%.1f"|format(summary.total_distance) }} nm{% else %}--{% endif %}
                 </div>
             </div>
-            <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
-                <div class="text-sm font-medium" style="color: var(--navy-deep);">{{ t('logbook.engine_hours') }}</div>
-                <div class="text-2xl font-bold" style="color: var(--sea-foam);">
+            <div class="text-center p-4 rounded-lg" style="background: var(--surface-2);">
+                <div class="text-sm font-medium">{{ t('logbook.engine_hours') }}</div>
+                <div class="text-2xl font-bold" style="color: var(--success);">
                     {% if summary.total_engine_hours is not none %}{{ "%.1f"|format(summary.total_engine_hours) }} h{% else %}--{% endif %}
                 </div>
             </div>
-            <div class="text-center p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
-                <div class="text-sm font-medium" style="color: var(--navy-deep);">{{ t('logbook.route') }}</div>
-                <div class="text-lg font-bold" style="color: var(--sea-foam);">
+            <div class="text-center p-4 rounded-lg" style="background: var(--surface-2);">
+                <div class="text-sm font-medium">{{ t('logbook.route') }}</div>
+                <div class="text-lg font-bold" style="color: var(--success);">
                     {% if summary.route %}{{ summary.route }}{% else %}--{% endif %}
                 </div>
             </div>
@@ -76,8 +74,7 @@
         
         <div class="mt-4 text-right">
             <a href="/logbook/export/pdf/daily?export_date={{ selected_date }}" 
-               class="text-white px-6 py-2 rounded-lg transition touch-action inline-block font-semibold"
-               style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
+               class="btn btn-danger text-white px-6 py-2 rounded-lg transition touch-action inline-block font-semibold">
                 📄 {{ t('logbook.pdf_export') }}
             </a>
         </div>
@@ -100,7 +97,7 @@
                             {% elif entry.maneuver_type == 'arrival' %}🏁
                             {% else %}📝{% endif %}
                         </div>
-                        <div class="text-xs font-medium mt-1" style="color: var(--navy-deep);">
+                        <div class="text-xs font-medium mt-1">
                             {% if entry.maneuver_type == 'departure' %}{{ t('logbook.maneuver_departure') }}
                             {% elif entry.maneuver_type == 'sail_change' %}{{ t('logbook.maneuver_sail_short') }}
                             {% elif entry.maneuver_type == 'motor' %}{{ t('logbook.maneuver_motor') }}
@@ -112,11 +109,11 @@
                     </div>
                     
                     <div>
-                        <div class="text-2xl font-bold" style="color: var(--navy-deep);">
+                        <div class="text-2xl font-bold">
                             {{ entry.entry_date.strftime('%H:%M') }} {{ t('logbook.time_label') }}
                         </div>
                         {% if entry.watch_leader %}
-                        <div class="text-sm" style="color: var(--navy-deep);">
+                        <div class="text-sm">
                             {{ t('logbook.watch_leader') }}: {{ entry.watch_leader.name }}
                         </div>
                         {% endif %}
@@ -150,7 +147,7 @@
                     </div>
                     
                     {% if entry.notes %}
-                    <div class="mt-2 p-2 rounded" style="background: rgba(52, 152, 219, 0.05);">
+                    <div class="mt-2 p-2 rounded" style="background: var(--surface-2);">
                         <span class="font-medium">{{ t('common.notes') }}:</span> {{ entry.notes }}
                     </div>
                     {% endif %}
@@ -159,8 +156,7 @@
                 <!-- Actions -->
                 <div class="flex md:flex-col gap-2">
                     <a href="/logbook/{{ entry.id }}" 
-                       class="text-sm px-3 py-1 rounded transition whitespace-nowrap"
-                       style="background: var(--sky-blue); color: white;">
+                       class="btn btn-primary text-sm px-3 py-1 rounded transition whitespace-nowrap text-white">
                         {{ t('common.details') }} →
                     </a>
                 </div>
@@ -172,7 +168,7 @@
     {% else %}
     <div class="bg-white porthole-card p-12 text-center">
         <div class="text-6xl mb-4">📭</div>
-        <h3 class="text-2xl font-bold mb-2" style="color: var(--navy-deep);">
+        <h3 class="text-2xl font-bold mb-2">
             {{ t('logbook.no_daily_entries') }}
         </h3>
         <p class="text-gray-600 mb-6">

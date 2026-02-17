@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
-    <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">
+    <h1 class="text-3xl font-bold maritime-header mb-6">
         ⛵ {{ t('admin.boat_setup.title') }}
     </h1>
 
@@ -23,42 +23,42 @@
         {{ csrf_input | safe }}
 
         <div class="porthole-card p-6 mb-6" style="background: white;">
-            <h2 class="text-xl font-bold mb-4" style="color: var(--navy-deep);">🏷️ {{ t('admin.boat_setup.branding') }}</h2>
+            <h2 class="text-xl font-bold mb-4">🏷️ {{ t('admin.boat_setup.branding') }}</h2>
             <div class="space-y-4">
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.boat_name') }} *</label>
+                    <label class="block font-medium mb-2">{{ t('admin.boat_setup.boat_name') }} *</label>
                     <input type="text" name="boat_name" value="{{ boat_profile.boat_name }}" required maxlength="100"
-                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);"
                         placeholder="{{ t('admin.boat_setup.boat_name_placeholder') }}"
                         {% if not is_owner %}disabled{% endif %}>
                     <p class="text-xs mt-1" style="color: var(--muted);">{{ t('admin.boat_setup.boat_name_hint') }}</p>
                 </div>
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.boat_type') }}</label>
+                    <label class="block font-medium mb-2">{{ t('admin.boat_setup.boat_type') }}</label>
                     <input type="text" name="boat_type" value="{{ boat_profile.boat_type or '' }}" maxlength="100"
-                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);"
                         placeholder="{{ t('admin.boat_setup.boat_type_placeholder') }}"
                         {% if not is_owner %}disabled{% endif %}>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.logo_url') }}</label>
+                        <label class="block font-medium mb-2">{{ t('admin.boat_setup.logo_url') }}</label>
                         <input type="url" name="logo_url" value="{{ boat_profile.logo_url or '' }}" maxlength="500"
-                            class="w-full px-4 py-3 border rounded-lg" style="border-color: var(--sky-blue);"
+                            class="w-full px-4 py-3 border rounded-lg" style="border-color: var(--border);"
                             placeholder="https://..."
                             {% if not is_owner %}disabled{% endif %}>
                         <p class="text-xs mt-1" style="color: var(--muted);">{{ t('admin.boat_setup.logo_url_hint') }}</p>
                     </div>
                     <div>
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.accent_color') }}</label>
+                        <label class="block font-medium mb-2">{{ t('admin.boat_setup.accent_color') }}</label>
                         <div class="flex items-center gap-3">
                             <input type="color" name="accent_color" id="accent-color-picker"
                                 value="{{ boat_profile.accent_color or '#0B3A66' }}"
-                                class="w-12 h-12 rounded-lg border cursor-pointer" style="border-color: var(--sky-blue);"
+                                class="w-12 h-12 rounded-lg border cursor-pointer" style="border-color: var(--border);"
                                 {% if not is_owner %}disabled{% endif %}>
                             <input type="text" id="accent-color-text" 
                                 value="{{ boat_profile.accent_color or '' }}" maxlength="7"
-                                class="flex-1 px-4 py-3 border rounded-lg font-mono" style="border-color: var(--sky-blue);"
+                                class="flex-1 px-4 py-3 border rounded-lg font-mono" style="border-color: var(--border);"
                                 placeholder="#0B3A66"
                                 {% if not is_owner %}disabled{% endif %}>
                         </div>
@@ -69,62 +69,62 @@
         </div>
 
         <div class="porthole-card p-6 mb-6" style="background: white;">
-            <h2 class="text-xl font-bold mb-4" style="color: var(--navy-deep);">📍 {{ t('admin.boat_setup.home_port') }}</h2>
+            <h2 class="text-xl font-bold mb-4">📍 {{ t('admin.boat_setup.home_port') }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2">
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.port_name') }}</label>
+                    <label class="block font-medium mb-2">{{ t('admin.boat_setup.port_name') }}</label>
                     <input type="text" name="home_port_name" value="{{ boat_profile.home_port_name or '' }}" maxlength="100"
-                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);"
                         placeholder="{{ t('admin.boat_setup.port_name_placeholder') }}"
                         {% if not is_owner %}disabled{% endif %}>
                 </div>
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.latitude') }}</label>
+                    <label class="block font-medium mb-2">{{ t('admin.boat_setup.latitude') }}</label>
                     <input type="number" name="home_port_lat" id="home_port_lat" step="0.000001"
                         value="{{ boat_profile.home_port_lat if boat_profile.home_port_lat is not none else '' }}"
-                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);"
                         placeholder="55.5678"
                         {% if not is_owner %}disabled{% endif %}>
                 </div>
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.longitude') }}</label>
+                    <label class="block font-medium mb-2">{{ t('admin.boat_setup.longitude') }}</label>
                     <input type="number" name="home_port_lon" id="home_port_lon" step="0.000001"
                         value="{{ boat_profile.home_port_lon if boat_profile.home_port_lon is not none else '' }}"
-                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);"
                         placeholder="9.7539"
                         {% if not is_owner %}disabled{% endif %}>
                 </div>
             </div>
             {% if is_owner %}
             <button type="button" id="gps-btn" class="mt-4 px-4 py-2 rounded-lg text-white font-semibold transition hover:scale-105"
-                style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--sea-foam) 100%);">
+                style="background: var(--accent);">
                 📡 {{ t('common.use_current_gps') }}
             </button>
-            <span id="gps-status" class="ml-2 text-sm" style="color: var(--navy-deep);"></span>
+            <span id="gps-status" class="ml-2 text-sm"></span>
             {% endif %}
         </div>
 
         <div class="porthole-card p-6 mb-6" style="background: white;">
-            <h2 class="text-xl font-bold mb-4" style="color: var(--navy-deep);">🔧 {{ t('admin.boat_setup.specs') }}</h2>
+            <h2 class="text-xl font-bold mb-4">🔧 {{ t('admin.boat_setup.specs') }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.make') }}</label>
+                    <label class="block font-medium mb-2">{{ t('admin.boat_setup.make') }}</label>
                     <input type="text" name="boat_make" value="{{ boat_profile.boat_make or '' }}" maxlength="100"
-                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);"
                         placeholder="{{ t('admin.boat_setup.make_placeholder') }}"
                         {% if not is_owner %}disabled{% endif %}>
                 </div>
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.model') }}</label>
+                    <label class="block font-medium mb-2">{{ t('admin.boat_setup.model') }}</label>
                     <input type="text" name="boat_model" value="{{ boat_profile.boat_model or '' }}" maxlength="100"
-                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);"
                         placeholder="{{ t('admin.boat_setup.model_placeholder') }}"
                         {% if not is_owner %}disabled{% endif %}>
                 </div>
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('admin.boat_setup.year') }}</label>
+                    <label class="block font-medium mb-2">{{ t('admin.boat_setup.year') }}</label>
                     <input type="number" name="boat_year" value="{{ boat_profile.boat_year if boat_profile.boat_year else '' }}" min="1900" max="2030"
-                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue);"
+                        class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);"
                         placeholder="2020"
                         {% if not is_owner %}disabled{% endif %}>
                 </div>
@@ -132,67 +132,67 @@
         </div>
 
         <div class="porthole-card p-6 mb-6" style="background: white;">
-            <h2 class="text-xl font-bold mb-4" style="color: var(--navy-deep);">⛵ {{ t('admin.boat_setup.sails') }}</h2>
+            <h2 class="text-xl font-bold mb-4">⛵ {{ t('admin.boat_setup.sails') }}</h2>
 
             <div class="mb-6">
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">{{ t('sails.main_type') }}</label>
+                <label class="block font-medium mb-2">{{ t('sails.main_type') }}</label>
                 <div class="flex gap-4">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="radio" name="main_type" value="FURLING"
                             {% if sail_profile.main_type == 'FURLING' %}checked{% endif %}
                             {% if not is_owner %}disabled{% endif %}>
-                        <span style="color: var(--navy-deep);">{{ t('sails.furling') }}</span>
+                        <span>{{ t('sails.furling') }}</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="radio" name="main_type" value="SLAB_REEFING"
                             {% if sail_profile.main_type == 'SLAB_REEFING' %}checked{% endif %}
                             {% if not is_owner %}disabled{% endif %}>
-                        <span style="color: var(--navy-deep);">{{ t('sails.slab_reefing') }}</span>
+                        <span>{{ t('sails.slab_reefing') }}</span>
                     </label>
                 </div>
-                <p id="reef-note" class="text-sm mt-1 {% if sail_profile.main_type != 'SLAB_REEFING' %}hidden{% endif %}" style="color: var(--ocean-blue);">
+                <p id="reef-note" class="text-sm mt-1 {% if sail_profile.main_type != 'SLAB_REEFING' %}hidden{% endif %}" style="color: var(--accent);">
                     {{ t('sails.reef_note') }}
                 </p>
             </div>
 
             <div class="mb-6">
-                <label class="block font-medium mb-3" style="color: var(--navy-deep);">{{ t('sails.headsails') }}</label>
+                <label class="block font-medium mb-3">{{ t('sails.headsails') }}</label>
                 <div class="flex flex-wrap gap-4">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="headsail_genoa" {% if sail_profile.headsail_genoa %}checked{% endif %}
                             {% if not is_owner %}disabled{% endif %}>
-                        <span style="color: var(--navy-deep);">{{ t('sails.genoa') }}</span>
+                        <span>{{ t('sails.genoa') }}</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="headsail_jib" {% if sail_profile.headsail_jib %}checked{% endif %}
                             {% if not is_owner %}disabled{% endif %}>
-                        <span style="color: var(--navy-deep);">{{ t('sails.jib') }}</span>
+                        <span>{{ t('sails.jib') }}</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="headsail_furling" {% if sail_profile.headsail_furling %}checked{% endif %}
                             {% if not is_owner %}disabled{% endif %}>
-                        <span style="color: var(--navy-deep);">{{ t('sails.headsail_furling') }}</span>
+                        <span>{{ t('sails.headsail_furling') }}</span>
                     </label>
                 </div>
             </div>
 
             <div>
-                <label class="block font-medium mb-3" style="color: var(--navy-deep);">{{ t('sails.extra_sails') }}</label>
+                <label class="block font-medium mb-3">{{ t('sails.extra_sails') }}</label>
                 <div class="flex flex-wrap gap-4">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="has_code0" {% if sail_profile.has_code0 %}checked{% endif %}
                             {% if not is_owner %}disabled{% endif %}>
-                        <span style="color: var(--navy-deep);">Code 0</span>
+                        <span>Code 0</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="has_gennaker" {% if sail_profile.has_gennaker %}checked{% endif %}
                             {% if not is_owner %}disabled{% endif %}>
-                        <span style="color: var(--navy-deep);">Gennaker</span>
+                        <span>Gennaker</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="has_spinnaker" {% if sail_profile.has_spinnaker %}checked{% endif %}
                             {% if not is_owner %}disabled{% endif %}>
-                        <span style="color: var(--navy-deep);">Spinnaker</span>
+                        <span>Spinnaker</span>
                     </label>
                 </div>
             </div>
@@ -200,7 +200,7 @@
 
         {% if is_owner %}
         <button type="submit" class="w-full py-3 rounded-lg text-white font-bold text-lg transition hover:scale-105"
-            style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+            style="background: var(--success);">
             💾 {{ t('common.save') }}
         </button>
         {% endif %}

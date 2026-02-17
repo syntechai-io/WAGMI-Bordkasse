@@ -38,21 +38,21 @@
     <div class="bg-white porthole-card p-6 space-y-4">
         <div class="grid grid-cols-2 gap-4">
             <div>
-                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">{{ t('billing.account') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ account_name }}</p>
+                <p class="text-sm font-medium ui-muted">{{ t('billing.account') }}</p>
+                <p class="text-lg font-semibold">{{ account_name }}</p>
             </div>
             <div>
-                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">{{ t('billing.plan') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">
+                <p class="text-sm font-medium ui-muted">{{ t('billing.plan') }}</p>
+                <p class="text-lg font-semibold">
                     {% if plan == "SKIPPER_PLUS" %}
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-white" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">⭐ Skipper Plus</span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-white" style="background: var(--success);">⭐ Skipper Plus</span>
                     {% else %}
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700">Free</span>
                     {% endif %}
                 </p>
             </div>
             <div>
-                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">{{ t('billing.status') }}</p>
+                <p class="text-sm font-medium ui-muted">{{ t('billing.status') }}</p>
                 <p class="text-lg font-semibold">
                     {% if status == "ACTIVE" %}
                     <span class="text-green-600">{{ t('billing.status_active') }}</span>
@@ -64,8 +64,8 @@
                 </p>
             </div>
             <div>
-                <p class="text-sm font-medium" style="color: var(--navy-deep); opacity:0.6;">{{ t('billing.renewal') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ current_period_end }}</p>
+                <p class="text-sm font-medium ui-muted">{{ t('billing.renewal') }}</p>
+                <p class="text-lg font-semibold">{{ current_period_end }}</p>
             </div>
         </div>
     </div>
@@ -73,30 +73,30 @@
     {% if is_owner %}
     <div class="bg-white porthole-card p-6">
         {% if plan == "FREE" %}
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">🚀 {{ t('billing.upgrade_title') }}</h2>
-        <p class="text-sm mb-4" style="color: var(--navy-deep); opacity:0.7;">{{ t('billing.upgrade_desc') }}</p>
+        <h2 class="text-xl font-bold maritime-header mb-4">🚀 {{ t('billing.upgrade_title') }}</h2>
+        <p class="text-sm mb-4 ui-muted">{{ t('billing.upgrade_desc') }}</p>
         <div class="flex flex-col sm:flex-row gap-3">
             <form hx-post="/billing/ui/checkout" hx-swap="none" class="flex-1">
                 {{ csrf_input | safe }}
                 <input type="hidden" name="interval" value="monthly">
-                <button type="submit" class="w-full text-white px-6 py-3 rounded-lg font-bold text-lg transition hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+                <button type="submit" class="btn btn-primary w-full text-white px-6 py-3 rounded-lg font-bold text-lg transition hover:scale-105 shadow-lg">
                     📅 {{ t('billing.upgrade_monthly') }}
                 </button>
             </form>
             <form hx-post="/billing/ui/checkout" hx-swap="none" class="flex-1">
                 {{ csrf_input | safe }}
                 <input type="hidden" name="interval" value="yearly">
-                <button type="submit" class="w-full text-white px-6 py-3 rounded-lg font-bold text-lg transition hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                <button type="submit" class="w-full text-white px-6 py-3 rounded-lg font-bold text-lg transition hover:scale-105 shadow-lg" style="background: var(--success);">
                     📅 {{ t('billing.upgrade_yearly') }}
                 </button>
             </form>
         </div>
         {% else %}
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">⚙️ {{ t('billing.manage_title') }}</h2>
-        <p class="text-sm mb-4" style="color: var(--navy-deep); opacity:0.7;">{{ t('billing.manage_desc') }}</p>
+        <h2 class="text-xl font-bold maritime-header mb-4">⚙️ {{ t('billing.manage_title') }}</h2>
+        <p class="text-sm mb-4 ui-muted">{{ t('billing.manage_desc') }}</p>
         <form hx-post="/billing/ui/portal" hx-swap="none">
             {{ csrf_input | safe }}
-            <button type="submit" class="text-white px-6 py-3 rounded-lg font-bold transition hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+            <button type="submit" class="btn btn-primary text-white px-6 py-3 rounded-lg font-bold transition hover:scale-105 shadow-lg">
                 ⚙️ {{ t('billing.manage_portal') }}
             </button>
         </form>
@@ -104,7 +104,7 @@
     </div>
     {% else %}
     <div class="bg-white porthole-card p-6">
-        <p class="text-sm" style="color: var(--navy-deep); opacity:0.7;">
+        <p class="text-sm ui-muted">
             💡 {{ t('billing.owner_only') }}
         </p>
     </div>

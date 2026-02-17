@@ -18,36 +18,36 @@
         
         <!-- Maneuver Type Quick Entry Selector -->
         <div class="mb-6">
-            <label class="block font-bold text-lg mb-3 maritime-header" style="color: var(--navy-deep);">
+            <label class="block font-bold text-lg mb-3 maritime-header">
                 ⚓ {{ t('logbook.maneuver_type') }}
             </label>
             <input type="hidden" name="maneuver_type" id="maneuver_type_input" value="{% if entry and entry.maneuver_type %}{{ entry.maneuver_type }}{% else %}full{% endif %}">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="departure" style="border-color: var(--sky-blue);">
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="departure" style="border-color: var(--border);">
                     <div class="text-2xl mb-1">🚢</div>
                     <div class="text-xs font-semibold">{{ t('logbook.maneuver_departure') }}</div>
                 </button>
-                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="sail_change" style="border-color: var(--sky-blue);">
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="sail_change" style="border-color: var(--border);">
                     <div class="text-2xl mb-1">⛵</div>
                     <div class="text-xs font-semibold">{{ t('logbook.maneuver_sail_change') }}</div>
                 </button>
-                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="motor" style="border-color: var(--sky-blue);">
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="motor" style="border-color: var(--border);">
                     <div class="text-2xl mb-1">🔧</div>
                     <div class="text-xs font-semibold">{{ t('logbook.maneuver_motor') }}</div>
                 </button>
-                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="anchor" style="border-color: var(--sky-blue);">
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="anchor" style="border-color: var(--border);">
                     <div class="text-2xl mb-1">⚓</div>
                     <div class="text-xs font-semibold">{{ t('logbook.maneuver_anchor') }}</div>
                 </button>
-                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="weather" style="border-color: var(--sky-blue);">
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="weather" style="border-color: var(--border);">
                     <div class="text-2xl mb-1">🌤️</div>
                     <div class="text-xs font-semibold">{{ t('logbook.maneuver_weather') }}</div>
                 </button>
-                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="arrival" style="border-color: var(--sky-blue);">
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action" data-type="arrival" style="border-color: var(--border);">
                     <div class="text-2xl mb-1">🏁</div>
                     <div class="text-xs font-semibold">{{ t('logbook.maneuver_arrival') }}</div>
                 </button>
-                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action md:col-span-2" data-type="full" style="border-color: var(--sky-blue);">
+                <button type="button" class="maneuver-btn p-3 rounded-lg border-2 transition hover:shadow-lg touch-action md:col-span-2" data-type="full" style="border-color: var(--border);">
                     <div class="text-2xl mb-1">📝</div>
                     <div class="text-xs font-semibold">{{ t('logbook.maneuver_full') }}</div>
                 </button>
@@ -58,21 +58,21 @@
         
         <div class="flex flex-wrap gap-4 items-end">
             <div class="flex-grow-0">
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">📅 {{ t('logbook.date_label') }} *</label>
+                <label class="block font-medium mb-2">📅 {{ t('logbook.date_label') }} *</label>
                 <input type="date" name="entry_date" 
                        value="{% if entry %}{{ entry.entry_date.strftime('%Y-%m-%d') }}{% endif %}" 
                        required 
                        class="px-4 py-3 border rounded-lg text-lg w-auto" 
-                       style="border-color: var(--sky-blue); min-width: 160px;">
+                       style="border-color: var(--border); min-width: 160px;">
             </div>
             
             <div class="flex-grow-0">
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🕐 {{ t('logbook.time_input') }} *</label>
+                <label class="block font-medium mb-2">🕐 {{ t('logbook.time_input') }} *</label>
                 <input type="time" name="entry_time" 
                        value="{% if entry %}{{ entry.entry_date.strftime('%H:%M') }}{% else %}12:00{% endif %}" 
                        required 
                        class="px-4 py-3 border rounded-lg text-lg w-auto" 
-                       style="border-color: var(--sky-blue); min-width: 140px;">
+                       style="border-color: var(--border); min-width: 140px;">
             </div>
         </div>
         
@@ -87,32 +87,32 @@
                     <span class="animate-pulse">⏳</span> {{ t('logbook.quick_fill_loading') }}
                 </span>
             </button>
-            <p class="text-xs mt-2 text-center" style="color: var(--navy-deep); opacity: 0.7;">
+            <p class="text-xs mt-2 text-center ui-muted">
                 {{ t('logbook.quick_fill_desc') }}
             </p>
         </div>
         
         <div class="rope-divider"></div>
         
-        <h3 class="text-lg font-bold maritime-header" style="color: var(--navy-deep);">📍 {{ t('logbook.position') }}</h3>
+        <h3 class="text-lg font-bold maritime-header">📍 {{ t('logbook.position') }}</h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌍 {{ t('logbook.latitude') }}</label>
+                <label class="block font-medium mb-2">🌍 {{ t('logbook.latitude') }}</label>
                 <input type="number" name="latitude" step="0.000001" 
                        value="{% if entry and entry.latitude %}{{ entry.latitude }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_lat') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
+                       style="border-color: var(--border);">
             </div>
             
             <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌍 {{ t('logbook.longitude') }}</label>
+                <label class="block font-medium mb-2">🌍 {{ t('logbook.longitude') }}</label>
                 <input type="number" name="longitude" step="0.000001" 
                        value="{% if entry and entry.longitude %}{{ entry.longitude }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_lon') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
+                       style="border-color: var(--border);">
             </div>
         </div>
         
@@ -136,13 +136,13 @@
                         <span class="text-2xl">🛰️</span>
                     </div>
                     <div>
-                        <div class="font-bold" style="color: var(--navy-deep);">{{ t('logbook.gps_tracking_active') }}</div>
-                        <div class="text-sm" style="color: var(--navy-deep);" id="gps-status-text">{{ t('logbook.gps_updating') }}</div>
+                        <div class="font-bold">{{ t('logbook.gps_tracking_active') }}</div>
+                        <div class="text-sm" id="gps-status-text">{{ t('logbook.gps_updating') }}</div>
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-xs" style="color: var(--navy-deep);" id="gps-accuracy">{{ t('logbook.gps_accuracy') }}: --m</div>
-                    <div class="text-xs" style="color: var(--navy-deep);" id="gps-update-time">{{ t('logbook.gps_last_update') }}: --</div>
+                    <div class="text-xs" id="gps-accuracy">{{ t('logbook.gps_accuracy') }}: --m</div>
+                    <div class="text-xs" id="gps-update-time">{{ t('logbook.gps_last_update') }}: --</div>
                 </div>
             </div>
         </div>
@@ -151,44 +151,44 @@
         
         <!-- Phase A: Navigation Section -->
         <details class="porthole-card p-4 mb-4 cursor-pointer" data-maneuver="full">
-            <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
+            <summary class="text-lg font-bold maritime-header cursor-pointer">
                 🧭 {{ t('logbook.navigation_section') }}
             </summary>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📐 {{ t('logbook.cog_label') }}</label>
+                    <label class="block font-medium mb-2">📐 {{ t('logbook.cog_label') }}</label>
                     <input type="number" name="cog_deg" min="0" max="359" step="1"
                            value="{% if entry and entry.cog_deg %}{{ entry.cog_deg }}{% endif %}" 
                            placeholder="{{ t('logbook.placeholder_cog') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
-                           style="border-color: var(--sky-blue);">
+                           style="border-color: var(--border);">
                 </div>
                 
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">⏱️ {{ t('logbook.sog_label') }}</label>
+                    <label class="block font-medium mb-2">⏱️ {{ t('logbook.sog_label') }}</label>
                     <input type="number" name="sog_kn" min="0" step="0.1"
                            value="{% if entry and entry.sog_kn %}{{ entry.sog_kn }}{% endif %}" 
                            placeholder="{{ t('logbook.placeholder_sog') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
-                           style="border-color: var(--sky-blue);">
+                           style="border-color: var(--border);">
                 </div>
                 
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📏 {{ t('logbook.log_speed') }}</label>
+                    <label class="block font-medium mb-2">📏 {{ t('logbook.log_speed') }}</label>
                     <input type="number" name="log_kn" min="0" step="0.1"
                            value="{% if entry and entry.log_kn %}{{ entry.log_kn }}{% endif %}" 
                            placeholder="{{ t('logbook.placeholder_stw') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
-                           style="border-color: var(--sky-blue);">
+                           style="border-color: var(--border);">
                 </div>
                 
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📊 {{ t('logbook.distance_today') }}</label>
+                    <label class="block font-medium mb-2">📊 {{ t('logbook.distance_today') }}</label>
                     <input type="number" name="dist_day_nm" min="0" step="0.1"
                            value="{% if entry and entry.dist_day_nm %}{{ entry.dist_day_nm }}{% endif %}" 
                            placeholder="{{ t('logbook.placeholder_log') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
-                           style="border-color: var(--sky-blue);">
+                           style="border-color: var(--border);">
                 </div>
             </div>
         </details>
@@ -199,10 +199,10 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="hybrid-field-container">
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">💨 {{ t('logbook.wind_direction') }}</label>
+                <label class="block font-medium mb-2">💨 {{ t('logbook.wind_direction') }}</label>
                 <select name="wind_direction" id="wind_direction_select" 
                         class="w-full px-4 py-3 border rounded-lg text-lg hybrid-select" 
-                        style="border-color: var(--sky-blue);"
+                        style="border-color: var(--border);"
                         data-field="wind_direction">
                     <option value="">{{ t('common.select_option') }}</option>
                     <option value="N" {% if entry and entry.wind_direction == 'N' %}selected{% endif %}>{{ t('logbook.wind_n') }}</option>
@@ -226,23 +226,23 @@
                        value="{% if entry and entry.wind_direction %}{{ entry.wind_direction }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_wind_dir') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
-                       style="border-color: var(--sky-blue);"
+                       style="border-color: var(--border);"
                        data-field="wind_direction"
                        disabled>
                 <button type="button" class="mt-2 text-sm hybrid-toggle" 
                         data-field="wind_direction"
                         aria-expanded="false"
                         aria-controls="wind_direction_manual"
-                        style="color: var(--sea-foam);">
+                        style="color: var(--success);">
                     ✏️ {{ t('common.manual_input') }}
                 </button>
             </div>
             
             <div class="hybrid-field-container">
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">💨 {{ t('logbook.wind_strength') }}</label>
+                <label class="block font-medium mb-2">💨 {{ t('logbook.wind_strength') }}</label>
                 <select name="wind_strength" id="wind_strength_select" 
                         class="w-full px-4 py-3 border rounded-lg text-lg hybrid-select" 
-                        style="border-color: var(--sky-blue);"
+                        style="border-color: var(--border);"
                         data-field="wind_strength">
                     <option value="">{{ t('common.select_option') }}</option>
                     <option value="bft0" {% if entry and norm_wind(entry.wind_strength) == 'bft0' %}selected{% endif %}>{{ t('logbook.bft0') }}</option>
@@ -263,23 +263,23 @@
                        value="{% if entry and entry.wind_strength %}{{ display_wind(entry.wind_strength) }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_wind_force') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
-                       style="border-color: var(--sky-blue);"
+                       style="border-color: var(--border);"
                        data-field="wind_strength"
                        disabled>
                 <button type="button" class="mt-2 text-sm hybrid-toggle" 
                         data-field="wind_strength"
                         aria-expanded="false"
                         aria-controls="wind_strength_manual"
-                        style="color: var(--sea-foam);">
+                        style="color: var(--success);">
                     ✏️ {{ t('common.manual_input') }}
                 </button>
             </div>
             
             <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌊 {{ t('logbook.sea_state') }}</label>
+                <label class="block font-medium mb-2">🌊 {{ t('logbook.sea_state') }}</label>
                 <select name="sea_state" 
                         class="w-full px-4 py-3 border rounded-lg text-lg" 
-                        style="border-color: var(--sky-blue);">
+                        style="border-color: var(--border);">
                     <option value="">{{ t('common.select_option') }}</option>
                     {% for state in sea_states %}
                     <option value="{{ state }}" {% if entry and entry.sea_state and entry.sea_state.value == state %}selected{% endif %}>
@@ -296,10 +296,10 @@
             </div>
             
             <div class="hybrid-field-container">
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">👁️ {{ t('logbook.visibility') }}</label>
+                <label class="block font-medium mb-2">👁️ {{ t('logbook.visibility') }}</label>
                 <select name="visibility" id="visibility_select" 
                         class="w-full px-4 py-3 border rounded-lg text-lg hybrid-select" 
-                        style="border-color: var(--sky-blue);"
+                        style="border-color: var(--border);"
                         data-field="visibility">
                     <option value="">{{ t('common.select_option') }}</option>
                     <option value="very_good" {% if entry and norm_vis(entry.visibility) == 'very_good' %}selected{% endif %}>{{ t('logbook.visibility_very_good') }}</option>
@@ -312,25 +312,25 @@
                        value="{% if entry and entry.visibility %}{{ display_visibility(entry.visibility) }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_visibility') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
-                       style="border-color: var(--sky-blue);"
+                       style="border-color: var(--border);"
                        data-field="visibility"
                        disabled>
                 <button type="button" class="mt-2 text-sm hybrid-toggle" 
                         data-field="visibility"
                         aria-expanded="false"
                         aria-controls="visibility_manual"
-                        style="color: var(--sea-foam);">
+                        style="color: var(--success);">
                     ✏️ {{ t('common.manual_input') }}
                 </button>
             </div>
             
             <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🌡️ {{ t('logbook.temperature') }} (°C)</label>
+                <label class="block font-medium mb-2">🌡️ {{ t('logbook.temperature') }} (°C)</label>
                 <input type="number" name="temperature" step="0.1" 
                        value="{% if entry and entry.temperature %}{{ entry.temperature }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_temp') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
+                       style="border-color: var(--border);">
             </div>
         </div>
         
@@ -341,24 +341,24 @@
         
         <!-- Phase A: Enhanced Weather Section -->
         <details class="porthole-card p-4 mb-4 cursor-pointer">
-            <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
+            <summary class="text-lg font-bold maritime-header cursor-pointer">
                 ⛅ {{ t('logbook.weather_extended') }}
             </summary>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📊 {{ t('logbook.pressure') }}</label>
+                    <label class="block font-medium mb-2">📊 {{ t('logbook.pressure') }}</label>
                     <input type="number" name="pressure_hpa" min="900" max="1100" step="1"
                            value="{% if entry and entry.pressure_hpa %}{{ entry.pressure_hpa }}{% endif %}" 
                            placeholder="{{ t('logbook.placeholder_pressure') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
-                           style="border-color: var(--sky-blue);">
+                           style="border-color: var(--border);">
                 </div>
                 
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📈 {{ t('logbook.pressure_trend') }}</label>
+                    <label class="block font-medium mb-2">📈 {{ t('logbook.pressure_trend') }}</label>
                     <select name="pressure_trend" 
                             class="w-full px-4 py-3 border rounded-lg text-lg" 
-                            style="border-color: var(--sky-blue);">
+                            style="border-color: var(--border);">
                         <option value="">{{ t('common.select_option') }}</option>
                         <option value="steigend" {% if entry and entry.pressure_trend == 'steigend' %}selected{% endif %}>↗ {{ t('logbook.pressure_rising') }}</option>
                         <option value="gleichbleibend" {% if entry and entry.pressure_trend == 'gleichbleibend' %}selected{% endif %}>→ {{ t('logbook.pressure_steady') }}</option>
@@ -367,12 +367,12 @@
                 </div>
                 
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📡 {{ t('logbook.weather_source') }}</label>
+                    <label class="block font-medium mb-2">📡 {{ t('logbook.weather_source') }}</label>
                     <input type="text" name="weather_source" 
                            value="{% if entry and entry.weather_source %}{{ entry.weather_source }}{% endif %}" 
                            placeholder="{{ t('logbook.placeholder_weather_source') }}" 
                            class="w-full px-4 py-3 border rounded-lg text-lg" 
-                           style="border-color: var(--sky-blue);">
+                           style="border-color: var(--border);">
                 </div>
             </div>
         </details>
@@ -384,7 +384,7 @@
         
         <!-- Phase A: Engine Section with Motor Toggle Buttons -->
         <details class="porthole-card p-4 mb-4 cursor-pointer">
-            <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
+            <summary class="text-lg font-bold maritime-header cursor-pointer">
                 🔧 {{ t('logbook.engine_section') }}
             </summary>
             <div class="mt-4 space-y-4">
@@ -403,10 +403,10 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">🟢 {{ t('logbook.engine_status') }}</label>
+                        <label class="block font-medium mb-2">🟢 {{ t('logbook.engine_status') }}</label>
                         <select name="engine_on" id="engine_on" 
                                 class="w-full px-4 py-3 border rounded-lg text-lg" 
-                                style="border-color: var(--sky-blue);">
+                                style="border-color: var(--border);">
                             <option value="">-- {{ t('logbook.unknown') }} --</option>
                             <option value="1" {% if entry and entry.engine_on %}selected{% endif %}>✅ {{ t('logbook.engine_yes') }}</option>
                             <option value="0" {% if entry and entry.engine_on == False %}selected{% endif %}>❌ {{ t('logbook.engine_no') }}</option>
@@ -414,37 +414,37 @@
                     </div>
                     
                     <div>
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">🔧 {{ t('logbook.engine_hours_total') }}</label>
+                        <label class="block font-medium mb-2">🔧 {{ t('logbook.engine_hours_total') }}</label>
                         <input type="number" name="eng_hours_total" min="0" step="0.1"
                                value="{% if entry and entry.eng_hours_total %}{{ entry.eng_hours_total }}{% endif %}" 
                                placeholder="{{ t('logbook.placeholder_engine_hours') }}" 
                                class="w-full px-4 py-3 border rounded-lg text-lg" 
-                               style="border-color: var(--sky-blue);">
+                               style="border-color: var(--border);">
                     </div>
                     
                     <div>
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">⏰ {{ t('logbook.engine_on_time') }}</label>
+                        <label class="block font-medium mb-2">⏰ {{ t('logbook.engine_on_time') }}</label>
                         <input type="datetime-local" name="engine_on_time" id="engine_on_time"
                                value="{% if entry and entry.engine_on_time %}{{ entry.engine_on_time.strftime('%Y-%m-%dT%H:%M') }}{% endif %}" 
                                class="w-full px-4 py-3 border rounded-lg text-lg" 
-                               style="border-color: var(--sky-blue);">
+                               style="border-color: var(--border);">
                     </div>
                     
                     <div>
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">⏰ {{ t('logbook.engine_off_time') }}</label>
+                        <label class="block font-medium mb-2">⏰ {{ t('logbook.engine_off_time') }}</label>
                         <input type="datetime-local" name="engine_off_time" id="engine_off_time"
                                value="{% if entry and entry.engine_off_time %}{{ entry.engine_off_time.strftime('%Y-%m-%dT%H:%M') }}{% endif %}" 
                                class="w-full px-4 py-3 border rounded-lg text-lg" 
-                               style="border-color: var(--sky-blue);">
+                               style="border-color: var(--border);">
                     </div>
                     
                     <div>
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">⛽ {{ t('logbook.fuel_level') }}</label>
+                        <label class="block font-medium mb-2">⛽ {{ t('logbook.fuel_level') }}</label>
                         <input type="number" name="fuel_level_l" min="0" step="1"
                                value="{% if entry and entry.fuel_level_l %}{{ entry.fuel_level_l }}{% endif %}" 
                                placeholder="{{ t('logbook.placeholder_rpm') }}" 
                                class="w-full px-4 py-3 border rounded-lg text-lg" 
-                               style="border-color: var(--sky-blue);">
+                               style="border-color: var(--border);">
                     </div>
                 </div>
             </div>
@@ -458,10 +458,10 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="hybrid-field-container">
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">⛵ {{ t('logbook.sail_plan') }}</label>
+                <label class="block font-medium mb-2">⛵ {{ t('logbook.sail_plan') }}</label>
                 <select name="sail_plan" id="sail_plan_select" 
                         class="w-full px-4 py-3 border rounded-lg text-lg hybrid-select" 
-                        style="border-color: var(--sky-blue);"
+                        style="border-color: var(--border);"
                         data-field="sail_plan">
                     <option value="">{{ t('common.select_option') }}</option>
                     <option value="motor_none" {% if entry and norm_sail(entry.sail_plan) == 'motor_none' %}selected{% endif %}>🚤 {{ t('logbook.sail_motor_none') }}</option>
@@ -474,43 +474,43 @@
                        value="{% if entry and entry.sail_plan %}{{ display_sail_plan(entry.sail_plan) }}{% endif %}" 
                        placeholder="{{ t('logbook.sail_placeholder') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg hybrid-manual hidden" 
-                       style="border-color: var(--sky-blue);"
+                       style="border-color: var(--border);"
                        data-field="sail_plan"
                        disabled>
                 <button type="button" class="mt-2 text-sm hybrid-toggle" 
                         data-field="sail_plan"
                         aria-expanded="false"
                         aria-controls="sail_plan_manual"
-                        style="color: var(--sea-foam);">
+                        style="color: var(--success);">
                     ✏️ {{ t('common.manual_input') }}
                 </button>
             </div>
             
             <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🔧 {{ t('logbook.engine_hours') }}</label>
+                <label class="block font-medium mb-2">🔧 {{ t('logbook.engine_hours') }}</label>
                 <input type="number" name="engine_hours" step="0.1" 
                        value="{% if entry and entry.engine_hours %}{{ entry.engine_hours }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_log_reading') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
+                       style="border-color: var(--border);">
             </div>
             
             <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏁 {{ t('logbook.departure') }}</label>
+                <label class="block font-medium mb-2">🏁 {{ t('logbook.departure') }}</label>
                 <input type="text" name="departure" 
                        value="{% if entry and entry.departure %}{{ entry.departure }}{% elif branding.home_port_name %}{{ branding.home_port_name }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_departure') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
+                       style="border-color: var(--border);">
             </div>
             
             <div>
-                <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏁 {{ t('logbook.destination') }}</label>
+                <label class="block font-medium mb-2">🏁 {{ t('logbook.destination') }}</label>
                 <input type="text" name="destination" 
                        value="{% if entry and entry.destination %}{{ entry.destination }}{% endif %}" 
                        placeholder="{{ t('logbook.placeholder_destination') }}" 
                        class="w-full px-4 py-3 border rounded-lg text-lg" 
-                       style="border-color: var(--sky-blue);">
+                       style="border-color: var(--border);">
             </div>
         </div>
         
@@ -518,14 +518,14 @@
         
         <!-- Phase A: Sails Section - sail-profile-aware -->
         <details class="porthole-card p-4 mb-4 cursor-pointer">
-            <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
+            <summary class="text-lg font-bold maritime-header cursor-pointer">
                 ⛵ {{ t('logbook.sails_section') }}
             </summary>
             <div class="mt-4 space-y-4">
                 {% if sail_profile and sail_profile.main_type == 'SLAB_REEFING' %}
                 <!-- Slab Reefing: Reef level selector -->
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
+                    <label class="block font-medium mb-2">
                         ⛵ {{ t('logbook.main_reef_level') }}
                     </label>
                     <div class="flex gap-2">
@@ -536,7 +536,7 @@
                                    {% if current_reef == level %}checked{% endif %}
                                    class="hidden peer">
                             <div class="peer-checked:bg-blue-600 peer-checked:text-white bg-white border-2 rounded-lg py-3 px-2 cursor-pointer transition font-bold text-sm"
-                                 style="border-color: var(--sky-blue);">
+                                 style="border-color: var(--border);">
                                 {% if level == 0 %}{{ t('logbook.reef_full') }}{% else %}{{ t('logbook.reef_level') }} {{ level }}{% endif %}
                             </div>
                         </label>
@@ -546,14 +546,14 @@
                 {% else %}
                 <!-- In-Mast Furling Slider: 0-100% -->
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">
+                    <label class="block font-medium mb-2">
                         🎚️ {{ t('logbook.main_furl') }}: <span id="main-furl-display">{% if entry and entry.main_furl_pct %}{{ entry.main_furl_pct }}%{% else %}0%{% endif %}</span>
                     </label>
                     <input type="range" name="main_furl_pct" id="main_furl_slider" min="0" max="100" step="5"
                            value="{% if entry and entry.main_furl_pct %}{{ entry.main_furl_pct }}{% else %}0{% endif %}"
                            class="w-full h-3 rounded-lg appearance-none cursor-pointer"
                            style="background: linear-gradient(to right, var(--accent) 0%, var(--accent-2) 100%);">
-                    <div class="flex justify-between text-xs mt-1" style="color: var(--navy-deep);">
+                    <div class="flex justify-between text-xs mt-1">
                         <span>{{ t('logbook.furl_label_0') }}</span>
                         <span>50%</span>
                         <span>{{ t('logbook.furl_label_100') }}</span>
@@ -564,12 +564,12 @@
                 <div class="flex gap-2 mb-4">
                     <button type="button" id="furl-in-btn" 
                             class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition touch-action text-sm" 
-                            style="background: linear-gradient(135deg, var(--sky-blue) 0%, #3498db 100%);">
+                            style="background: var(--accent-2);">
                         ⬅️ {{ t('logbook.furl_in') }}
                     </button>
                     <button type="button" id="furl-out-btn" 
                             class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition touch-action text-sm" 
-                            style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                            style="background: var(--success);">
                         ➡️ {{ t('logbook.furl_out') }}
                     </button>
                 </div>
@@ -578,11 +578,11 @@
                 <!-- Headsail section -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">🎐 {{ t('logbook.headsail') }}</label>
+                        <label class="block font-medium mb-2">🎐 {{ t('logbook.headsail') }}</label>
                         {% if sail_profile and sail_profile.headsail_names %}
                         <select name="headsail_type" 
                                 class="w-full px-4 py-3 border rounded-lg text-lg" 
-                                style="border-color: var(--sky-blue);">
+                                style="border-color: var(--border);">
                             <option value="">{{ t('common.select_option') }}</option>
                             {% for hs in sail_profile.headsail_names %}
                             <option value="{{ hs }}" {% if entry and entry.headsail_type == hs %}selected{% endif %}>{{ hs }}</option>
@@ -590,7 +590,7 @@
                         </select>
                         {% if sail_profile.headsail_furling %}
                         <div class="mt-2">
-                            <label class="block text-sm mb-1" style="color: var(--navy-deep);">
+                            <label class="block text-sm mb-1">
                                 {{ t('logbook.headsail_furl_percent') }}: <span id="headsail-furl-display">{% if entry and entry.headsail_furl_percent %}{{ entry.headsail_furl_percent }}%{% else %}0%{% endif %}</span>
                             </label>
                             <input type="range" name="headsail_furl_percent" id="headsail_furl_slider" min="0" max="100" step="5"
@@ -602,7 +602,7 @@
                         {% else %}
                         <select name="headsail" 
                                 class="w-full px-4 py-3 border rounded-lg text-lg" 
-                                style="border-color: var(--sky-blue);">
+                                style="border-color: var(--border);">
                             <option value="">{{ t('common.select_option') }}</option>
                             <option value="Genua gesetzt" {% if entry and entry.headsail == 'Genua gesetzt' %}selected{% endif %}>{{ t('logbook.headsail_set') }}</option>
                             <option value="Genua teilweise" {% if entry and entry.headsail == 'Genua teilweise' %}selected{% endif %}>{{ t('logbook.headsail_partial') }}</option>
@@ -613,22 +613,22 @@
                     
                     <div>
                         {% if sail_profile and sail_profile.extra_sail_names %}
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">🪁 {{ t('logbook.extra_sail') }}</label>
+                        <label class="block font-medium mb-2">🪁 {{ t('logbook.extra_sail') }}</label>
                         <select name="extra_sail" 
                                 class="w-full px-4 py-3 border rounded-lg text-lg" 
-                                style="border-color: var(--sky-blue);">
+                                style="border-color: var(--border);">
                             <option value="">{{ t('common.select_option') }}</option>
                             {% for es in sail_profile.extra_sail_names %}
                             <option value="{{ es }}" {% if entry and entry.extra_sail == es %}selected{% endif %}>{{ es }}</option>
                             {% endfor %}
                         </select>
                         {% else %}
-                        <label class="block font-medium mb-2" style="color: var(--navy-deep);">⚙️ {{ t('logbook.sail_action') }}</label>
+                        <label class="block font-medium mb-2">⚙️ {{ t('logbook.sail_action') }}</label>
                         <input type="text" name="sail_action" 
                                value="{% if entry and entry.sail_action %}{{ entry.sail_action }}{% endif %}" 
                                placeholder="{{ t('logbook.placeholder_sail_action') }}" 
                                class="w-full px-4 py-3 border rounded-lg text-lg" 
-                               style="border-color: var(--sky-blue);">
+                               style="border-color: var(--border);">
                         {% endif %}
                     </div>
                 </div>
@@ -642,15 +642,15 @@
         
         <!-- Phase A: Events Section -->
         <details class="porthole-card p-4 mb-4 cursor-pointer">
-            <summary class="text-lg font-bold maritime-header cursor-pointer" style="color: var(--navy-deep);">
+            <summary class="text-lg font-bold maritime-header cursor-pointer">
                 📋 {{ t('logbook.events_section') }}
             </summary>
             <div class="grid grid-cols-1 gap-4 mt-4">
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏷️ {{ t('logbook.event_category') }}</label>
+                    <label class="block font-medium mb-2">🏷️ {{ t('logbook.event_category') }}</label>
                     <select name="event_category" 
                             class="w-full px-4 py-3 border rounded-lg text-lg" 
-                            style="border-color: var(--sky-blue);">
+                            style="border-color: var(--border);">
                         <option value="">{{ t('common.select_option') }}</option>
                         <option value="Manöver" {% if entry and entry.event_category == 'Manöver' %}selected{% endif %}>⚓ {{ t('logbook.event_maneuver') }}</option>
                         <option value="Wetterwechsel" {% if entry and entry.event_category == 'Wetterwechsel' %}selected{% endif %}>🌦️ {{ t('logbook.event_weather_change') }}</option>
@@ -662,11 +662,11 @@
                 </div>
                 
                 <div>
-                    <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 {{ t('logbook.event_details') }}</label>
+                    <label class="block font-medium mb-2">📝 {{ t('logbook.event_details') }}</label>
                     <textarea name="event_details" rows="3" 
                               placeholder="{{ t('logbook.event_details_placeholder') }}" 
                               class="w-full px-4 py-3 border rounded-lg text-lg" 
-                              style="border-color: var(--sky-blue);">{% if entry and entry.event_details %}{{ entry.event_details }}{% endif %}</textarea>
+                              style="border-color: var(--border);">{% if entry and entry.event_details %}{{ entry.event_details }}{% endif %}</textarea>
                 </div>
             </div>
         </details>
@@ -678,10 +678,10 @@
         <div class="logbook-section-body">
 
         <div class="mb-4">
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">⚓ {{ t('logbook.watch_leader') }}</label>
+            <label class="block font-medium mb-2">⚓ {{ t('logbook.watch_leader') }}</label>
             <select name="watch_leader_id" 
                     class="w-full px-4 py-3 border rounded-lg text-lg" 
-                    style="border-color: var(--sky-blue);">
+                    style="border-color: var(--border);">
                 <option value="">{{ t('logbook.select_watch_leader') }}</option>
                 {% for member in crew_members %}
                 <option value="{{ member.id }}" {% if entry and entry.watch_leader_id == member.id %}selected{% endif %}>
@@ -692,8 +692,8 @@
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">👥 {{ t('logbook.watch') }} ({{ t('logbook.multi_select') }})</label>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
+            <label class="block font-medium mb-2">👥 {{ t('logbook.watch') }} ({{ t('logbook.multi_select') }})</label>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded-lg" style="background: var(--surface-2);">
                 {% for member in crew_members %}
                 <label class="flex items-center space-x-2 cursor-pointer">
                     <input type="checkbox" name="crew_on_watch_ids" value="{{ member.id }}" 
@@ -703,26 +703,26 @@
                                {% endfor %}
                            {% endif %}
                            class="rounded touch-action">
-                    <span class="text-sm font-medium" style="color: var(--navy-deep);">{{ member.code }} - {{ member.name }}</span>
+                    <span class="text-sm font-medium">{{ member.code }} - {{ member.name }}</span>
                 </label>
                 {% endfor %}
             </div>
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 {{ t('common.notes') }}</label>
+            <label class="block font-medium mb-2">📝 {{ t('common.notes') }}</label>
             <textarea name="notes" rows="4" 
                       placeholder="{{ t('logbook.notes_placeholder') }}" 
                       class="w-full px-4 py-3 border rounded-lg text-lg" 
-                      style="border-color: var(--sky-blue);">{% if entry and entry.notes %}{{ entry.notes }}{% endif %}</textarea>
+                      style="border-color: var(--border);">{% if entry and entry.notes %}{{ entry.notes }}{% endif %}</textarea>
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">✅ {{ t('logbook.safety_checks_label') }}</label>
+            <label class="block font-medium mb-2">✅ {{ t('logbook.safety_checks_label') }}</label>
             <textarea name="safety_checks" rows="3" 
                       placeholder="{{ t('logbook.safety_placeholder') }}" 
                       class="w-full px-4 py-3 border rounded-lg text-lg" 
-                      style="border-color: var(--sky-blue);">{% if entry and entry.safety_checks_completed %}{{ entry.safety_checks_completed }}{% endif %}</textarea>
+                      style="border-color: var(--border);">{% if entry and entry.safety_checks_completed %}{{ entry.safety_checks_completed }}{% endif %}</textarea>
         </div>
         
         </div>

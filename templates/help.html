@@ -2,14 +2,14 @@
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-4xl font-bold maritime-header" style="color: var(--navy-deep);">📖 {{ t('help.title') }}</h1>
+    <h1 class="text-4xl font-bold maritime-header">📖 {{ t('help.title') }}</h1>
     
     <div class="bg-white porthole-card p-8 prose max-w-none">
-        <div style="color: var(--navy-deep);">
+        <div>
             
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">🔐 {{ t('help.login_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">🔐 {{ t('help.login_title') }}</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.login_how') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.login_how') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
                     <li>{{ t('help.login_step1') }}</li>
                     <li>{{ t('help.login_step2') }}</li>
@@ -17,7 +17,7 @@
                     <li>{{ t('help.login_step4') }}</li>
                 </ol>
 
-                <h3 class="text-xl font-semibold mb-3 mt-6" style="color: var(--navy-deep);">🎯 {{ t('help.roles_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3 mt-6">🎯 {{ t('help.roles_title') }}</h3>
                 <p class="mb-4">{{ t('help.roles_intro') }}</p>
 
                 <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 mb-4">
@@ -68,9 +68,9 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💰 {{ t('help.deposits_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">💰 {{ t('help.deposits_title') }}</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.deposits_how') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.deposits_how') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
                     <li>{{ t('help.deposits_step1') }}</li>
                     <li>{{ t('help.deposits_step2') }}
@@ -88,9 +88,9 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⚓ {{ t('help.expenses_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">⚓ {{ t('help.expenses_title') }}</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.expenses_wallet') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.expenses_wallet') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
                     <li>{{ t('help.expenses_step1') }}</li>
                     <li>{{ t('help.expenses_step2') }}</li>
@@ -108,14 +108,14 @@
                     <li>{{ t('help.expenses_step4') }}</li>
                 </ol>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.expenses_private') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.expenses_private') }}</h3>
                 <p class="mb-2">{{ t('help.expenses_private_desc') }}</p>
                 <p class="text-sm opacity-75">{{ t('help.expenses_private_auto') }}</p>
             </div>
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📸 {{ t('help.receipts_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">📸 {{ t('help.receipts_title') }}</h2>
             <div class="mb-6">
                 <p class="mb-4">{{ t('help.receipts_intro') }}</p>
                 <ul class="list-disc ml-6 mb-4">
@@ -127,11 +127,11 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">👋 {{ t('help.crew_deactivate_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">👋 {{ t('help.crew_deactivate_title') }}</h2>
             <div class="mb-6">
                 <p class="mb-4">{{ t('help.crew_deactivate_intro') }}</p>
                 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.crew_deactivate_how') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.crew_deactivate_how') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
                     <li>{{ t('help.crew_deactivate_step1') }}</li>
                     <li>{{ t('help.crew_deactivate_step2') }}</li>
@@ -140,7 +140,7 @@
                     <li>{{ t('help.crew_deactivate_step5') }}</li>
                 </ol>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.crew_deactivate_auto') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.crew_deactivate_auto') }}</h3>
                 <p class="mb-3">{{ t('help.crew_deactivate_auto_desc') }}</p>
 
                 <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 mb-3">
@@ -168,7 +168,7 @@
                     </ul>
                 </div>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.crew_reactivate') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.crew_reactivate') }}</h3>
                 <p class="mb-2">{{ t('help.crew_reactivate_intro') }}</p>
                 <ul class="list-disc ml-6">
                     <li>{{ t('help.crew_reactivate_1') }}</li>
@@ -178,16 +178,16 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📊 {{ t('help.overview_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">📊 {{ t('help.overview_title') }}</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.overview_dashboard') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.overview_dashboard') }}</h3>
                 <ul class="list-disc ml-6 mb-4">
                     <li>{{ t('help.overview_wallet') }}</li>
                     <li>{{ t('help.overview_totals') }}</li>
                     <li>{{ t('help.overview_categories') }}</li>
                 </ul>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.overview_balances') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.overview_balances') }}</h3>
                 <p>{{ t('help.overview_balances_desc') }}</p>
                 <ul class="list-disc ml-6 mb-4">
                     <li>{{ t('help.overview_who_paid') }}</li>
@@ -198,7 +198,7 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⛵ {{ t('help.settlement_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">⛵ {{ t('help.settlement_title') }}</h2>
             <div class="mb-6">
                 <p class="mb-2">{{ t('help.settlement_intro') }}</p>
                 <ol class="list-decimal ml-6 space-y-2">
@@ -210,11 +210,11 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📓 {{ t('help.logbook_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">📓 {{ t('help.logbook_title') }}</h2>
             <div class="mb-6">
                 <p class="mb-4">{{ t('help.logbook_intro') }}</p>
                 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">⚡ {{ t('help.logbook_quickfill_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">⚡ {{ t('help.logbook_quickfill_title') }}</h3>
                 <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border-2 border-blue-300 mb-4">
                     <p class="font-semibold mb-2">🎯 {{ t('help.logbook_quickfill_headline') }}</p>
                     <ol class="list-decimal ml-6 space-y-2">
@@ -233,7 +233,7 @@
                     <p class="text-sm mt-3 opacity-75">{{ t('help.logbook_quickfill_note') }}</p>
                 </div>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🎯 {{ t('help.logbook_maneuver_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">🎯 {{ t('help.logbook_maneuver_title') }}</h3>
                 <p class="mb-3">{{ t('help.logbook_maneuver_intro') }}</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                     <div class="bg-blue-50 p-3 rounded border border-blue-200">
@@ -266,7 +266,7 @@
                     </div>
                 </div>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📋 {{ t('help.logbook_data_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">📋 {{ t('help.logbook_data_title') }}</h3>
                 <ul class="list-disc ml-6 space-y-2 mb-4">
                     <li>📍 {{ t('help.logbook_data_nav') }}</li>
                     <li>🌤️ {{ t('help.logbook_data_weather') }}</li>
@@ -277,7 +277,7 @@
                     <li>📸 {{ t('help.logbook_data_photos') }}</li>
                 </ul>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📖 {{ t('help.logbook_daily_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">📖 {{ t('help.logbook_daily_title') }}</h3>
                 <p class="mb-3">{{ t('help.logbook_daily_intro') }}</p>
                 <ul class="list-disc ml-6 space-y-2 mb-4">
                     <li>{{ t('help.logbook_daily_grouped') }}</li>
@@ -287,7 +287,7 @@
                     <li>{{ t('help.logbook_daily_pdf') }}</li>
                 </ul>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🔧 {{ t('help.logbook_engine_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">🔧 {{ t('help.logbook_engine_title') }}</h3>
                 <div class="bg-amber-50 p-4 rounded-lg border-2 border-amber-200 mb-4">
                     <p class="mb-2">{{ t('help.logbook_engine_intro') }}</p>
                     <ol class="list-decimal ml-6 space-y-1 text-sm">
@@ -311,11 +311,11 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">⛵ {{ t('help.trips_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">⛵ {{ t('help.trips_title') }}</h2>
             <div class="mb-6">
                 <p class="mb-4">{{ t('help.trips_intro') }}</p>
                 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">⚡ {{ t('help.trips_quickstart_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">⚡ {{ t('help.trips_quickstart_title') }}</h3>
                 <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border-2 border-blue-300 mb-4">
                     <p class="font-semibold mb-2">🚀 {{ t('help.trips_quickstart_headline') }}</p>
                     <ol class="list-decimal ml-6 space-y-2 text-sm">
@@ -335,7 +335,7 @@
                     <p class="text-sm mt-3 opacity-75">{{ t('help.trips_quickstart_perfect') }}</p>
                 </div>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">🧑‍✈️ {{ t('help.trips_solo_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">🧑‍✈️ {{ t('help.trips_solo_title') }}</h3>
                 <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200 mb-4">
                     <p class="mb-2">{{ t('help.trips_solo_intro') }}</p>
                     <ul class="list-disc ml-6 text-sm space-y-1">
@@ -346,7 +346,7 @@
                     </ul>
                 </div>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📋 {{ t('help.trips_manage_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">📋 {{ t('help.trips_manage_title') }}</h3>
                 <ul class="list-disc ml-6 space-y-2 mb-4">
                     <li>{{ t('help.trips_current') }}</li>
                     <li>{{ t('help.trips_new') }} 
@@ -376,7 +376,7 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💱 {{ t('help.currency_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">💱 {{ t('help.currency_title') }}</h2>
             <div class="mb-6">
                 <p class="mb-4">{{ t('help.currency_intro') }}</p>
                 <ul class="list-disc ml-6 space-y-2 mb-4">
@@ -394,11 +394,11 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📱 {{ t('help.pwa_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">📱 {{ t('help.pwa_title') }}</h2>
             <div class="mb-6">
                 <p class="mb-4">{{ t('help.pwa_intro') }}</p>
                 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.pwa_ios_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.pwa_ios_title') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
                     <li>{{ t('help.pwa_ios_step1') }}</li>
                     <li>{{ t('help.pwa_ios_step2')|safe }}</li>
@@ -407,7 +407,7 @@
                     <li>{{ t('help.pwa_ios_step5') }}</li>
                 </ol>
 
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">{{ t('help.pwa_android_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">{{ t('help.pwa_android_title') }}</h3>
                 <ol class="list-decimal ml-6 space-y-2 mb-4">
                     <li>{{ t('help.pwa_android_step1') }}</li>
                     <li>{{ t('help.pwa_android_step2')|safe }}</li>
@@ -428,9 +428,9 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">📋 {{ t('help.export_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">📋 {{ t('help.export_title') }}</h2>
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3" style="color: var(--navy-deep);">📊 {{ t('help.export_bordkasse_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3">📊 {{ t('help.export_bordkasse_title') }}</h3>
                 
                 <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 mb-4">
                     <h4 class="font-bold mb-2">{{ t('help.export_csv_title') }}</h4>
@@ -453,7 +453,7 @@
                     </ul>
                 </div>
                 
-                <h3 class="text-xl font-semibold mb-3 mt-6" style="color: var(--navy-deep);">📓 {{ t('help.export_logbook_title') }}</h3>
+                <h3 class="text-xl font-semibold mb-3 mt-6">📓 {{ t('help.export_logbook_title') }}</h3>
                 <p class="mb-3">{{ t('help.export_logbook_intro') }}</p>
                 
                 <div class="bg-amber-50 p-4 rounded-lg border-2 border-amber-200 mb-3">
@@ -491,7 +491,7 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">✏️ {{ t('help.corrections_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">✏️ {{ t('help.corrections_title') }}</h2>
             <div class="mb-6">
                 <p class="mb-2">{{ t('help.corrections_intro')|safe }}</p>
                 <ul class="list-disc ml-6 mb-4">
@@ -503,7 +503,7 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">🧭 {{ t('help.nav_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">🧭 {{ t('help.nav_title') }}</h2>
             <div class="mb-6">
                 <ul class="list-disc ml-6 space-y-1">
                     <li>{{ t('help.nav_dashboard')|safe }}</li>
@@ -521,7 +521,7 @@
 
             <div class="rope-divider"></div>
 
-            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--ocean-blue);">💡 {{ t('help.general_tips_title') }}</h2>
+            <h2 class="text-2xl font-bold maritime-header mb-4" style="color: var(--accent);">💡 {{ t('help.general_tips_title') }}</h2>
             <div class="mb-6">
                 <ol class="list-decimal ml-6 space-y-2">
                     <li>{{ t('help.general_tip1') }}</li>
@@ -533,10 +533,10 @@
 
             <div class="rope-divider"></div>
 
-            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border-2" style="border-color: var(--sky-blue);">
-                <h2 class="text-2xl font-bold maritime-header mb-3" style="color: var(--ocean-blue);">❓ {{ t('help.faq_title') }}</h2>
+            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border-2" style="border-color: var(--border);">
+                <h2 class="text-2xl font-bold maritime-header mb-3" style="color: var(--accent);">❓ {{ t('help.faq_title') }}</h2>
                 <p class="mb-4">{{ t('help.faq_contact') }}</p>
-                <p class="text-xl font-bold maritime-header" style="color: var(--sea-foam);">{{ t('help.faq_farewell') }} ⛵🌊</p>
+                <p class="text-xl font-bold maritime-header" style="color: var(--success);">{{ t('help.faq_farewell') }} ⛵🌊</p>
             </div>
 
         </div>

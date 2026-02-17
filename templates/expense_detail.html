@@ -3,23 +3,23 @@
 {% block content %}
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">📋 {{ t('expense.detail_title') }}</h1>
-        <a href="/expenses" class="hover:underline touch-action" style="color: var(--ocean-blue);">← {{ t('common.back') }}</a>
+        <h1 class="text-3xl font-bold maritime-header">📋 {{ t('expense.detail_title') }}</h1>
+        <a href="/expenses" class="hover:underline touch-action" style="color: var(--accent);">← {{ t('common.back') }}</a>
     </div>
     
     <div class="bg-white porthole-card p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📅 {{ t('common.date') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.date }}</p>
+                <p class="text-sm ui-muted">📅 {{ t('common.date') }}</p>
+                <p class="text-lg font-semibold">{{ expense.date }}</p>
             </div>
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📂 {{ t('common.category') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{% if expense.category == 'Proviant' %}{{ t('expense.cat_proviant') }}{% elif expense.category == 'Getränke' %}{{ t('expense.cat_getraenke') }}{% elif expense.category == 'Mooring' %}{{ t('expense.cat_mooring') }}{% elif expense.category == 'Diesel' %}{{ t('expense.cat_diesel') }}{% elif expense.category == 'Wasser' %}{{ t('expense.cat_wasser') }}{% elif expense.category == 'Strom' %}{{ t('expense.cat_strom') }}{% elif expense.category == 'Gas' %}{{ t('expense.cat_gas') }}{% elif expense.category == 'Taxi/Transfer' %}{{ t('expense.cat_taxi') }}{% elif expense.category == 'Restaurant' %}{{ t('expense.cat_restaurant') }}{% elif expense.category == 'Eintritte' %}{{ t('expense.cat_eintritte') }}{% elif expense.category == 'Sonstiges' %}{{ t('expense.cat_sonstiges') }}{% else %}{{ expense.category }}{% endif %}</p>
+                <p class="text-sm ui-muted">📂 {{ t('common.category') }}</p>
+                <p class="text-lg font-semibold">{% if expense.category == 'Proviant' %}{{ t('expense.cat_proviant') }}{% elif expense.category == 'Getränke' %}{{ t('expense.cat_getraenke') }}{% elif expense.category == 'Mooring' %}{{ t('expense.cat_mooring') }}{% elif expense.category == 'Diesel' %}{{ t('expense.cat_diesel') }}{% elif expense.category == 'Wasser' %}{{ t('expense.cat_wasser') }}{% elif expense.category == 'Strom' %}{{ t('expense.cat_strom') }}{% elif expense.category == 'Gas' %}{{ t('expense.cat_gas') }}{% elif expense.category == 'Taxi/Transfer' %}{{ t('expense.cat_taxi') }}{% elif expense.category == 'Restaurant' %}{{ t('expense.cat_restaurant') }}{% elif expense.category == 'Eintritte' %}{{ t('expense.cat_eintritte') }}{% elif expense.category == 'Sonstiges' %}{{ t('expense.cat_sonstiges') }}{% else %}{{ expense.category }}{% endif %}</p>
             </div>
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👤 {{ t('expense.paid_by') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">
+                <p class="text-sm ui-muted">👤 {{ t('expense.paid_by') }}</p>
+                <p class="text-lg font-semibold">
                     {% if expense.payer %}
                         {{ expense.payer.code }} - {{ expense.payer.name }}
                     {% else %}
@@ -28,24 +28,24 @@
                 </p>
             </div>
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💵 {{ t('common.amount') }}</p>
+                <p class="text-sm ui-muted">💵 {{ t('common.amount') }}</p>
                 <p class="text-lg font-semibold" style="color: var(--coral);">{{ "%.2f"|format(expense.amount_eur) }} €</p>
             </div>
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">💰 {{ t('expense.paid_from') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{% if expense.paid_from.value == 'wallet' %}{{ t('common.wallet') }}{% else %}{{ t('common.private') }}{% endif %}</p>
+                <p class="text-sm ui-muted">💰 {{ t('expense.paid_from') }}</p>
+                <p class="text-lg font-semibold">{% if expense.paid_from.value == 'wallet' %}{{ t('common.wallet') }}{% else %}{{ t('common.private') }}{% endif %}</p>
             </div>
             <div>
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">🎯 {{ t('expense.split_mode') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{% if expense.split_mode.value == 'equal' %}{{ t('expense.split_equal') }}{% elif expense.split_mode.value == 'participants' %}{{ t('expense.split_participants') }}{% else %}{{ t('expense.split_percentage') }}{% endif %}</p>
+                <p class="text-sm ui-muted">🎯 {{ t('expense.split_mode') }}</p>
+                <p class="text-lg font-semibold">{% if expense.split_mode.value == 'equal' %}{{ t('expense.split_equal') }}{% elif expense.split_mode.value == 'participants' %}{{ t('expense.split_participants') }}{% else %}{{ t('expense.split_percentage') }}{% endif %}</p>
             </div>
             <div class="md:col-span-2">
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">📝 {{ t('common.description') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--navy-deep);">{{ expense.description }}</p>
+                <p class="text-sm ui-muted">📝 {{ t('common.description') }}</p>
+                <p class="text-lg font-semibold">{{ expense.description }}</p>
             </div>
             <div class="md:col-span-2">
-                <p class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">👥 {{ t('expense.participants') }}</p>
-                <p class="text-lg" style="color: var(--navy-deep);">
+                <p class="text-sm ui-muted">👥 {{ t('expense.participants') }}</p>
+                <p class="text-lg">
                     {% for p in expense.participants %}
                         {{ p.member.code }}{% if not loop.last %}, {% endif %}
                     {% endfor %}
@@ -56,20 +56,20 @@
         <div class="rope-divider"></div>
         
         <div class="pt-4">
-            <h3 class="text-lg font-bold maritime-header mb-4" style="color: var(--navy-deep);">📎 {{ t('expense.receipts') }}</h3>
+            <h3 class="text-lg font-bold maritime-header mb-4">📎 {{ t('expense.receipts') }}</h3>
             {% if expense.receipts %}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {% for receipt in expense.receipts %}
-                <a href="/receipts/{{ receipt.stored_filename }}" class="block porthole-card p-3 touch-action" style="transition: transform 0.2s; border-color: var(--sky-blue);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                    <p class="text-sm font-medium truncate" style="color: var(--navy-deep);">{{ receipt.original_name }}</p>
-                    <p class="text-xs" style="color: var(--navy-deep); opacity: 0.6;">{{ (receipt.size_bytes / 1024) | round(1) }} KB</p>
+                <a href="/receipts/{{ receipt.stored_filename }}" class="block porthole-card p-3 touch-action" style="transition: transform 0.2s; border-color: var(--border);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    <p class="text-sm font-medium truncate">{{ receipt.original_name }}</p>
+                    <p class="text-xs ui-muted">{{ (receipt.size_bytes / 1024) | round(1) }} KB</p>
                 </a>
                 {% endfor %}
             </div>
             {% else %}
-            <p style="color: var(--navy-deep); opacity: 0.6;">{{ t('expense.no_receipts') }}</p>
+            <p class="ui-muted">{{ t('expense.no_receipts') }}</p>
             {% endif %}
-            <p class="text-sm mt-3" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('expense.receipt_tip') }}</p>
+            <p class="text-sm mt-3 ui-muted">💡 {{ t('expense.receipt_tip') }}</p>
         </div>
     </div>
 </div>

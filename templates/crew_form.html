@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <h1 class="text-3xl font-bold maritime-header mb-6" style="color: var(--navy-deep);">{% if member %}⚓ {{ t('crew.edit_member') }}{% else %}➕ {{ t('crew.new_member') }}{% endif %}</h1>
+    <h1 class="text-3xl font-bold maritime-header mb-6">{% if member %}⚓ {{ t('crew.edit_member') }}{% else %}➕ {{ t('crew.new_member') }}{% endif %}</h1>
     
     {% if error %}
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card mb-4" role="alert">
@@ -14,21 +14,21 @@
     <form method="post" class="bg-white porthole-card p-6 space-y-4">
         {{ csrf_input | safe }}
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">📝 {{ t('crew.username') }} *</label>
+            <label class="block font-medium mb-2">📝 {{ t('crew.username') }} *</label>
             <input type="text" name="code" value="{% if member %}{{ member.code }}{% endif %}" required maxlength="20"
-                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);">
+                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border); focus:ring-color: var(--accent);">
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">👤 {{ t('common.name') }} *</label>
+            <label class="block font-medium mb-2">👤 {{ t('common.name') }} *</label>
             <input type="text" name="name" value="{% if member %}{{ member.name }}{% endif %}" required
-                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);">
+                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border); focus:ring-color: var(--accent);">
         </div>
         
         <div>
-            <label class="block font-medium mb-2" style="color: var(--navy-deep);">🏦 {{ t('crew.iban_optional') }}</label>
+            <label class="block font-medium mb-2">🏦 {{ t('crew.iban_optional') }}</label>
             <input type="text" name="iban_or_handle" value="{% if member %}{{ member.iban_or_handle or '' }}{% endif %}"
-                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--sky-blue); focus:ring-color: var(--ocean-blue);">
+                class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border); focus:ring-color: var(--accent);">
         </div>
         
         {% if request.session.get('role') == 'admin' and not request.session.get('trip_admin_trip_id') %}
@@ -56,7 +56,7 @@
             <button type="submit" class="flex-1 ocean-gradient text-white font-bold py-3 px-4 rounded-lg transition touch-action">
                 💾 {{ t('common.save') }}
             </button>
-            <a href="/crew" class="flex-1 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action" style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
+            <a href="/crew" class="flex-1 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action" style="background: var(--muted);">
                 ❌ {{ t('common.cancel') }}
             </a>
         </div>

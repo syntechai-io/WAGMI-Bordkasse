@@ -4,76 +4,76 @@
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">🔧 {{ t('admin_billing.title') }}</h1>
+    <h1 class="text-3xl font-bold maritime-header">🔧 {{ t('admin_billing.title') }}</h1>
 
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div class="bg-white porthole-card p-4 text-center">
-            <p class="text-2xl font-bold" style="color: var(--navy-deep);">{{ total_accounts }}</p>
-            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">{{ t('admin_billing.accounts') }}</p>
+            <p class="text-2xl font-bold">{{ total_accounts }}</p>
+            <p class="text-xs ui-muted">{{ t('admin_billing.accounts') }}</p>
         </div>
         <div class="bg-white porthole-card p-4 text-center">
             <p class="text-2xl font-bold text-green-600">{{ active_subs }}</p>
-            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">{{ t('admin_billing.active') }}</p>
+            <p class="text-xs ui-muted">{{ t('admin_billing.active') }}</p>
         </div>
         <div class="bg-white porthole-card p-4 text-center">
             <p class="text-2xl font-bold text-red-600">{{ past_due_subs }}</p>
-            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Past Due</p>
+            <p class="text-xs ui-muted">Past Due</p>
         </div>
         <div class="bg-white porthole-card p-4 text-center">
             <p class="text-2xl font-bold text-gray-500">{{ canceled_subs }}</p>
-            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Canceled</p>
+            <p class="text-xs ui-muted">Canceled</p>
         </div>
         <div class="bg-white porthole-card p-4 text-center">
             <p class="text-2xl font-bold text-gray-400">{{ free_accounts }}</p>
-            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">Free</p>
+            <p class="text-xs ui-muted">Free</p>
         </div>
         <div class="bg-white porthole-card p-4 text-center {% if stale_webhook_count > 0 %}border-2 border-amber-400{% endif %}">
             <p class="text-2xl font-bold {% if stale_webhook_count > 0 %}text-amber-600{% else %}text-green-600{% endif %}">{{ stale_webhook_count }}</p>
-            <p class="text-xs" style="color: var(--navy-deep); opacity:0.6;">{{ t('admin_billing.stale_webhooks') }}</p>
+            <p class="text-xs ui-muted">{{ t('admin_billing.stale_webhooks') }}</p>
         </div>
     </div>
 
     <div class="bg-white porthole-card p-6">
         <form method="get" action="/admin/billing" class="flex flex-col sm:flex-row gap-3 mb-6">
-            <input type="text" name="q" value="{{ q }}" placeholder="{{ t('admin_billing.search_placeholder') }}" class="flex-1 px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-            <select name="plan" class="px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+            <input type="text" name="q" value="{{ q }}" placeholder="{{ t('admin_billing.search_placeholder') }}" class="flex-1 px-3 py-2 border rounded-lg" style="border-color: var(--border);">
+            <select name="plan" class="px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                 <option value="">{{ t('admin_billing.all_plans') }}</option>
                 <option value="FREE" {% if plan_filter == "FREE" %}selected{% endif %}>Free</option>
                 <option value="SKIPPER_PLUS" {% if plan_filter == "SKIPPER_PLUS" %}selected{% endif %}>Skipper Plus</option>
             </select>
-            <select name="status" class="px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+            <select name="status" class="px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                 <option value="">{{ t('admin_billing.all_status') }}</option>
                 <option value="ACTIVE" {% if status_filter == "ACTIVE" %}selected{% endif %}>Active</option>
                 <option value="PAST_DUE" {% if status_filter == "PAST_DUE" %}selected{% endif %}>Past Due</option>
                 <option value="CANCELED" {% if status_filter == "CANCELED" %}selected{% endif %}>Canceled</option>
             </select>
-            <button type="submit" class="text-white px-4 py-2 rounded-lg font-semibold" style="background: var(--ocean-blue);">🔍 {{ t('admin_billing.filter') }}</button>
+            <button type="submit" class="text-white px-4 py-2 rounded-lg font-semibold" style="background: var(--accent);">🔍 {{ t('admin_billing.filter') }}</button>
         </form>
 
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
-                <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
+                <thead style="background: var(--surface-2);">
                     <tr>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_id') }}</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_account') }}</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_owner') }}</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_plan') }}</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_status') }}</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_renewal') }}</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_webhook') }}</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_stripe_ids') }}</th>
-                        <th class="px-4 py-3 text-left font-medium" style="color: var(--navy-deep);">{{ t('admin_billing.col_actions') }}</th>
+                        <th class="px-4 py-3 text-left font-medium">{{ t('admin_billing.col_id') }}</th>
+                        <th class="px-4 py-3 text-left font-medium">{{ t('admin_billing.col_account') }}</th>
+                        <th class="px-4 py-3 text-left font-medium">{{ t('admin_billing.col_owner') }}</th>
+                        <th class="px-4 py-3 text-left font-medium">{{ t('admin_billing.col_plan') }}</th>
+                        <th class="px-4 py-3 text-left font-medium">{{ t('admin_billing.col_status') }}</th>
+                        <th class="px-4 py-3 text-left font-medium">{{ t('admin_billing.col_renewal') }}</th>
+                        <th class="px-4 py-3 text-left font-medium">{{ t('admin_billing.col_webhook') }}</th>
+                        <th class="px-4 py-3 text-left font-medium">{{ t('admin_billing.col_stripe_ids') }}</th>
+                        <th class="px-4 py-3 text-left font-medium">{{ t('admin_billing.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-sky-200">
                     {% for row in rows %}
                     <tr class="hover:bg-sky-50 transition">
                         <td class="px-4 py-3">{{ row.account_id }}</td>
-                        <td class="px-4 py-3 font-semibold" style="color: var(--navy-deep);">{{ row.account_name }}</td>
+                        <td class="px-4 py-3 font-semibold">{{ row.account_name }}</td>
                         <td class="px-4 py-3">{{ row.owner_email or "—" }}</td>
                         <td class="px-4 py-3">
                             {% if row.plan and row.plan.value == "SKIPPER_PLUS" %}
-                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold text-white" style="background: var(--sea-foam);">Plus</span>
+                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold text-white" style="background: var(--success);">Plus</span>
                             {% else %}
                             <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold bg-gray-200 text-gray-600">Free</span>
                             {% endif %}
@@ -103,7 +103,7 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex flex-col gap-1">
-                                <a href="/admin/billing/account/{{ row.account_id }}" class="text-xs font-semibold hover:underline" style="color: var(--ocean-blue);">Details</a>
+                                <a href="/admin/billing/account/{{ row.account_id }}" class="text-xs font-semibold hover:underline" style="color: var(--accent);">Details</a>
                                 {% if row.stripe_subscription_id %}
                                 <form hx-post="/admin/billing/reconcile/{{ row.account_id }}" hx-target="#reconcile-{{ row.account_id }}" hx-swap="innerHTML" class="m-0">
                                     {{ csrf_input | safe }}

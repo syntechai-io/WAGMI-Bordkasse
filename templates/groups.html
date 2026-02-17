@@ -3,14 +3,14 @@
 {% block content %}
 <div class="space-y-6">
     <!-- Breadcrumb navigation -->
-    <div class="text-sm" style="color: var(--navy-deep); opacity: 0.7;">
+    <div class="text-sm text-secondary" style="opacity: 0.7;">
         <a href="/" class="hover:underline">🧭 {{ t('nav.dashboard') }}</a> 
         <span class="mx-2">/</span>
         <span class="font-semibold">👥 {{ t('group.title') }}</span>
     </div>
 
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">👥 {{ t('group.title') }}</h1>
+        <h1 class="text-3xl font-bold maritime-header">👥 {{ t('group.title') }}</h1>
     </div>
 
     <!-- Success messages -->
@@ -52,34 +52,34 @@
     <!-- Create Group Form (Admin Only) -->
     {% if is_admin and is_editable %}
     <div class="bg-white porthole-card p-6">
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ {{ t('group.create_title') }}</h2>
+        <h2 class="text-xl font-bold maritime-header mb-4">➕ {{ t('group.create_title') }}</h2>
         <form method="post" action="/groups/create" class="space-y-4">
             {{ csrf_input | safe }}
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👥 {{ t('group.group_name') }}</label>
+                    <label class="block text-sm font-medium mb-1">👥 {{ t('group.group_name') }}</label>
                     <input type="text" name="group_name" required placeholder="{{ t('group.group_name_placeholder') }}" 
-                           class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
-                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('group.group_name_hint') }}</p>
+                           class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
+                    <p class="text-xs mt-1 ui-muted">💡 {{ t('group.group_name_hint') }}</p>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👑 {{ t('group.representative') }}</label>
+                    <label class="block text-sm font-medium mb-1">👑 {{ t('group.representative') }}</label>
                     <select name="representative_id" id="representative_id" required 
-                            class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                            class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                         <option value="">{{ t('group.select_representative') }}</option>
                         {% for member in crew_members %}
                         <option value="{{ member.id }}">{{ member.code }} - {{ member.name }}</option>
                         {% endfor %}
                     </select>
-                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('group.representative_hint') }}</p>
+                    <p class="text-xs mt-1 ui-muted">💡 {{ t('group.representative_hint') }}</p>
                 </div>
             </div>
             
             <div>
-                <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">👥 {{ t('group.members_label') }}</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-3 border rounded-lg" style="border-color: var(--sky-blue); background: rgba(135, 206, 235, 0.05);">
+                <label class="block text-sm font-medium mb-2">👥 {{ t('group.members_label') }}</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-3 border rounded-lg" style="border-color: var(--border); background: var(--surface-2);">
                     {% for member in crew_members %}
                     <label class="flex items-center space-x-2 p-2 hover:bg-white rounded transition cursor-pointer">
                         <input type="checkbox" name="member_checkbox" value="{{ member.id }}" 
@@ -89,7 +89,7 @@
                     {% endfor %}
                 </div>
                 <input type="hidden" name="member_ids" id="member_ids">
-                <p class="text-xs mt-2" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('group.rep_auto_included') }}</p>
+                <p class="text-xs mt-2 ui-muted">💡 {{ t('group.rep_auto_included') }}</p>
             </div>
             
             <button type="submit" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
@@ -103,33 +103,31 @@
 
     <!-- Existing Groups -->
     <div class="bg-white porthole-card overflow-hidden">
-        <div class="px-6 py-4" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
-            <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">📋 {{ t('group.existing_groups') }}</h2>
+        <div class="px-6 py-4" style="background: var(--surface-2); border-bottom: 1px solid var(--border);">
+            <h2 class="text-xl font-bold maritime-header">📋 {{ t('group.existing_groups') }}</h2>
         </div>
         
         {% if groups %}
-        <div class="divide-y divide-sky-200">
+        <div class="divide-y" style="border-color: var(--border);">
             {% for group in groups %}
-            <div class="p-6 hover:bg-sky-50 transition">
+            <div class="p-6 hover:bg-gray-50 transition">
                 <div class="flex justify-between items-start mb-3">
                     <div>
-                        <h3 class="text-lg font-bold" style="color: var(--ocean-blue);">👥 {{ group.name }}</h3>
-                        <p class="text-sm mt-1" style="color: var(--navy-deep); opacity: 0.7;">
+                        <h3 class="text-lg font-bold" style="color: var(--accent);">👥 {{ group.name }}</h3>
+                        <p class="text-sm mt-1 ui-muted">
                             👑 <strong>{{ t('group.representative') }}:</strong> {{ group.representative }}
                         </p>
                     </div>
                     {% if is_admin and is_editable %}
                     <div class="flex space-x-2">
                         <button onclick="editGroup({{ group.id }}, '{{ group.name }}', {{ group.member_ids }}, {{ group.representative_id }})" 
-                                class="px-3 py-1 rounded-lg text-sm font-semibold text-white transition hover:scale-105"
-                                style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+                                class="btn btn-primary px-3 py-1 text-sm">
                             ✏️ {{ t('common.edit') }}
                         </button>
                         <form action="/groups/{{ group.id }}/delete" method="post" class="inline" 
                               onsubmit="return confirm('Delete group \'{{ group.name }}\'? Members will become independent again.')">
                             {{ csrf_input | safe }}
-                            <button type="submit" class="px-3 py-1 rounded-lg text-sm font-semibold text-white transition hover:scale-105"
-                                    style="background: linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%);">
+                            <button type="submit" class="btn btn-danger px-3 py-1 text-sm">
                                 🗑️ {{ t('common.delete') }}
                             </button>
                         </form>
@@ -137,18 +135,17 @@
                     {% endif %}
                 </div>
                 
-                <div class="flex items-center space-x-4 text-sm" style="color: var(--navy-deep);">
-                    <span class="px-3 py-1 rounded-full text-white font-semibold" 
-                          style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                <div class="flex items-center space-x-4 text-sm">
+                    <span class="tag-success px-3 py-1 rounded-full font-semibold">
                         👥 {{ group.member_count }} members
                     </span>
-                    <span class="opacity-70">{{ group.member_names | join(', ') }}</span>
+                    <span class="ui-muted">{{ group.member_names | join(', ') }}</span>
                 </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <div class="p-6 text-center" style="color: var(--navy-deep); opacity: 0.7;">
+        <div class="p-6 text-center ui-muted">
             <p class="text-lg">📭 {{ t('group.no_groups') }}</p>
             {% if is_admin %}
             <p class="text-sm mt-2">{{ t('group.no_groups_admin') }}</p>
@@ -162,15 +159,15 @@
     <!-- Ungrouped Members -->
     {% if ungrouped_members %}
     <div class="bg-white porthole-card overflow-hidden">
-        <div class="px-6 py-4" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
-            <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ {{ t('group.ungrouped_members') }}</h2>
+        <div class="px-6 py-4" style="background: var(--surface-2); border-bottom: 1px solid var(--border);">
+            <h2 class="text-xl font-bold maritime-header">⚓ {{ t('group.ungrouped_members') }}</h2>
         </div>
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {% for member in ungrouped_members %}
-                <div class="p-3 border rounded-lg" style="border-color: var(--sky-blue); background: rgba(135, 206, 235, 0.05);">
-                    <span class="font-semibold" style="color: var(--ocean-blue);">{{ member.code }}</span>
-                    <span class="ml-2" style="color: var(--navy-deep);">{{ member.name }}</span>
+                <div class="p-3 border rounded-lg" style="border-color: var(--border); background: var(--surface-2);">
+                    <span class="font-semibold" style="color: var(--accent);">{{ member.code }}</span>
+                    <span class="ml-2">{{ member.name }}</span>
                 </div>
                 {% endfor %}
             </div>
@@ -179,9 +176,9 @@
     {% endif %}
 
     <!-- Help Section -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg porthole-card p-6">
-        <h3 class="text-lg font-bold mb-3" style="color: var(--navy-deep);">💡 {{ t('group.about_title') }}</h3>
-        <div class="space-y-2 text-sm" style="color: var(--navy-deep);">
+    <div class="porthole-card p-6" style="background: var(--surface-2); border: 1px solid var(--border);">
+        <h3 class="text-lg font-bold mb-3">💡 {{ t('group.about_title') }}</h3>
+        <div class="space-y-2 text-sm">
             <p>• {{ t('group.about_1') }}</p>
             <p>• {{ t('group.about_2') }}</p>
             <p>• {{ t('group.about_3') }}</p>
@@ -197,7 +194,7 @@
     <div class="bg-white rounded-lg porthole-card max-w-2xl w-full max-h-screen overflow-y-auto">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold maritime-header" style="color: var(--navy-deep);">✏️ {{ t('group.edit_title') }}</h2>
+                <h2 class="text-2xl font-bold maritime-header">✏️ {{ t('group.edit_title') }}</h2>
                 <button onclick="closeEditModal()" class="text-2xl hover:text-red-500">&times;</button>
             </div>
             
@@ -205,15 +202,15 @@
                 {{ csrf_input | safe }}
                 
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👥 {{ t('group.group_name') }}</label>
+                    <label class="block text-sm font-medium mb-1">👥 {{ t('group.group_name') }}</label>
                     <input type="text" id="edit_group_name" readonly 
-                           class="w-full px-3 py-2 border rounded-lg bg-gray-100" style="border-color: var(--sky-blue);">
-                    <p class="text-xs mt-1" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('group.name_readonly_hint') }}</p>
+                           class="w-full px-3 py-2 border rounded-lg bg-gray-100" style="border-color: var(--border);">
+                    <p class="text-xs mt-1 ui-muted">💡 {{ t('group.name_readonly_hint') }}</p>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">👥 {{ t('group.edit_members') }}</label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto p-3 border rounded-lg" style="border-color: var(--sky-blue); background: rgba(135, 206, 235, 0.05);">
+                    <label class="block text-sm font-medium mb-2">👥 {{ t('group.edit_members') }}</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto p-3 border rounded-lg" style="border-color: var(--border); background: var(--surface-2);">
                         {% for member in crew_members %}
                         <label class="flex items-center space-x-2 p-2 hover:bg-white rounded transition cursor-pointer">
                             <input type="checkbox" name="edit_member_checkbox" value="{{ member.id }}" 
@@ -230,8 +227,7 @@
                         ✅ {{ t('group.update_members') }}
                     </button>
                     <button type="button" onclick="closeEditModal()" 
-                            class="flex-1 px-6 py-2 rounded-lg font-semibold transition" 
-                            style="background: #e0e0e0; color: var(--navy-deep);">
+                            class="flex-1 btn btn-secondary">
                         ❌ {{ t('common.cancel') }}
                     </button>
                 </div>

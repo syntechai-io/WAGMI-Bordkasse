@@ -5,7 +5,7 @@
     <div class="flex items-center justify-between">
         <h1 class="ui-title maritime-header" style="margin-bottom: 0;">⛵ {{ t('trips.title') }}</h1>
         {% if request.session.get('role') == 'admin' or is_saas_owner %}
-        <a href="/trips/yearly/report" class="text-white px-4 py-2 rounded-lg hover:shadow-lg transition font-semibold" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+        <a href="/trips/yearly/report" class="text-white px-4 py-2 rounded-lg hover:shadow-lg transition font-semibold" style="background: var(--accent);">
             📊 {{ branding.brand_name }} {{ t('trips.yearly_overview') }}
         </a>
         {% endif %}
@@ -15,7 +15,7 @@
     <div class="rounded-xl p-4" style="background: #fef3c7; border: 1px solid #f59e0b;">
         <p class="font-semibold" style="color: #92400e;">⚠️ {{ t('billing.over_limit_title') }}</p>
         <p class="text-sm mt-1" style="color: #92400e;">{{ t('billing.over_limit_info') }}</p>
-        <a href="/billing" class="inline-block mt-2 text-white px-4 py-2 rounded-lg font-semibold text-sm" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+        <a href="/billing" class="inline-block mt-2 text-white px-4 py-2 rounded-lg font-semibold text-sm" style="background: var(--accent);">
             {{ t('billing.over_limit_upgrade') }}
         </a>
     </div>
@@ -25,7 +25,7 @@
     <div class="bg-white porthole-card p-6">
         <div class="flex flex-col md:flex-row gap-4 mb-4">
             <div class="flex-1">
-                <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">➕ {{ t('trips.create_title') }}</h2>
+                <h2 class="text-xl font-bold maritime-header">➕ {{ t('trips.create_title') }}</h2>
             </div>
             <div>
                 <form method="post" action="/trips/quick-start" class="inline">
@@ -34,80 +34,80 @@
                         ⚡ {{ t('trips.quick_start') }} {{ branding.brand_name }}
                     </button>
                 </form>
-                <p class="text-xs mt-1 text-center" style="color: var(--navy-deep); opacity: 0.7;">{{ t('trips.quick_start_hint') }}</p>
+                <p class="text-xs mt-1 text-center ui-muted">{{ t('trips.quick_start_hint') }}</p>
             </div>
         </div>
         <form method="post" action="/trips/new" class="space-y-4">
             {{ csrf_input | safe }}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">⛵ {{ t('trips.name_label') }}</label>
-                    <input type="text" name="name" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);" placeholder="{{ t('trips.name_placeholder') }}">
+                    <label class="block text-sm font-medium mb-1">⛵ {{ t('trips.name_label') }}</label>
+                    <input type="text" name="name" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);" placeholder="{{ t('trips.name_placeholder') }}">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 {{ t('trips.start_date') }}</label>
-                    <input type="date" name="start_date" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <label class="block text-sm font-medium mb-1">📅 {{ t('trips.start_date') }}</label>
+                    <input type="date" name="start_date" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                 </div>
                 <div class="flex items-end">
-                    <button type="submit" class="w-full text-white px-6 py-2 rounded-lg transition touch-action font-semibold" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%);">
+                    <button type="submit" class="w-full text-white px-6 py-2 rounded-lg transition touch-action font-semibold" style="background: var(--success);">
                         ✅ {{ t('trips.create_submit') }}
                     </button>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 p-3 rounded-lg" style="background: rgba(135, 206, 235, 0.1);">
-                <input type="checkbox" name="solo_sailing" id="solo_sailing" value="true" class="w-4 h-4" style="accent-color: var(--ocean-blue);">
-                <label for="solo_sailing" class="text-sm font-medium cursor-pointer" style="color: var(--navy-deep);">
+            <div class="flex items-center space-x-2 p-3 rounded-lg" style="background: var(--surface-2);">
+                <input type="checkbox" name="solo_sailing" id="solo_sailing" value="true" class="w-4 h-4" style="accent-color: var(--accent);">
+                <label for="solo_sailing" class="text-sm font-medium cursor-pointer">
                     👤 {{ t('trips.solo_sailing') }}
                 </label>
             </div>
         </form>
-        <p class="text-sm mt-2" style="color: var(--navy-deep); opacity: 0.7;">{{ t('trips.create_hint') }}</p>
+        <p class="text-sm mt-2 ui-muted">{{ t('trips.create_hint') }}</p>
     </div>
 
     <div class="rope-divider"></div>
     {% endif %}
 
     <div class="bg-white porthole-card overflow-hidden">
-        <div class="p-6 mb-4" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
-            <h2 class="text-xl font-bold maritime-header" style="color: var(--navy-deep);">📋 {{ t('trips.all_trips') }}</h2>
+        <div class="p-6 mb-4" style="background: var(--surface-2);">
+            <h2 class="text-xl font-bold maritime-header">📋 {{ t('trips.all_trips') }}</h2>
         </div>
         
         <div class="overflow-x-auto">
             <table class="min-w-full">
-                <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
+                <thead style="background: var(--surface-2);">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('trips.col_name') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('trips.col_start') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('trips.col_end') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('trips.col_status') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('trips.col_actions') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_name') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_start') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_end') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_status') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-sky-200">
                     {% for trip in trips %}
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--navy-deep);">
+                        <td class="px-6 py-4 whitespace-nowrap font-semibold">
                             {{ trip.name }}
                             {% if trip.id == active_trip.id %}
-                            <span class="ml-2 text-xs px-2 py-1 rounded-full" style="background: var(--sea-foam); color: white;">{{ t('trips.status_active') }}</span>
+                            <span class="ml-2 text-xs px-2 py-1 rounded-full" style="background: var(--success); color: white;">{{ t('trips.status_active') }}</span>
                             {% endif %}
                             {% if trip.is_closed == 1 %}
                             <span class="ml-2 text-xs px-2 py-1 rounded-full" style="background: var(--coral); color: white;">🔒 {{ t('trips.status_closed') }}</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ trip.start_date }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap" style="color: var(--navy-deep);">{{ trip.end_date or '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ trip.start_date }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ trip.end_date or '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             {% if trip.status.value == 'active' %}
-                            <span class="px-3 py-1 rounded-lg font-semibold" style="background: linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%); color: white;">{{ t('trips.status_active') }}</span>
+                            <span class="px-3 py-1 rounded-lg font-semibold" style="background: var(--success); color: white;">{{ t('trips.status_active') }}</span>
                             {% else %}
-                            <span class="px-3 py-1 rounded-lg font-semibold" style="background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.2) 100%); color: var(--navy-deep);">{{ t('trips.status_archived') }}</span>
+                            <span class="px-3 py-1 rounded-lg font-semibold" style="background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.2) 100%);">{{ t('trips.status_archived') }}</span>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                             <form action="/trips/{{ trip.id }}/select" method="post" class="inline">
                                 {{ csrf_input | safe }}
-                                <button type="submit" class="hover:underline touch-action" style="color: var(--ocean-blue);">👁️ {{ t('trips.action_view') }}</button>
+                                <button type="submit" class="hover:underline touch-action" style="color: var(--accent);">👁️ {{ t('trips.action_view') }}</button>
                             </form>
                             
                             {% if request.session.get('role') == 'admin' or is_saas_owner %}
@@ -119,19 +119,19 @@
                                 {% else %}
                                 <form action="/trips/{{ trip.id }}/reopen" method="post" class="inline">
                                     {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action" style="color: var(--sea-foam);" title="{{ t('trips.help_reopen') }}">🔓 {{ t('trips.action_reopen') }}</button>
+                                    <button type="submit" class="hover:underline touch-action" style="color: var(--success);" title="{{ t('trips.help_reopen') }}">🔓 {{ t('trips.action_reopen') }}</button>
                                 </form>
                                 {% endif %}
                                 
                                 {% if trip.status.value == 'archived' %}
                                 <form action="/trips/{{ trip.id }}/activate" method="post" class="inline">
                                     {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action" style="color: var(--ocean-blue);">✅ {{ t('trips.action_activate') }}</button>
+                                    <button type="submit" class="hover:underline touch-action" style="color: var(--accent);">✅ {{ t('trips.action_activate') }}</button>
                                 </form>
                                 {% elif trip.id != active_trip.id %}
                                 <form action="/trips/{{ trip.id }}/archive" method="post" class="inline" onsubmit="return confirm('{{ t('trips.confirm_archive') }}')">
                                     {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action" style="color: var(--navy-deep);">📦 {{ t('trips.action_archive') }}</button>
+                                    <button type="submit" class="hover:underline touch-action">📦 {{ t('trips.action_archive') }}</button>
                                 </form>
                                 {% endif %}
                             {% endif %}
@@ -147,11 +147,11 @@
     <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-lg p-4">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-                <p class="font-bold" style="color: var(--navy-deep);">🚀 {{ t('trips.upgrade_title') }}</p>
-                <p class="text-sm mt-1" style="color: var(--navy-deep); opacity: 0.8;">{{ t('trips.upgrade_desc') }}</p>
+                <p class="font-bold">🚀 {{ t('trips.upgrade_title') }}</p>
+                <p class="text-sm mt-1 ui-muted">{{ t('trips.upgrade_desc') }}</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="startCheckout('monthly')" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+                <button onclick="startCheckout('monthly')" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: var(--accent);">
                     {{ t('trips.upgrade_monthly') }}
                 </button>
                 <button onclick="startCheckout('yearly')" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
@@ -164,10 +164,10 @@
     <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-4">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-                <p class="font-bold" style="color: var(--navy-deep);">✅ {{ t('trips.active_plan') }}</p>
-                <p class="text-sm mt-1" style="color: var(--navy-deep); opacity: 0.8;">{{ t('trips.active_plan_desc') }}</p>
+                <p class="font-bold">✅ {{ t('trips.active_plan') }}</p>
+                <p class="text-sm mt-1 ui-muted">{{ t('trips.active_plan_desc') }}</p>
             </div>
-            <button onclick="openBillingPortal()" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+            <button onclick="openBillingPortal()" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: var(--accent);">
                 {{ t('trips.manage_sub') }}
             </button>
         </div>
@@ -175,8 +175,8 @@
     {% endif %}
 
     <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-        <p class="text-sm font-semibold mb-2" style="color: var(--navy-deep);">💡 {{ t('trips.help_title') }}</p>
-        <ul class="text-sm space-y-1" style="color: var(--navy-deep);">
+        <p class="text-sm font-semibold mb-2">💡 {{ t('trips.help_title') }}</p>
+        <ul class="text-sm space-y-1">
             <li><strong>👁️ {{ t('trips.action_view') }}:</strong> {{ t('trips.help_view') }}</li>
             {% if request.session.get('role') == 'admin' or is_saas_owner %}
             <li><strong>🔒 {{ t('trips.action_close') }}:</strong> {{ t('trips.help_close') }}</li>

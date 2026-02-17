@@ -2,19 +2,19 @@
 
 {% block content %}
 <div class="space-y-6">
-    <h1 class="text-3xl font-bold maritime-header" style="color: var(--navy-deep);">⚓ {{ t('expense.title') }}</h1>
+    <h1 class="text-3xl font-bold maritime-header">⚓ {{ t('expense.title') }}</h1>
     
     <div class="bg-white porthole-card p-6">
-        <h2 class="text-xl font-bold maritime-header mb-4" style="color: var(--navy-deep);">➕ {{ t('expense.new_expense') }}</h2>
+        <h2 class="text-xl font-bold maritime-header mb-4">➕ {{ t('expense.new_expense') }}</h2>
         <form method="post" action="/expenses/new" enctype="multipart/form-data" class="space-y-4">
             {{ csrf_input | safe }}
             
             {% if expense_templates %}
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">
+                <label class="block text-sm font-medium mb-2">
                     📋 {{ t('expense.quick_template') }}
                 </label>
-                <select id="template_selector" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                <select id="template_selector" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                     <option value="">{{ t('expense.manual_entry') }}</option>
                     {% for template in expense_templates %}
                     <option value="{{ template.id }}" 
@@ -28,14 +28,14 @@
                     </option>
                     {% endfor %}
                 </select>
-                <p class="text-xs mt-2" style="color: var(--navy-deep); opacity: 0.7;">💡 {{ t('expense.template_hint') }}</p>
+                <p class="text-xs mt-2 ui-muted">💡 {{ t('expense.template_hint') }}</p>
             </div>
             {% endif %}
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👤 {{ t('expense.paid_by') }}</label>
-                    <select name="payer_id" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <label class="block text-sm font-medium mb-1">👤 {{ t('expense.paid_by') }}</label>
+                    <select name="payer_id" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                         <option value="">🌐 {{ t('expense.external_charge') }}</option>
                         {% for member in crew_members %}
                         <option value="{{ member.id }}">{{ member.code }} - {{ member.name }}</option>
@@ -43,24 +43,24 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📅 {{ t('common.date') }}</label>
-                    <input type="date" name="expense_date" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <label class="block text-sm font-medium mb-1">📅 {{ t('common.date') }}</label>
+                    <input type="date" name="expense_date" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📂 {{ t('common.category') }}</label>
-                    <select name="category" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <label class="block text-sm font-medium mb-1">📂 {{ t('common.category') }}</label>
+                    <select name="category" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                         {% for cat in categories %}
                         <option value="{{ cat }}">{% if cat == 'Proviant' %}{{ t('expense.cat_proviant') }}{% elif cat == 'Getränke' %}{{ t('expense.cat_getraenke') }}{% elif cat == 'Mooring' %}{{ t('expense.cat_mooring') }}{% elif cat == 'Diesel' %}{{ t('expense.cat_diesel') }}{% elif cat == 'Wasser' %}{{ t('expense.cat_wasser') }}{% elif cat == 'Strom' %}{{ t('expense.cat_strom') }}{% elif cat == 'Gas' %}{{ t('expense.cat_gas') }}{% elif cat == 'Taxi/Transfer' %}{{ t('expense.cat_taxi') }}{% elif cat == 'Restaurant' %}{{ t('expense.cat_restaurant') }}{% elif cat == 'Eintritte' %}{{ t('expense.cat_eintritte') }}{% elif cat == 'Sonstiges' %}{{ t('expense.cat_sonstiges') }}{% else %}{{ cat }}{% endif %}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💵 {{ t('common.amount') }}</label>
-                    <input type="number" name="amount" step="0.01" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <label class="block text-sm font-medium mb-1">💵 {{ t('common.amount') }}</label>
+                    <input type="number" name="amount" step="0.01" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💱 {{ t('common.currency') }}</label>
-                    <select name="currency" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <label class="block text-sm font-medium mb-1">💱 {{ t('common.currency') }}</label>
+                    <select name="currency" class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                         <option value="EUR" selected>EUR (€)</option>
                         <option value="DKK">DKK (kr)</option>
                         <option value="SEK">SEK (kr)</option>
@@ -68,26 +68,26 @@
                     </select>
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📝 {{ t('common.description') }}</label>
-                    <input type="text" name="description" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <label class="block text-sm font-medium mb-1">📝 {{ t('common.description') }}</label>
+                    <input type="text" name="description" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">💰 {{ t('expense.paid_from') }}</label>
-                    <select name="paid_from" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <label class="block text-sm font-medium mb-1">💰 {{ t('expense.paid_from') }}</label>
+                    <select name="paid_from" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                         <option value="private" selected>{{ t('common.private') }}</option>
                         <option value="wallet">{{ t('common.wallet') }}</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">🎯 {{ t('expense.split_mode') }}</label>
-                    <select name="split_mode" id="split_mode" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--sky-blue);">
+                    <label class="block text-sm font-medium mb-1">🎯 {{ t('expense.split_mode') }}</label>
+                    <select name="split_mode" id="split_mode" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
                         <option value="equal">{{ t('expense.split_equal') }}</option>
                         <option value="participants">{{ t('expense.split_participants') }}</option>
                         <option value="percentage">{{ t('expense.split_percentage') }}</option>
                     </select>
                 </div>
                 <div id="participants_div" class="md:col-span-2 hidden">
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">👥 {{ t('expense.participants') }}</label>
+                    <label class="block text-sm font-medium mb-1">👥 {{ t('expense.participants') }}</label>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {% for member in crew_members %}
                         <label class="flex items-center space-x-2">
@@ -98,8 +98,8 @@
                     </div>
                 </div>
                 <div id="percentage_div" class="md:col-span-2 hidden">
-                    <label class="block text-sm font-medium mb-1" style="color: var(--navy-deep);">📊 {{ t('expense.split_percentage') }}</label>
-                    <p class="text-sm mb-2" style="color: var(--navy-deep); opacity: 0.8;">{{ t('expense.percentage_must_100') }}</p>
+                    <label class="block text-sm font-medium mb-1">📊 {{ t('expense.split_percentage') }}</label>
+                    <p class="text-sm mb-2 ui-muted">{{ t('expense.percentage_must_100') }}</p>
                     <div class="space-y-3">
                         {% for member in crew_members %}
                         <div class="flex items-center gap-3">
@@ -115,9 +115,9 @@
                                     step="0.01" 
                                     value="0"
                                     class="w-20 px-2 py-1 border rounded-lg percentage-input" 
-                                    style="border-color: var(--sky-blue);"
+                                    style="border-color: var(--border);"
                                     data-member-id="{{ member.id }}">
-                                <span class="text-sm" style="color: var(--navy-deep);">%</span>
+                                <span class="text-sm">%</span>
                             </div>
                         </div>
                         {% endfor %}
@@ -131,21 +131,21 @@
             <div class="rope-divider"></div>
             
             <div>
-                <label class="block text-sm font-medium mb-2" style="color: var(--navy-deep);">📎 {{ t('expense.receipt_optional') }}</label>
+                <label class="block text-sm font-medium mb-2">📎 {{ t('expense.receipt_optional') }}</label>
                 <input type="file" id="receiptInput" accept="image/*,.pdf" class="hidden">
                 <div class="flex gap-3">
                     <button type="button" onclick="activateReceiptCamera()" 
                             class="flex-1 text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-center"
-                            style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+                            style="background: var(--accent);">
                         📷 {{ t('common.camera') }}
                     </button>
                     <button type="button" onclick="activateReceiptFile()" 
                             class="flex-1 text-white px-4 py-2 rounded-lg transition touch-action font-semibold text-center"
-                            style="background: linear-gradient(135deg, var(--navy-deep) 0%, #0d1f3d 100%);">
+                            style="background: var(--muted);">
                         📁 {{ t('common.file') }}
                     </button>
                 </div>
-                <p id="receiptFileName" class="text-sm mt-2" style="color: var(--navy-deep); opacity: 0.7;"></p>
+                <p id="receiptFileName" class="text-sm mt-2 ui-muted"></p>
             </div>
             
             <button type="submit" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
@@ -166,20 +166,20 @@
     <div class="bg-white porthole-card overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full">
-                <thead style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(135, 206, 235, 0.1) 100%);">
+                <thead style="background: var(--surface-2);">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_date') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_paid_by') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_category') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_description') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_amount') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_source') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color: var(--navy-deep);">{{ t('expense.col_actions') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('expense.col_date') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('expense.col_paid_by') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('expense.col_category') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('expense.col_description') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('expense.col_amount') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('expense.col_source') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('expense.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody id="expensesTableBody" class="divide-y divide-sky-200">
                     {% for expense in expenses %}
-                    <tr style="transition: background-color 0.2s;" onmouseover="this.style.background='rgba(135, 206, 235, 0.05)'" onmouseout="this.style.background='transparent'">
+                    <tr style="transition: background-color 0.2s;" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background='transparent'">
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">{{ expense.date }}</td>
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">
                             {% if expense.payer %}{{ expense.payer.code }}{% else %}🌐 External{% endif %}
@@ -194,12 +194,12 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap cursor-pointer" onclick="window.location='/expenses/{{ expense.id }}'">
-                            <span class="px-2 py-1 text-xs rounded-full {% if expense.paid_from.value == 'wallet' %}text-white{% else %}text-white{% endif %}" style="background: {% if expense.paid_from.value == 'wallet' %}linear-gradient(135deg, var(--sea-foam) 0%, #27ae60 100%){% else %}linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%){% endif %};">
+                            <span class="px-2 py-1 text-xs rounded-full {% if expense.paid_from.value == 'wallet' %}text-white{% else %}text-white{% endif %}" style="background: {% if expense.paid_from.value == 'wallet' %}linear-gradient(135deg, var(--success) 0%, #27ae60 100%){% else %}linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%){% endif %};">
                                 {% if expense.paid_from.value == 'wallet' %}{{ t('common.wallet') }}{% else %}{{ t('common.private') }}{% endif %}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                            <a href="/expenses/{{ expense.id }}/edit" class="hover:underline touch-action" onclick="event.stopPropagation()" style="color: var(--ocean-blue);">✏️ {{ t('common.edit') }}</a>
+                            <a href="/expenses/{{ expense.id }}/edit" class="hover:underline touch-action" onclick="event.stopPropagation()" style="color: var(--accent);">✏️ {{ t('common.edit') }}</a>
                             <form action="/expenses/{{ expense.id }}/delete" method="post" class="inline" onsubmit="event.stopPropagation(); return confirm('{{ t('common.confirm_delete_expense') }}')">
                                 {{ csrf_input | safe }}
                                 <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
@@ -302,7 +302,7 @@
                     const preview = document.createElement('img');
                     preview.src = ev.target.result;
                     preview.className = 'mt-2 max-w-xs max-h-48 rounded-lg border-2';
-                    preview.style.borderColor = 'var(--sea-foam)';
+                    preview.style.borderColor = 'var(--success)';
                     
                     // Remove old preview if exists
                     const oldPreview = fileName.parentElement.querySelector('img');
