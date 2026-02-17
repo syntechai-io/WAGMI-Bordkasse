@@ -1,0 +1,119 @@
+Implement Calm Maritime v3 Desktop Design System (Dark Navy + Light Grey) as a DESKTOP-ONLY CSS skin.
+
+HARD CONSTRAINTS (must follow):
+- Desktop only: ALL new/changed CSS rules must be inside @media (min-width: 1024px)
+- Do NOT touch mobile behavior or layout
+- Do NOT modify backend, routes, template structure, or JS behavior
+- Visual changes only (CSS + linking the CSS + SW cache bump)
+- Do NOT remove existing functionality
+- Ensure there is NEVER black/dark text on navy header/footer (guardrail required)
+
+TASKS:
+
+1) Create/Update a single desktop-only CSS skin file:
+- File: static/ui_desktop_skin.css
+- Add/ensure ALL rules are scoped inside:
+  @media (min-width: 1024px) { ... }
+
+2) Topbar/Header (premium feel):
+- Keep the dark navy brand background for header/topbar:
+  --navy-shell: #1E2F45
+- Set topbar height to 68px (not 56/64)
+- Add subtle separator/shadow at bottom of topbar:
+  box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+- Increase horizontal padding slightly for breathing room (desktop only)
+- Slightly enlarge logo/icon and spacing next to “CrewLog”
+- Active nav item:
+  use a clean 2px bottom border in accent blue (no heavy background pill):
+  --accent-blue: #2C6BED
+  border-bottom: 2px solid var(--accent-blue);
+
+3) GUARDAIL (mandatory): prevent any “black on navy” in header/footer forever
+- In the same desktop skin CSS (inside the desktop media query), add a scoped guardrail that forces near-white text inside the navy header/footer shells ONLY.
+- Implement it as:
+  .navy-shell, .navy-shell * { color: #F8FAFC !important; }
+  (Apply to header + footer containers that use the navy shell class; do NOT apply this globally to content.)
+
+4) Page background + typography (desktop):
+- Set page/canvas background to a calm light grey:
+  --canvas-grey: #F3F4F6
+- Set main body text to dark slate (NOT pure black):
+  --text-primary: #1F2937
+- Secondary/muted text:
+  --text-secondary: #64748B
+- Ensure headings use --text-primary (no black on navy situations; guardrail already covers header/footer)
+
+5) Cards (desktop):
+- Normalize ALL card-like containers to:
+  background: #FFFFFF
+  border-radius: 16px
+  border: 1px solid #E5E7EB (soft)
+  box-shadow: 0 6px 24px rgba(16,24,40,0.06)
+- Remove/neutralize “multi-colored” borders/headers/backgrounds (blue/green/purple card frames), converting them to the unified card styling.
+- Keep semantic alert colors only (success/warning/danger), but muted tints:
+  success bg tint: rgba(34,197,94,0.10)
+  warning bg tint: rgba(245,158,11,0.12)
+  danger  bg tint: rgba(239,68,68,0.12)
+  Ensure readable text in those alerts.
+
+6) Buttons (desktop):
+- Rebalance hierarchy: topbar remains navy; primary actions use accent blue.
+Primary buttons:
+  background: #2C6BED
+  color: #FFFFFF
+  border-radius: 12px
+  min-height: 44px
+Secondary buttons:
+  background: #FFFFFF
+  border: 1px solid #E5E7EB
+  color: #1F2937
+  border-radius: 12px
+  min-height: 44px
+Danger buttons:
+  background: #991B1B
+  color: #FFFFFF
+  border-radius: 12px
+  min-height: 44px
+- Keep existing button classes/HTML; adjust via CSS selectors only.
+
+7) Forms/Inputs (desktop):
+- Inputs/selects/textareas:
+  min-height: 44px
+  border-radius: 10px
+  border: 1px solid #CBD5E1
+  background: #FFFFFF
+  color: #1F2937
+- Placeholder:
+  color: #94A3B8
+- Focus ring:
+  box-shadow: 0 0 0 3px rgba(44,107,237,0.20);
+  border-color: #2C6BED;
+
+8) Links (desktop):
+- Enforce consistent link color:
+  color: #2C6BED
+- Remove purple visited state (force visited to same accent blue).
+
+9) Apply CSS without breaking anything:
+- In templates/layout.html (or whichever base layout all pages use), add ONE link tag to load:
+  /static/ui_desktop_skin.css
+- Ensure it loads AFTER the base stylesheet(s) so it can override them.
+
+10) Service Worker cache bump (PWA users pick it up):
+- In static/sw.js, bump cache version to v10 (or next integer)
+- Add /static/ui_desktop_skin.css to the precache list
+- Do NOT change service worker behavior beyond cache version + new asset inclusion
+
+11) Verification checklist (must run through mentally and ensure):
+- Desktop (>=1024px): topbar is 68px, premium feel, readable white text on navy, no black-on-blue in header/footer
+- Desktop pages like Trips, Expenses, Groups, Dashboard: cards are unified, no rainbow borders
+- Buttons: primary is accent blue; topbar stays navy
+- Mobile (<1024px): absolutely unchanged, including drawer and sticky action bar behavior
+- No JS changes, no backend changes, no template restructuring
+
+Deliverables:
+- static/ui_desktop_skin.css updated/created as described
+- layout template updated with stylesheet link
+- static/sw.js cache version bumped and precache updated
+
+Proceed and implement now.
