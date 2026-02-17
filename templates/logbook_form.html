@@ -652,12 +652,12 @@
                             class="w-full px-4 py-3 border rounded-lg text-lg" 
                             style="border-color: var(--border);">
                         <option value="">{{ t('common.select_option') }}</option>
-                        <option value="Manöver" {% if entry and entry.event_category == 'Manöver' %}selected{% endif %}>⚓ {{ t('logbook.event_maneuver') }}</option>
-                        <option value="Wetterwechsel" {% if entry and entry.event_category == 'Wetterwechsel' %}selected{% endif %}>🌦️ {{ t('logbook.event_weather_change') }}</option>
-                        <option value="Sichtung" {% if entry and entry.event_category == 'Sichtung' %}selected{% endif %}>👁️ {{ t('logbook.event_sighting') }}</option>
-                        <option value="Reparatur" {% if entry and entry.event_category == 'Reparatur' %}selected{% endif %}>🔧 {{ t('logbook.event_repair') }}</option>
-                        <option value="Notfall" {% if entry and entry.event_category == 'Notfall' %}selected{% endif %}>🚨 {{ t('logbook.event_emergency') }}</option>
-                        <option value="Sonstiges" {% if entry and entry.event_category == 'Sonstiges' %}selected{% endif %}>📌 {{ t('logbook.event_other') }}</option>
+                        <option value="maneuver" {% if entry and norm_event(entry.event_category) == 'maneuver' %}selected{% endif %}>⚓ {{ t('logbook.event_maneuver') }}</option>
+                        <option value="weather_change" {% if entry and norm_event(entry.event_category) == 'weather_change' %}selected{% endif %}>🌦️ {{ t('logbook.event_weather_change') }}</option>
+                        <option value="sighting" {% if entry and norm_event(entry.event_category) == 'sighting' %}selected{% endif %}>👁️ {{ t('logbook.event_sighting') }}</option>
+                        <option value="repair" {% if entry and norm_event(entry.event_category) == 'repair' %}selected{% endif %}>🔧 {{ t('logbook.event_repair') }}</option>
+                        <option value="emergency" {% if entry and norm_event(entry.event_category) == 'emergency' %}selected{% endif %}>🚨 {{ t('logbook.event_emergency') }}</option>
+                        <option value="other" {% if entry and norm_event(entry.event_category) == 'other' %}selected{% endif %}>📌 {{ t('logbook.event_other') }}</option>
                     </select>
                 </div>
                 

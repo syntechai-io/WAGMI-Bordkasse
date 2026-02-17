@@ -1,0 +1,69 @@
+TASK: Implement Phase B (i18n hardening + language-neutral persistence) without breaking any existing functionality, routes, or UI behavior.
+
+GOAL
+Fix the core issue that some pages (especially logbook entries) display German in EN mode after saving. Make the system robust by storing language-neutral codes in DB and rendering localized labels via the existing session-based i18n (t()).
+
+NON-NEGOTIABLES
+- Do NOT change backend behavior/logic besides mapping labels<->codes; all features must keep working.
+- Do NOT restructure templates or routes in a way that risks regressions.
+- Keep mobile behavior untouched (existing drawer + sticky bar etc).
+- Keep the “fallback to German if key missing” behavior.
+- Deliver changes in small, safe steps and show diffs.
+
+STEP 1 — Inventory / Audit (must be done first, report findings)
+Scan templates + server-side mapping code and list:
+1) All hard-coded German/English UI strings still present (page by page).
+2) All places where we store or compute human-readable labels (German text) into DB fields.
+3) All enumerations used in logbook that currently store labels (examples: wind strength with “Leiser Zug”, sea state, visibility, maneuver type, sail plan labels, etc).
+
+STEP 2 — Introduce language-neutral codes (minimal schema changes)
+Where we currently store labels, switch to storing codes:
+- Example approach:
+  - wind_strength_code: "BFT_1"
+  - sea_state_code: "SEA_MODERATE"
+  - visibility_code: "VIS_GOOD"
+  - maneuver_code: "MANEUVER_SET_SAILS"
+  - sailplan_code: "SAILPLAN_MAIN_GENOA"
+Do this ONLY for fields that are causing the EN/DE mismatch (start with logbook core fields first).
+
+If adding columns is necessary:
+- Add new *_code columns (nullable).
+- Keep old label columns for backward compatibility.
+- On write: write the code columns (and optionally keep old label column in sync short-term).
+- On read/render: prefer *_code if present; else map legacy label -> code.
+
+STEP 3 — Legacy value mapping (soft migration)
+Implement deterministic mapping functions:
+- label_to_code(field_name, label, locale_hint_optional) -> code or None
+- code_to_label_key(field_name, code) -> i18n key
+
+Rules:
+- If legacy German label exists (e.g. “Leiser Zug”), map to the correct code.
+- If mapping fails, keep showing the raw stored value as a last resort, but do not break the page.
+
+STEP 4 — Render everything via t() keys (no mixed hardcoded labels)
+- Create i18n keys for every code label we render (DE and EN).
+- Update templates to render:
+  - t("enum.wind_strength.BFT_1")
+  - t("enum.sea_state.SEA_MODERATE")
+  - etc.
+No hard-coded German/English labels in templates for these enum fields.
+
+STEP 5 — Fix the reported bug explicitly
+Reproduce / identify the exact fields in logbook that revert to German in EN mode after save.
+Patch them using the new code-based system.
+Show the exact before/after behavior in your report.
+
+STEP 6 — Quality gates (must be included)
+- Ensure CSS/JS unaffected.
+- Ensure existing forms still submit and save.
+- Ensure EN session stays EN after saving and on detail view/list view.
+- Add 3–5 minimal tests or assertions (even if lightweight) OR a deterministic manual test checklist in the reply.
+
+DELIVERABLES
+1) A concise “What changed” list with file names.
+2) The mapping table you used (code <-> DE label <-> EN label).
+3) Confirmation that logbook saved entries render in EN when session is EN.
+4) No regressions to mobile or existing features.
+
+Proceed now with STEP 1 audit, then implement iteratively.

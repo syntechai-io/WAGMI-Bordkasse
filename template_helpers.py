@@ -9,7 +9,9 @@ from services.trip import TripService
 from i18n import get_lang, t as i18n_t
 from constants.logbook_enums import (
     normalize_wind, normalize_visibility, normalize_sail_plan,
+    normalize_event_category,
     display_wind, display_visibility, display_sail_plan,
+    display_event_category, display_sea_state,
 )
 
 
@@ -116,15 +118,27 @@ def i18n_context_processor(request: Request) -> Dict[str, Any]:
     def _normalize_sail_plan_val(value):
         return normalize_sail_plan(value) if value else ""
 
+    def _normalize_event_category_val(value):
+        return normalize_event_category(value) if value else ""
+
+    def _display_event_category(value):
+        return display_event_category(value, _t)
+
+    def _display_sea_state(value):
+        return display_sea_state(value, _t)
+
     return {
         "lang": lang,
         "t": _t,
         "display_wind": _display_wind,
         "display_visibility": _display_visibility,
         "display_sail_plan": _display_sail_plan,
+        "display_event_category": _display_event_category,
+        "display_sea_state": _display_sea_state,
         "norm_wind": _normalize_wind_val,
         "norm_vis": _normalize_visibility_val,
         "norm_sail": _normalize_sail_plan_val,
+        "norm_event": _normalize_event_category_val,
     }
 
 

@@ -15,7 +15,10 @@ import uuid
 import io
 from logbook_pdf_template import render_logbook_pdf
 from weather_service import WeatherService
-from constants.logbook_enums import normalize_wind, normalize_visibility, normalize_sail_plan
+from constants.logbook_enums import (
+    normalize_wind, normalize_visibility, normalize_sail_plan,
+    normalize_event_category, display_event_category, display_sea_state,
+)
 
 router = APIRouter(prefix="/logbook", tags=["logbook"])
 templates = create_templates()
@@ -299,7 +302,7 @@ async def create_entry(
             headsail_furl_percent=headsail_furl_percent,
             extra_sail=extra_sail if extra_sail else None,
             # Phase A: Events
-            event_category=event_category,
+            event_category=normalize_event_category(event_category) if event_category else None,
             event_details=event_details,
             # Phase B: Quick Entry
             maneuver_type=maneuver_type
@@ -511,7 +514,7 @@ async def update_entry(
         entry.headsail_furl_percent = headsail_furl_percent
         entry.extra_sail = extra_sail if extra_sail else None
         # Phase A: Events
-        entry.event_category = event_category
+        entry.event_category = normalize_event_category(event_category) if event_category else None
         entry.event_details = event_details
         entry.updated_at = datetime.utcnow()
         
@@ -665,7 +668,7 @@ async def create_addendum(
             headsail_type=parent_entry.headsail_type,
             headsail_furl_percent=parent_entry.headsail_furl_percent,
             extra_sail=parent_entry.extra_sail,
-            event_category=parent_entry.event_category,
+            event_category=normalize_event_category(parent_entry.event_category) if parent_entry.event_category else None,
             event_details=parent_entry.event_details
         )
         db.add(addendum_entry)

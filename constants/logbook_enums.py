@@ -43,6 +43,37 @@ GERMAN_TO_SAIL_PLAN_KEY = {
     "Keine Segel": "no_sails",
 }
 
+EVENT_CATEGORY_KEYS = [
+    "maneuver", "weather_change", "sighting", "repair", "emergency", "other",
+]
+
+GERMAN_TO_EVENT_CATEGORY_KEY = {
+    "Manöver": "maneuver",
+    "Wetterwechsel": "weather_change",
+    "Sichtung": "sighting",
+    "Reparatur": "repair",
+    "Notfall": "emergency",
+    "Sonstiges": "other",
+}
+
+EVENT_CATEGORY_I18N_MAP = {
+    "maneuver": "logbook.event_maneuver",
+    "weather_change": "logbook.event_weather_change",
+    "sighting": "logbook.event_sighting",
+    "repair": "logbook.event_repair",
+    "emergency": "logbook.event_emergency",
+    "other": "logbook.event_other",
+}
+
+SEA_STATE_I18N_MAP = {
+    "calm": "logbook.sea_calm",
+    "slight": "logbook.sea_slight",
+    "moderate": "logbook.sea_moderate",
+    "rough": "logbook.sea_rough",
+    "very_rough": "logbook.sea_very_rough",
+    "high": "logbook.sea_high",
+}
+
 WIND_I18N_MAP = {k: f"logbook.bft{k.replace('bft', '')}" for k in WIND_STRENGTH_KEYS}
 
 VISIBILITY_I18N_MAP = {
@@ -114,3 +145,31 @@ def display_sail_plan(value, t_func):
     if i18n_key:
         return t_func(i18n_key)
     return value
+
+
+def normalize_event_category(value):
+    if not value:
+        return value
+    if value in EVENT_CATEGORY_KEYS:
+        return value
+    return GERMAN_TO_EVENT_CATEGORY_KEY.get(value, value)
+
+
+def display_event_category(value, t_func):
+    if not value:
+        return ""
+    key = normalize_event_category(value)
+    i18n_key = EVENT_CATEGORY_I18N_MAP.get(key)
+    if i18n_key:
+        return t_func(i18n_key)
+    return value
+
+
+def display_sea_state(value, t_func):
+    if not value:
+        return ""
+    val = value.value if hasattr(value, 'value') else value
+    i18n_key = SEA_STATE_I18N_MAP.get(val)
+    if i18n_key:
+        return t_func(i18n_key)
+    return val

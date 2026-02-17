@@ -81,15 +81,7 @@
                 {% if entry.sea_state %}
                 <div class="p-3 rounded-lg" style="background: var(--surface-2);">
                     <span class="text-sm ui-muted">🌊 {{ t('logbook.sea_state') }}:</span>
-                    <p class="text-lg font-medium">
-                        {% if entry.sea_state.value == 'calm' %}{{ t('logbook.sea_calm') }}
-                        {% elif entry.sea_state.value == 'slight' %}{{ t('logbook.sea_slight') }}
-                        {% elif entry.sea_state.value == 'moderate' %}{{ t('logbook.sea_moderate') }}
-                        {% elif entry.sea_state.value == 'rough' %}{{ t('logbook.sea_rough') }}
-                        {% elif entry.sea_state.value == 'very_rough' %}{{ t('logbook.sea_very_rough') }}
-                        {% elif entry.sea_state.value == 'high' %}{{ t('logbook.sea_high') }}
-                        {% else %}{{ entry.sea_state.value }}{% endif %}
-                    </p>
+                    <p class="text-lg font-medium">{{ display_sea_state(entry.sea_state) }}</p>
                 </div>
                 {% endif %}
                 {% if entry.visibility %}
