@@ -28,4 +28,5 @@ dependencies = [
     "starlette-csrf>=3.0.0",
     "pyjwt>=2.10.1",
     "stripe>=14.3.0",
+    "cairosvg>=2.8.2",
 ]
