@@ -1,0 +1,209 @@
+Implement a refined desktop-only design system update for CrewLog (“Calm Maritime v2”) with a slightly thicker, higher-quality topbar.
+
+CRITICAL CONSTRAINTS:
+- Do NOT modify backend logic
+- Do NOT change routes, forms, or JS behavior
+- Do NOT restructure templates / HTML hierarchy
+- Do NOT touch mobile layout (<1024px)
+- CSS-only changes for desktop (>=1024px)
+- Preserve all existing functionality exactly as-is
+
+DELIVERABLES:
+1) Create/Update: static/ui_desktop_skin.css (desktop-only overrides)
+2) Ensure it is included in templates/layout.html (one additional <link>)
+3) If PWA/service worker exists: bump cache version and precache list to include the new CSS file
+
+------------------------------------------------------------
+1) SCOPE (DESKTOP ONLY)
+------------------------------------------------------------
+All styles MUST be wrapped in:
+
+@media (min-width: 1024px) { ... }
+
+Mobile must remain untouched.
+
+------------------------------------------------------------
+2) COLOR SYSTEM (NO NEW COLORS)
+------------------------------------------------------------
+In ui_desktop_skin.css define variables:
+
+:root {
+  --navy-shell: #1E2F45;
+  --canvas-grey: #F3F4F6;
+  --card-white: #FFFFFF;
+
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-on-navy: #F8FAFC;
+
+  --accent-blue: #2563EB;
+
+  --success-bg: #E6F4EA;
+  --success-text: #166534;
+
+  --warning-bg: #FEF3C7;
+  --warning-text: #92400E;
+
+  --danger-bg: #FEE2E2;
+  --danger-text: #991B1B;
+}
+
+No additional colors allowed. No gradients.
+
+------------------------------------------------------------
+3) PAGE BACKGROUND + CARDS
+------------------------------------------------------------
+Desktop body/background:
+- Set main page canvas background to var(--canvas-grey)
+
+Cards/panels/forms containers:
+- background: var(--card-white)
+- border: 1px solid #E5E7EB
+- border-radius: 16px
+- box-shadow: 0 4px 16px rgba(0,0,0,0.04)
+
+Remove/neutralize any existing colored borders/background tints on cards (blue/green/purple boxes).
+Only semantic alerts/badges may use soft tints (success/warn/danger).
+
+------------------------------------------------------------
+4) TYPOGRAPHY (NO BLACK ON NAVY)
+------------------------------------------------------------
+- Body text: var(--text-primary), not pure black
+- Secondary text: var(--text-secondary)
+- On navy: var(--text-on-navy)
+
+Headings:
+- H1: 32px, font-weight 700, color var(--text-primary)
+- H2: 24px, font-weight 600
+- H3: 18–20px, font-weight 600
+
+Tables:
+- Remove uppercase table headers
+- Header rows: soft grey background (#F9FAFB), text var(--text-secondary)
+- Optional subtle zebra striping for readability
+
+------------------------------------------------------------
+5) TOPBAR: SLIGHTLY THICKER + HIGH-QUALITY (DESKTOP ONLY)
+------------------------------------------------------------
+Goal: keep dark navy identity but make it feel more premium.
+
+For the desktop topbar/nav wrapper:
+- background: var(--navy-shell)
+- increase vertical padding slightly (e.g. +6 to +10px compared to current) so it feels thicker
+- align items vertically centered
+- tighten spacing between logo/icon and “CrewLog” (clean, not cramped)
+
+Navigation links (desktop):
+- text color: var(--text-on-navy)
+- remove “black on blue” everywhere in header
+- active item should NOT use a heavy background block
+- active item: subtle bottom border in accent blue (2px) + slightly higher opacity text
+- hover: mild opacity change or subtle underline/border, not a big pill
+
+Language toggle + user chip (desktop):
+- keep as pill but ensure text stays light (var(--text-on-navy))
+- subtle border with rgba(255,255,255,0.18)
+
+------------------------------------------------------------
+6) HEADER/FOOTER GUARDRAIL (PREVENT COLOR REGRESSIONS)
+------------------------------------------------------------
+Add a hard guardrail for header/footer only.
+Apply to the actual header/footer containers (use existing wrapper classes/IDs; do NOT restructure HTML).
+
+Implement:
+
+.navy-shell,
+.navy-shell * {
+  color: var(--text-on-navy) !important;
+}
+
+If the project’s header/footer wrapper is not named .navy-shell, add that class to the existing header/footer wrapper elements in templates/layout.html ONLY (no restructuring, just class addition).
+
+This guardrail must NOT affect the main content area.
+
+------------------------------------------------------------
+7) BUTTONS (DESKTOP)
+------------------------------------------------------------
+Primary buttons:
+- background: var(--navy-shell)
+- color: var(--text-on-navy)
+- border-radius: 12px
+- min-height: 44px
+- hover: slightly lighter navy (e.g. filter/opacity), no gradients
+
+Secondary buttons:
+- background: #FFFFFF
+- border: 1px solid #D1D5DB
+- color: var(--text-primary)
+- border-radius: 12px
+- min-height: 44px
+
+Danger buttons:
+- background: var(--danger-text)
+- color: #FFFFFF
+- border-radius: 12px
+- min-height: 44px
+
+------------------------------------------------------------
+8) FORMS / INPUTS (DESKTOP)
+------------------------------------------------------------
+Inputs/selects/textareas:
+- height: 44px (where applicable)
+- border-radius: 10px
+- border: 1px solid #D1D5DB
+- placeholder: softer (var(--text-secondary))
+
+Focus state:
+- border-color: var(--accent-blue)
+- box-shadow: 0 0 0 3px rgba(37,99,235,0.15)
+- remove any harsh default outlines
+
+------------------------------------------------------------
+9) LINKS (DESKTOP)
+------------------------------------------------------------
+Links:
+- color: var(--accent-blue)
+- no purple visited styles
+- hover: subtle underline
+
+------------------------------------------------------------
+10) STATUS BADGES (DESKTOP)
+------------------------------------------------------------
+Standardize badges:
+- pill shape (border-radius: 999px)
+- padding: 4px 10px
+- font-weight: 600
+
+Use muted tints:
+- success: background var(--success-bg), text var(--success-text)
+- warning: background var(--warning-bg), text var(--warning-text)
+- danger: background var(--danger-bg), text var(--danger-text)
+
+No neon. No full-solid bright fills.
+
+------------------------------------------------------------
+11) STRICT PROHIBITIONS
+------------------------------------------------------------
+Do NOT:
+- add new colors
+- add gradients
+- reintroduce multicolor card borders
+- allow black text on navy in header/footer
+- change layout structure or move elements around
+- change any JS or backend logic
+
+------------------------------------------------------------
+12) IMPLEMENTATION STEPS
+------------------------------------------------------------
+A) Create static/ui_desktop_skin.css with all rules inside @media (min-width: 1024px)
+B) Add one <link rel="stylesheet" href="/static/ui_desktop_skin.css"> in templates/layout.html (desktop is fine; CSS controls scope)
+C) If service worker exists:
+   - bump cache version (e.g. v7)
+   - add /static/ui_desktop_skin.css to precache list
+D) Run server, verify:
+   - desktop: calm navy/grey system, thicker premium topbar, consistent cards
+   - mobile: unchanged
+   - no black-on-navy anywhere in header/footer
+   - no functional regressions
+
+END.

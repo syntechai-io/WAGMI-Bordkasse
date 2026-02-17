@@ -1,5 +1,5 @@
 .navy-shell {
-  background: #1f3347;
+  background: var(--navy-shell, #1E2F45);
   color: #F8FAFC !important;
 }
 
