@@ -1,4 +1,4 @@
-const CACHE_NAME = 'crewlog-v13';
+const CACHE_NAME = 'crewlog-v14';
 
 const STATIC_ASSETS = [
   '/static/ui_v1.css',

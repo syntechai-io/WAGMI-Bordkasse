@@ -22,6 +22,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/set-language",
         "/privacy",
         "/terms",
+        "/ios/return",
+        "/.well-known",
     ]
     
     async def dispatch(self, request, call_next):

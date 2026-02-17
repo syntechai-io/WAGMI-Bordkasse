@@ -137,4 +137,57 @@
       }
     });
   }
+
+  function checkSession() {
+    fetch('/api/whoami', { credentials: 'same-origin' })
+      .then(function(res) {
+        if (!res.ok) {
+          window.location.href = '/login';
+          return;
+        }
+        return res.json();
+      })
+      .then(function(data) {
+        if (data && data.mode === 'none') {
+          window.location.href = '/login';
+        }
+      })
+      .catch(function() {});
+  }
+
+  try {
+    var AppPlugin = window.Capacitor.Plugins.App;
+    if (AppPlugin && AppPlugin.addListener) {
+      AppPlugin.addListener('appStateChange', function(state) {
+        if (state.isActive) {
+          checkSession();
+        }
+      });
+    }
+  } catch(e) {}
+
+  var offlineOverlay = null;
+  function showOfflineScreen() {
+    if (offlineOverlay) return;
+    offlineOverlay = document.createElement('div');
+    offlineOverlay.id = 'crewlog-offline';
+    offlineOverlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1a2f4a 0%,#2c4a6e 100%);color:white;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,Inter,sans-serif;';
+    offlineOverlay.innerHTML = '<div style="text-align:center;padding:2rem;"><div style="font-size:4rem;margin-bottom:1rem;">⚓</div><h1 style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;">No Connection</h1><p style="font-size:0.95rem;opacity:0.8;margin-bottom:2rem;">Please check your internet connection and try again.</p><button id="crewlog-retry" style="background:white;color:#1a2f4a;padding:0.9rem 2.5rem;border-radius:12px;font-size:1.1rem;font-weight:700;border:none;cursor:pointer;">Retry</button></div>';
+    document.body.appendChild(offlineOverlay);
+    document.getElementById('crewlog-retry').addEventListener('click', function() {
+      hideOfflineScreen();
+      window.location.reload();
+    });
+  }
+
+  function hideOfflineScreen() {
+    if (offlineOverlay) {
+      offlineOverlay.remove();
+      offlineOverlay = null;
+    }
+  }
+
+  window.addEventListener('offline', showOfflineScreen);
+  window.addEventListener('online', hideOfflineScreen);
+  if (!navigator.onLine) showOfflineScreen();
 })();

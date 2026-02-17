@@ -1,0 +1,84 @@
+TASK: Prepare CrewLog iOS Capacitor wrapper for TestFlight and App Store submission packaging. Focus on build reliability, reviewer flow, deep links, and minimal diagnostics. Do NOT change business logic.
+
+CONSTRAINTS
+- Keep Stripe out of the app UI (already done).
+- Do NOT loosen security unnecessarily.
+- Do NOT refactor backend architecture.
+- Keep web app behavior unchanged for browser users.
+- iOS-only changes allowed in /ios_app and minimal safe web hooks for deep links.
+
+GOALS
+1) Provide a stable TestFlight build path.
+2) Ensure Safari (Stripe, privacy/terms) returns cleanly to the app when appropriate.
+3) Ensure reviewer can log in and verify subscription state without payment UI inside app.
+4) Add minimal diagnostics for support (version, build, environment) without exposing secrets.
+
+STEP 1 — Universal Links & Return-to-App for external browser flows
+Implement a “return to app” mechanism using Universal Links:
+- Choose a path on the web app: /ios/return
+- When opened on iOS, it should show a minimal page with a single button “Open CrewLog” and automatically attempt to open the app via Universal Link.
+- Configure Capacitor iOS to support associated domains:
+  - Add Associated Domains capability in Xcode project via config (document how to do it).
+  - Use applinks:YOUR_DOMAIN (placeholder if needed).
+- Create apple-app-site-association file documentation:
+  - Create docs describing where to host it (/.well-known/apple-app-site-association) and expected JSON structure.
+  - Provide example JSON with the appID placeholder.
+NOTE: If hosting the AASA file inside the current backend is feasible, add a simple route to serve it with correct content-type.
+
+STEP 2 — In-app “Who am I” + build info screen (diagnostics)
+Add a minimal “About” page accessible from Help:
+- Shows:
+  - app name
+  - web base URL (sanitized)
+  - app version + build number
+  - current session mode (saas vs legacy) + account_id (if present)
+  - current language
+- Must be read-only.
+- No secrets.
+In iOS wrapper, expose native version/build via Capacitor App plugin and display it.
+
+STEP 3 — Session stability check (WKWebView cookie persistence)
+Add a lightweight automated self-check endpoint + UI indicator:
+- Endpoint already exists: /api/whoami (or similar)
+- On iOS, when app resumes (foreground), call /api/whoami:
+  - If unauthorized, show a calm “Session expired, please log in again” screen and redirect to login.
+- Ensure this behavior is iOS-only (Capacitor detection).
+- Do not change session expiry policy (24h) unless required.
+
+STEP 4 — Network reliability (offline-friendly failure mode)
+Inside iOS wrapper:
+- Detect offline state:
+  - If offline, show a simple offline screen (no crashes) with retry button.
+- Do not attempt full offline-first now; just graceful handling.
+
+STEP 5 — App Store assets & metadata checklist
+Create /ios_app/APP_STORE_ASSETS.md containing:
+- Required screenshots list (iPhone sizes)
+- App icon requirements
+- Short description / long description templates (EN + DE)
+- Keywords suggestions
+- Privacy questionnaire notes (no tracking, location only when in use, camera for attachments)
+- Reviewer notes template (explicitly stating subscriptions are web-managed; no purchase links in app)
+
+STEP 6 — TestFlight build documentation (deterministic)
+Update /ios_app/README_IOS.md with exact steps:
+- npm install
+- npx cap sync ios
+- open Xcode
+- set Signing & Capabilities
+- archive
+- upload to TestFlight
+Include:
+- Where to set Bundle ID
+- Where to set version/build
+- How to set associated domains
+- How to test Universal Links
+
+DELIVERABLES
+- Working /ios/return path + Universal Link documentation (and AASA plan)
+- “About” diagnostics page (web + iOS version integration)
+- iOS-only resume check calling /api/whoami
+- Offline graceful screen (iOS-only)
+- Updated documentation: APP_STORE_ASSETS.md + improved README_IOS.md
+- No regressions to web app.
+Proceed now.

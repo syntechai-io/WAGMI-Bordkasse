@@ -147,6 +147,47 @@ async def terms_of_service(request: Request):
     lang = get_lang(request)
     return templates.TemplateResponse("terms.html", {"request": request})
 
+@app.get("/ios/return")
+async def ios_return(request: Request):
+    return templates.TemplateResponse("ios_return.html", {"request": request})
+
+@app.get("/.well-known/apple-app-site-association")
+async def apple_app_site_association():
+    from fastapi.responses import JSONResponse
+    aasa = {
+        "applinks": {
+            "apps": [],
+            "details": [
+                {
+                    "appID": "TEAMID.app.crewlog.mobile",
+                    "paths": ["/ios/return", "/ios/*"]
+                }
+            ]
+        },
+        "webcredentials": {
+            "apps": ["TEAMID.app.crewlog.mobile"]
+        }
+    }
+    return JSONResponse(content=aasa, media_type="application/json")
+
+@app.get("/about")
+async def about_page(request: Request, db: Session = Depends(get_db)):
+    from i18n import get_lang
+    lang = get_lang(request)
+    saas_user_id = request.session.get("saas_user_id")
+    account_id = request.session.get("account_id")
+    user_id = request.session.get("user_id")
+    role = request.session.get("role")
+    session_mode = "saas" if saas_user_id else ("legacy" if user_id else "none")
+    return templates.TemplateResponse("about.html", {
+        "request": request,
+        "app_version": "1.0.0",
+        "build_number": "1",
+        "session_mode": session_mode,
+        "account_id": account_id,
+        "current_lang": lang,
+    })
+
 @app.get("/set-language")
 @app.post("/set-language")
 async def set_language(request: Request):

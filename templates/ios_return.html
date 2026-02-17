@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return to CrewLog</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a2f4a 0%, #2c4a6e 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 400px;
+        }
+        .logo { font-size: 4rem; margin-bottom: 1rem; }
+        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        p { font-size: 0.95rem; opacity: 0.8; margin-bottom: 2rem; }
+        .btn {
+            display: inline-block;
+            background: white;
+            color: #1a2f4a;
+            padding: 0.9rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.15s;
+        }
+        .btn:active { transform: scale(0.97); }
+        .note { font-size: 0.75rem; opacity: 0.5; margin-top: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">⛵</div>
+        <h1>CrewLog</h1>
+        <p>Your action has been completed. Tap below to return to the app.</p>
+        <a href="crewlog://return" class="btn" id="openApp">Open CrewLog</a>
+        <p class="note">If the button doesn't work, open CrewLog from your home screen.</p>
+    </div>
+    <script>
+        setTimeout(function() {
+            window.location.href = 'crewlog://return';
+        }, 800);
+    </script>
+</body>
+</html>

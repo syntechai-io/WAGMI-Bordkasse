@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ t('about.title') }} - CrewLog{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <h1 class="ui-title maritime-header">{{ t('about.title') }}</h1>
+
+    <div class="bg-white porthole-card p-6 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm font-medium ui-muted">{{ t('about.app_name') }}</p>
+                <p class="text-lg font-semibold">CrewLog</p>
+            </div>
+            <div>
+                <p class="text-sm font-medium ui-muted">{{ t('about.version') }}</p>
+                <p class="text-lg font-semibold" id="about-version">{{ app_version }} ({{ build_number }})</p>
+            </div>
+            <div>
+                <p class="text-sm font-medium ui-muted">{{ t('about.session_mode') }}</p>
+                <p class="text-lg font-semibold">
+                    {% if session_mode == 'saas' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold text-white" style="background: var(--success);">SaaS</span>
+                    {% elif session_mode == 'legacy' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-200 text-gray-700">Legacy</span>
+                    {% else %}
+                    <span class="text-gray-400">—</span>
+                    {% endif %}
+                </p>
+            </div>
+            {% if account_id %}
+            <div>
+                <p class="text-sm font-medium ui-muted">{{ t('about.account_id') }}</p>
+                <p class="text-lg font-semibold font-mono text-sm">{{ account_id }}</p>
+            </div>
+            {% endif %}
+            <div>
+                <p class="text-sm font-medium ui-muted">{{ t('about.language') }}</p>
+                <p class="text-lg font-semibold">{{ current_lang | upper }}</p>
+            </div>
+            <div>
+                <p class="text-sm font-medium ui-muted">{{ t('about.environment') }}</p>
+                <p class="text-lg font-semibold" id="about-env">Web</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white porthole-card p-6" id="native-info" style="display:none;">
+        <h2 class="text-lg font-bold maritime-header mb-3">{{ t('about.native_info') }}</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm font-medium ui-muted">{{ t('about.native_version') }}</p>
+                <p class="text-lg font-semibold" id="native-version">—</p>
+            </div>
+            <div>
+                <p class="text-sm font-medium ui-muted">{{ t('about.native_build') }}</p>
+                <p class="text-lg font-semibold" id="native-build">—</p>
+            </div>
+            <div>
+                <p class="text-sm font-medium ui-muted">{{ t('about.platform') }}</p>
+                <p class="text-lg font-semibold" id="native-platform">—</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <a href="/help" class="text-sm font-medium hover:underline" style="color: var(--accent);">{{ t('about.back_to_help') }}</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        document.getElementById('about-env').textContent = 'iOS App';
+        var nativeInfo = document.getElementById('native-info');
+        if (nativeInfo) nativeInfo.style.display = '';
+
+        try {
+            var AppPlugin = window.Capacitor.Plugins.App;
+            if (AppPlugin && AppPlugin.getInfo) {
+                AppPlugin.getInfo().then(function(info) {
+                    if (info.version) document.getElementById('native-version').textContent = info.version;
+                    if (info.build) document.getElementById('native-build').textContent = info.build;
+                    document.getElementById('native-platform').textContent = 'iOS';
+                }).catch(function() {});
+            }
+        } catch(e) {}
+    }
+})();
+</script>
+{% endblock %}

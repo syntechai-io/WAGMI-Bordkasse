@@ -87,6 +87,11 @@ A greedy matching algorithm minimizes transfers between debtors and creditors, s
 
 #### iOS Native Wrapper
 - **Capacitor**: Used for a Capacitor-based iOS wrapper loading the web app in a native WKWebView. Includes plugins for browser, geolocation, camera, and app lifecycle management. Handles Stripe external browser interactions and ensures App Store compliance by hiding billing UI on iOS.
+- **Universal Links**: `/ios/return` route provides return-to-app flow after external browser actions. AASA served at `/.well-known/apple-app-site-association`. URL scheme: `crewlog://`.
+- **About/Diagnostics**: `/about` page shows app version, session mode, account ID, language. In iOS, native version/build info from Capacitor App plugin. Accessible from Help in navigation.
+- **Session Stability**: Bridge calls `/api/whoami` on app resume (foreground) to check session validity. Auto-redirects to login if session expired.
+- **Offline Handling**: Bridge shows full-screen offline overlay with retry button when device loses connectivity (iOS only).
+- **Documentation**: `ios_app/README_IOS.md` (TestFlight build steps), `ios_app/APP_STORE_CHECKLIST.md` (Apple review compliance), `ios_app/APP_STORE_ASSETS.md` (screenshots, metadata, descriptions).
 
 #### External Services
 - **ECB (European Central Bank) API**: For daily exchange rates.

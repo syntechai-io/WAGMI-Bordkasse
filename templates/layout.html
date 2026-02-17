@@ -230,6 +230,9 @@
             <a href="/help" class="drawer-link">
                 <span class="drawer-icon">📖</span> {{ t('nav.help') }}
             </a>
+            <a href="/about" class="drawer-link">
+                <span class="drawer-icon">ℹ️</span> {{ t('about.title') }}
+            </a>
 
             <div class="drawer-divider"></div>
 
@@ -355,6 +358,7 @@
                     </div>
                     
                     <a href="/help" class="nav-item touch-action">📖 {{ t('nav.help') }}</a>
+                    <a href="/about" class="nav-item touch-action">ℹ️ {{ t('about.title') }}</a>
 
                     <div class="lang-pill ml-2">
                         <a href="/set-language?lang=de&next={{ request.url.path }}" class="{% if lang == 'de' %}lang-active{% endif %}">DE</a>
