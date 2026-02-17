@@ -1,0 +1,102 @@
+You are working on CrewLog (Flask/FastAPI + Jinja templates + static CSS/JS) on Replit.
+
+GOAL
+Implement a clean, calm “Calm Maritime” design system that matches SyntechAI UI: dark navy topbar + light grey canvas + white cards. MUST eliminate “black on blue” issues and prevent regressions.
+
+CRITICAL CONSTRAINTS (DO NOT BREAK)
+- Do NOT change any backend logic, routes, data models, or form field names.
+- Do NOT refactor templates structurally beyond adding class names/wrappers if needed.
+- Do NOT change JavaScript behavior except if required for styling hooks (no logic changes).
+- Mobile UI remains untouched. All new styling MUST be scoped to desktop only: @media (min-width: 1024px).
+- Must remain compatible with existing PWA/service worker caching.
+
+BEFORE CODING: QUICK AUDIT
+1) Identify current topbar/footer wrappers/classes (e.g., header/nav container and footer container). If no stable wrapper exists, add minimal class markers ONLY (e.g., class="navy-shell" to header/topbar container and class="navy-shell-footer" to footer container).
+2) Find which CSS currently sets topbar text colors. There must be no dark text on the dark navy background.
+
+IMPLEMENTATION PLAN (A: Desktop-only CSS skin + guardrails)
+A1) Create or update a single desktop override stylesheet:
+- File path: static/ui_desktop_skin.css
+- It must contain ONLY desktop rules within:
+  @media (min-width: 1024px) { ... }
+
+A2) Ensure layout.html includes the stylesheet AFTER existing CSS:
+- Add one <link rel="stylesheet" href="/static/ui_desktop_skin.css"> after other CSS links.
+- Do not remove existing CSS files.
+
+A3) Apply Calm Maritime tokens (CSS variables) inside ui_desktop_skin.css:
+- --navy-shell: #1E2F45
+- --canvas-grey: #F3F4F6  (light grey page background)
+- --card: #FFFFFF
+- --border: #E2E8F0
+- --text-primary: #0F172A   (NOT pure black, high contrast)
+- --text-secondary: #64748B
+- --accent-blue: #2C6BED
+- --danger: #991B1B
+- Shadows: subtle, premium (no harsh outlines)
+
+A4) Desktop Topbar (premium, slightly thicker)
+- Increase desktop topbar height to 68px (from current).
+- Background: var(--navy-shell)
+- Bottom separator: 1px hairline + subtle shadow
+- Active nav item: 2px accent-blue bottom border (no heavy pill backgrounds)
+- Ensure ALL text/icons in topbar are near-white.
+- Language toggle pill: subtle white border + near-white text.
+
+A5) Page canvas + cards
+- Page background (desktop): var(--canvas-grey)
+- Normalize “cards” across the app: white bg, 16px radius, soft shadow, 1px border.
+- Neutralize multi-colored callout boxes: replace colored backgrounds/borders with the same neutral card style.
+- EXCEPTION: semantic alerts (success/warning/danger) keep tinted backgrounds with strong contrast text.
+
+A6) Typography & links
+- Headings: H1 ~32px bold, H2 ~24px, H3 ~18-20px. Color: var(--text-primary).
+- Body text: var(--text-primary); muted text: var(--text-secondary).
+- Links: consistent var(--accent-blue) and no purple visited styles.
+
+A7) Forms & buttons
+- Inputs/selects/textareas: 44px min height, 10px radius, border var(--border).
+- Focus ring: accent-blue with low opacity (accessible but not neon).
+- Buttons: min 44px height, 12px radius.
+  Primary button background: var(--accent-blue) (so actions pop against navy topbar).
+  Secondary: white background + border.
+  Danger: var(--danger).
+
+A8) TABLES
+- Light header row (no aggressive uppercase).
+- Subtle zebra striping for readability.
+- Borders using var(--border).
+
+A9) GUARDRAILS (MUST INCLUDE IN FINAL CSS)
+This must PREVENT any future regression of dark text on navy.
+Implement both:
+1) Scoped header guardrail:
+   - In the topbar wrapper (navy-shell), force text/icon color to near-white with !important.
+   - Keep it limited to header only to avoid harming content typography.
+2) Scoped footer guardrail:
+   - Same for footer wrapper.
+
+Example (adapt selectors to your actual DOM):
+.navy-shell, .navy-shell * { color: #F8FAFC !important; }
+.navy-shell a, .navy-shell a:visited { color: #F8FAFC !important; }
+.navy-shell svg, .navy-shell svg * { fill: #F8FAFC !important; stroke: #F8FAFC !important; }
+
+And similar for footer wrapper class.
+
+IMPORTANT: The guardrails must NOT apply to the whole page, ONLY header/footer wrappers.
+
+A10) Service worker / cache bump
+- If the project uses a service worker that precaches assets, ensure ui_desktop_skin.css is in the precache list.
+- Bump the cache version so users actually receive the new CSS.
+
+DELIVERABLES
+- static/ui_desktop_skin.css created/updated with ALL rules inside @media (min-width: 1024px)
+- templates/layout.html updated to include the stylesheet link after existing CSS
+- service worker cache bumped and precache list updated (if applicable)
+- No changes to backend behavior, routes, forms, or mobile layout
+
+ACCEPTANCE CHECKS (MUST VERIFY)
+1) Desktop topbar: no dark text on navy anywhere (nav links, dropdowns, language pill, logout, user name).
+2) Desktop pages: light grey canvas, white cards, unified look, minimal colors, readable in daylight.
+3) Mobile: visually unchanged.
+4) Existing functionality: forms submit, JS interactions, navigation, i18n, billing, logbook, trips all still work.

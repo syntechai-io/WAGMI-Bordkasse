@@ -24,6 +24,7 @@
 
 .navy-shell svg:not(.dropdown-content svg),
 .navy-shell svg:not(.dropdown-content svg) * {
+  fill: #F8FAFC !important;
   stroke: #F8FAFC !important;
 }
 
