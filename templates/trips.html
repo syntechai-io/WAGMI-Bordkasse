@@ -10,6 +10,16 @@
         </a>
         {% endif %}
     </div>
+
+    {% if request.query_params.get('upgrade_required') %}
+    <div class="rounded-xl p-4" style="background: #fef3c7; border: 1px solid #f59e0b;">
+        <p class="font-semibold" style="color: #92400e;">⚠️ {{ t('billing.over_limit_title') }}</p>
+        <p class="text-sm mt-1" style="color: #92400e;">{{ t('billing.over_limit_info') }}</p>
+        <a href="/billing" class="inline-block mt-2 text-white px-4 py-2 rounded-lg font-semibold text-sm" style="background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--navy-deep) 100%);">
+            {{ t('billing.over_limit_upgrade') }}
+        </a>
+    </div>
+    {% endif %}
     
     {% if request.session.get('role') == 'admin' or is_saas_owner %}
     <div class="bg-white porthole-card p-6">

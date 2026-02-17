@@ -1,0 +1,128 @@
+We are refining the DESKTOP (web) UI only.
+Mobile implementation must remain untouched.
+Do NOT change any backend logic, routing, JS behavior or form submission.
+This is a pure visual refinement pass.
+
+GOAL:
+Unify the UI into a clean, modern, Apple-like aesthetic with subtle contrast,
+less visual noise, and consistent spacing.
+
+----------------------------------------
+1) Header Refinement (Desktop Only)
+----------------------------------------
+
+Reduce header height slightly (approx 64px total).
+Navigation links:
+- Remove heavy background highlighting.
+- Active nav item should use subtle bottom border (2px CrewLog blue).
+- Icon opacity slightly reduced (0.85 default, 1.0 on hover).
+
+No layout restructuring.
+
+----------------------------------------
+2) Card System Unification
+----------------------------------------
+
+All dashboard and feature cards should:
+
+background: #FFFFFF;
+border: 1px solid #E5E7EB;
+border-radius: 16px;
+box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+
+Hover:
+transform: translateY(-2px);
+box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+transition: all 0.2s ease;
+
+Remove:
+- Colored left borders
+- Thick blue outlines
+
+----------------------------------------
+3) Form Input Refinement (Trips, Expenses, Logbook)
+----------------------------------------
+
+Inputs & Selects:
+
+border: 1px solid #D1D5DB;
+border-radius: 8px;
+background: #FFFFFF;
+
+On focus:
+border-color: #1F4E8C;
+box-shadow: 0 0 0 3px rgba(31,78,140,0.12);
+
+Reduce label font weight slightly.
+Increase vertical spacing between form rows.
+
+----------------------------------------
+4) Section Headings
+----------------------------------------
+
+Replace heavy section dividers with:
+
+margin-top: 32px;
+margin-bottom: 16px;
+font-size: 20px;
+font-weight: 600;
+color: #1F2937;
+
+Remove thick colored bars above tables.
+
+----------------------------------------
+5) Table Refinement
+----------------------------------------
+
+Table header row:
+
+background: #F8FAFC;
+color: #334155;
+font-weight: 600;
+
+Remove blue background table headers.
+Keep zebra striping subtle (#FAFBFC).
+
+----------------------------------------
+6) Buttons
+----------------------------------------
+
+Primary Button:
+background: #1F4E8C;
+border-radius: 10px;
+font-weight: 600;
+
+Hover:
+background: #173B6B;
+
+Secondary Button:
+background: #F3F4F6;
+color: #1F2937;
+
+Danger:
+background: #DC2626;
+border-radius: 10px;
+
+----------------------------------------
+7) Desktop Only Guard
+----------------------------------------
+
+Wrap all new CSS inside:
+
+@media (min-width: 1024px) { ... }
+
+Do NOT affect mobile drawer or sticky mobile actions.
+
+----------------------------------------
+OUTPUT
+----------------------------------------
+
+Modify only:
+- static/ui_v1.css (or equivalent main CSS file)
+- Minimal class adjustments in templates if needed
+
+Ensure:
+- All current functionality remains unchanged
+- No layout breakage
+- No missing spacing
+- No icon distortion

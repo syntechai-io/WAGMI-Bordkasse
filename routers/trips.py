@@ -89,7 +89,12 @@ async def quick_start_trip(
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     account_id = _get_account_id(request)
-    enforce_free_limits_for_trip_creation(db, account_id)
+    try:
+        enforce_free_limits_for_trip_creation(db, account_id)
+    except HTTPException as e:
+        if isinstance(e.detail, dict) and e.detail.get("code") == "UPGRADE_REQUIRED":
+            return RedirectResponse(url="/trips?upgrade_required=1", status_code=303)
+        raise
 
     # Scope active trip lookup to account to avoid cross-tenant archiving
     current_active = _scoped_trip_query(db, request).filter(Trip.status == TripStatus.active).first()
@@ -119,7 +124,12 @@ async def create_trip(
         raise HTTPException(status_code=403, detail="Only admin can create trips")
     
     account_id = _get_account_id(request)
-    enforce_free_limits_for_trip_creation(db, account_id)
+    try:
+        enforce_free_limits_for_trip_creation(db, account_id)
+    except HTTPException as e:
+        if isinstance(e.detail, dict) and e.detail.get("code") == "UPGRADE_REQUIRED":
+            return RedirectResponse(url="/trips?upgrade_required=1", status_code=303)
+        raise
     
     trip = Trip(
         name=name,
