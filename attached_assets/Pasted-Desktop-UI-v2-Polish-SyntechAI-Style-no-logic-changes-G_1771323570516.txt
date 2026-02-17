@@ -1,0 +1,150 @@
+Desktop UI v2 Polish (SyntechAI Style, no logic changes)
+
+Goal: Refine the existing CrewLog desktop UI (screens ≥1024px) into a cohesive, Apple-inspired SyntechAI look & feel (clean, minimal, readable, high contrast). Do not change any backend logic, routes, forms, or JS behavior. This is purely UI (CSS + minimal template markup for classes only). Mobile UI (<1024px) must remain exactly as-is.
+
+Hard constraints (do not break anything)
+	1.	No changes to backend code or route logic.
+	2.	No changes to form field names, IDs, action URLs, or JS hooks.
+	3.	Do not remove any elements used by existing JS (drawer, sticky actions, quick fill). You may only add wrapper classes or data attributes if needed.
+	4.	Desktop only: all new styling must be behind @media (min-width: 1024px) so mobile remains untouched.
+	5.	Keep current i18n logic. Only adjust CSS and minor template class names.
+
+⸻
+
+Deliverables
+
+A) Introduce a small “design token” layer (CSS variables)
+
+Create/extend a central CSS file (or add to existing global stylesheet) with tokens:
+	•	Typography: base font size, headings scale, weights, line-heights
+	•	Spacing: 8px grid (e.g., --space-1: 4px; --space-2: 8px; ...)
+	•	Colors:
+	•	neutral background, surface, border
+	•	primary brand blue (SyntechAI) + hover + focus ring
+	•	text (primary/secondary/muted)
+	•	semantic (success/warn/danger/info)
+	•	Radii: card radius 16px, input 10px, buttons 12px
+	•	Shadows: very subtle (1–2 levels max)
+
+Example tokens to implement (adjust as needed but keep restrained):
+	•	--bg: #f6f7f9
+	•	--surface: #ffffff
+	•	--border: #e6e9ee
+	•	--text: #0f172a
+	•	--muted: #64748b
+	•	--navy: #1f2f45 (existing header base)
+	•	--primary: #2563eb
+	•	--primary-hover: #1d4ed8
+	•	--focus: rgba(37, 99, 235, .25)
+	•	--success: #16a34a
+	•	--warning: #f59e0b
+	•	--danger: #dc2626
+
+⸻
+
+B) Typography system (desktop)
+	•	Set default body text to clean system font stack (keep existing if already).
+	•	Define headings:
+	•	H1: 32px / 700
+	•	H2: 22–24px / 650
+	•	H3: 18–20px / 600
+	•	Remove “shouty” all-caps in tables/headings (already partly done) and ensure consistent letter spacing.
+	•	Ensure readability for onboard use: good contrast, generous line-height, avoid thin gray text.
+
+⸻
+
+C) Layout & spacing consistency (desktop)
+	•	Apply an 8px spacing grid across page containers.
+	•	Standardize page max-width (e.g., 1100–1200px) and center content.
+	•	Use consistent vertical rhythm between sections.
+
+⸻
+
+D) Header + Navigation (desktop)
+
+Without changing navigation structure/links:
+	1.	Make header slightly more compact (height ~56–60px).
+	2.	Unify nav icon sizing (16px) and baseline alignment.
+	3.	Replace any heavy active states with a subtle bottom border + slightly brighter text.
+	4.	Improve the DE/EN language toggle:
+	•	pill-style segmented control
+	•	clear active/inactive state
+	•	consistent with tokens
+	5.	Make logout/user chip calmer:
+	•	neutral button style
+	•	consistent radius and spacing
+
+Important: do not break mobile drawer; desktop topbar remains.
+
+⸻
+
+E) Cards (desktop)
+
+Standardize all cards:
+	•	white surface, subtle border, 16px radius
+	•	soft shadow on hover only (very subtle)
+	•	consistent internal padding (e.g., 20–24px)
+	•	remove strong colored left borders unless semantic (error/warn)
+
+Dashboard tiles and form containers should visually match.
+
+⸻
+
+F) Forms (desktop)
+	•	Inputs: 44–46px height, 10px radius, subtle border
+	•	Focus ring: soft glow using --focus
+	•	Placeholder: slightly muted (opacity ~0.6)
+	•	Labels: consistent weight and spacing
+	•	Keep required asterisks and validation messages unchanged.
+
+⸻
+
+G) Buttons (desktop)
+
+Define a consistent button system:
+	•	Primary: --primary background, white text, hover --primary-hover
+	•	Secondary: white surface + border, hover light tint
+	•	Danger: --danger (only where currently used)
+	•	Button height: 44px on desktop forms
+	•	Radius: 12px
+	•	Reduce overly saturated blues if any remain
+
+Do not change button text, click handlers, or routes.
+
+⸻
+
+H) Tables (desktop)
+	•	Header row: light gray background, normal case text
+	•	Row separators: subtle
+	•	Zebra striping: extremely subtle
+	•	Add consistent cell padding
+	•	Make “Status” badges standardized (next item).
+
+⸻
+
+I) Badges / Status pills (desktop)
+
+Standardize status badges (Active, Trialing, Past Due etc.):
+	•	pill shape, consistent padding, 12px radius
+	•	background tints with strong readable text
+	•	ensure contrast in sunlight conditions (don’t go too pale)
+
+⸻
+
+J) QA checklist (must verify)
+
+After changes:
+	1.	Desktop pages render without layout break: Dashboard, Trips, Logbook, Finances, Admin.
+	2.	No route/form behavior changes.
+	3.	Mobile (<1024px) looks identical to before.
+	4.	Language toggle and nav still work.
+	5.	No JS errors in console.
+
+⸻
+
+Implementation instructions
+	•	Make changes primarily in a single global stylesheet (or a new static/ui_tokens.css + static/ui_desktop.css) and include it in layout.html.
+	•	Only add minimal new CSS classes to templates if necessary.
+	•	Keep changes modular and easy to rollback.
+
+Deliver: commit-level summary: which files changed, what selectors/tokens were added, and confirmation that functionality is unchanged.

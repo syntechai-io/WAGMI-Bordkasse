@@ -1206,7 +1206,7 @@ div[style*="linear-gradient"]:not(.login-surface) {
    ══════════════════════════════════════════ */
 @media (min-width: 1024px) {
 
-  /* ── 1) Header: reduced height, refined nav items ── */
+  /* ── 1) Header: compact 56px, refined nav ── */
   .topbar {
     padding-top: 0;
     padding-bottom: 0;
@@ -1248,7 +1248,33 @@ div[style*="linear-gradient"]:not(.login-surface) {
     opacity: 1;
   }
 
-  /* ── 2) Card system: unified, subtle ── */
+  /* ── 2) Typography: SyntechAI heading scale ── */
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #0f172a;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 650;
+    line-height: 1.25;
+    color: #0f172a;
+  }
+
+  h3 {
+    font-size: 1.175rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #0f172a;
+  }
+
+  .ui-title {
+    font-size: 2rem;
+  }
+
+  /* ── 3) Card system: unified, subtle ── */
   .card,
   .porthole-card,
   .dash-tile,
@@ -1283,7 +1309,14 @@ div[style*="linear-gradient"]:not(.login-surface) {
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
   }
 
-  /* ── 3) Form inputs: refined borders and focus ── */
+  /* Card internal padding consistency */
+  .card-body,
+  .porthole-card > .p-6,
+  .porthole-card > div {
+    padding: 1.25rem;
+  }
+
+  /* ── 4) Form inputs: 44px height, 10px radius, focus glow ── */
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -1294,8 +1327,10 @@ div[style*="linear-gradient"]:not(.login-surface) {
   select,
   textarea {
     border: 1px solid #D1D5DB;
-    border-radius: 8px;
+    border-radius: 10px;
     background: #ffffff;
+    min-height: 44px;
+    font-size: 0.95rem;
   }
 
   input[type="text"]:focus,
@@ -1307,20 +1342,26 @@ div[style*="linear-gradient"]:not(.login-surface) {
   input[type="datetime-local"]:focus,
   select:focus,
   textarea:focus {
-    border-color: #1F4E8C;
-    box-shadow: 0 0 0 3px rgba(31,78,140,0.12);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
     outline: none;
+  }
+
+  ::placeholder {
+    color: #94a3b8;
+    opacity: 0.6;
   }
 
   label {
     font-weight: 500;
+    color: #1e293b;
   }
 
   .space-y-4 > * + * {
     margin-top: 1.15rem;
   }
 
-  /* ── 4) Section headings ── */
+  /* ── 5) Section headings ── */
   .maritime-header {
     font-size: 20px;
     font-weight: 600;
@@ -1337,7 +1378,7 @@ div[style*="linear-gradient"]:not(.login-surface) {
     height: 1px;
   }
 
-  /* ── 5) Table refinement ── */
+  /* ── 6) Table refinement ── */
   th {
     background: #F8FAFC;
     color: #334155;
@@ -1355,10 +1396,16 @@ div[style*="linear-gradient"]:not(.login-surface) {
     background: #F1F5F9;
   }
 
-  /* ── 6) Buttons: rounded, crisp ── */
+  /* ── 7) Buttons: 12px radius, 44px height, crisp ── */
   .btn {
-    border-radius: 10px;
+    border-radius: 12px;
     font-weight: 600;
+    min-height: 44px;
+  }
+
+  .btn-sm {
+    min-height: 36px;
+    border-radius: 10px;
   }
 
   .btn-primary {
@@ -1372,19 +1419,19 @@ div[style*="linear-gradient"]:not(.login-surface) {
   }
 
   .btn-secondary {
-    background: #F3F4F6;
+    background: #ffffff;
     color: #1F2937;
     border-color: #E5E7EB;
   }
 
   .btn-secondary:hover {
-    background: #E5E7EB;
+    background: #F3F4F6;
   }
 
   .btn-danger {
     background: #DC2626;
     border-color: #DC2626;
-    border-radius: 10px;
+    border-radius: 12px;
   }
 
   .btn-danger:hover {
@@ -1394,11 +1441,77 @@ div[style*="linear-gradient"]:not(.login-surface) {
 
   .ocean-gradient {
     background: #1F4E8C !important;
-    border-radius: 10px;
+    border-radius: 12px;
   }
 
   .ocean-gradient:hover {
     background: #173B6B !important;
+  }
+
+  /* ── 8) Status badges / pills ── */
+  .tag,
+  .tag-accent,
+  .tag-success,
+  .tag-warn,
+  .tag-danger,
+  span[class*="bg-green"],
+  span[class*="bg-red"],
+  span[class*="bg-yellow"],
+  span[class*="bg-blue"] {
+    border-radius: 12px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .tag-success,
+  span[class*="bg-green"] {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  .tag-danger,
+  span[class*="bg-red"] {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  .tag-warn,
+  span[class*="bg-yellow"] {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .tag-accent,
+  span[class*="bg-blue"] {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  /* ── 9) Language toggle refinement ── */
+  .lang-pill {
+    background: rgba(255,255,255,0.1);
+    border-radius: 999px;
+    padding: 3px;
+  }
+
+  .lang-pill a {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.72rem;
+    border-radius: 999px;
+    transition: all 0.15s ease;
+  }
+
+  .lang-pill a.lang-active {
+    background: rgba(255,255,255,0.22);
+    color: #fff;
+  }
+
+  /* ── 10) User/logout chip: calmer ── */
+  .user-email-truncate {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.7);
   }
 
   /* Logbook sections: unified card on desktop */
