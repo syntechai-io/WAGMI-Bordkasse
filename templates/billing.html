@@ -76,14 +76,14 @@
         <h2 class="text-xl font-bold maritime-header mb-4">🚀 {{ t('billing.upgrade_title') }}</h2>
         <p class="text-sm mb-4 ui-muted">{{ t('billing.upgrade_desc') }}</p>
         <div class="flex flex-col sm:flex-row gap-3">
-            <form hx-post="/billing/ui/checkout" hx-swap="none" class="flex-1">
+            <form hx-post="/billing/ui/checkout" hx-swap="none" class="flex-1" data-stripe-external="1">
                 {{ csrf_input | safe }}
                 <input type="hidden" name="interval" value="monthly">
                 <button type="submit" class="btn btn-primary w-full text-white px-6 py-3 rounded-lg font-bold text-lg transition hover:scale-105 shadow-lg">
                     📅 {{ t('billing.upgrade_monthly') }}
                 </button>
             </form>
-            <form hx-post="/billing/ui/checkout" hx-swap="none" class="flex-1">
+            <form hx-post="/billing/ui/checkout" hx-swap="none" class="flex-1" data-stripe-external="1">
                 {{ csrf_input | safe }}
                 <input type="hidden" name="interval" value="yearly">
                 <button type="submit" class="w-full text-white px-6 py-3 rounded-lg font-bold text-lg transition hover:scale-105 shadow-lg" style="background: var(--success);">
@@ -94,7 +94,7 @@
         {% else %}
         <h2 class="text-xl font-bold maritime-header mb-4">⚙️ {{ t('billing.manage_title') }}</h2>
         <p class="text-sm mb-4 ui-muted">{{ t('billing.manage_desc') }}</p>
-        <form hx-post="/billing/ui/portal" hx-swap="none">
+        <form hx-post="/billing/ui/portal" hx-swap="none" data-stripe-external="1">
             {{ csrf_input | safe }}
             <button type="submit" class="btn btn-primary text-white px-6 py-3 rounded-lg font-bold transition hover:scale-105 shadow-lg">
                 ⚙️ {{ t('billing.manage_portal') }}

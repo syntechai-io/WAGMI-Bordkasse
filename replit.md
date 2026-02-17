@@ -88,6 +88,12 @@ Uses a greedy matching algorithm to minimize transfers between debtors and credi
 #### File Storage
 - **Local filesystem**: For receipt uploads in `/uploads`.
 
+#### iOS Native Wrapper
+- **Capacitor**: `/ios_app` contains a Capacitor-based iOS wrapper that loads the production CrewLog web URL in a native WKWebView.
+- **Plugins**: @capacitor/browser (Stripe external open), @capacitor/geolocation (GPS), @capacitor/camera (photo capture), @capacitor/app (lifecycle).
+- **Stripe external browser**: `capacitor-bridge.js` intercepts Stripe checkout/portal URLs and opens them in SFSafariViewController via Browser plugin. Templates use `data-stripe-external="1"` attribute as hook.
+- **iOS build**: Requires macOS + Xcode. Run `npx cap sync ios && npx cap open ios` from `/ios_app`. See `ios_app/README_IOS.md`.
+
 #### External Services
 - **ECB (European Central Bank) API**: For daily exchange rates.
 - **Open-Meteo API**: For weather data retrieval.

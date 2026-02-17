@@ -1,0 +1,12 @@
+<!-- Add these entries to ios/App/App/Info.plist -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>CrewLog uses your location to record GPS position for logbook entries.</string>
+
+<key>NSCameraUsageDescription</key>
+<string>CrewLog uses the camera to attach receipts and logbook photos.</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>CrewLog accesses your photo library to attach images to entries and expenses.</string>
+
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>CrewLog saves photos to your library.</string>

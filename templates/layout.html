@@ -440,6 +440,14 @@
     }
     </script>
 
+    <script>
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        var s = document.createElement('script');
+        s.src = '/static/capacitor-bridge.js';
+        document.body.appendChild(s);
+    }
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,121 @@
+TASK: Add an iOS native wrapper project using Capacitor for CrewLog so we can publish in the Apple App Store, WITHOUT changing existing backend logic or web functionality.
+
+CONSTRAINTS (non-negotiable)
+- Do NOT modify backend auth logic beyond small safe cookie/header tweaks if needed for iOS WebView compatibility.
+- Do NOT refactor templates/HTMX architecture.
+- Keep existing web app working exactly as-is.
+- No web search; do not introduce unrelated frameworks.
+
+GOAL
+Create an /ios_app wrapper (Capacitor) that loads the production CrewLog web URL and supports:
+- App Store deployable iOS project
+- GPS usage (Quick Fill)
+- Camera/photo uploads (logbook photos, receipts)
+- Stripe Checkout + Billing Portal open in external SFSafariViewController (NOT inside WebView)
+- Correct icons/splash placeholders and permission strings
+
+ASSUMPTIONS
+- CrewLog is hosted on a public HTTPS domain (APP_BASE_URL exists already in Replit secrets for server-side redirects).
+- The app already has Stripe integration and success/cancel pages.
+- PWA/service worker exists; keep it.
+
+STEP 1 — Create Capacitor wrapper folder
+1) Create a new folder at repo root: /ios_app
+2) Inside /ios_app initialize a minimal Node project and install:
+   - @capacitor/core
+   - @capacitor/cli
+   - @capacitor/ios
+   - @capacitor/browser
+   - @capacitor/geolocation
+   - @capacitor/camera
+   - @capacitor/app
+3) Add package.json scripts:
+   - "cap:init"
+   - "cap:add:ios"
+   - "cap:sync"
+   - "cap:open:ios"
+
+STEP 2 — Capacitor config
+Create capacitor.config.ts in /ios_app with:
+- appId: use placeholder "app.crewlog.mobile" (we will change later)
+- appName: "CrewLog"
+- webDir: set to "public" (even if unused, required by Capacitor)
+- server.url: set to the production base URL via env var, e.g. CREWLOG_WEB_URL
+- server.cleartext: false
+- androidScheme irrelevant (we focus iOS)
+- allowNavigation: include the CrewLog domain + Stripe domains used during checkout:
+   - https://*.stripe.com
+   - https://checkout.stripe.com
+   - https://billing.stripe.com
+   - https://js.stripe.com
+(Use the minimal set needed for redirects/resources.)
+
+Important:
+- We do NOT package the web assets for now. We load the live site via server.url to ship faster and avoid duplicating build pipelines.
+
+STEP 3 — iOS project creation
+Run:
+- npx cap init
+- npx cap add ios
+- npx cap sync ios
+
+Ensure ios/ is created under /ios_app.
+
+STEP 4 — Stripe: Force external browser for Checkout & Portal
+We must ensure that when a user taps “Upgrade” or “Manage Billing”, Stripe flows open in SFSafariViewController (Capacitor Browser plugin), not inside the WebView.
+
+Implementation:
+A) In the web app templates where those buttons exist (e.g. trips/billing pages), add a data attribute hook:
+   - data-stripe-external="1"
+   - and ensure the link is a normal <a href="..."> to your backend route that creates checkout/portal session and responds with a redirect to Stripe.
+B) In /ios_app create a small injected script OR minimal JS bridge strategy:
+   - Use Capacitor App/Browser plugin to open any URL that matches:
+     - "checkout.stripe.com"
+     - "billing.stripe.com"
+   - Approach:
+     - Add a JS listener in the WebView context that intercepts clicks on anchors with data-stripe-external="1"
+     - Prevent default navigation
+     - Call Capacitor Browser.open({ url: linkHref })
+C) If injecting JS is complex, use the iOS WKWebView navigation delegate via Capacitor configuration to open Stripe URLs externally (preferred if simple).
+
+Deliverable: Stripe checkout/portal never loads inside the embedded webview.
+
+STEP 5 — Permissions (Info.plist)
+Update ios/App/App/Info.plist with clear permission strings:
+- NSLocationWhenInUseUsageDescription: “CrewLog uses your location to record GPS position for logbook entries.”
+- NSCameraUsageDescription: “CrewLog uses the camera to attach receipts and logbook photos.”
+- NSPhotoLibraryAddUsageDescription / NSPhotoLibraryUsageDescription: “CrewLog accesses your photo library to attach images to entries and expenses.”
+
+Also ensure Geolocation plugin is configured if required.
+
+STEP 6 — Icons & Splash placeholders
+Add basic app icons and splash assets placeholders:
+- Use @capacitor/assets (if installed) or provide manual instructions in README.
+- For now, reuse existing CrewLog icon files (logo-crewlog-192.png / 512.png) as source and generate iOS icon set.
+
+STEP 7 — Session cookie compatibility sanity check (minimal)
+Because CrewLog uses session cookies (SameSite + httponly), confirm iOS WKWebView receives and persists the cookie for your domain.
+
+If issues appear:
+- Ensure cookie SameSite is Lax (or None+Secure if cross-site is required).
+- Since the app loads the same HTTPS domain, Lax should work. Do NOT loosen security unnecessarily.
+
+STEP 8 — Documentation
+Create /ios_app/README_IOS.md with:
+- Required env var: CREWLOG_WEB_URL (production URL)
+- How to run:
+   - npm install
+   - npx cap sync ios
+   - npx cap open ios
+- How Stripe external open works
+- Notes for App Store submission: bundle id, versioning, signing, privacy text
+
+DELIVERABLES
+- /ios_app folder with Capacitor configured
+- iOS project generated and syncable
+- Stripe checkout/portal opens externally (Browser plugin / SFSafariViewController)
+- Info.plist permissions added
+- Icons/splash placeholders generated or documented
+- No regressions to web app behavior
+
+Proceed step-by-step and keep changes minimal and reversible.
