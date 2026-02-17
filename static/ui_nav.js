@@ -117,6 +117,23 @@
         link.classList.add('drawer-link-active');
       }
     });
+    var desktopNav = document.querySelector('.desktop-nav');
+    if (desktopNav) {
+      var dLinks = desktopNav.querySelectorAll('.nav-item');
+      dLinks.forEach(function(link) {
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var m = false;
+        if (href === '/') {
+          m = path === '/';
+        } else {
+          m = path === href || path.startsWith(href + '/');
+        }
+        if (m) {
+          link.classList.add('nav-active');
+        }
+      });
+    }
   }
 
   if (document.readyState === 'loading') {

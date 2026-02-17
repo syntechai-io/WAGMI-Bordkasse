@@ -1199,3 +1199,212 @@ div[style*="linear-gradient"]:not(.login-surface) {
     display: none;
   }
 }
+
+/* ══════════════════════════════════════════
+   DESKTOP UI REFINEMENT (>=1024px)
+   Pure visual pass — no layout/logic changes
+   ══════════════════════════════════════════ */
+@media (min-width: 1024px) {
+
+  /* ── 1) Header: reduced height, refined nav items ── */
+  .topbar {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .topbar > div {
+    min-height: 56px;
+  }
+
+  .nav-item {
+    background: none;
+    border-radius: 0;
+    padding: 0.5rem 0.65rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    font-size: 0.82rem;
+  }
+
+  .nav-item:hover {
+    background: none;
+    color: #fff;
+    border-bottom-color: rgba(255,255,255,0.35);
+  }
+
+  .nav-item.nav-active,
+  .nav-item[aria-current="page"] {
+    background: none;
+    color: #fff;
+    border-bottom-color: var(--accent);
+  }
+
+  .nav-item .drawer-icon,
+  .nav-item > span:first-child {
+    opacity: 0.85;
+  }
+
+  .nav-item:hover .drawer-icon,
+  .nav-item:hover > span:first-child {
+    opacity: 1;
+  }
+
+  /* ── 2) Card system: unified, subtle ── */
+  .card,
+  .porthole-card,
+  .dash-tile,
+  .dash-hero,
+  .ui-card {
+    background: #ffffff;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card:hover,
+  .porthole-card:hover,
+  .dash-tile:hover,
+  .dash-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+
+  .kpi-card {
+    background: #ffffff;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    border-top: 2px solid var(--accent);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+
+  /* ── 3) Form inputs: refined borders and focus ── */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  select,
+  textarea {
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="number"]:focus,
+  input[type="date"]:focus,
+  input[type="time"]:focus,
+  input[type="datetime-local"]:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #1F4E8C;
+    box-shadow: 0 0 0 3px rgba(31,78,140,0.12);
+    outline: none;
+  }
+
+  label {
+    font-weight: 500;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 1.15rem;
+  }
+
+  /* ── 4) Section headings ── */
+  .maritime-header {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1F2937;
+  }
+
+  h2.maritime-header {
+    margin-top: 32px;
+    margin-bottom: 16px;
+  }
+
+  .rope-divider {
+    background: #E5E7EB;
+    height: 1px;
+  }
+
+  /* ── 5) Table refinement ── */
+  th {
+    background: #F8FAFC;
+    color: #334155;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 0.82rem;
+  }
+
+  tr:nth-child(even) td {
+    background: #FAFBFC;
+  }
+
+  tr:hover td {
+    background: #F1F5F9;
+  }
+
+  /* ── 6) Buttons: rounded, crisp ── */
+  .btn {
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  .btn-primary {
+    background: #1F4E8C;
+    border-color: #1F4E8C;
+  }
+
+  .btn-primary:hover {
+    background: #173B6B;
+    border-color: #173B6B;
+  }
+
+  .btn-secondary {
+    background: #F3F4F6;
+    color: #1F2937;
+    border-color: #E5E7EB;
+  }
+
+  .btn-secondary:hover {
+    background: #E5E7EB;
+  }
+
+  .btn-danger {
+    background: #DC2626;
+    border-color: #DC2626;
+    border-radius: 10px;
+  }
+
+  .btn-danger:hover {
+    background: #B91C1C;
+    border-color: #B91C1C;
+  }
+
+  .ocean-gradient {
+    background: #1F4E8C !important;
+    border-radius: 10px;
+  }
+
+  .ocean-gradient:hover {
+    background: #173B6B !important;
+  }
+
+  /* Logbook sections: unified card on desktop */
+  .logbook-section {
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+}
