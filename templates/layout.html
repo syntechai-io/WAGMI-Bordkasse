@@ -35,6 +35,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/ui_v1.css">
     <link rel="stylesheet" href="/static/ui_desktop_skin.css">
+    <link rel="stylesheet" href="/static/ui_navy_contrast_fix.css">
     {% if branding.accent_color %}
     <style>
         :root {
@@ -255,7 +256,7 @@
     </aside>
 
     <!-- Topbar -->
-    <nav class="topbar sticky top-0 z-50">
+    <nav class="topbar navy-shell sticky top-0 z-50">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-12">
                 <div class="flex items-center space-x-2.5">
@@ -387,7 +388,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="footer-bar">
+    <footer class="footer-bar navy-shell">
         <p><strong>{{ t('footer.title') }}</strong></p>
         <p class="mt-1">{{ t('footer.subtitle') }}</p>
     </footer>

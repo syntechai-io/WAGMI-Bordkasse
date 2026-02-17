@@ -114,44 +114,8 @@
     color: #d97706 !important;
   }
 
-  /* ── 4) Topbar: fix white text on navy ──
-     Ensure no black text appears on the dark header */
-
-  .topbar,
-  .topbar * {
-    color: #fff;
-  }
-
-  .topbar .nav-item {
-    color: rgba(255, 255, 255, 0.85);
-  }
-
-  .topbar .nav-item:hover {
-    color: #fff;
-  }
-
-  .topbar .nav-item.nav-active {
-    color: #fff;
-  }
-
-  .topbar a {
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  .topbar a:hover {
-    color: #fff;
-  }
-
-  /* Brand name in topbar */
-  .topbar-brand-name {
-    color: #fff !important;
-  }
-
-  /* User email / logout chip */
-  .topbar .user-email-truncate,
-  .topbar .text-xs {
-    color: rgba(255, 255, 255, 0.7) !important;
-  }
+  /* Topbar/footer contrast now handled by navy-shell guardrail
+     in ui_navy_contrast_fix.css — no rules needed here */
 
   /* ── 5) Link colors: consistent, accessible ── */
   a:not(.btn):not(.nav-item):not(.topbar a):not(.lang-pill a) {
@@ -189,16 +153,7 @@
     color: #0f172a;
   }
 
-  /* ── 9) Footer bar on navy ── */
-  .footer-bar,
-  .footer-bar * {
-    color: rgba(255, 255, 255, 0.75);
-  }
-
-  .footer-bar strong,
-  .footer-bar .font-bold {
-    color: rgba(255, 255, 255, 0.9);
-  }
+  /* Footer contrast now handled by navy-shell guardrail */
 
   /* ── 10) Alert / notification consistency ── */
 

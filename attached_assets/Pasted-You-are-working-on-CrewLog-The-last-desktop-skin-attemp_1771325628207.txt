@@ -1,0 +1,70 @@
+You are working on CrewLog. The last desktop skin attempts failed: there is STILL black/dark text on the navy header/footer (“black on blue”). Fix this permanently with a strict guardrail.
+
+## Scope
+- Fix ONLY the navy header + footer (and any nav elements that sit on navy).
+- Do NOT change backend logic.
+- Do NOT restructure templates except adding ONE stable hook class to the header container and footer container.
+- Must work on desktop and mobile.
+
+## Non-negotiable Acceptance Criteria
+On ANY navy background area (header, footer, top nav, pills in the header, dropdown labels):
+- All text + icons + links must render near-white (#F8FAFC / #E5E7EB).
+- ZERO visible #000/#111/#222 on navy anywhere.
+- Hover/active states remain near-white (optional underline/border). No “blue link on navy”.
+
+## Implementation Plan
+1) Identify the actual header/footer containers in templates/layout.html (or equivalent).
+2) Add a stable hook class to BOTH:
+   - header container: add class "navy-shell"
+   - footer container: add class "navy-shell"
+   Only add the class; do not change layout/structure.
+3) Create a new CSS file: static/ui_navy_contrast_fix.css
+   - Load it AFTER all other CSS (including any desktop skin CSS) in templates/layout.html.
+
+## Guardrail (MANDATORY, header/footer only)
+In ui_navy_contrast_fix.css enforce near-white on everything inside navy-shell using !important.
+This is required to defeat legacy specificity and prevent regressions.
+
+## Required CSS Rules (adapt selectors to actual DOM, but keep the guardrail)
+- Base background + default text:
+  .navy-shell { background: #1f3347; color: #F8FAFC !important; }
+
+- HARD GUARDRAIL:
+  .navy-shell * { color: #F8FAFC !important; }
+
+- Links (still near-white, with clear hover affordance):
+  .navy-shell a, .navy-shell a:visited { color: #F8FAFC !important; }
+  .navy-shell a:hover { color: #F8FAFC !important; text-decoration: underline; }
+
+- Form controls/pills inside header (language toggle, trip selector, user pill):
+  Ensure their text remains near-white; background can be slightly lighter/darker navy/gray,
+  but no black text. Override any component-specific classes explicitly if needed.
+
+- SVG/icons (helm, emojis replaced by svg, etc.):
+  .navy-shell svg, .navy-shell svg * { fill: #F8FAFC !important; stroke: #F8FAFC !important; }
+
+- Inputs/selects that might appear in header dropdowns:
+  If any input/select appears on navy, ensure text and placeholder are readable.
+
+## Testing (must be executed)
+- Desktop (>=1024px):
+  - Dashboard header: all nav items, trip dropdown label, language toggle, user + logout are near-white.
+  - Trips header: same checks.
+  - Hover nav links: still near-white, underline OK.
+  - Footer: all text near-white.
+- Mobile:
+  - Mobile header: title + hamburger near-white.
+  - Open drawer: drawer may be light background; only header needs navy contrast.
+- Verify via DevTools computed styles:
+  - No header/footer text computed as #000/#111/#222.
+
+## Service Worker
+If you add a new CSS file:
+- Bump static/sw.js cache version and add /static/ui_navy_contrast_fix.css to precache.
+
+## Output
+Return a short summary:
+- which containers received class navy-shell
+- which file was added and where it’s loaded
+- confirm desktop + mobile tests passed
+- confirm DevTools check: no #000/#111/#222 on navy

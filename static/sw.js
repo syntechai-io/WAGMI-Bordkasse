@@ -1,8 +1,9 @@
-const CACHE_NAME = 'crewlog-v6';
+const CACHE_NAME = 'crewlog-v7';
 
 const STATIC_ASSETS = [
   '/static/ui_v1.css',
   '/static/ui_desktop_skin.css',
+  '/static/ui_navy_contrast_fix.css',
   '/static/ui_nav.js',
   '/static/manifest.json',
   '/static/logo-crewlog.svg',
