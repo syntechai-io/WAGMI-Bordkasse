@@ -19,6 +19,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/billing/cancel",
         "/billing/ui/success",
         "/billing/ui/cancel",
+        "/forgot-password",
+        "/reset-password",
         "/set-language",
         "/privacy",
         "/terms",

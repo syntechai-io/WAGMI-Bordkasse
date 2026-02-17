@@ -14,14 +14,15 @@ templates = create_templates()
 async def login_page(request: Request, db: Session = Depends(get_db)):
     """Display login page"""
     error = request.session.pop("login_error", None)
+    reset_success = request.query_params.get("reset") == "success"
     
-    # Get all trips for trip selection (for trip admin/crew login)
     trips = db.query(Trip).order_by(Trip.start_date.desc()).all()
     
     return templates.TemplateResponse("login.html", {
         "request": request,
         "error": error,
-        "trips": trips
+        "trips": trips,
+        "reset_success": reset_success,
     })
 
 @router.post("/login")

@@ -35,7 +35,7 @@ Preferred communication style: Simple, everyday language.
 - **DB Hardening**: Unique constraints and robust defaults for critical tables.
 
 #### Data Model
-**Core Entities**: CrewMember, Deposit, Expense, ExpenseParticipant, ExpenseTemplate, CrewGroup, CrewGroupMember, Receipt, Trip, AuditLog, LogbookEntry, LogbookPhoto, UserPreferences, Subscriptions.
+**Core Entities**: CrewMember, Deposit, Expense, ExpenseParticipant, ExpenseTemplate, CrewGroup, CrewGroupMember, Receipt, Trip, AuditLog, LogbookEntry, LogbookPhoto, UserPreferences, Subscriptions, PasswordResetToken.
 
 #### Settlement Algorithm
 A greedy matching algorithm minimizes transfers between debtors and creditors, supporting individual and group settlements.
@@ -45,7 +45,8 @@ A greedy matching algorithm minimizes transfers between debtors and creditors, s
 - **Rate Limiting**: `SlowAPI` for global and login-specific limits.
 - **Session Security**: Secure session configurations (timeout, SameSite, httponly).
 - **Role-Based Authorization**: Server-side checks enforce permissions.
-- **Audit Logging**: Tracks financial transactions.
+- **Password Reset**: Secure forgot/reset password flow for SaaS users via Resend email. Tokens are single-use, time-limited (60min), stored hashed (SHA-256). Rate-limited per IP. No user enumeration. Audit logged.
+- **Audit Logging**: Tracks financial transactions and security events (PASSWORD_RESET_REQUEST, PASSWORD_RESET_SUCCESS).
 - **Input Validation**: Pydantic schemas.
 - **Environment Variables**: Secure storage for sensitive data.
 
@@ -74,6 +75,7 @@ A greedy matching algorithm minimizes transfers between debtors and creditors, s
 - **slowapi**: Rate limiting.
 - **werkzeug**: Password hashing.
 - **stripe**: Stripe billing SDK.
+- **resend**: Email delivery for password reset.
 
 #### Frontend Libraries (CDN)
 - **Tailwind CSS**: CSS framework.

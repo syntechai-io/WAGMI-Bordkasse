@@ -447,6 +447,21 @@ class SaaSUser(Base):
         return check_password_hash(str(self.password_hash), password)
 
 
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("new_users.id"), nullable=False, index=True)
+    token_hash = Column(String(128), nullable=False, unique=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    used_at = Column(DateTime, nullable=True)
+    request_ip = Column(String(50), nullable=True)
+    user_agent = Column(String(500), nullable=True)
+
+    user = relationship("SaaSUser")
+
+
 class TripMember(Base):
     __tablename__ = "trip_members"
 

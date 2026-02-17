@@ -29,4 +29,5 @@ dependencies = [
     "pyjwt>=2.10.1",
     "stripe>=14.3.0",
     "cairosvg>=2.8.2",
+    "resend>=2.22.0",
 ]

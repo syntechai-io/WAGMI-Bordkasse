@@ -31,6 +31,7 @@ from routes_auth import router as saas_auth_router
 from routes_billing import router as billing_router
 from routes_billing_ui import router as billing_ui_router
 from routes_boat import router as boat_router
+from routes_password_reset import router as password_reset_router
 from i18n import set_lang, SUPPORTED_LANGS
 
 app = FastAPI(title="CrewLog - Maritime Logbook & Bordkasse")
@@ -134,6 +135,7 @@ app.include_router(saas_auth_router)
 app.include_router(billing_router)
 app.include_router(billing_ui_router)
 app.include_router(boat_router)
+app.include_router(password_reset_router)
 
 @app.get("/privacy")
 async def privacy_policy(request: Request):
