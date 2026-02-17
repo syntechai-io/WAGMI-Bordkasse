@@ -1,0 +1,89 @@
+
+Implement a desktop-only UI consolidation for CrewLog that aligns with the SyntechAI design language and improves sunlight readability on board.
+
+Hard constraints (do not violate)
+	•	Do not change any backend logic, routes, handlers, DB schema, or API calls.
+	•	Do not change form names/ids/actions, submission behavior, or existing JavaScript event wiring.
+	•	Do not remove DOM elements that JS depends on. If needed, only hide via CSS.
+	•	Mobile behavior must remain unchanged (below 1024px): keep the off-canvas drawer, sticky action bar, logbook accordions, etc.
+	•	Only modify: CSS (preferred), small layout.html cosmetic tweaks, and template class additions for consistent styling.
+
+⸻
+
+Goals
+
+1) Remove “too many colors” / inconsistent accents
+	•	Replace multi-colored card borders and strong color blocks with a neutral card system and one primary accent (SyntechAI navy).
+	•	Keep status colors only where semantic (success/warn/danger), but in tinted backgrounds, not neon.
+
+2) Fix the “black on blue” issue
+	•	Avoid harsh black text on dark/navy surfaces. Use:
+	•	text on navy: white / near-white
+	•	body text on white: slate/dark gray, not pure black
+	•	Ensure link colors are consistent and accessible.
+
+3) Introduce a minimal SyntechAI token system
+
+Create a CSS token section (variables) and refactor desktop styling to use it:
+	•	Primary brand navy
+	•	Accent blue for focus and active states
+	•	Neutral grays for borders/backgrounds
+	•	Consistent radius, shadow, spacing
+
+4) Normalize core UI components (desktop >= 1024px only)
+
+Standardize these across all pages:
+	•	Header/topbar: compact height, clean active indicator, consistent spacing
+	•	Cards: same border, radius, shadow, padding everywhere
+	•	Headings: consistent sizes, weights, and spacing (no heavy uppercase)
+	•	Forms: consistent input height, border, focus ring
+	•	Buttons: one primary, one secondary, one danger; consistent radius/height
+	•	Tables: subtle header background, zebra striping, clean spacing
+	•	Badges: pill shape, tinted background, high contrast text
+
+⸻
+
+Implementation details
+
+A) Add a “desktop skin” CSS file (preferred) or extend existing CSS
+	•	Add: static/ui_desktop_skin.css
+	•	Only apply styles for @media (min-width: 1024px) so mobile is untouched.
+
+B) Update layout.html
+	•	Include the new CSS file after existing CSS so it overrides safely:
+	•	<link rel="stylesheet" href="/static/ui_desktop_skin.css">
+	•	Do NOT restructure navigation HTML. You may add utility classes on container elements (e.g. .topbar, .nav, .page, .card) if needed, but keep markup stable.
+
+C) Component mapping (do NOT break existing classes)
+
+Implement styling by targeting existing classes and adding non-breaking aliases, e.g.:
+	•	.card, .panel, .box → normalize to one card style
+	•	.btn, .button, button → normalize buttons (desktop only)
+	•	input, select, textarea → normalize form controls
+
+D) Specific fixes requested
+	•	Remove overly dark/high-contrast heading colors on blue bars.
+	•	Ensure page titles (e.g. “Manage Trips”, “Expenses”, “Settlement Groups”) are high contrast and readable, but not “black-on-blue”.
+	•	Keep existing icons/emojis; do not remove.
+
+⸻
+
+QA checklist (must be completed)
+	1.	Desktop (>=1024px): Dashboard, Trips, Logbook list + entry, Expenses, Settlement Groups render correctly.
+	2.	No broken submits: Create Trip, Create Expense, Create Settlement Group still works.
+	3.	Mobile (<1024px): drawer, sticky actions, accordions unchanged.
+	4.	No console JS errors introduced.
+	5.	Visual consistency: cards, headings, inputs, buttons look unified across pages.
+
+Deliver a short summary of:
+	•	files changed
+	•	what was touched (CSS vs templates)
+	•	confirmation that behavior is unchanged
+
+⸻
+
+Design direction (explicit)
+	•	Use a light, clean “Apple-like” UI: white cards, subtle shadows, soft borders.
+	•	Use SyntechAI navy as the only strong brand color (topbar + primary buttons).
+	•	Reduce saturated accent colors; use muted tints.
+	•	Typography: prefer slate/dark gray for body text, not pure black.

@@ -1,0 +1,276 @@
+@media (min-width: 1024px) {
+
+  /* ══════════════════════════════════════════
+     CrewLog Desktop Skin — SyntechAI Design
+     Consolidates colors, fixes contrast,
+     normalizes components. Mobile untouched.
+     ══════════════════════════════════════════ */
+
+  /* ── 1) Body text: slate, never pure black ── */
+  body {
+    color: #1e293b;
+  }
+
+  p, li, td, th, span, div, label, small {
+    color: inherit;
+  }
+
+  /* ── 2) Neutralize colored callout boxes ──
+     Turn multi-color (blue/green/yellow/purple/amber)
+     bordered callouts into a single neutral card style */
+
+  [class*="bg-blue-50"],
+  [class*="bg-green-50"],
+  [class*="bg-emerald-50"],
+  [class*="bg-cyan-50"],
+  [class*="bg-purple-50"],
+  [class*="bg-indigo-50"] {
+    background: #f8fafc !important;
+  }
+
+  [class*="bg-yellow-50"],
+  [class*="bg-amber-50"] {
+    background: #fffbeb !important;
+  }
+
+  [class*="bg-red-50"] {
+    background: #fef2f2 !important;
+  }
+
+  [class*="bg-green-100"] {
+    background: #f0fdf4 !important;
+  }
+
+  [class*="bg-yellow-100"],
+  [class*="bg-amber-100"] {
+    background: #fefce8 !important;
+  }
+
+  [class*="bg-red-100"] {
+    background: #fef2f2 !important;
+  }
+
+  /* Neutralize colored borders to soft gray */
+  [class*="border-blue-200"],
+  [class*="border-blue-300"],
+  [class*="border-blue-100"],
+  [class*="border-green-200"],
+  [class*="border-green-300"],
+  [class*="border-green-400"],
+  [class*="border-purple-200"],
+  [class*="border-purple-300"],
+  [class*="border-indigo-200"],
+  [class*="border-cyan-200"] {
+    border-color: #e2e8f0 !important;
+  }
+
+  [class*="border-yellow-200"],
+  [class*="border-yellow-400"],
+  [class*="border-amber-200"] {
+    border-color: #fde68a !important;
+  }
+
+  [class*="border-red-200"],
+  [class*="border-red-400"] {
+    border-color: #fca5a5 !important;
+  }
+
+  /* ── 3) Fix text-on-colored-backgrounds ──
+     Replace strong blue/purple/amber heading text
+     with consistent slate for readability */
+
+  [class*="text-blue-900"],
+  [class*="text-blue-800"],
+  [class*="text-blue-700"] {
+    color: #1e293b !important;
+  }
+
+  [class*="text-amber-900"],
+  [class*="text-amber-800"],
+  [class*="text-amber-700"] {
+    color: #78350f !important;
+  }
+
+  [class*="text-green-700"],
+  [class*="text-green-800"] {
+    color: #166534 !important;
+  }
+
+  [class*="text-red-700"],
+  [class*="text-red-800"] {
+    color: #991b1b !important;
+  }
+
+  [class*="text-purple-700"],
+  [class*="text-purple-800"] {
+    color: #1e293b !important;
+  }
+
+  [class*="text-blue-600"] {
+    color: #2563eb !important;
+  }
+
+  [class*="text-amber-600"] {
+    color: #d97706 !important;
+  }
+
+  /* ── 4) Topbar: fix white text on navy ──
+     Ensure no black text appears on the dark header */
+
+  .topbar,
+  .topbar * {
+    color: #fff;
+  }
+
+  .topbar .nav-item {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .topbar .nav-item:hover {
+    color: #fff;
+  }
+
+  .topbar .nav-item.nav-active {
+    color: #fff;
+  }
+
+  .topbar a {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .topbar a:hover {
+    color: #fff;
+  }
+
+  /* Brand name in topbar */
+  .topbar-brand-name {
+    color: #fff !important;
+  }
+
+  /* User email / logout chip */
+  .topbar .user-email-truncate,
+  .topbar .text-xs {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* ── 5) Link colors: consistent, accessible ── */
+  a:not(.btn):not(.nav-item):not(.topbar a):not(.lang-pill a) {
+    color: #2563eb;
+  }
+
+  a:not(.btn):not(.nav-item):not(.topbar a):not(.lang-pill a):hover {
+    color: #1d4ed8;
+  }
+
+  /* ── 6) Card normalization ──
+     All card-like containers get the same treatment */
+
+  .porthole-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  /* Remove gradient backgrounds from card-like elements */
+  [class*="bg-gradient-to-r"] {
+    background: #f8fafc !important;
+  }
+
+  /* ── 7) Gradient overlays: clean flat style ── */
+  [class*="from-green-50"],
+  [class*="from-blue-50"] {
+    background: #f8fafc !important;
+  }
+
+  /* ── 8) Section headings on white: readable slate ── */
+  .maritime-header,
+  h1, h2, h3, h4 {
+    color: #0f172a;
+  }
+
+  /* ── 9) Footer bar on navy ── */
+  .footer-bar,
+  .footer-bar * {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .footer-bar strong,
+  .footer-bar .font-bold {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* ── 10) Alert / notification consistency ── */
+
+  /* Success alerts */
+  [role="alert"][class*="bg-green"] {
+    background: #f0fdf4 !important;
+    border-color: #86efac !important;
+    color: #166534 !important;
+    border-radius: 12px;
+  }
+
+  /* Error alerts */
+  [role="alert"][class*="bg-red"] {
+    background: #fef2f2 !important;
+    border-color: #fca5a5 !important;
+    color: #991b1b !important;
+    border-radius: 12px;
+  }
+
+  /* Warning alerts */
+  [role="alert"][class*="bg-yellow"],
+  [role="alert"][class*="bg-amber"] {
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
+    color: #92400e !important;
+    border-radius: 12px;
+  }
+
+  /* Info callouts */
+  [class*="bg-blue-50"][class*="border"] {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    border-radius: 12px;
+  }
+
+  /* ── 11) Settlement step badges: neutral ── */
+  [class*="bg-blue-500"][class*="rounded-full"] {
+    background: #1e40af !important;
+  }
+
+  /* ── 12) Logbook quick-entry toggle chips ── */
+  .peer-checked\:bg-blue-600 {
+    background: #1e40af;
+  }
+
+  /* ── 13) Help page: calm callouts ── */
+  .help-section [class*="bg-blue-50"],
+  .help-section [class*="bg-green-50"],
+  .help-section [class*="bg-purple-50"] {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  /* ── 14) Admin billing health: toned down ── */
+  [class*="text-green-600"] {
+    color: #16a34a !important;
+  }
+
+  /* ── 15) KPI card value colors ── */
+  .kpi-card .text-2xl,
+  .kpi-card .text-3xl {
+    color: #0f172a;
+  }
+
+  /* ── 16) Dashboard hero: clean on white bg ── */
+  .dash-hero h2,
+  .dash-hero h3 {
+    color: #0f172a;
+  }
+
+  .dash-hero .text-muted,
+  .dash-hero .ui-muted {
+    color: #64748b;
+  }
+}
