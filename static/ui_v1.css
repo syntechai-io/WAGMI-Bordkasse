@@ -471,6 +471,7 @@ a:hover {
 /* ── Legacy class overrides ── */
 .ocean-gradient {
   background: var(--navy-deep);
+  color: #fff;
 }
 
 .porthole-card {
@@ -567,6 +568,52 @@ a:hover {
 .dash-hero-primary:hover {
   background: var(--accent-2);
   color: #fff;
+}
+
+/* ── Inverted text on colored backgrounds ──
+   Apply .text-on-color to ANY element with a blue/accent/dark background.
+   Forces all children (headings, links, paragraphs, spans, etc.) to white.
+   This prevents global rules like h1-h6{color:var(--text)} from showing
+   dark text on colored surfaces. */
+.text-on-color,
+.text-on-color *,
+.dash-hero-primary,
+.dash-hero-primary * {
+  color: #fff !important;
+}
+
+.text-on-color a,
+.dash-hero-primary a {
+  color: #fff !important;
+  text-decoration: underline;
+  text-decoration-color: rgba(255,255,255,0.4);
+}
+
+.text-on-color a:hover,
+.dash-hero-primary a:hover {
+  text-decoration-color: #fff;
+}
+
+.text-on-color .opacity-80,
+.dash-hero-primary .opacity-80 {
+  color: rgba(255,255,255,0.8) !important;
+}
+
+.text-on-color .opacity-50,
+.dash-hero-primary .opacity-50 {
+  color: rgba(255,255,255,0.5) !important;
+}
+
+.text-on-color .opacity-60,
+.dash-hero-primary .opacity-60 {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+.text-on-color .text-secondary,
+.dash-hero-primary .text-secondary,
+.text-on-color .ui-muted,
+.dash-hero-primary .ui-muted {
+  color: rgba(255,255,255,0.7) !important;
 }
 
 /* ── Form inputs ── */
