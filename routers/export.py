@@ -100,7 +100,7 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
             sanitize_csv_value(expense.amount_eur),
             sanitize_csv_value(expense.paid_from.value),
             sanitize_csv_value(expense.split_mode.value),
-            participants
+            sanitize_csv_value(participants)
         ])
     
     # Add settlement transfers
