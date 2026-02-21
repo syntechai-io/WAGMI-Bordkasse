@@ -255,7 +255,10 @@ function showNotification(message, type = 'info') {
     }
     
     notification.style.color = 'white';
-    notification.innerHTML = `<div class="font-bold">${message}</div>`;
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'font-bold';
+    messageDiv.textContent = message;
+    notification.appendChild(messageDiv);
     
     document.body.appendChild(notification);
     
