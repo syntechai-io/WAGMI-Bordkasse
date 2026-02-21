@@ -10,7 +10,7 @@ from routers.balances import calculate_balances
 from i18n import get_lang, t as i18n_t
 from constants.expense_enums import display_expense_category
 import io
-import csv
+from defusedcsv import csv
 from typing import Any
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
