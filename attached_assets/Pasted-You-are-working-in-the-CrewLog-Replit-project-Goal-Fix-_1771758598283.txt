@@ -1,0 +1,76 @@
+You are working in the CrewLog Replit project. Goal: Fix the MOBILE UI look & feel on specific pages (Logbook entry detail + Logbook entry edit) so it matches our Calm Maritime design (dark navy topbar, light grey canvas, calm white cards) WITHOUT changing any backend logic, routes, translations, or JS behavior.
+
+IMPORTANT WORKFLOW / CONSTRAINTS
+- Plan mode first: produce a short plan + exact files/lines you will touch before applying changes.
+- Changes must be CSS-only (plus a service worker cache bump). Do NOT modify Python logic, DB, or template text keys.
+- Scope changes to mobile only: @media (max-width: 1023px). Desktop (>=1024px) must remain pixel-identical.
+- Keep existing DOM structure and class names. Only override styling.
+- Preserve accessibility: tap targets >= 44px, focus outlines visible, no text contrast regressions.
+- Ensure iOS safe area is respected where needed (bottom sticky bars or top spacing).
+
+TARGET PAGES (mobile)
+1) Logbook entry edit page (shows “Manöver-Typ (Quick Entry)” tiles + sticky bottom actions)
+2) Logbook entry detail page (shows entry header, back button, edit/delete buttons, sections like Position/Fotos, camera/file buttons)
+
+CURRENT PROBLEMS TO FIX (mobile)
+- Oversized headings and inconsistent typography scale.
+- Too many large “primary blue” blocks; hierarchy unclear.
+- Cards/sections feel heavy and inconsistent with Calm Maritime (too much blue fill, thick borders).
+- Buttons inconsistent (radius/height/colors), especially: Back/Camera/File/Edit/Delete.
+- Overall spacing: too much vertical whitespace in some blocks, cramped in others.
+
+DESIRED MOBILE DESIGN SYSTEM (Calm Maritime Mobile)
+- Canvas background: light grey (same tone as desktop canvas, e.g. #F3F4F6) behind content.
+- Cards: white background, 16px radius, subtle shadow, soft grey border; consistent across sections.
+- Typography:
+  - H1 on mobile: ~24–26px, semibold; not huge.
+  - H2: ~18–20px, semibold.
+  - Body: readable slate (not pure black), secondary text muted.
+- Buttons (mobile):
+  - Minimum height 44px.
+  - Radius 12px.
+  - Primary = accent blue (#2C6BED) with white text (use sparingly: Save/Update).
+  - Secondary = white with soft border, dark text.
+  - Danger = red (#DC2626 / #B91C1C), consistent radius/height.
+  - Icon + label alignment consistent.
+- Tiles (Maneuver quick-entry):
+  - Default tile: white card with border and icon; no filled blue background by default.
+  - Selected/active tile can use subtle accent (border or light tint), but not full blue fill unless strictly needed.
+- Keep the dark navy topbar exactly as is (already good).
+- Do NOT alter translations or labels; only styling.
+
+IMPLEMENTATION STEPS
+A) Add a new mobile-only stylesheet:
+   - Create: static/ui_mobile_skin.css
+   - Put ALL rules inside: @media (max-width: 1023px) { ... }
+   - Use conservative selectors that target existing containers on the two pages, e.g.:
+     - body / main container canvas background
+     - card containers and section wrappers used on those pages
+     - buttons used on those pages (including camera/file buttons)
+     - maneuver tiles grid/buttons
+     - page headings within those templates
+   - Avoid global destructive rules. Prefer scoping to wrappers already present (e.g. .logbook-form-wrapper, .porthole-card, .dash-card, etc.). If wrappers differ, add minimal, safe selectors by page (e.g. body classes or unique ids if they exist already). If there are no stable hooks, add ONLY ONE non-functional wrapper class in the relevant templates (allowed) but keep it minimal and do not change structure; then style against that class.
+
+B) Load the new CSS after existing CSS:
+   - In templates/layout.html add a <link rel="stylesheet" href="/static/ui_mobile_skin.css"> AFTER existing skin/override CSS files so it wins on mobile.
+
+C) Service worker cache bump:
+   - In static/sw.js bump cache version (e.g. crewlog-v17 -> crewlog-v18 or current -> +1).
+   - Add /static/ui_mobile_skin.css to precache list if you maintain one.
+
+D) Verification / QA checklist (do this in your output AND test manually):
+   1) Desktop unchanged (>=1024px): dashboard, trips, expenses, groups look identical to before.
+   2) Mobile logbook edit page:
+      - headings smaller and consistent
+      - maneuver tiles calm (no big blue fill by default)
+      - sticky bar still works; safe area respected; buttons consistent
+   3) Mobile logbook detail page:
+      - back/edit/delete buttons consistent sizing and hierarchy
+      - section cards calm and consistent; camera/file buttons secondary unless primary action is required
+   4) No text becomes dark-on-navy in header/footer; do not touch the existing navy guardrail.
+   5) No JS or form submission behavior changed.
+
+DELIVERABLE
+- First: show the plan (bullets: files to be changed, what rules you’ll add).
+- Then: apply the patch.
+- Finally: summarize what changed and how to test (including hard refresh / SW update on iOS if needed).
