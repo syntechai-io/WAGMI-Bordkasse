@@ -1,0 +1,58 @@
+You are working on CrewLog (Flask + Jinja templates + i18n t() + service worker). 
+
+PROBLEM (confirmed by screenshots):
+- On large screens, the Dashboard "Quick Logbook" / "Quick Start" card renders in the calm light style and shows EN text even though the app is set to German (DE).
+- When the viewport becomes smaller (or on mobile), that card switches to a blue hero-style tile and the text becomes German.
+- On mobile it is always the blue hero tile and German text.
+We need to identify the ROOT CAUSE (template duplication vs CSS breakpoint vs i18n context mismatch vs cached assets) and apply a fix that ensures:
+1) The dashboard card uses ONE canonical component (same markup) across breakpoints.
+2) The text language always follows the active locale (DE/EN) consistently (no hardcoded strings).
+3) The visual styling may change responsively if desired, but the language must NOT. Also: we want the calm maritime palette (dark navy + light grey canvas), no random blue hero tiles unless explicitly configured.
+4) Do this in a way that does NOT break any existing navigation, links, or routes.
+
+WORK MODE:
+- PLAN MODE FIRST. Do not change code until you have produced a short but precise plan with verification steps.
+- Then implement the smallest possible fix. Avoid broad refactors.
+
+STEP A — Reproduce & Trace (must do)
+1) Locate the dashboard template(s): search for "Quick Start CrewLog", "Schnell-Logbuch", "Logbuch führen", "Keep Logbook", "Quick Logbook", "Start a new trip now", "Neuen Törn jetzt starten" in /templates and /static.
+2) Identify whether there are two different blocks rendered conditionally:
+   - via Jinja if/else (e.g., is_mobile, request.user_agent, screen width assumptions, etc.)
+   - or via separate partials included for desktop vs mobile
+   - or via duplicated HTML blocks where one is hidden/shown by CSS media queries.
+3) Identify where the blue hero styling comes from:
+   - Find the CSS class names used on the mobile version (e.g., "hero", "quick-start", "dashboard-tile", etc.)
+   - Find the breakpoint rule that switches the layout (e.g., @media max-width ...).
+4) Confirm the i18n context:
+   - Verify how locale is stored (session, cookie, query param, g.lang, etc.)
+   - Confirm that the dashboard card strings call t("...") and are present in de.json/en.json.
+   - If one version is hardcoded, list the exact lines.
+
+STEP B — Root Cause Statement (must do)
+Before changing anything, write a root cause statement like:
+- "There are two dashboard markup blocks; the mobile one is legacy and uses hardcoded German strings + blue hero class; it is shown under 1024px via CSS. Desktop uses t() and the new card classes."
+
+STEP C — Fix Strategy (must do)
+Implement a canonical single dashboard card component:
+- Create one Jinja partial (e.g., templates/partials/dashboard_quick_cards.html) containing the dashboard quick actions markup using ONLY t() keys.
+- Both desktop and mobile layouts should include the same partial; differences should be controlled only by CSS classes (responsive), not duplicated markup.
+- Remove or disable the legacy mobile-only block OR ensure it uses the same t() keys and classes.
+- Ensure the language displayed follows the active locale always.
+
+STEP D — Cache/Service Worker (must do)
+- If dashboard templates or UI CSS/JS are cached in sw.js, bump the service worker cache version and ensure the updated files are precached.
+- Add a verification note: how to hard refresh / clear SW on iOS.
+
+STEP E — Verification Checklist (must do)
+After changes:
+1) With DE selected, the dashboard card text is German on desktop AND mobile AND when resizing.
+2) With EN selected, the dashboard card text is English on desktop AND mobile AND when resizing.
+3) The blue hero tile no longer appears (or if it remains by design, it still uses correct locale and matches calm palette).
+4) No regressions in dashboard links.
+
+DELIVERABLES:
+- A short Plan section (bullets).
+- The exact files changed (paths) and what changed in each.
+- The root cause statement.
+- The verification steps.
+Do NOT claim success without explicitly pointing to the relevant code locations you changed.
