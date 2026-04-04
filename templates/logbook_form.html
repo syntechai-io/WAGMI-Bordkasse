@@ -60,7 +60,7 @@
             <div class="flex-grow-0">
                 <label class="block font-medium mb-2">📅 {{ t('logbook.date_label') }} *</label>
                 <input type="date" name="entry_date" 
-                       value="{% if entry %}{{ entry.entry_date.strftime('%Y-%m-%d') }}{% endif %}" 
+                       value="{% if entry %}{{ entry.entry_date.strftime('%Y-%m-%d') }}{% elif default_date %}{{ default_date }}{% endif %}" 
                        required 
                        class="px-4 py-3 border rounded-lg text-lg w-auto" 
                        style="border-color: var(--border); min-width: 160px;">
@@ -69,7 +69,7 @@
             <div class="flex-grow-0">
                 <label class="block font-medium mb-2">🕐 {{ t('logbook.time_input') }} *</label>
                 <input type="time" name="entry_time" 
-                       value="{% if entry %}{{ entry.entry_date.strftime('%H:%M') }}{% else %}12:00{% endif %}" 
+                       value="{% if entry %}{{ entry.entry_date.strftime('%H:%M') }}{% elif default_time %}{{ default_time }}{% else %}12:00{% endif %}" 
                        required 
                        class="px-4 py-3 border rounded-lg text-lg w-auto" 
                        style="border-color: var(--border); min-width: 140px;">

@@ -165,6 +165,7 @@ async def new_entry_form(request: Request, db: Session = Depends(get_db)):
         if bp:
             sail_profile = bp.sail_profile
     
+    now = datetime.utcnow()
     return templates.TemplateResponse("logbook_form.html", {
         "request": request,
         "crew_members": crew_members,
@@ -172,6 +173,8 @@ async def new_entry_form(request: Request, db: Session = Depends(get_db)):
         "active_trip": active_trip,
         "entry": None,
         "sail_profile": sail_profile,
+        "default_date": now.strftime("%Y-%m-%d"),
+        "default_time": now.strftime("%H:%M"),
     })
 
 @router.post("/new")
