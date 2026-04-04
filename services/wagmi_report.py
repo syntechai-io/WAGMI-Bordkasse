@@ -6,36 +6,46 @@ from typing import List, Dict, Optional
 from collections import defaultdict
 
 class WagmiAnnualReportService:
-    """Service for generating WAGMI yearly sailing reports"""
-    
+    """Service for generating yearly sailing reports"""
+
     @staticmethod
-    def get_yearly_report(db: Session, start_year: int = 2026) -> Dict[int, Dict]:
+    def get_yearly_report(db: Session, account_id: int = 1, start_year: Optional[int] = None) -> Dict[int, Dict]:
         """
-        Generate yearly report for all WAGMI trips starting from specified year.
-        
+        Generate yearly report for all trips in the given account.
+
         Args:
             db: Database session
-            start_year: First year to include in report (default: 2026)
-            
+            account_id: Account to scope the report to
+            start_year: First year to include (default: auto-detected from earliest trip)
+
         Returns:
             Dictionary with years as keys and aggregated statistics as values
         """
         current_year = datetime.now().year
-        
-        # Get all WAGMI trips from start_year onwards
-        wagmi_trips = db.query(Trip).filter(
-            Trip.name.ilike('%WAGMI%'),
+
+        # Base query — all trips for the account with a start date (no name filter)
+        base_query = db.query(Trip).filter(
+            Trip.account_id == account_id,
             Trip.start_date.isnot(None),
+        )
+
+        # Auto-detect the earliest year if not specified
+        if start_year is None:
+            earliest = base_query.order_by(Trip.start_date.asc()).first()
+            start_year = earliest.start_date.year if earliest else current_year
+
+        # Fetch all trips from start_year onwards
+        all_trips = base_query.filter(
             extract('year', Trip.start_date) >= start_year
         ).order_by(Trip.start_date.asc()).all()
-        
+
         # Group trips by year
         trips_by_year = defaultdict(list)
-        for trip in wagmi_trips:
+        for trip in all_trips:
             if trip.start_date:
                 year = trip.start_date.year
                 trips_by_year[year].append(trip)
-        
+
         # Calculate statistics for each year
         yearly_stats = {}
         for year in range(start_year, current_year + 1):

@@ -379,7 +379,8 @@ async def yearly_annual_report(request: Request, db: Session = Depends(get_db)):
     if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can view reports")
     
-    yearly_stats = WagmiAnnualReportService.get_yearly_report(db, start_year=2026)
+    account_id = _get_account_id(request)
+    yearly_stats = WagmiAnnualReportService.get_yearly_report(db, account_id=account_id)
     
     sorted_years = sorted(yearly_stats.keys(), reverse=True)
     
