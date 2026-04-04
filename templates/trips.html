@@ -86,13 +86,27 @@
                 <tbody class="divide-y divide-sky-200">
                     {% for trip in trips %}
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap font-semibold">
-                            {{ trip.name }}
-                            {% if trip.id == active_trip.id %}
-                            <span class="ml-2 text-xs px-2 py-1 rounded-full" style="background: var(--success); color: white;">{{ t('trips.status_active') }}</span>
-                            {% endif %}
-                            {% if trip.is_closed == 1 %}
-                            <span class="ml-2 text-xs px-2 py-1 rounded-full" style="background: var(--coral); color: white;">🔒 {{ t('trips.status_closed') }}</span>
+                        <td class="px-6 py-4 font-semibold">
+                            <div id="trip-name-display-{{ trip.id }}" class="flex items-center gap-1 flex-wrap">
+                                <span>{{ trip.name }}</span>
+                                {% if trip.id == active_trip.id %}
+                                <span class="text-xs px-2 py-1 rounded-full" style="background: var(--success); color: white;">{{ t('trips.status_active') }}</span>
+                                {% endif %}
+                                {% if trip.is_closed == 1 %}
+                                <span class="text-xs px-2 py-1 rounded-full" style="background: var(--coral); color: white;">🔒 {{ t('trips.status_closed') }}</span>
+                                {% endif %}
+                                {% if request.session.get('role') == 'admin' or is_saas_owner %}
+                                <button type="button" onclick="toggleRename({{ trip.id }})" class="text-xs hover:opacity-70 touch-action" style="color: var(--text-secondary);" title="{{ t('trips.action_rename') }}">✏️</button>
+                                {% endif %}
+                            </div>
+                            {% if request.session.get('role') == 'admin' or is_saas_owner %}
+                            <form id="trip-rename-form-{{ trip.id }}" action="/trips/{{ trip.id }}/rename" method="post" class="hidden mt-2 flex gap-1 items-center" style="min-width:180px;">
+                                {{ csrf_input | safe }}
+                                <input type="text" name="name" value="{{ trip.name }}" required
+                                       class="flex-1 px-2 py-1 border rounded text-sm" style="border-color: var(--border); min-width: 120px;">
+                                <button type="submit" class="text-white px-2 py-1 rounded text-xs font-bold touch-action" style="background: var(--success);">✔</button>
+                                <button type="button" onclick="toggleRename({{ trip.id }})" class="px-2 py-1 rounded text-xs touch-action" style="background: var(--border);">✖</button>
+                            </form>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ trip.start_date }}</td>
@@ -230,6 +244,16 @@ async function openBillingPortal() {
         }
     } catch (e) {
         alert('{{ t("trips.portal_fetch_error") }}');
+    }
+}
+function toggleRename(tripId) {
+    var display = document.getElementById('trip-name-display-' + tripId);
+    var form = document.getElementById('trip-rename-form-' + tripId);
+    if (display) display.classList.toggle('hidden');
+    if (form) form.classList.toggle('hidden');
+    if (form && !form.classList.contains('hidden')) {
+        var input = form.querySelector('input[name="name"]');
+        if (input) { input.focus(); input.select(); }
     }
 }
 </script>

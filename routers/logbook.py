@@ -4,7 +4,7 @@ from template_helpers import create_templates
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
 from db import get_db
-from models import LogbookEntry, LogbookPhoto, CrewOnWatch, CrewMember, SeaStateEnum
+from models import LogbookEntry, LogbookPhoto, CrewOnWatch, CrewMember, SeaStateEnum, Trip
 from services.trip import TripService
 from services.audit import AuditService
 from services.boat import get_or_create_boat_profile, get_boat_profile_for_account
@@ -368,20 +368,36 @@ async def view_entry(request: Request, entry_id: int, db: Session = Depends(get_
 
 @router.get("/{entry_id}/edit", response_class=HTMLResponse)
 async def edit_entry_form(request: Request, entry_id: int, db: Session = Depends(get_db)):
-    active_trip = TripService.get_selected_trip(request, db)
+    user_role = request.session.get("role", "crew")
+
+    # Admin can edit entries from any trip (including archived/closed).
+    # Crew can only edit entries that belong to their currently selected trip.
+    if user_role == "admin":
+        entry = db.query(LogbookEntry).options(
+            joinedload(LogbookEntry.crew_on_watch)
+        ).filter(LogbookEntry.id == entry_id).first()
+        if not entry:
+            return RedirectResponse(url="/logbook", status_code=303)
+        active_trip = db.query(Trip).filter(Trip.id == entry.trip_id).first()
+    else:
+        active_trip = TripService.get_selected_trip(request, db)
+        if not active_trip:
+            return RedirectResponse(url="/trips", status_code=303)
+        entry = db.query(LogbookEntry).options(
+            joinedload(LogbookEntry.crew_on_watch)
+        ).filter(LogbookEntry.id == entry_id, LogbookEntry.trip_id == active_trip.id).first()
+        if not entry:
+            return RedirectResponse(url="/logbook", status_code=303)
+
     if not active_trip:
-        return RedirectResponse(url="/trips", status_code=303)
-    
-    entry = db.query(LogbookEntry).options(
-        joinedload(LogbookEntry.crew_on_watch)
-    ).filter(LogbookEntry.id == entry_id, LogbookEntry.trip_id == active_trip.id).first()
-    
-    if not entry:
         return RedirectResponse(url="/logbook", status_code=303)
-    
+
+    if not TripService.is_trip_editable(active_trip, user_role, request):
+        return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
+
     crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.name).all()
     sea_states = [s.value for s in SeaStateEnum]
-    
+
     sail_profile = None
     account_id = request.session.get("account_id")
     if account_id:
@@ -449,20 +465,29 @@ async def update_entry(
     maneuver_type: Optional[str] = Form("full"),
     db: Session = Depends(get_db)
 ):
-    active_trip = TripService.get_selected_trip(request, db)
-    if not active_trip:
-        return RedirectResponse(url="/trips", status_code=303)
-    
-    # Check if trip is editable by current user
     user_role = request.session.get("role", "crew")
+
+    # Admin can update entries from any trip (including archived/closed).
+    if user_role == "admin":
+        entry = db.query(LogbookEntry).filter(LogbookEntry.id == entry_id).first()
+        if not entry:
+            return RedirectResponse(url="/logbook", status_code=303)
+        active_trip = db.query(Trip).filter(Trip.id == entry.trip_id).first()
+    else:
+        active_trip = TripService.get_selected_trip(request, db)
+        if not active_trip:
+            return RedirectResponse(url="/trips", status_code=303)
+        entry = db.query(LogbookEntry).filter(LogbookEntry.id == entry_id, LogbookEntry.trip_id == active_trip.id).first()
+        if not entry:
+            return RedirectResponse(url="/logbook", status_code=303)
+
+    if not active_trip:
+        return RedirectResponse(url="/logbook", status_code=303)
+
     if not TripService.is_trip_editable(active_trip, user_role, request):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/logbook", status_code=303)
-    
-    entry = db.query(LogbookEntry).filter(LogbookEntry.id == entry_id, LogbookEntry.trip_id == active_trip.id).first()
-    if not entry:
-        return RedirectResponse(url="/logbook", status_code=303)
-    
+
     try:
         # Combine date and time
         entry_datetime = datetime.fromisoformat(f"{entry_date}T{entry_time}")

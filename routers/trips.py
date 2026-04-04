@@ -275,6 +275,27 @@ async def reopen_trip(
     
     return RedirectResponse(url="/trips/", status_code=303)
 
+@router.post("/{trip_id}/rename")
+async def rename_trip(
+    trip_id: int,
+    request: Request,
+    name: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    """Rename a trip — scoped to account"""
+    if not _is_admin_or_owner(request, db):
+        raise HTTPException(status_code=403, detail="Only admin can rename trips")
+
+    trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+
+    trip.name = name.strip() or trip.name
+    db.commit()
+
+    return RedirectResponse(url="/trips/", status_code=303)
+
+
 @router.post("/{trip_id}/select")
 async def select_trip(
     trip_id: int,
