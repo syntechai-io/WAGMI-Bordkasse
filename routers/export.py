@@ -3,7 +3,7 @@ from fastapi.responses import StreamingResponse, RedirectResponse, HTMLResponse,
 from template_helpers import create_templates
 from sqlalchemy.orm import Session, joinedload
 from db import get_db
-from models import CrewMember, Deposit, Expense
+from models import CrewMember, Deposit, Expense, ExpenseParticipant
 from services.trip import TripService
 from settlement import compute_settlement
 from routers.balances import calculate_balances
@@ -87,7 +87,7 @@ async def download_csv(request: Request, db: Session = Depends(get_db)):
     _t = lambda key, **kw: i18n_t(lang, key, **kw)
     for expense in db.query(Expense).options(
         joinedload(Expense.payer),
-        joinedload(Expense.participants).joinedload('member')
+        joinedload(Expense.participants).joinedload(ExpenseParticipant.member)
     ).filter(Expense.trip_id == active_trip.id).all():
         participants = ", ".join([sanitize_csv_value(p.member.code) for p in expense.participants])
         writer.writerow([
