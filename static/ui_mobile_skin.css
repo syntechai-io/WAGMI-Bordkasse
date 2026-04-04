@@ -1,6 +1,23 @@
 @media (max-width: 1023px) {
 
   /* ══════════════════════════════════════════
+     IPHONE NOTCH / DYNAMIC ISLAND SAFE AREA
+     viewport-fit=cover is set on the meta tag,
+     so we must manually push topbar + drawer
+     content below the status bar / notch area.
+     ══════════════════════════════════════════ */
+
+  .topbar {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* Drawer starts at top:0 (fixed), so its header
+     also needs to clear the notch */
+  .drawer-header {
+    padding-top: calc(0.85rem + env(safe-area-inset-top, 0px));
+  }
+
+  /* ══════════════════════════════════════════
      CALM MARITIME MOBILE SKIN
      Scoped to: .logbook-detail-wrapper (detail page)
                 .logbook-form-wrapper  (edit/new page)
