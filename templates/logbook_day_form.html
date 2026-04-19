@@ -31,7 +31,7 @@
         <button type="button" class="remove-row-btn text-sm font-medium px-3 py-2 rounded touch-action"
                 style="color: var(--coral); background: var(--surface-2);">🗑️ {{ t('common.delete') }}</button>
     </div>
-    <div class="day-row__grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
+    <div class="day-row__grid items-end">
         <div class="min-w-0">
             <label class="block text-xs ui-muted">⏱️ {{ t('logbook.time_input') }} *</label>
             <input type="time" name="row_time" required value="{{ values.get('row_time', '') }}"
@@ -270,28 +270,32 @@
 </template>
 
 <style>
-    /* Reserve enough vertical space for labels that wrap to 2-3 lines on narrow
-       iPhone widths (grid is 2 columns on mobile). Without this, longer labels
-       like "Betriebsstunden gesamt" or "Breitengrad (Latitude)" wrap and push
-       neighbouring inputs (e.g. Uhrzeit vs. Manöver-Typ) out of alignment. */
-    /* Reserve enough vertical space for labels that wrap to 2-3 lines. The grid
-       is 2 cols on mobile (~180px each), 3 cols on iPad portrait (~240px each)
-       and only switches to the dense 6-col layout on real desktop (lg, >=1024px,
-       ~150-170px each). On lg+ labels rarely wrap, so we can shrink the
-       reservation. */
-    .day-row label {
-        min-height: 3.2rem;
+    /* Self-adapting grid: every column is at least 160px wide so labels stay
+       on one line, and the column count adjusts naturally to the viewport.
+       iPhone (~375px) -> 2 cols, iPad portrait (~768px) -> 4 cols,
+       iPad landscape (~1024px) -> 6 cols, desktop -> 7-8 cols. No breakpoint
+       juggling, no overlap. */
+    .day-row__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.75rem;
+    }
+    .day-row__grid > div { min-width: 0; display: flex; flex-direction: column; }
+    .day-row__grid > div > label {
+        font-size: 0.75rem;
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+        min-height: 1.5rem;     /* one comfortable line; wraps grow naturally */
         display: block;
-        line-height: 1.15;
         word-break: break-word;
-        overflow-wrap: anywhere;
     }
-    @media (min-width: 1024px) {
-        .day-row label { min-height: 2.6rem; }
+    .day-row__grid > div > input,
+    .day-row__grid > div > select,
+    .day-row__grid > div > textarea {
+        min-height: 40px;
+        width: 100%;
+        box-sizing: border-box;
     }
-    .day-row .day-row__grid > div { min-width: 0; }
-    .day-row .day-row__grid > div > input,
-    .day-row .day-row__grid > div > select { min-height: 40px; width: 100%; }
     .day-row .move-up-btn[disabled],
     .day-row .move-down-btn[disabled] { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
     #dayPhotosPreview .photo-pill { position: relative; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); }
