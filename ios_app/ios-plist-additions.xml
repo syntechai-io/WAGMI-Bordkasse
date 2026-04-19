@@ -23,6 +23,10 @@
     <false/>
 </dict>
 
+<!-- Face ID: Optional biometric login. Required by Apple when LocalAuthentication is linked. -->
+<key>NSFaceIDUsageDescription</key>
+<string>CrewLog uses Face ID to sign you in securely without re-entering your password.</string>
+
 <!-- No background location, no Bluetooth, no tracking -->
 <!-- ITSAppUsesNonExemptEncryption: Standard HTTPS only -->
 <key>ITSAppUsesNonExemptEncryption</key>

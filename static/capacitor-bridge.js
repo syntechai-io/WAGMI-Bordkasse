@@ -190,4 +190,86 @@
   window.addEventListener('offline', showOfflineScreen);
   window.addEventListener('online', hideOfflineScreen);
   if (!navigator.onLine) showOfflineScreen();
+
+  // ---------------------------------------------------------------------------
+  // Biometric (Face ID / Touch ID) login helpers
+  // ---------------------------------------------------------------------------
+  // Uses @aparajita/capacitor-biometric-auth (LocalAuthentication) and
+  // @aparajita/capacitor-secure-storage (iOS Keychain). Credentials saved here
+  // are only retrievable after a successful biometric prompt.
+  var BIO_KEY_EMAIL = 'crewlog.bio.email';
+  var BIO_KEY_PASSWORD = 'crewlog.bio.password';
+
+  function _bioPlugin() {
+    try { return window.Capacitor.Plugins.BiometricAuth || null; } catch (e) { return null; }
+  }
+  function _securePlugin() {
+    try { return window.Capacitor.Plugins.SecureStorage || null; } catch (e) { return null; }
+  }
+
+  async function bioIsAvailable() {
+    var p = _bioPlugin();
+    if (!p) return { available: false, reason: 'plugin_missing' };
+    try {
+      var info = await p.checkBiometry();
+      return {
+        available: !!info.isAvailable,
+        biometryType: info.biometryType,
+        reason: info.reason || null
+      };
+    } catch (e) {
+      return { available: false, reason: 'check_failed' };
+    }
+  }
+
+  async function bioHasSavedCredentials() {
+    var s = _securePlugin();
+    if (!s) return false;
+    try {
+      var v = await s.get({ key: BIO_KEY_EMAIL });
+      return !!(v && v.value);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function bioAuthenticateAndLoad(reason) {
+    var p = _bioPlugin();
+    var s = _securePlugin();
+    if (!p || !s) throw new Error('plugin_missing');
+    await p.authenticate({
+      reason: reason || 'Sign in to CrewLog',
+      cancelTitle: 'Cancel',
+      allowDeviceCredential: false,
+      iosFallbackTitle: ''
+    });
+    var emailRes = await s.get({ key: BIO_KEY_EMAIL });
+    var pwRes = await s.get({ key: BIO_KEY_PASSWORD });
+    if (!emailRes || !emailRes.value || !pwRes || !pwRes.value) {
+      throw new Error('no_credentials');
+    }
+    return { email: emailRes.value, password: pwRes.value };
+  }
+
+  async function bioSaveCredentials(email, password) {
+    var s = _securePlugin();
+    if (!s) throw new Error('plugin_missing');
+    await s.set({ key: BIO_KEY_EMAIL, value: String(email || '') });
+    await s.set({ key: BIO_KEY_PASSWORD, value: String(password || '') });
+  }
+
+  async function bioClearCredentials() {
+    var s = _securePlugin();
+    if (!s) return;
+    try { await s.remove({ key: BIO_KEY_EMAIL }); } catch (e) {}
+    try { await s.remove({ key: BIO_KEY_PASSWORD }); } catch (e) {}
+  }
+
+  window.CrewlogBiometric = {
+    isAvailable: bioIsAvailable,
+    hasSaved: bioHasSavedCredentials,
+    authenticateAndLoad: bioAuthenticateAndLoad,
+    save: bioSaveCredentials,
+    clear: bioClearCredentials
+  };
 })();

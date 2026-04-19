@@ -145,6 +145,32 @@
                 <span id="saas-error-msg"></span>
             </div>
 
+            {# Face ID / biometric login (iOS only, when credentials saved) #}
+            <div id="biometric-login-block" class="hidden mb-5">
+                <button type="button" id="biometric-login-btn"
+                        class="btn btn-primary w-full py-3 text-base flex items-center justify-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+                        <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+                        <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+                        <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                        <path d="M9 9v2"/><path d="M15 9v2"/>
+                        <path d="M9 15c1 1 2 1.5 3 1.5s2-.5 3-1.5"/>
+                    </svg>
+                    <span id="biometric-login-label">{{ t('auth.biometric_signin') }}</span>
+                </button>
+                <div class="text-center mt-2">
+                    <button type="button" id="biometric-clear-btn" class="text-xs" style="color: var(--muted);">
+                        {{ t('auth.biometric_forget') }}
+                    </button>
+                </div>
+                <div class="my-4 flex items-center" aria-hidden="true">
+                    <div style="flex:1;height:1px;background:var(--border-light);"></div>
+                    <span class="px-3 text-xs" style="color: var(--muted);">{{ t('auth.or') }}</span>
+                    <div style="flex:1;height:1px;background:var(--border-light);"></div>
+                </div>
+            </div>
+
             <form id="saas-form" class="space-y-5" onsubmit="return handleSaasLogin(event)">
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color: var(--text);">
@@ -205,34 +231,125 @@
         legacyCard.classList.toggle('hidden');
         saasCard.classList.toggle('hidden');
     }
-    async function handleSaasLogin(e) {
-        e.preventDefault();
+    async function submitSaasCredentials(email, password) {
         const errBox = document.getElementById('saas-error');
         const errMsg = document.getElementById('saas-error-msg');
         errBox.classList.add('hidden');
         const form = new FormData();
-        form.append('email', document.getElementById('saas-email').value);
-        form.append('password', document.getElementById('saas-password').value);
+        form.append('email', email);
+        form.append('password', password);
+        const csrfToken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+        const res = await fetch('/login-saas', {
+            method: 'POST',
+            body: form,
+            headers: { 'x-csrftoken': csrfToken }
+        });
+        let data = {};
+        try { data = await res.json(); } catch (e) {}
+        if (res.ok && data.ok) {
+            return { ok: true };
+        }
+        return { ok: false, detail: data.detail || '{{ t("auth.login_failed") }}' };
+    }
+    function showSaasError(msg) {
+        const errBox = document.getElementById('saas-error');
+        const errMsg = document.getElementById('saas-error-msg');
+        errMsg.textContent = msg;
+        errBox.classList.remove('hidden');
+    }
+    async function maybeOfferBiometricSave(email, password) {
+        if (!window.IS_NATIVE_IOS || !window.CrewlogBiometric) return;
         try {
-            const csrfToken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
-            const res = await fetch('/login-saas', {
-                method: 'POST',
-                body: form,
-                headers: { 'x-csrftoken': csrfToken }
-            });
-            const data = await res.json();
-            if (res.ok && data.ok) {
+            const info = await window.CrewlogBiometric.isAvailable();
+            if (!info.available) return;
+            const already = await window.CrewlogBiometric.hasSaved();
+            if (already) return;
+            const ok = window.confirm('{{ t("auth.biometric_save_prompt") }}');
+            if (!ok) return;
+            await window.CrewlogBiometric.save(email, password);
+        } catch (e) { /* non-fatal */ }
+    }
+    async function handleSaasLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('saas-email').value;
+        const password = document.getElementById('saas-password').value;
+        try {
+            const result = await submitSaasCredentials(email, password);
+            if (result.ok) {
+                await maybeOfferBiometricSave(email, password);
                 window.location.href = '/trips/';
             } else {
-                errMsg.textContent = data.detail || '{{ t("auth.login_failed") }}';
-                errBox.classList.remove('hidden');
+                showSaasError(result.detail);
             }
         } catch (err) {
-            errMsg.textContent = '{{ t("common.connection_error") }}';
-            errBox.classList.remove('hidden');
+            showSaasError('{{ t("common.connection_error") }}');
         }
         return false;
     }
+
+    async function initBiometricLogin() {
+        if (!window.IS_NATIVE_IOS || !window.CrewlogBiometric) return;
+        try {
+            const info = await window.CrewlogBiometric.isAvailable();
+            const has = await window.CrewlogBiometric.hasSaved();
+            if (!info.available || !has) return;
+            const block = document.getElementById('biometric-login-block');
+            const btn = document.getElementById('biometric-login-btn');
+            const label = document.getElementById('biometric-login-label');
+            const clearBtn = document.getElementById('biometric-clear-btn');
+            if (info.biometryType && /face/i.test(info.biometryType)) {
+                label.textContent = '{{ t("auth.biometric_signin_face") }}';
+            } else if (info.biometryType && /touch|finger/i.test(info.biometryType)) {
+                label.textContent = '{{ t("auth.biometric_signin_touch") }}';
+            }
+            // Auto-show SaaS card so the biometric option is visible
+            const legacyCard = document.querySelector('.login-card');
+            const saasCard = document.getElementById('saas-login-card');
+            if (saasCard.classList.contains('hidden')) {
+                legacyCard.classList.add('hidden');
+                saasCard.classList.remove('hidden');
+            }
+            block.classList.remove('hidden');
+            btn.addEventListener('click', async function () {
+                btn.disabled = true;
+                try {
+                    const creds = await window.CrewlogBiometric.authenticateAndLoad('{{ t("auth.biometric_reason") }}');
+                    const result = await submitSaasCredentials(creds.email, creds.password);
+                    if (result.ok) {
+                        window.location.href = '/trips/';
+                    } else {
+                        // Stale credentials -> clear and let the user log in manually
+                        await window.CrewlogBiometric.clear();
+                        block.classList.add('hidden');
+                        showSaasError(result.detail);
+                    }
+                } catch (err) {
+                    // User cancelled or biometric failed: stay on the form silently
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+            clearBtn.addEventListener('click', async function () {
+                if (!window.confirm('{{ t("auth.biometric_forget_confirm") }}')) return;
+                await window.CrewlogBiometric.clear();
+                block.classList.add('hidden');
+            });
+        } catch (e) { /* non-fatal */ }
+    }
+    </script>
+
+    {# Load the Capacitor bridge on iOS so window.CrewlogBiometric is available here, then init. #}
+    <script>
+    (function () {
+        if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) return;
+        var s = document.createElement('script');
+        s.src = '/static/capacitor-bridge.js';
+        s.onload = function () {
+            // Bridge defines window.CrewlogBiometric synchronously; init now.
+            try { initBiometricLogin(); } catch (e) {}
+        };
+        document.body.appendChild(s);
+    })();
     </script>
 </body>
 </html>

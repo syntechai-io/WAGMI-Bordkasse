@@ -37,6 +37,8 @@ npx cap open ios
 
 ### Step 1: Install Dependencies
 
+> Note: when biometric login support was added, two plugins were appended to `package.json` (`@aparajita/capacitor-biometric-auth`, `@aparajita/capacitor-secure-storage`). Run `npm install` (not `npm ci`) on the next pull so the lockfile picks them up, then commit the regenerated `package-lock.json`.
+
 ```bash
 cd ios_app
 npm install
@@ -159,6 +161,7 @@ After completing an external browser action (e.g., Stripe payment on the website
 - **Camera**: Attach photos to logbook entries and expense receipts
 - **Photo Library**: Select existing photos for attachments
 - **App Plugin**: Version info, app state change detection
+- **Face ID / Touch ID**: Biometric login for SaaS accounts. After a successful email/password login the user is offered to save the credentials to the iOS Keychain (via `@aparajita/capacitor-secure-storage`). On subsequent visits to `/login`, the bridge probes `@aparajita/capacitor-biometric-auth`; if a biometric is enrolled and credentials are stored, a "Sign in with Face ID" button appears, prompts the user via `LocalAuthentication`, retrieves the credentials from the Keychain, and submits them to `/login-saas`. Credentials are cleared automatically if the saved password no longer works, and the user can clear them manually from the login screen.
 
 ---
 
@@ -170,6 +173,7 @@ After completing an external browser action (e.g., Stripe payment on the website
 | `NSCameraUsageDescription` | Photographs receipts and logbook documentation |
 | `NSPhotoLibraryUsageDescription` | Attaches images to logbook entries and expenses |
 | `NSPhotoLibraryAddUsageDescription` | Saves exported documents to photo library |
+| `NSFaceIDUsageDescription` | Enables Face ID / Touch ID for biometric sign-in |
 
 No background location, Bluetooth, or tracking permissions are requested.
 

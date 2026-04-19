@@ -92,6 +92,7 @@ A greedy matching algorithm minimizes transfers between debtors and creditors, s
 - **Universal Links**: `/ios/return` route provides return-to-app flow after external browser actions. AASA served at `/.well-known/apple-app-site-association`. URL scheme: `crewlog://`.
 - **About/Diagnostics**: `/about` page shows app version, session mode, account ID, language. In iOS, native version/build info from Capacitor App plugin. Accessible from Help in navigation.
 - **Session Stability**: Bridge calls `/api/whoami` on app resume (foreground) to check session validity. Auto-redirects to login if session expired.
+- **Biometric Login (Face ID / Touch ID)**: SaaS users on iOS can opt in to biometric sign-in. After a successful email/password login they are prompted to save credentials to the iOS Keychain via `@aparajita/capacitor-secure-storage`; on later visits to `/login`, `@aparajita/capacitor-biometric-auth` (LocalAuthentication) gates retrieval of those credentials and submits them to `/login-saas`. Stale credentials are cleared automatically and can be cleared manually from the login screen. Requires `NSFaceIDUsageDescription` in Info.plist.
 - **Offline Handling**: Bridge shows full-screen offline overlay with retry button when device loses connectivity (iOS only).
 - **Documentation**: `ios_app/README_IOS.md` (TestFlight build steps), `ios_app/APP_STORE_CHECKLIST.md` (Apple review compliance), `ios_app/APP_STORE_ASSETS.md` (screenshots, metadata, descriptions).
 
