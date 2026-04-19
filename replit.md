@@ -31,6 +31,7 @@ Preferred communication style: Simple, everyday language.
 - **Crew Departure Handling**: Correct settlement calculations for mid-trip departures.
 - **Timezone Handling**: All datetime fields normalized to UTC with client-side conversion.
 - **Solo-Sailing Workflow**: Streamlined trip creation for solo users.
+- **Quick Start Trip (swap semantics)**: `POST /trips/quick-start` archives the currently active trip and creates a fresh one in a single transaction. The auto-archive runs *before* the free-plan limit check so a free-plan user (1 active trip max) can always swap. Archive + create share one DB transaction; on any failure the archive rolls back so the user is never left with zero active trips.
 - **Stripe Subscription Billing**: Integration for customer/subscription management, checkout, billing portal, and webhook processing for plan gating and state synchronization. Non-destructive downgrade handling.
 - **DB Hardening**: Unique constraints and robust defaults for critical tables.
 - **Receipt OCR Pre-fill**: Anthropic Claude vision (`claude-sonnet-4-20250514`) reads uploaded receipt images/PDFs and pre-fills empty expense form fields (amount, currency, date, vendor, category, description). Endpoint `POST /expenses/ocr-suggest` is auth-gated, scoped to active trip, rate-limited (20/min/IP), 8 MB cap. Failures degrade silently and are audit-logged (`OCR_FAILED`). Suggestions are visually marked with a "Suggested" pill that clears on user edit; existing values are never overwritten.

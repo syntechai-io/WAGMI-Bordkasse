@@ -94,24 +94,37 @@ async def quick_start_trip(
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     account_id = _get_account_id(request)
-    if request.session.get("role") != "admin":
-        try:
-            enforce_free_limits_for_trip_creation(db, account_id)
-        except HTTPException as e:
-            if isinstance(e.detail, dict) and e.detail.get("code") == "UPGRADE_REQUIRED":
-                return RedirectResponse(url="/trips?upgrade_required=1", status_code=303)
-            raise
 
-    # Scope active trip lookup to account to avoid cross-tenant archiving
+    # Auto-archive the existing active trip BEFORE the plan limit check.
+    # Quick Start is the "swap to a fresh trip" workflow, so the previous
+    # active trip is rolled to archived first; otherwise free-plan users
+    # (1 active trip max) would be blocked from ever quick-starting again.
+    # Do NOT commit yet — keep archive + new-trip creation in one transaction
+    # so a failure in create_quick_start_trip rolls back the archive too and
+    # the user is never left with zero active trips.
     current_active = _scoped_trip_query(db, request).filter(Trip.status == TripStatus.active).first()
     if current_active:
         current_active.status = TripStatus.archived
         if not current_active.end_date:
             current_active.end_date = date.today()
-        db.commit()
-    
+        db.flush()
+
+    if request.session.get("role") != "admin":
+        try:
+            enforce_free_limits_for_trip_creation(db, account_id)
+        except HTTPException as e:
+            if isinstance(e.detail, dict) and e.detail.get("code") == "UPGRADE_REQUIRED":
+                db.rollback()
+                return RedirectResponse(url="/trips?upgrade_required=1", status_code=303)
+            db.rollback()
+            raise
+
     saas_user_id = request.session.get("saas_user_id")
-    trip = TripQuickStartService.create_quick_start_trip(db, user_id, account_id, saas_user_id)
+    try:
+        trip = TripQuickStartService.create_quick_start_trip(db, user_id, account_id, saas_user_id)
+    except Exception:
+        db.rollback()
+        raise
     
     TripService.set_selected_trip(request, trip.id)
     
