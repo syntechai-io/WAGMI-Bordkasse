@@ -307,12 +307,12 @@
                 return;
             }
             let filled = 0;
-            if (fillIfEmpty('input[name="amount"]', s.amount)) filled++;
-            if (fillIfEmpty('select[name="currency"]', s.currency)) filled++;
-            if (fillIfEmpty('input[name="expense_date"]', s.date)) filled++;
+            if (fillIfSuggestable('input[name="amount"]', s.amount)) filled++;
+            if (fillIfSuggestable('select[name="currency"]', s.currency)) filled++;
+            if (fillIfSuggestable('input[name="expense_date"]', s.date)) filled++;
             const desc = s.description || s.vendor;
-            if (fillIfEmpty('input[name="description"]', desc)) filled++;
-            if (fillIfEmpty('select[name="category"]', s.category)) filled++;
+            if (fillIfSuggestable('input[name="description"]', desc)) filled++;
+            if (fillIfSuggestable('select[name="category"]', s.category)) filled++;
             if (filled > 0) {
                 status.textContent = '{{ t("expense.ocr_filled") }}';
                 status.style.color = 'var(--success)';
