@@ -21,8 +21,20 @@ import uuid
 import logging
 from constants.expense_enums import EXPENSE_CATEGORY_KEYS, normalize_expense_category
 from limiter_config import limiter
+from slowapi.util import get_remote_address
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
+
+
+def _ocr_rate_key(request: Request) -> str:
+    """Rate-limit OCR per authenticated user (account_id), falling back to IP."""
+    account_id = request.session.get("account_id")
+    if account_id:
+        return f"ocr:account:{account_id}"
+    user_id = request.session.get("user_id")
+    if user_id:
+        return f"ocr:user:{user_id}"
+    return f"ocr:ip:{get_remote_address(request)}"
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +60,7 @@ OCR_ALLOWED_CONTENT_TYPES = OCR_IMAGE_TYPES | {OCR_PDF_TYPE}
 
 
 @router.post("/ocr-suggest")
-@limiter.limit("20/minute")
+@limiter.limit("20/minute", key_func=_ocr_rate_key)
 async def ocr_suggest_receipt(
     request: Request,
     receipt: UploadFile = File(...),

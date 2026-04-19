@@ -264,12 +264,19 @@
         el.addEventListener('input', clear);
         el.addEventListener('change', clear);
     }
-    function fillIfEmpty(selector, value) {
+    document.querySelectorAll('input[name="amount"], input[name="expense_date"], input[name="description"], select[name="currency"], select[name="category"]').forEach(el => {
+        const mark = () => { el.dataset.userTouched = '1'; };
+        el.addEventListener('input', mark);
+        el.addEventListener('change', mark);
+    });
+    function fillIfSuggestable(selector, value) {
         if (value === null || value === undefined || value === '') return false;
         const el = document.querySelector(selector);
         if (!el) return false;
+        if (el.dataset.userTouched === '1') return false;
         const current = (el.value || '').trim();
-        if (current && current !== '0' && current !== '0.00') return false;
+        if (el.tagName === 'INPUT' && el.type !== 'date' && current && current !== '0' && current !== '0.00') return false;
+        if (String(el.value) === String(value)) return false;
         el.value = value;
         setSuggested(el);
         return true;

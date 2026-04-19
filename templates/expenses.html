@@ -349,12 +349,24 @@
         el.addEventListener('input', clear);
         el.addEventListener('change', clear);
     }
-    function fillIfEmpty(selector, value) {
+    // Mark a field as user-touched the first time the user actually edits it,
+    // so OCR may overwrite preselected defaults (currency, category) but never
+    // a real user edit.
+    document.querySelectorAll('input[name="amount"], input[name="expense_date"], input[name="description"], select[name="currency"], select[name="category"]').forEach(el => {
+        const mark = () => { el.dataset.userTouched = '1'; };
+        el.addEventListener('input', mark, { once: false });
+        el.addEventListener('change', mark, { once: false });
+    });
+    function fillIfSuggestable(selector, value) {
         if (value === null || value === undefined || value === '') return false;
         const el = document.querySelector(selector);
         if (!el) return false;
+        if (el.dataset.userTouched === '1') return false;
         const current = (el.value || '').trim();
-        if (current && current !== '0' && current !== '0.00') return false;
+        // Allow overwriting empty values OR untouched preselected defaults.
+        // For free-text fields, require empty (preselected text is rare).
+        if (el.tagName === 'INPUT' && el.type !== 'date' && current && current !== '0' && current !== '0.00') return false;
+        if (String(el.value) === String(value)) return false;
         el.value = value;
         setSuggested(el);
         return true;
@@ -385,12 +397,12 @@
                 return;
             }
             let filled = 0;
-            if (fillIfEmpty('input[name="amount"]', s.amount)) filled++;
-            if (fillIfEmpty('select[name="currency"]', s.currency)) filled++;
-            if (fillIfEmpty('input[name="expense_date"]', s.date)) filled++;
+            if (fillIfSuggestable('input[name="amount"]', s.amount)) filled++;
+            if (fillIfSuggestable('select[name="currency"]', s.currency)) filled++;
+            if (fillIfSuggestable('input[name="expense_date"]', s.date)) filled++;
             const desc = s.description || s.vendor;
-            if (fillIfEmpty('input[name="description"]', desc)) filled++;
-            if (fillIfEmpty('select[name="category"]', s.category)) filled++;
+            if (fillIfSuggestable('input[name="description"]', desc)) filled++;
+            if (fillIfSuggestable('select[name="category"]', s.category)) filled++;
             if (filled > 0) {
                 status.textContent = '{{ t("expense.ocr_filled") }}';
                 status.style.color = 'var(--success)';
