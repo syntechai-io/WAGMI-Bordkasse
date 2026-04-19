@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="flex justify-between items-center">
+    <h1 class="ui-title maritime-header" style="margin-bottom: 0;">📡 {{ t('sync.title') }}</h1>
+    <a href="/logbook" class="text-sm hover:underline" style="color: var(--accent);">← {{ t('logbook.back_to_list') }}</a>
+  </div>
+
+  <div class="bg-white porthole-card p-6">
+    <p class="ui-muted text-sm mb-4">{{ t('sync.intro') }}</p>
+
+    <div class="flex gap-3 flex-wrap mb-4">
+      <button id="sync-now" type="button" class="ocean-gradient text-white px-4 py-2 rounded-lg font-semibold touch-action">
+        🔄 {{ t('sync.sync_now') }}
+      </button>
+      <span id="sync-status-line" class="text-sm self-center ui-muted"></span>
+    </div>
+
+    <div id="queue-empty" class="text-center py-8" style="display:none;">
+      <p class="text-lg maritime-header mb-2">✅ {{ t('sync.empty_title') }}</p>
+      <p class="ui-muted text-sm">{{ t('sync.empty_desc') }}</p>
+    </div>
+
+    <div id="queue-pending-section" style="display:none;">
+      <h2 class="text-lg font-semibold mb-2 maritime-header">⏳ {{ t('sync.pending_title') }}</h2>
+      <ul id="queue-pending-list" class="divide-y" style="border-top:1px solid var(--border); border-bottom:1px solid var(--border);"></ul>
+    </div>
+
+    <div id="queue-failed-section" class="mt-6" style="display:none;">
+      <h2 class="text-lg font-semibold mb-2 maritime-header" style="color: var(--coral);">⚠️ {{ t('sync.failed_title') }}</h2>
+      <p class="ui-muted text-sm mb-2">{{ t('sync.failed_desc') }}</p>
+      <ul id="queue-failed-list" class="divide-y" style="border-top:1px solid var(--border); border-bottom:1px solid var(--border);"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  if (!window.CrewlogQueue) return;
+  var Q = window.CrewlogQueue;
+
+  function fmt(ts) {
+    if (!ts) return '';
+    try { return new Date(ts).toLocaleString(); } catch (e) { return ''; }
+  }
+
+  function render() {
+    Q.listAll().then(function (rows) {
+      var pending = rows.filter(function (r) { return r.status !== 'failed'; });
+      var failed = rows.filter(function (r) { return r.status === 'failed'; });
+
+      var emptyEl = document.getElementById('queue-empty');
+      var pendingSec = document.getElementById('queue-pending-section');
+      var failedSec = document.getElementById('queue-failed-section');
+
+      emptyEl.style.display = (rows.length === 0) ? 'block' : 'none';
+      pendingSec.style.display = pending.length ? 'block' : 'none';
+      failedSec.style.display = failed.length ? 'block' : 'none';
+
+      function rowHtml(rec, isFailed) {
+        var actions = isFailed
+          ? '<button data-retry="' + rec.client_temp_id + '" class="text-sm font-semibold hover:underline" style="color: var(--accent);">↻ {{ t("sync.retry") }}</button>' +
+            ' <button data-discard="' + rec.client_temp_id + '" class="text-sm font-semibold hover:underline ml-3" style="color: var(--coral);">🗑 {{ t("sync.discard") }}</button>'
+          : '<span class="text-xs ui-muted">⏳ {{ t("sync.queued") }}</span>';
+        var err = rec.last_error ? '<div class="text-xs mt-1" style="color:var(--coral)">' + rec.last_error + '</div>' : '';
+        var attempts = rec.attempts ? ' · ' + rec.attempts + ' {{ t("sync.attempts") }}' : '';
+        var label = (rec.label || rec.kind || 'entry').replace(/[<>&]/g, function (c) {
+          return c === '<' ? '&lt;' : c === '>' ? '&gt;' : '&amp;';
+        });
+        return '<li class="py-3 flex items-start justify-between gap-3">' +
+          '<div class="flex-1 min-w-0">' +
+            '<div class="font-medium" style="color:var(--text);">' + label + '</div>' +
+            '<div class="text-xs ui-muted">' + fmt(rec.created_at) + attempts + '</div>' +
+            err +
+          '</div>' +
+          '<div class="flex-shrink-0">' + actions + '</div>' +
+          '</li>';
+      }
+
+      document.getElementById('queue-pending-list').innerHTML = pending.map(function (r) { return rowHtml(r, false); }).join('');
+      document.getElementById('queue-failed-list').innerHTML = failed.map(function (r) { return rowHtml(r, true); }).join('');
+    });
+  }
+
+  function wire() {
+    document.body.addEventListener('click', function (e) {
+      var t = e.target;
+      var rid = t.getAttribute && (t.getAttribute('data-retry') || t.getAttribute('data-discard'));
+      if (!rid) return;
+      e.preventDefault();
+      var line = document.getElementById('sync-status-line');
+      if (t.hasAttribute('data-retry')) {
+        line.textContent = '{{ t("sync.retrying") }}';
+        Q.retryFailed(rid).then(function () { line.textContent = ''; render(); });
+      } else {
+        if (!confirm('{{ t("sync.discard_confirm") }}')) return;
+        Q.discard(rid).then(function () { render(); });
+      }
+    });
+
+    document.getElementById('sync-now').addEventListener('click', function () {
+      var line = document.getElementById('sync-status-line');
+      line.textContent = '{{ t("sync.syncing") }}';
+      Q.syncAll().then(function () {
+        line.textContent = '{{ t("sync.done") }}';
+        setTimeout(function () { line.textContent = ''; }, 2000);
+        render();
+      });
+    });
+
+    window.addEventListener('crewlog:queue-changed', render);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () { wire(); render(); });
+})();
+</script>
+{% endblock %}
