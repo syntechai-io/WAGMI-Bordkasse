@@ -26,6 +26,14 @@ def get_db():
 def init_db():
     Base.metadata.create_all(bind=engine)
     # Idempotent column adds for fields introduced after table creation.
+    # The DDL below uses PostgreSQL-specific syntax (ADD COLUMN IF NOT EXISTS,
+    # ALTER COLUMN ... DROP NOT NULL, partial unique indexes). This project
+    # targets PostgreSQL exclusively (Neon-backed), so we gate the migration
+    # on the dialect to keep init_db() safe to run under any other engine
+    # (e.g. SQLite in local tests where tables are created from scratch and
+    # already match the model's nullability).
+    if engine.dialect.name != "postgresql":
+        return
     from sqlalchemy import text
     with engine.begin() as conn:
         conn.execute(text(

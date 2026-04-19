@@ -72,17 +72,17 @@
   }
 
   function buildSwitch(idPrefix) {
+    var labels = (window.__crewlogThemeLabels) || { auto: 'Auto', day: 'Day', night: 'Night', label: 'Theme' };
     var wrap = document.createElement('div');
     wrap.className = 'theme-switch';
     wrap.setAttribute('role', 'group');
-    wrap.setAttribute('aria-label', 'Theme');
+    wrap.setAttribute('aria-label', labels.label || 'Theme');
 
     var modes = [
       { key: THEMES.AUTO,  label: '◐', titleKey: 'theme.auto'  },
       { key: THEMES.LIGHT, label: '☀', titleKey: 'theme.day'   },
       { key: THEMES.NIGHT, label: '☾', titleKey: 'theme.night' }
     ];
-    var labels = (window.__crewlogThemeLabels) || { auto: 'Auto', day: 'Day', night: 'Night' };
 
     modes.forEach(function (m) {
       var b = document.createElement('button');
