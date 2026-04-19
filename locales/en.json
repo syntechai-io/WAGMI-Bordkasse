@@ -283,7 +283,7 @@
   "logbook.time_label": "hrs",
   "logbook.date_label": "Date",
   "logbook.time_input": "Time",
-  "logbook.maneuver_type": "Maneuver Type (Quick Entry)",
+  "logbook.maneuver_type": "Maneuver Type",
   "logbook.maneuver_departure": "Cast Off",
   "logbook.maneuver_sail_change": "Set Sails",
   "logbook.maneuver_motor": "Motor",

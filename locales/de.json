@@ -283,7 +283,7 @@
   "logbook.time_label": "Uhr",
   "logbook.date_label": "Datum",
   "logbook.time_input": "Uhrzeit",
-  "logbook.maneuver_type": "Manöver-Typ (Quick Entry)",
+  "logbook.maneuver_type": "Manöver-Typ",
   "logbook.maneuver_departure": "Ablegen",
   "logbook.maneuver_sail_change": "Segel setzen",
   "logbook.maneuver_motor": "Motor",
