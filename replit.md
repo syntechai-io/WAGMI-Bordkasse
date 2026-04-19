@@ -33,6 +33,7 @@ Preferred communication style: Simple, everyday language.
 - **Solo-Sailing Workflow**: Streamlined trip creation for solo users.
 - **Stripe Subscription Billing**: Integration for customer/subscription management, checkout, billing portal, and webhook processing for plan gating and state synchronization. Non-destructive downgrade handling.
 - **DB Hardening**: Unique constraints and robust defaults for critical tables.
+- **Receipt OCR Pre-fill**: Anthropic Claude vision (`claude-sonnet-4-20250514`) reads uploaded receipt images/PDFs and pre-fills empty expense form fields (amount, currency, date, vendor, category, description). Endpoint `POST /expenses/ocr-suggest` is auth-gated, scoped to active trip, rate-limited (20/min/IP), 8 MB cap. Failures degrade silently and are audit-logged (`OCR_FAILED`). Suggestions are visually marked with a "Suggested" pill that clears on user edit; existing values are never overwritten.
 
 #### Data Model
 **Core Entities**: CrewMember, Deposit, Expense, ExpenseParticipant, ExpenseTemplate, CrewGroup, CrewGroupMember, Receipt, Trip, AuditLog, LogbookEntry, LogbookPhoto, UserPreferences, Subscriptions, PasswordResetToken.

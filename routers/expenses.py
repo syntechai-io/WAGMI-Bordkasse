@@ -22,6 +22,7 @@ import logging
 from constants.expense_enums import EXPENSE_CATEGORY_KEYS, normalize_expense_category
 from limiter_config import limiter
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
 
@@ -81,29 +82,36 @@ async def ocr_suggest_receipt(
             {"ok": False, "error": "file_too_large"}, status_code=413
         )
 
-    try:
-        suggestions = ocr_extract_receipt(
-            file_bytes=file_bytes,
-            content_type=content_type,
-            category_keys=list(EXPENSE_CATEGORY_KEYS),
-        )
-        return JSONResponse({"ok": True, "suggestions": suggestions})
-    except ReceiptOCRError as exc:
-        logger.warning(f"Receipt OCR failed: {exc}")
+    def _audit_failure(reason: str) -> None:
         try:
             AuditService.log(
                 db=db,
                 request=request,
                 action="OCR_FAILED",
                 entity_type="receipt",
-                details=str(exc)[:500],
+                details=reason[:500],
                 trip_id=active_trip.id,
             )
         except Exception:
             db.rollback()
+
+    try:
+        # Anthropic SDK call is sync/blocking — push it off the event loop so
+        # one OCR request doesn't stall other requests for the ~2-3s round-trip.
+        suggestions = await run_in_threadpool(
+            ocr_extract_receipt,
+            file_bytes,
+            content_type,
+            list(EXPENSE_CATEGORY_KEYS),
+        )
+        return JSONResponse({"ok": True, "suggestions": suggestions})
+    except ReceiptOCRError as exc:
+        logger.warning(f"Receipt OCR failed: {exc}")
+        _audit_failure(str(exc))
         return JSONResponse({"ok": True, "suggestions": None})
     except Exception as exc:  # safety net — never break the form
         logger.exception(f"Unexpected OCR error: {exc}")
+        _audit_failure(f"unexpected: {type(exc).__name__}: {exc}")
         return JSONResponse({"ok": True, "suggestions": None})
 
 @router.get("", response_class=HTMLResponse)
