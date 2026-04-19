@@ -176,13 +176,17 @@ async def daily_logbook_view(request: Request, date: Optional[str] = None, db: S
     entry_legs = {e.id: trip_leg_map.get(e.id) for e in entries if not e.is_superseded}
     auto_total = round(sum(v for v in entry_legs.values() if v is not None), 2) or None
 
-    # Calculate summary stats
-    manual_distance = sum(e.dist_day_nm for e in entries if e.dist_day_nm and not e.is_superseded)
+    # Calculate summary stats. Auto (haversine across non-superseded entries)
+    # is the canonical day total; manual `dist_day_nm` is shown alongside as a
+    # secondary value when the skipper logged it. Use max() so multiple entries
+    # on the same day don't double-count a manually entered total.
+    manual_values = [e.dist_day_nm for e in entries if e.dist_day_nm and not e.is_superseded]
+    manual_distance = max(manual_values) if manual_values else None
     summary = {
         "total_entries": len(entries),
-        "total_distance": manual_distance if manual_distance else auto_total,
+        "total_distance": auto_total if auto_total is not None else manual_distance,
         "auto_distance": auto_total,
-        "manual_distance": manual_distance if manual_distance else None,
+        "manual_distance": manual_distance,
         "total_engine_hours": None,
         "route": None
     }

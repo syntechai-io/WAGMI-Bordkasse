@@ -138,7 +138,7 @@
                         {% endif %}
 
                         {% set leg_nm = entry_legs.get(entry.id) if entry_legs else None %}
-                        {% if leg_nm %}
+                        {% if leg_nm is not none %}
                         <div class="text-sm">
                             <span class="ui-muted">📏 {{ t('track.leg') }}:</span>
                             <span class="font-medium ml-1">{{ "%.2f"|format(leg_nm) }} nm</span>
