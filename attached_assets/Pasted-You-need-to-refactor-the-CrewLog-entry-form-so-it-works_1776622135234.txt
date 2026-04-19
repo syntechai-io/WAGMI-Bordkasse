@@ -1,0 +1,82 @@
+You need to refactor the CrewLog entry form so it works properly on iPhone and iPad in Safari and Chrome, with a truly responsive mobile/tablet layout.
+
+Current problem shown in the screenshot:
+- form fields are not aligned consistently
+- labels wrap badly and break the layout
+- input fields are too narrow or partially hidden
+- columns are squeezed next to each other on small screens
+- some controls overlap or become hard to use
+- the page looks like a desktop grid that was only shrunk down, instead of being redesigned responsively
+
+Goal:
+Build a proper mobile-first responsive UI for iPhone and iPad so that all fields are fully visible, aligned, readable, and easy to use.
+
+Requirements:
+1. Use a mobile-first layout.
+2. On iPhone, each form row should stack vertically or in a clean 1-column layout unless 2 very small related fields can safely share a row.
+3. On iPad, use a 2-column layout where space allows, but never if it causes truncation, overlap, or unreadable labels.
+4. Labels must remain readable and should not break awkwardly word-by-word.
+5. Inputs, selects, and textareas must use full available width of their container.
+6. No field may be clipped horizontally.
+7. No horizontal scrolling inside the form.
+8. Buttons such as “Löschen”, “Zeile hinzufügen”, and “Alle speichern” must stay visible and usable on small screens.
+9. Spacing, padding, and font sizes must be optimized for touch devices.
+10. The entry card (#1 etc.) should look like a clean card layout on mobile, not like a compressed spreadsheet.
+
+Implementation guidance:
+- Replace the current dense desktop grid with responsive breakpoints.
+- Use CSS grid or flexbox intentionally, not a fixed multi-column form.
+- Create breakpoint behavior approximately like this:
+  - iPhone portrait: 1 column
+  - iPhone landscape / small tablet: 1 to 2 columns only if fields remain fully visible
+  - iPad portrait/landscape: 2 columns, optionally 3 only for very short fields
+- Group related fields into logical sections:
+  - Time / maneuver
+  - Position / weather
+  - Sailing / engine
+  - Event details / notes
+- For labels with long text like “Breitengrad (Latitude)” or “Längengrad (Longitude)”, either:
+  - place label above input, or
+  - use shorter visible label and keep full meaning in helper text or tooltip
+- Ensure minimum touch target height of about 44px for all inputs and buttons.
+- Ensure form cards have enough internal padding on mobile.
+- Avoid fixed widths. Prefer width: 100%, minmax(), and responsive grid-template-columns.
+- Prevent overflow with box-sizing: border-box and proper container widths.
+- Review all parent wrappers for max-width, overflow, flex shrink, and grid constraints that may compress children.
+
+Specific redesign expectations for each entry card:
+- Top row: entry number and action buttons
+- Then fields in clean stacked groups
+- On mobile, each field block should have:
+  - label on top
+  - full-width input below
+- Notes field should always span full width
+- Event details should span full width
+- Delete button should move to a place that does not break layout
+
+Technical tasks:
+1. Audit the current form container, row wrappers, and field wrappers for fixed widths or overly aggressive grid columns.
+2. Refactor the entry form component into responsive field groups.
+3. Add breakpoints for iPhone and iPad.
+4. Test in browser device emulation for:
+   - iPhone 13/14/15
+   - iPhone SE
+   - iPad
+   - iPad Pro
+5. Fix all clipping, overlap, and misalignment.
+6. Keep the visual style consistent with the existing CrewLog branding.
+
+Acceptance criteria:
+- Every label is readable.
+- Every input is fully visible without clipping.
+- No overlapping controls.
+- No horizontal scrolling.
+- Buttons remain accessible.
+- The form is comfortable to use on iPhone and iPad.
+- The layout looks intentionally designed for mobile/tablet, not just scaled down from desktop.
+
+Please implement the responsive refactor now and then summarize:
+1. which components were changed,
+2. which breakpoints were introduced,
+3. what layout rules were applied for phone vs iPad,
+4. what remaining edge cases, if any, still need cleanup.

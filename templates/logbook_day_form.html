@@ -11,156 +11,198 @@
     {% endif %}
 {%- endmacro %}
 
+{% macro field_label(text) -%}
+<label class="day-field__label">{{ text }}</label>
+{%- endmacro %}
+
 {% macro render_row(values, errors) -%}
 {% set values = values or {} %}
 {% set errors = errors or {} %}
-<div class="day-row p-3 rounded-lg border{% if errors %} row-has-error{% endif %}"
+<div class="day-row{% if errors %} row-has-error{% endif %}"
      style="border-color: {% if errors %}var(--coral){% else %}var(--border){% endif %}; background: {% if errors %}var(--coral-soft){% else %}var(--surface){% endif %};">
-    <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
-        <div class="flex items-center gap-1">
-            <button type="button" class="move-up-btn flex items-center justify-center rounded touch-action"
+
+    {# Row header: index + reorder + delete #}
+    <div class="day-row__header">
+        <div class="day-row__header-left">
+            <button type="button" class="move-up-btn day-row__icon-btn touch-action"
                     title="{{ t('logbook.day_logbook_move_up') }}"
-                    aria-label="{{ t('logbook.day_logbook_move_up') }}"
-                    style="background: var(--surface-2); width:40px; height:40px; font-size:18px;">▲</button>
-            <button type="button" class="move-down-btn flex items-center justify-center rounded touch-action"
+                    aria-label="{{ t('logbook.day_logbook_move_up') }}">▲</button>
+            <button type="button" class="move-down-btn day-row__icon-btn touch-action"
                     title="{{ t('logbook.day_logbook_move_down') }}"
-                    aria-label="{{ t('logbook.day_logbook_move_down') }}"
-                    style="background: var(--surface-2); width:40px; height:40px; font-size:18px;">▼</button>
-            <span class="font-semibold text-sm ml-2">⏱️ <span class="row-index">1</span></span>
+                    aria-label="{{ t('logbook.day_logbook_move_down') }}">▼</button>
+            <span class="day-row__index">⏱️ <span class="row-index">1</span></span>
         </div>
-        <button type="button" class="remove-row-btn text-sm font-medium px-3 py-2 rounded touch-action"
-                style="color: var(--coral); background: var(--surface-2);">🗑️ {{ t('common.delete') }}</button>
+        <button type="button" class="remove-row-btn day-row__delete touch-action">
+            🗑️ {{ t('common.delete') }}
+        </button>
     </div>
-    <div class="day-row__grid items-end">
-        <div class="min-w-0">
-            <label class="block text-xs ui-muted">⏱️ {{ t('logbook.time_input') }} *</label>
-            <input type="time" name="row_time" required value="{{ values.get('row_time', '') }}"
-                   class="w-full px-2 py-1 border rounded text-sm" style="border-color: {% if errors.get('row_time') %}var(--coral){% else %}var(--border) {% endif %};">
-            {{ field_error(errors, 'row_time') }}
+
+    {# Section: Time & Maneuver #}
+    <div class="day-section">
+        <div class="day-section__title">⏱️ {{ t('logbook.day_section_time') }}</div>
+        <div class="day-section__grid day-section__grid--2">
+            <div class="day-field">
+                {{ field_label('⏱️ ' ~ t('logbook.time_input') ~ ' *') }}
+                <input type="time" name="row_time" required value="{{ values.get('row_time', '') }}"
+                       class="day-field__input"
+                       style="border-color: {% if errors.get('row_time') %}var(--coral){% else %}var(--border){% endif %};">
+                {{ field_error(errors, 'row_time') }}
+            </div>
+            <div class="day-field">
+                {{ field_label(t('logbook.maneuver_type')) }}
+                {% set mt = values.get('row_maneuver_type', '') %}
+                <select name="row_maneuver_type" class="day-field__input">
+                    <option value="full"{% if mt == 'full' or not mt %} selected{% endif %}>📝 {{ t('logbook.maneuver_full') }}</option>
+                    <option value="departure"{% if mt == 'departure' %} selected{% endif %}>🚢 {{ t('logbook.maneuver_departure') }}</option>
+                    <option value="sail_change"{% if mt == 'sail_change' %} selected{% endif %}>⛵ {{ t('logbook.maneuver_sail_change') }}</option>
+                    <option value="motor"{% if mt == 'motor' %} selected{% endif %}>🔧 {{ t('logbook.maneuver_motor') }}</option>
+                    <option value="anchor"{% if mt == 'anchor' %} selected{% endif %}>⚓ {{ t('logbook.maneuver_anchor') }}</option>
+                    <option value="weather"{% if mt == 'weather' %} selected{% endif %}>🌤️ {{ t('logbook.maneuver_weather') }}</option>
+                    <option value="arrival"{% if mt == 'arrival' %} selected{% endif %}>🏁 {{ t('logbook.maneuver_arrival') }}</option>
+                </select>
+            </div>
         </div>
-        <div>
-            <label class="block text-xs ui-muted">{{ t('logbook.maneuver_type') }}</label>
-            {% set mt = values.get('row_maneuver_type', '') %}
-            <select name="row_maneuver_type" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
-                <option value="full"{% if mt == 'full' or not mt %} selected{% endif %}>📝 {{ t('logbook.maneuver_full') }}</option>
-                <option value="departure"{% if mt == 'departure' %} selected{% endif %}>🚢 {{ t('logbook.maneuver_departure') }}</option>
-                <option value="sail_change"{% if mt == 'sail_change' %} selected{% endif %}>⛵ {{ t('logbook.maneuver_sail_change') }}</option>
-                <option value="motor"{% if mt == 'motor' %} selected{% endif %}>🔧 {{ t('logbook.maneuver_motor') }}</option>
-                <option value="anchor"{% if mt == 'anchor' %} selected{% endif %}>⚓ {{ t('logbook.maneuver_anchor') }}</option>
-                <option value="weather"{% if mt == 'weather' %} selected{% endif %}>🌤️ {{ t('logbook.maneuver_weather') }}</option>
-                <option value="arrival"{% if mt == 'arrival' %} selected{% endif %}>🏁 {{ t('logbook.maneuver_arrival') }}</option>
-            </select>
+    </div>
+
+    {# Section: Position #}
+    <div class="day-section">
+        <div class="day-section__title">📍 {{ t('logbook.day_section_position') }}</div>
+        <div class="day-section__grid day-section__grid--2">
+            <div class="day-field">
+                {{ field_label(t('logbook.latitude')) }}
+                <input type="number" step="any" name="row_latitude" placeholder="54.32" value="{{ values.get('row_latitude', '') }}"
+                       class="day-field__input"
+                       style="border-color: {% if errors.get('row_latitude') %}var(--coral){% else %}var(--border){% endif %};">
+                {{ field_error(errors, 'row_latitude') }}
+            </div>
+            <div class="day-field">
+                {{ field_label(t('logbook.longitude')) }}
+                <input type="number" step="any" name="row_longitude" placeholder="10.13" value="{{ values.get('row_longitude', '') }}"
+                       class="day-field__input"
+                       style="border-color: {% if errors.get('row_longitude') %}var(--coral){% else %}var(--border){% endif %};">
+                {{ field_error(errors, 'row_longitude') }}
+            </div>
         </div>
-        <div>
-            <label class="block text-xs ui-muted">{{ t('logbook.latitude') }}</label>
-            <input type="number" step="any" name="row_latitude" placeholder="54.32" value="{{ values.get('row_latitude', '') }}"
-                   class="w-full px-2 py-1 border rounded text-sm" style="border-color: {% if errors.get('row_latitude') %}var(--coral){% else %}var(--border){% endif %};">
-            {{ field_error(errors, 'row_latitude') }}
+    </div>
+
+    {# Section: Weather #}
+    <div class="day-section">
+        <div class="day-section__title">🌤️ {{ t('logbook.day_section_weather') }}</div>
+        <div class="day-section__grid day-section__grid--3">
+            <div class="day-field">
+                {{ field_label(t('logbook.wind_direction')) }}
+                <input type="text" name="row_wind_direction" maxlength="3" placeholder="SW" value="{{ values.get('row_wind_direction', '') }}"
+                       class="day-field__input">
+            </div>
+            <div class="day-field">
+                {{ field_label(t('logbook.wind_strength')) }}
+                {% set ws = values.get('row_wind_strength', '') %}
+                <select name="row_wind_strength" class="day-field__input">
+                    <option value=""></option>
+                    {% for n in range(0, 13) %}
+                    <option value="{{ n }}"{% if ws == n|string %} selected{% endif %}>{{ n }} Bft</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="day-field">
+                {{ field_label('🌡️ ' ~ t('logbook.temperature') ~ ' (°C)') }}
+                <input type="number" step="0.1" name="row_temperature" value="{{ values.get('row_temperature', '') }}"
+                       class="day-field__input">
+            </div>
+            <div class="day-field">
+                {{ field_label('🌊 ' ~ t('logbook.sea_state')) }}
+                {% set ss = values.get('row_sea_state', '') %}
+                <select name="row_sea_state" class="day-field__input"
+                        style="border-color: {% if errors.get('row_sea_state') %}var(--coral){% else %}var(--border){% endif %};">
+                    <option value=""></option>
+                    {% for s in sea_states %}
+                    <option value="{{ s }}"{% if ss == s %} selected{% endif %}>
+                        {% if s == 'calm' %}{{ t('logbook.sea_calm') }}
+                        {% elif s == 'slight' %}{{ t('logbook.sea_slight') }}
+                        {% elif s == 'moderate' %}{{ t('logbook.sea_moderate') }}
+                        {% elif s == 'rough' %}{{ t('logbook.sea_rough') }}
+                        {% elif s == 'very_rough' %}{{ t('logbook.sea_very_rough') }}
+                        {% elif s == 'high' %}{{ t('logbook.sea_high') }}
+                        {% else %}{{ s }}{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                {{ field_error(errors, 'row_sea_state') }}
+            </div>
+            <div class="day-field">
+                {{ field_label(t('logbook.visibility')) }}
+                {% set vis = values.get('row_visibility', '') %}
+                <select name="row_visibility" class="day-field__input">
+                    <option value=""></option>
+                    <option value="very_good"{% if vis == 'very_good' %} selected{% endif %}>{{ t('logbook.visibility_very_good') }}</option>
+                    <option value="good"{% if vis == 'good' %} selected{% endif %}>{{ t('logbook.visibility_good') }}</option>
+                    <option value="moderate"{% if vis == 'moderate' %} selected{% endif %}>{{ t('logbook.visibility_moderate') }}</option>
+                    <option value="poor"{% if vis == 'poor' %} selected{% endif %}>{{ t('logbook.visibility_poor') }}</option>
+                    <option value="very_poor"{% if vis == 'very_poor' %} selected{% endif %}>{{ t('logbook.visibility_very_poor') }}</option>
+                </select>
+            </div>
         </div>
-        <div>
-            <label class="block text-xs ui-muted">{{ t('logbook.longitude') }}</label>
-            <input type="number" step="any" name="row_longitude" placeholder="10.13" value="{{ values.get('row_longitude', '') }}"
-                   class="w-full px-2 py-1 border rounded text-sm" style="border-color: {% if errors.get('row_longitude') %}var(--coral){% else %}var(--border){% endif %};">
-            {{ field_error(errors, 'row_longitude') }}
+    </div>
+
+    {# Section: Sail & Engine #}
+    <div class="day-section">
+        <div class="day-section__title">⛵ {{ t('logbook.day_section_sail_engine') }}</div>
+        <div class="day-section__grid day-section__grid--3">
+            <div class="day-field">
+                {{ field_label('⛵ ' ~ t('logbook.sail_plan')) }}
+                {% set sp = values.get('row_sail_plan', '') %}
+                <select name="row_sail_plan" class="day-field__input">
+                    <option value=""></option>
+                    <option value="motor_none"{% if sp == 'motor_none' %} selected{% endif %}>🚤 {{ t('logbook.sail_motor_none') }}</option>
+                    <option value="mainsail"{% if sp == 'mainsail' %} selected{% endif %}>⛵ {{ t('logbook.sail_mainsail') }}</option>
+                    <option value="genoa"{% if sp == 'genoa' %} selected{% endif %}>🎐 {{ t('logbook.sail_genoa') }}</option>
+                    <option value="main_genoa"{% if sp == 'main_genoa' %} selected{% endif %}>⛵ {{ t('logbook.sail_main_genoa') }}</option>
+                    <option value="no_sails"{% if sp == 'no_sails' %} selected{% endif %}>⚓ {{ t('logbook.sail_none') }}</option>
+                </select>
+            </div>
+            <div class="day-field">
+                {{ field_label('🔧 ' ~ t('logbook.engine_status')) }}
+                {% set eo = values.get('row_engine_on', '') %}
+                <select name="row_engine_on" class="day-field__input">
+                    <option value=""{% if not eo %} selected{% endif %}>—</option>
+                    <option value="true"{% if eo == 'true' %} selected{% endif %}>{{ t('logbook.engine_on') }}</option>
+                    <option value="false"{% if eo == 'false' %} selected{% endif %}>{{ t('logbook.engine_off') }}</option>
+                </select>
+            </div>
+            <div class="day-field">
+                {{ field_label(t('logbook.engine_hours_total')) }}
+                <input type="number" step="0.1" name="row_eng_hours_total" value="{{ values.get('row_eng_hours_total', '') }}"
+                       class="day-field__input">
+            </div>
         </div>
-        <div>
-            <label class="block text-xs ui-muted">{{ t('logbook.wind_direction') }}</label>
-            <input type="text" name="row_wind_direction" maxlength="3" placeholder="SW" value="{{ values.get('row_wind_direction', '') }}"
-                   class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+    </div>
+
+    {# Section: Event & Notes #}
+    <div class="day-section">
+        <div class="day-section__title">⚠️ {{ t('logbook.day_section_event_notes') }}</div>
+        <div class="day-section__grid day-section__grid--2">
+            <div class="day-field">
+                {{ field_label('⚠️ ' ~ t('logbook.event_category')) }}
+                {% set ec = values.get('row_event_category', '') %}
+                <select name="row_event_category" class="day-field__input">
+                    <option value=""></option>
+                    <option value="safety"{% if ec == 'safety' %} selected{% endif %}>{{ t('logbook.event_safety') }}</option>
+                    <option value="equipment"{% if ec == 'equipment' %} selected{% endif %}>{{ t('logbook.event_equipment') }}</option>
+                    <option value="navigation"{% if ec == 'navigation' %} selected{% endif %}>{{ t('logbook.event_navigation_event') }}</option>
+                    <option value="crew"{% if ec == 'crew' %} selected{% endif %}>{{ t('logbook.event_crew_event') }}</option>
+                    <option value="other"{% if ec == 'other' %} selected{% endif %}>{{ t('logbook.event_other') }}</option>
+                </select>
+            </div>
+            <div class="day-field">
+                {{ field_label(t('logbook.event_details')) }}
+                <input type="text" name="row_event_details" value="{{ values.get('row_event_details', '') }}"
+                       class="day-field__input">
+            </div>
         </div>
-        <div>
-            <label class="block text-xs ui-muted">{{ t('logbook.wind_strength') }}</label>
-            {% set ws = values.get('row_wind_strength', '') %}
-            <select name="row_wind_strength" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
-                <option value=""></option>
-                {% for n in range(0, 13) %}
-                <option value="{{ n }}"{% if ws == n|string %} selected{% endif %}>{{ n }} Bft</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div>
-            <label class="block text-xs ui-muted">🌊 {{ t('logbook.sea_state') }}</label>
-            {% set ss = values.get('row_sea_state', '') %}
-            <select name="row_sea_state" class="w-full px-2 py-1 border rounded text-sm" style="border-color: {% if errors.get('row_sea_state') %}var(--coral){% else %}var(--border){% endif %};">
-                <option value=""></option>
-                {% for s in sea_states %}
-                <option value="{{ s }}"{% if ss == s %} selected{% endif %}>
-                    {% if s == 'calm' %}{{ t('logbook.sea_calm') }}
-                    {% elif s == 'slight' %}{{ t('logbook.sea_slight') }}
-                    {% elif s == 'moderate' %}{{ t('logbook.sea_moderate') }}
-                    {% elif s == 'rough' %}{{ t('logbook.sea_rough') }}
-                    {% elif s == 'very_rough' %}{{ t('logbook.sea_very_rough') }}
-                    {% elif s == 'high' %}{{ t('logbook.sea_high') }}
-                    {% else %}{{ s }}{% endif %}
-                </option>
-                {% endfor %}
-            </select>
-            {{ field_error(errors, 'row_sea_state') }}
-        </div>
-        <div>
-            <label class="block text-xs ui-muted">{{ t('logbook.visibility') }}</label>
-            {% set vis = values.get('row_visibility', '') %}
-            <select name="row_visibility" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
-                <option value=""></option>
-                <option value="very_good"{% if vis == 'very_good' %} selected{% endif %}>{{ t('logbook.visibility_very_good') }}</option>
-                <option value="good"{% if vis == 'good' %} selected{% endif %}>{{ t('logbook.visibility_good') }}</option>
-                <option value="moderate"{% if vis == 'moderate' %} selected{% endif %}>{{ t('logbook.visibility_moderate') }}</option>
-                <option value="poor"{% if vis == 'poor' %} selected{% endif %}>{{ t('logbook.visibility_poor') }}</option>
-                <option value="very_poor"{% if vis == 'very_poor' %} selected{% endif %}>{{ t('logbook.visibility_very_poor') }}</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-xs ui-muted">🌡️ {{ t('logbook.temperature') }} (°C)</label>
-            <input type="number" step="0.1" name="row_temperature" value="{{ values.get('row_temperature', '') }}"
-                   class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
-        </div>
-        <div>
-            <label class="block text-xs ui-muted">⛵ {{ t('logbook.sail_plan') }}</label>
-            {% set sp = values.get('row_sail_plan', '') %}
-            <select name="row_sail_plan" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
-                <option value=""></option>
-                <option value="motor_none"{% if sp == 'motor_none' %} selected{% endif %}>🚤 {{ t('logbook.sail_motor_none') }}</option>
-                <option value="mainsail"{% if sp == 'mainsail' %} selected{% endif %}>⛵ {{ t('logbook.sail_mainsail') }}</option>
-                <option value="genoa"{% if sp == 'genoa' %} selected{% endif %}>🎐 {{ t('logbook.sail_genoa') }}</option>
-                <option value="main_genoa"{% if sp == 'main_genoa' %} selected{% endif %}>⛵ {{ t('logbook.sail_main_genoa') }}</option>
-                <option value="no_sails"{% if sp == 'no_sails' %} selected{% endif %}>⚓ {{ t('logbook.sail_none') }}</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-xs ui-muted">🔧 {{ t('logbook.engine_status') }}</label>
-            {% set eo = values.get('row_engine_on', '') %}
-            <select name="row_engine_on" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
-                <option value=""{% if not eo %} selected{% endif %}>—</option>
-                <option value="true"{% if eo == 'true' %} selected{% endif %}>{{ t('logbook.engine_on') }}</option>
-                <option value="false"{% if eo == 'false' %} selected{% endif %}>{{ t('logbook.engine_off') }}</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-xs ui-muted">{{ t('logbook.engine_hours_total') }}</label>
-            <input type="number" step="0.1" name="row_eng_hours_total" value="{{ values.get('row_eng_hours_total', '') }}"
-                   class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
-        </div>
-        <div class="col-span-2 md:col-span-3">
-            <label class="block text-xs ui-muted">⚠️ {{ t('logbook.event_category') }}</label>
-            {% set ec = values.get('row_event_category', '') %}
-            <select name="row_event_category" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
-                <option value=""></option>
-                <option value="safety"{% if ec == 'safety' %} selected{% endif %}>{{ t('logbook.event_safety') }}</option>
-                <option value="equipment"{% if ec == 'equipment' %} selected{% endif %}>{{ t('logbook.event_equipment') }}</option>
-                <option value="navigation"{% if ec == 'navigation' %} selected{% endif %}>{{ t('logbook.event_navigation_event') }}</option>
-                <option value="crew"{% if ec == 'crew' %} selected{% endif %}>{{ t('logbook.event_crew_event') }}</option>
-                <option value="other"{% if ec == 'other' %} selected{% endif %}>{{ t('logbook.event_other') }}</option>
-            </select>
-        </div>
-        <div class="col-span-2 md:col-span-3">
-            <label class="block text-xs ui-muted">{{ t('logbook.event_details') }}</label>
-            <input type="text" name="row_event_details" value="{{ values.get('row_event_details', '') }}"
-                   class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
-        </div>
-        <div class="col-span-2 md:col-span-6">
-            <label class="block text-xs ui-muted">📝 {{ t('common.notes') }}</label>
+        <div class="day-field day-field--full">
+            {{ field_label('📝 ' ~ t('common.notes')) }}
             <input type="text" name="row_notes" placeholder="{{ t('logbook.notes_placeholder') }}" value="{{ values.get('row_notes', '') }}"
-                   class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+                   class="day-field__input">
         </div>
     </div>
 </div>
@@ -270,32 +312,106 @@
 </template>
 
 <style>
-    /* Self-adapting grid: every column is at least 160px wide so labels stay
-       on one line, and the column count adjusts naturally to the viewport.
-       iPhone (~375px) -> 2 cols, iPad portrait (~768px) -> 4 cols,
-       iPad landscape (~1024px) -> 6 cols, desktop -> 7-8 cols. No breakpoint
-       juggling, no overlap. */
-    .day-row__grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 0.75rem;
-    }
-    .day-row__grid > div { min-width: 0; display: flex; flex-direction: column; }
-    .day-row__grid > div > label {
-        font-size: 0.75rem;
-        line-height: 1.2;
-        margin-bottom: 0.25rem;
-        min-height: 1.5rem;     /* one comfortable line; wraps grow naturally */
-        display: block;
-        word-break: break-word;
-    }
-    .day-row__grid > div > input,
-    .day-row__grid > div > select,
-    .day-row__grid > div > textarea {
-        min-height: 40px;
-        width: 100%;
+    /* === Day Logbook entry card — mobile-first responsive layout =========== */
+    /* Card: comfortable padding, generous spacing between sections.          */
+    .day-row {
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--border);
         box-sizing: border-box;
     }
+    @media (min-width: 768px) { .day-row { padding: 1.25rem; } }
+
+    /* Header: index + reorder buttons | delete button (always visible).      */
+    .day-row__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.75rem;
+    }
+    .day-row__header-left { display: flex; align-items: center; gap: 0.25rem; }
+    .day-row__icon-btn {
+        width: 44px; height: 44px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 0.5rem;
+        background: var(--surface-2);
+        font-size: 18px;
+        border: none;
+        cursor: pointer;
+    }
+    .day-row__index { font-weight: 600; font-size: 0.95rem; margin-left: 0.5rem; }
+    .day-row__delete {
+        min-height: 44px;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        background: var(--surface-2);
+        color: var(--coral);
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* Sections within a row: a small heading then a responsive grid.         */
+    .day-section { margin-top: 1rem; }
+    .day-section:first-of-type { margin-top: 0; }
+    .day-section__title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted, #6b7280);
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* Mobile-first grid: 1 column. Tablets bump to 2 or 3 depending on the
+       group. We never go denser than 3 even on desktop, so labels and inputs
+       always have ample width and never clip or overlap. */
+    .day-section__grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem 1rem;
+    }
+    @media (min-width: 640px) {
+        .day-section__grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .day-section__grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1024px) {
+        .day-section__grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    /* Field block: stacked label + full-width input. */
+    .day-field { display: flex; flex-direction: column; min-width: 0; }
+    .day-field--full { margin-top: 0.75rem; }
+    .day-field__label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.3;
+        color: var(--muted, #4b5563);
+        margin-bottom: 0.375rem;
+        word-break: break-word;
+    }
+    .day-field__input {
+        width: 100%;
+        min-height: 44px;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        font-size: 1rem;        /* >= 16px prevents iOS auto-zoom on focus */
+        background: white;
+        box-sizing: border-box;
+    }
+    .day-field__input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+    select.day-field__input { padding-right: 2rem; }
+
     .day-row .move-up-btn[disabled],
     .day-row .move-down-btn[disabled] { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
     #dayPhotosPreview .photo-pill { position: relative; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); }
