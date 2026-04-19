@@ -7,113 +7,102 @@
 
 {% macro field_error(errors, key) -%}
     {% if errors and errors.get(key) %}
-        <p class="row-error-msg text-xs mt-1" style="color: var(--coral);">{{ errors.get(key) }}</p>
+        <p class="cl-field__error">{{ errors.get(key) }}</p>
     {% endif %}
 {%- endmacro %}
 
-{% macro field_label(text) -%}
-<label class="day-field__label">{{ text }}</label>
+{% macro lbl(text) -%}
+<label class="cl-label">{{ text }}</label>
+{%- endmacro %}
+
+{% macro group_eyebrow(text) -%}
+<div class="cl-eyebrow">{{ text }}</div>
 {%- endmacro %}
 
 {% macro render_row(values, errors) -%}
 {% set values = values or {} %}
 {% set errors = errors or {} %}
-<div class="day-row{% if errors %} row-has-error{% endif %}"
-     style="border-color: {% if errors %}var(--coral){% else %}var(--border){% endif %}; background: {% if errors %}var(--coral-soft){% else %}var(--surface){% endif %};">
+<article class="day-row cl-entry{% if errors %} cl-entry--error row-has-error{% endif %}">
 
-    {# Row header: index + reorder + delete #}
-    <div class="day-row__header">
-        <div class="day-row__header-left">
-            <button type="button" class="move-up-btn day-row__icon-btn touch-action"
-                    title="{{ t('logbook.day_logbook_move_up') }}"
-                    aria-label="{{ t('logbook.day_logbook_move_up') }}">▲</button>
-            <button type="button" class="move-down-btn day-row__icon-btn touch-action"
-                    title="{{ t('logbook.day_logbook_move_down') }}"
-                    aria-label="{{ t('logbook.day_logbook_move_down') }}">▼</button>
-            <span class="day-row__index">⏱️ <span class="row-index">1</span></span>
+    <header class="cl-entry__head">
+        <div class="cl-entry__head-left">
+            <button type="button" class="move-up-btn cl-iconbtn" aria-label="{{ t('logbook.day_logbook_move_up') }}" title="{{ t('logbook.day_logbook_move_up') }}">▲</button>
+            <button type="button" class="move-down-btn cl-iconbtn" aria-label="{{ t('logbook.day_logbook_move_down') }}" title="{{ t('logbook.day_logbook_move_down') }}">▼</button>
+            <span class="cl-entry__index">#<span class="row-index">1</span></span>
         </div>
-        <button type="button" class="remove-row-btn day-row__delete touch-action">
-            🗑️ {{ t('common.delete') }}
+        <button type="button" class="remove-row-btn cl-btn cl-btn--ghost-danger cl-btn--sm">
+            {{ t('common.delete') }}
         </button>
-    </div>
+    </header>
 
-    {# Section: Time & Maneuver #}
-    <div class="day-section">
-        <div class="day-section__title">⏱️ {{ t('logbook.day_section_time') }}</div>
-        <div class="day-section__grid day-section__grid--2">
-            <div class="day-field">
-                {{ field_label('⏱️ ' ~ t('logbook.time_input') ~ ' *') }}
+    <section class="cl-group">
+        {{ group_eyebrow(t('logbook.day_section_time')) }}
+        <div class="cl-grid cl-grid--2">
+            <div class="cl-field">
+                {{ lbl(t('logbook.time_input') ~ ' *') }}
                 <input type="time" name="row_time" required value="{{ values.get('row_time', '') }}"
-                       class="day-field__input"
-                       style="border-color: {% if errors.get('row_time') %}var(--coral){% else %}var(--border){% endif %};">
+                       class="cl-input{% if errors.get('row_time') %} cl-input--error{% endif %}">
                 {{ field_error(errors, 'row_time') }}
             </div>
-            <div class="day-field">
-                {{ field_label(t('logbook.maneuver_type')) }}
+            <div class="cl-field">
+                {{ lbl(t('logbook.maneuver_type')) }}
                 {% set mt = values.get('row_maneuver_type', '') %}
-                <select name="row_maneuver_type" class="day-field__input">
-                    <option value="full"{% if mt == 'full' or not mt %} selected{% endif %}>📝 {{ t('logbook.maneuver_full') }}</option>
-                    <option value="departure"{% if mt == 'departure' %} selected{% endif %}>🚢 {{ t('logbook.maneuver_departure') }}</option>
-                    <option value="sail_change"{% if mt == 'sail_change' %} selected{% endif %}>⛵ {{ t('logbook.maneuver_sail_change') }}</option>
-                    <option value="motor"{% if mt == 'motor' %} selected{% endif %}>🔧 {{ t('logbook.maneuver_motor') }}</option>
-                    <option value="anchor"{% if mt == 'anchor' %} selected{% endif %}>⚓ {{ t('logbook.maneuver_anchor') }}</option>
-                    <option value="weather"{% if mt == 'weather' %} selected{% endif %}>🌤️ {{ t('logbook.maneuver_weather') }}</option>
-                    <option value="arrival"{% if mt == 'arrival' %} selected{% endif %}>🏁 {{ t('logbook.maneuver_arrival') }}</option>
+                <select name="row_maneuver_type" class="cl-input cl-select">
+                    <option value="full"{% if mt == 'full' or not mt %} selected{% endif %}>{{ t('logbook.maneuver_full') }}</option>
+                    <option value="departure"{% if mt == 'departure' %} selected{% endif %}>{{ t('logbook.maneuver_departure') }}</option>
+                    <option value="sail_change"{% if mt == 'sail_change' %} selected{% endif %}>{{ t('logbook.maneuver_sail_change') }}</option>
+                    <option value="motor"{% if mt == 'motor' %} selected{% endif %}>{{ t('logbook.maneuver_motor') }}</option>
+                    <option value="anchor"{% if mt == 'anchor' %} selected{% endif %}>{{ t('logbook.maneuver_anchor') }}</option>
+                    <option value="weather"{% if mt == 'weather' %} selected{% endif %}>{{ t('logbook.maneuver_weather') }}</option>
+                    <option value="arrival"{% if mt == 'arrival' %} selected{% endif %}>{{ t('logbook.maneuver_arrival') }}</option>
                 </select>
             </div>
         </div>
-    </div>
+    </section>
 
-    {# Section: Position #}
-    <div class="day-section">
-        <div class="day-section__title">📍 {{ t('logbook.day_section_position') }}</div>
-        <div class="day-section__grid day-section__grid--2">
-            <div class="day-field">
-                {{ field_label(t('logbook.latitude')) }}
+    <section class="cl-group">
+        {{ group_eyebrow(t('logbook.day_section_position')) }}
+        <div class="cl-grid cl-grid--2">
+            <div class="cl-field">
+                {{ lbl(t('logbook.latitude')) }}
                 <input type="number" step="any" name="row_latitude" placeholder="54.32" value="{{ values.get('row_latitude', '') }}"
-                       class="day-field__input"
-                       style="border-color: {% if errors.get('row_latitude') %}var(--coral){% else %}var(--border){% endif %};">
+                       class="cl-input{% if errors.get('row_latitude') %} cl-input--error{% endif %}">
                 {{ field_error(errors, 'row_latitude') }}
             </div>
-            <div class="day-field">
-                {{ field_label(t('logbook.longitude')) }}
+            <div class="cl-field">
+                {{ lbl(t('logbook.longitude')) }}
                 <input type="number" step="any" name="row_longitude" placeholder="10.13" value="{{ values.get('row_longitude', '') }}"
-                       class="day-field__input"
-                       style="border-color: {% if errors.get('row_longitude') %}var(--coral){% else %}var(--border){% endif %};">
+                       class="cl-input{% if errors.get('row_longitude') %} cl-input--error{% endif %}">
                 {{ field_error(errors, 'row_longitude') }}
             </div>
         </div>
-    </div>
+    </section>
 
-    {# Section: Weather #}
-    <div class="day-section">
-        <div class="day-section__title">🌤️ {{ t('logbook.day_section_weather') }}</div>
-        <div class="day-section__grid day-section__grid--3">
-            <div class="day-field">
-                {{ field_label(t('logbook.wind_direction')) }}
-                <input type="text" name="row_wind_direction" maxlength="3" placeholder="SW" value="{{ values.get('row_wind_direction', '') }}"
-                       class="day-field__input">
+    <section class="cl-group">
+        {{ group_eyebrow(t('logbook.day_section_weather')) }}
+        <div class="cl-grid cl-grid--3">
+            <div class="cl-field">
+                {{ lbl(t('logbook.wind_direction')) }}
+                <input type="text" name="row_wind_direction" maxlength="3" placeholder="SW" value="{{ values.get('row_wind_direction', '') }}" class="cl-input">
             </div>
-            <div class="day-field">
-                {{ field_label(t('logbook.wind_strength')) }}
+            <div class="cl-field">
+                {{ lbl(t('logbook.wind_strength')) }}
                 {% set ws = values.get('row_wind_strength', '') %}
-                <select name="row_wind_strength" class="day-field__input">
+                <select name="row_wind_strength" class="cl-input cl-select">
                     <option value=""></option>
                     {% for n in range(0, 13) %}
                     <option value="{{ n }}"{% if ws == n|string %} selected{% endif %}>{{ n }} Bft</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="day-field">
-                {{ field_label('🌡️ ' ~ t('logbook.temperature') ~ ' (°C)') }}
-                <input type="number" step="0.1" name="row_temperature" value="{{ values.get('row_temperature', '') }}"
-                       class="day-field__input">
+            <div class="cl-field">
+                {{ lbl(t('logbook.temperature') ~ ' (°C)') }}
+                <input type="number" step="0.1" name="row_temperature" value="{{ values.get('row_temperature', '') }}" class="cl-input">
             </div>
-            <div class="day-field">
-                {{ field_label('🌊 ' ~ t('logbook.sea_state')) }}
+            <div class="cl-field">
+                {{ lbl(t('logbook.sea_state')) }}
                 {% set ss = values.get('row_sea_state', '') %}
-                <select name="row_sea_state" class="day-field__input"
-                        style="border-color: {% if errors.get('row_sea_state') %}var(--coral){% else %}var(--border){% endif %};">
+                <select name="row_sea_state" class="cl-input cl-select{% if errors.get('row_sea_state') %} cl-input--error{% endif %}">
                     <option value=""></option>
                     {% for s in sea_states %}
                     <option value="{{ s }}"{% if ss == s %} selected{% endif %}>
@@ -129,10 +118,10 @@
                 </select>
                 {{ field_error(errors, 'row_sea_state') }}
             </div>
-            <div class="day-field">
-                {{ field_label(t('logbook.visibility')) }}
+            <div class="cl-field">
+                {{ lbl(t('logbook.visibility')) }}
                 {% set vis = values.get('row_visibility', '') %}
-                <select name="row_visibility" class="day-field__input">
+                <select name="row_visibility" class="cl-input cl-select">
                     <option value=""></option>
                     <option value="very_good"{% if vis == 'very_good' %} selected{% endif %}>{{ t('logbook.visibility_very_good') }}</option>
                     <option value="good"{% if vis == 'good' %} selected{% endif %}>{{ t('logbook.visibility_good') }}</option>
@@ -142,49 +131,46 @@
                 </select>
             </div>
         </div>
-    </div>
+    </section>
 
-    {# Section: Sail & Engine #}
-    <div class="day-section">
-        <div class="day-section__title">⛵ {{ t('logbook.day_section_sail_engine') }}</div>
-        <div class="day-section__grid day-section__grid--3">
-            <div class="day-field">
-                {{ field_label('⛵ ' ~ t('logbook.sail_plan')) }}
+    <section class="cl-group">
+        {{ group_eyebrow(t('logbook.day_section_sail_engine')) }}
+        <div class="cl-grid cl-grid--3">
+            <div class="cl-field">
+                {{ lbl(t('logbook.sail_plan')) }}
                 {% set sp = values.get('row_sail_plan', '') %}
-                <select name="row_sail_plan" class="day-field__input">
+                <select name="row_sail_plan" class="cl-input cl-select">
                     <option value=""></option>
-                    <option value="motor_none"{% if sp == 'motor_none' %} selected{% endif %}>🚤 {{ t('logbook.sail_motor_none') }}</option>
-                    <option value="mainsail"{% if sp == 'mainsail' %} selected{% endif %}>⛵ {{ t('logbook.sail_mainsail') }}</option>
-                    <option value="genoa"{% if sp == 'genoa' %} selected{% endif %}>🎐 {{ t('logbook.sail_genoa') }}</option>
-                    <option value="main_genoa"{% if sp == 'main_genoa' %} selected{% endif %}>⛵ {{ t('logbook.sail_main_genoa') }}</option>
-                    <option value="no_sails"{% if sp == 'no_sails' %} selected{% endif %}>⚓ {{ t('logbook.sail_none') }}</option>
+                    <option value="motor_none"{% if sp == 'motor_none' %} selected{% endif %}>{{ t('logbook.sail_motor_none') }}</option>
+                    <option value="mainsail"{% if sp == 'mainsail' %} selected{% endif %}>{{ t('logbook.sail_mainsail') }}</option>
+                    <option value="genoa"{% if sp == 'genoa' %} selected{% endif %}>{{ t('logbook.sail_genoa') }}</option>
+                    <option value="main_genoa"{% if sp == 'main_genoa' %} selected{% endif %}>{{ t('logbook.sail_main_genoa') }}</option>
+                    <option value="no_sails"{% if sp == 'no_sails' %} selected{% endif %}>{{ t('logbook.sail_none') }}</option>
                 </select>
             </div>
-            <div class="day-field">
-                {{ field_label('🔧 ' ~ t('logbook.engine_status')) }}
+            <div class="cl-field">
+                {{ lbl(t('logbook.engine_status')) }}
                 {% set eo = values.get('row_engine_on', '') %}
-                <select name="row_engine_on" class="day-field__input">
+                <select name="row_engine_on" class="cl-input cl-select">
                     <option value=""{% if not eo %} selected{% endif %}>—</option>
                     <option value="true"{% if eo == 'true' %} selected{% endif %}>{{ t('logbook.engine_on') }}</option>
                     <option value="false"{% if eo == 'false' %} selected{% endif %}>{{ t('logbook.engine_off') }}</option>
                 </select>
             </div>
-            <div class="day-field">
-                {{ field_label(t('logbook.engine_hours_total')) }}
-                <input type="number" step="0.1" name="row_eng_hours_total" value="{{ values.get('row_eng_hours_total', '') }}"
-                       class="day-field__input">
+            <div class="cl-field">
+                {{ lbl(t('logbook.engine_hours_total')) }}
+                <input type="number" step="0.1" name="row_eng_hours_total" value="{{ values.get('row_eng_hours_total', '') }}" class="cl-input">
             </div>
         </div>
-    </div>
+    </section>
 
-    {# Section: Event & Notes #}
-    <div class="day-section">
-        <div class="day-section__title">⚠️ {{ t('logbook.day_section_event_notes') }}</div>
-        <div class="day-section__grid day-section__grid--2">
-            <div class="day-field">
-                {{ field_label('⚠️ ' ~ t('logbook.event_category')) }}
+    <section class="cl-group">
+        {{ group_eyebrow(t('logbook.day_section_event_notes')) }}
+        <div class="cl-grid cl-grid--2">
+            <div class="cl-field">
+                {{ lbl(t('logbook.event_category')) }}
                 {% set ec = values.get('row_event_category', '') %}
-                <select name="row_event_category" class="day-field__input">
+                <select name="row_event_category" class="cl-input cl-select">
                     <option value=""></option>
                     <option value="safety"{% if ec == 'safety' %} selected{% endif %}>{{ t('logbook.event_safety') }}</option>
                     <option value="equipment"{% if ec == 'equipment' %} selected{% endif %}>{{ t('logbook.event_equipment') }}</option>
@@ -193,41 +179,42 @@
                     <option value="other"{% if ec == 'other' %} selected{% endif %}>{{ t('logbook.event_other') }}</option>
                 </select>
             </div>
-            <div class="day-field">
-                {{ field_label(t('logbook.event_details')) }}
-                <input type="text" name="row_event_details" value="{{ values.get('row_event_details', '') }}"
-                       class="day-field__input">
+            <div class="cl-field">
+                {{ lbl(t('logbook.event_details')) }}
+                <input type="text" name="row_event_details" value="{{ values.get('row_event_details', '') }}" class="cl-input">
             </div>
         </div>
-        <div class="day-field day-field--full">
-            {{ field_label('📝 ' ~ t('common.notes')) }}
-            <input type="text" name="row_notes" placeholder="{{ t('logbook.notes_placeholder') }}" value="{{ values.get('row_notes', '') }}"
-                   class="day-field__input">
+        <div class="cl-field cl-field--full">
+            {{ lbl(t('common.notes')) }}
+            <input type="text" name="row_notes" placeholder="{{ t('logbook.notes_placeholder') }}" value="{{ values.get('row_notes', '') }}" class="cl-input">
         </div>
-    </div>
-</div>
+    </section>
+</article>
 {%- endmacro %}
 
 {% block content %}
-<div class="space-y-6 max-w-5xl mx-auto">
-    <div class="flex items-center justify-between">
-        <h1 class="ui-title maritime-header" style="margin-bottom:0;">📅 {{ t('logbook.day_logbook_title') }}</h1>
-        <a href="/logbook" class="text-sm hover:underline" style="color: var(--accent);">← {{ t('logbook.back_to_list') }}</a>
-    </div>
+<div class="cl-page">
 
-    <p class="ui-muted text-sm">{{ t('logbook.day_logbook_help') }}</p>
+    {# Page header #}
+    <header class="cl-pageheader">
+        <div>
+            <h1 class="cl-title">{{ t('logbook.day_logbook_title') }}</h1>
+            <p class="cl-subtitle">{{ t('logbook.day_logbook_help') }}</p>
+        </div>
+        <a href="/logbook" class="cl-btn cl-btn--ghost">← {{ t('logbook.back_to_list') }}</a>
+    </header>
 
     {% if request.session.get('error') %}
-        <div class="p-3 rounded-lg" style="background: var(--coral-soft); color: var(--coral);">{{ request.session.pop('error') }}</div>
+        <div class="cl-alert cl-alert--danger">{{ request.session.pop('error') }}</div>
     {% endif %}
 
     {% if general_errors %}
-        <div class="p-3 rounded-lg space-y-1" style="background: var(--coral-soft); color: var(--coral);">
+        <div class="cl-alert cl-alert--danger">
             {% for e in general_errors %}<div>{{ e }}</div>{% endfor %}
         </div>
     {% endif %}
 
-    <form action="/logbook/day-new" method="post" id="dayLogbookForm" class="space-y-6" enctype="multipart/form-data"
+    <form action="/logbook/day-new" method="post" id="dayLogbookForm" class="cl-form" enctype="multipart/form-data"
           data-i18n-row-required="{{ t('logbook.day_err_row_required') }}"
           data-i18n-time-missing="{{ t('logbook.day_err_time_missing') }}"
           data-i18n-time-monotonic="{{ t('logbook.day_err_time_monotonic') }}"
@@ -235,189 +222,473 @@
           data-i18n-photos-selected="{{ t('logbook.day_photos_selected') }}">
         {{ csrf_input | safe }}
 
-        {# Header card #}
-        <div class="bg-white porthole-card p-6 space-y-4">
-            <h2 class="font-bold maritime-header">{{ t('logbook.day_logbook_header') }}</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">📅 {{ t('logbook.date_label') }} *</label>
-                    <input type="date" name="entry_date" value="{{ header.get('entry_date', default_date) }}" required
-                           class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
+        {# Trip-day card #}
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">{{ t('logbook.day_logbook_header') }}</h2>
+            </header>
+            <div class="cl-grid cl-grid--3">
+                <div class="cl-field">
+                    {{ lbl(t('logbook.date_label') ~ ' *') }}
+                    <input type="date" name="entry_date" value="{{ header.get('entry_date', default_date) }}" required class="cl-input">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">🏁 {{ t('logbook.departure') }}</label>
-                    <input type="text" name="departure" placeholder="{{ t('logbook.departure_placeholder') }}" value="{{ header.get('departure', '') }}"
-                           class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
+                <div class="cl-field">
+                    {{ lbl(t('logbook.departure')) }}
+                    <input type="text" name="departure" placeholder="{{ t('logbook.departure_placeholder') }}" value="{{ header.get('departure', '') }}" class="cl-input">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">🏁 {{ t('logbook.destination') }}</label>
-                    <input type="text" name="destination" placeholder="{{ t('logbook.destination_placeholder') }}" value="{{ header.get('destination', '') }}"
-                           class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
+                <div class="cl-field">
+                    {{ lbl(t('logbook.destination')) }}
+                    <input type="text" name="destination" placeholder="{{ t('logbook.destination_placeholder') }}" value="{{ header.get('destination', '') }}" class="cl-input">
                 </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">📝 {{ t('common.notes') }}</label>
-                <textarea name="summary_notes" rows="2" placeholder="{{ t('logbook.notes_placeholder') }}"
-                          class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">{{ header.get('summary_notes', '') }}</textarea>
+            <div class="cl-field cl-field--full">
+                {{ lbl(t('common.notes')) }}
+                <textarea name="summary_notes" rows="2" placeholder="{{ t('logbook.notes_placeholder') }}" class="cl-input cl-input--textarea">{{ header.get('summary_notes', '') }}</textarea>
             </div>
-            <div class="flex gap-2 flex-wrap">
-                <button type="button" id="quickFillFirstRow" class="px-4 py-2 rounded-lg font-semibold text-white touch-action" style="background: var(--accent);">
-                    ⚡ {{ t('logbook.day_logbook_quick_fill_first') }}
+            <div class="cl-card__footer">
+                <button type="button" id="quickFillFirstRow" class="cl-btn cl-btn--secondary">
+                    {{ t('logbook.day_logbook_quick_fill_first') }}
                 </button>
-                <span id="quickFillStatus" class="text-sm ui-muted self-center"></span>
+                <span id="quickFillStatus" class="cl-help"></span>
             </div>
-        </div>
+        </section>
 
-        {# Rows container #}
-        <div class="bg-white porthole-card p-4 space-y-3" id="rowsCard">
-            <div class="flex items-center justify-between">
-                <h2 class="font-bold maritime-header">⏱️ {{ t('logbook.day_logbook_entries') }}</h2>
-                <button type="button" id="addRowBtn" class="px-3 py-1 rounded-lg text-sm font-semibold text-white touch-action" style="background: var(--success);">
-                    ➕ {{ t('logbook.day_logbook_add_row') }}
+        {# Entries card #}
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">{{ t('logbook.day_logbook_entries') }}</h2>
+                <button type="button" id="addRowBtn" class="cl-btn cl-btn--primary cl-btn--sm">
+                    + {{ t('logbook.day_logbook_add_row') }}
                 </button>
-            </div>
+            </header>
 
-            <div id="rowsContainer" class="space-y-3">
+            <div id="rowsContainer" class="cl-entries">
                 {% for r in submitted_rows %}
                     {{ render_row(r, row_errors[loop.index0] if loop.index0 < row_errors|length else {}) }}
                 {% endfor %}
             </div>
 
-            <p class="text-xs ui-muted">{{ t('logbook.day_logbook_carry_forward_hint') }}</p>
-        </div>
+            <p class="cl-help cl-card__hint">{{ t('logbook.day_logbook_carry_forward_hint') }}</p>
+        </section>
 
-        {# Multi-photo upload — attached to first entry of the day #}
-        <div class="bg-white porthole-card p-4 space-y-3">
-            <h2 class="font-bold maritime-header">📷 {{ t('logbook.add_photo') }} ({{ t('logbook.photos_multi_hint') }})</h2>
-            <p class="text-xs ui-muted">{{ t('logbook.day_photos_hint') }}</p>
-            <input type="file" name="day_photos" multiple accept="image/jpeg,image/png,image/jpg"
-                   class="block w-full text-sm" id="dayPhotosInput">
-            <p id="dayPhotosCount" class="text-xs font-medium" style="color: var(--success);"></p>
-            <div id="dayPhotosPreview" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2"></div>
-        </div>
+        {# Photos card #}
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">{{ t('logbook.add_photo') }}</h2>
+            </header>
+            <p class="cl-help">{{ t('logbook.day_photos_hint') }}</p>
+            <input type="file" name="day_photos" multiple accept="image/jpeg,image/png,image/jpg" class="cl-input cl-input--file" id="dayPhotosInput">
+            <p id="dayPhotosCount" class="cl-help cl-help--success"></p>
+            <div id="dayPhotosPreview" class="cl-photo-grid"></div>
+        </section>
 
-        {# Sticky save bar #}
-        <div class="sticky bottom-0 bg-white border-t p-3 flex gap-2 justify-end" style="border-color: var(--border); z-index: 10;">
-            <a href="/logbook" class="px-4 py-2 rounded-lg" style="background: var(--surface-2);">{{ t('common.cancel') }}</a>
-            <button type="submit" class="ocean-gradient text-white px-6 py-2 rounded-lg font-semibold touch-action">
-                💾 {{ t('logbook.day_logbook_save_all') }} (<span id="rowCounter">0</span>)
+        {# Sticky save bar — proper backdrop, never overlaps content thanks to cl-form padding-bottom #}
+        <div class="cl-actionbar">
+            <a href="/logbook" class="cl-btn cl-btn--secondary">{{ t('common.cancel') }}</a>
+            <button type="submit" class="cl-btn cl-btn--primary">
+                {{ t('logbook.day_logbook_save_all') }} (<span id="rowCounter">0</span>)
             </button>
         </div>
     </form>
 </div>
 
-{# Row template (cloned by JS) — rendered via the same macro with empty values #}
+{# Row template (cloned by JS) #}
 <template id="dayRowTemplate">
     {{ render_row({}, {}) }}
 </template>
 
 <style>
-    /* === Day Logbook entry card — mobile-first responsive layout =========== */
-    /* Card: comfortable padding, generous spacing between sections.          */
-    .day-row {
-        padding: 1rem;
-        border-radius: 0.75rem;
-        border: 1px solid var(--border);
-        box-sizing: border-box;
-    }
-    @media (min-width: 768px) { .day-row { padding: 1.25rem; } }
+/* ==========================================================================
+   CrewLog Day Logbook — page-scoped design system
+   Mobile-first. iPhone = 1 column. iPad = 2 columns. Desktop = 2-3 columns.
+   ========================================================================== */
 
-    /* Header: index + reorder buttons | delete button (always visible).      */
-    .day-row__header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        margin-bottom: 0.75rem;
-    }
-    .day-row__header-left { display: flex; align-items: center; gap: 0.25rem; }
-    .day-row__icon-btn {
-        width: 44px; height: 44px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 0.5rem;
-        background: var(--surface-2);
-        font-size: 18px;
-        border: none;
-        cursor: pointer;
-    }
-    .day-row__index { font-weight: 600; font-size: 0.95rem; margin-left: 0.5rem; }
-    .day-row__delete {
-        min-height: 44px;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        background: var(--surface-2);
-        color: var(--coral);
-        font-size: 0.875rem;
-        font-weight: 500;
-        border: none;
-        cursor: pointer;
-    }
+/* --- Design tokens (page-scoped to avoid colliding with global theme) ----- */
+.cl-page {
+    --cl-bg:        #f6f8fb;
+    --cl-surface:   #ffffff;
+    --cl-surface-2: #f1f4f8;
+    --cl-border:    #e2e6ec;
+    --cl-border-strong: #cdd3db;
+    --cl-text:      #1a2540;
+    --cl-text-muted:#5a6479;
+    --cl-text-subtle:#8a93a4;
+    --cl-navy:      #0f2942;
+    --cl-navy-soft: #1a3a5c;
+    --cl-accent:    #1d6fbb;
+    --cl-success:   #2f7a4d;
+    --cl-danger:    #c53e3e;
+    --cl-danger-soft:#fdecec;
 
-    /* Sections within a row: a small heading then a responsive grid.         */
-    .day-section { margin-top: 1rem; }
-    .day-section:first-of-type { margin-top: 0; }
-    .day-section__title {
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: var(--muted, #6b7280);
-        margin-bottom: 0.5rem;
-        padding-bottom: 0.25rem;
-        border-bottom: 1px solid var(--border);
-    }
+    --cl-radius:    12px;
+    --cl-radius-sm: 8px;
+    --cl-shadow:    0 1px 2px rgba(15,41,66,.04), 0 4px 12px rgba(15,41,66,.04);
 
-    /* Mobile-first grid: 1 column. Tablets bump to 2 or 3 depending on the
-       group. We never go denser than 3 even on desktop, so labels and inputs
-       always have ample width and never clip or overlap. */
-    .day-section__grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.75rem 1rem;
-    }
-    @media (min-width: 640px) {
-        .day-section__grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .day-section__grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    @media (min-width: 1024px) {
-        .day-section__grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    }
+    --cl-space-1:   4px;
+    --cl-space-2:   8px;
+    --cl-space-3:   12px;
+    --cl-space-4:   16px;
+    --cl-space-5:   24px;
+    --cl-space-6:   32px;
+    --cl-space-7:   48px;
 
-    /* Field block: stacked label + full-width input. */
-    .day-field { display: flex; flex-direction: column; min-width: 0; }
-    .day-field--full { margin-top: 0.75rem; }
-    .day-field__label {
-        font-size: 0.8125rem;
-        font-weight: 500;
-        line-height: 1.3;
-        color: var(--muted, #4b5563);
-        margin-bottom: 0.375rem;
-        word-break: break-word;
-    }
-    .day-field__input {
-        width: 100%;
-        min-height: 44px;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid var(--border);
-        border-radius: 0.5rem;
-        font-size: 1rem;        /* >= 16px prevents iOS auto-zoom on focus */
-        background: white;
-        box-sizing: border-box;
-    }
-    .day-field__input:focus {
-        outline: none;
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
-    }
-    select.day-field__input { padding-right: 2rem; }
+    max-width: 960px;
+    margin: 0 auto;
+    padding: var(--cl-space-5) var(--cl-space-4);
+    color: var(--cl-text);
+    font-size: 15px;
+    line-height: 1.45;
+}
+@media (min-width: 768px) {
+    .cl-page { padding: var(--cl-space-6) var(--cl-space-5); }
+}
 
-    .day-row .move-up-btn[disabled],
-    .day-row .move-down-btn[disabled] { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
-    #dayPhotosPreview .photo-pill { position: relative; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); }
-    #dayPhotosPreview .photo-pill img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    #photoPreview .photo-pill { position: relative; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); }
-    #photoPreview .photo-pill img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* --- Page header ---------------------------------------------------------- */
+.cl-pageheader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--cl-space-4);
+    margin-bottom: var(--cl-space-5);
+    flex-wrap: wrap;
+}
+.cl-title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--cl-navy);
+    margin: 0 0 var(--cl-space-2);
+    line-height: 1.2;
+}
+@media (min-width: 768px) { .cl-title { font-size: 30px; } }
+.cl-subtitle {
+    font-size: 14px;
+    color: var(--cl-text-muted);
+    margin: 0;
+    max-width: 60ch;
+}
+
+/* --- Form layout ---------------------------------------------------------- */
+.cl-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-5);
+    /* Reserve space so the sticky action bar never overlaps the last card */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
+/* --- Card ----------------------------------------------------------------- */
+.cl-card {
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    box-shadow: var(--cl-shadow);
+    padding: var(--cl-space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-4);
+}
+@media (min-width: 768px) {
+    .cl-card { padding: var(--cl-space-6); gap: var(--cl-space-5); }
+}
+.cl-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cl-space-3);
+    flex-wrap: wrap;
+}
+.cl-card__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--cl-navy);
+    margin: 0;
+    letter-spacing: -0.005em;
+}
+.cl-card__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-3);
+    flex-wrap: wrap;
+    margin-top: var(--cl-space-2);
+}
+.cl-card__hint { margin-top: var(--cl-space-2); }
+
+/* --- Field grid (1 col mobile / 2 col tablet / 3 col desktop) ------------- */
+.cl-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--cl-space-4);
+}
+@media (min-width: 640px) {
+    .cl-grid--2,
+    .cl-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+    .cl-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* --- Field & input -------------------------------------------------------- */
+.cl-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-2);
+    min-width: 0;
+}
+.cl-field--full { grid-column: 1 / -1; }
+.cl-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--cl-text-muted);
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+}
+.cl-input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 44px;
+    padding: 0 var(--cl-space-3);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-sm);
+    background: var(--cl-surface);
+    font-size: 16px;            /* prevents iOS auto-zoom */
+    line-height: 1.4;
+    color: var(--cl-text);
+    transition: border-color .15s, box-shadow .15s;
+    font-family: inherit;
+}
+.cl-input:focus {
+    outline: none;
+    border-color: var(--cl-accent);
+    box-shadow: 0 0 0 3px rgba(29,111,187,.18);
+}
+.cl-input--textarea {
+    height: auto;
+    min-height: 72px;
+    padding: var(--cl-space-3);
+    resize: vertical;
+}
+.cl-input--file {
+    height: auto;
+    padding: var(--cl-space-3);
+    background: var(--cl-surface-2);
+    cursor: pointer;
+}
+.cl-input--error {
+    border-color: var(--cl-danger);
+    background: var(--cl-danger-soft);
+}
+.cl-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%235a6479' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+.cl-field__error {
+    font-size: 12px;
+    color: var(--cl-danger);
+    margin: 0;
+}
+
+/* --- Buttons -------------------------------------------------------------- */
+.cl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--cl-space-2);
+    height: 44px;
+    padding: 0 var(--cl-space-4);
+    border-radius: var(--cl-radius-sm);
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+    box-sizing: border-box;
+    white-space: nowrap;
+    font-family: inherit;
+}
+.cl-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(29,111,187,.25);
+}
+.cl-btn--sm { height: 36px; padding: 0 var(--cl-space-3); font-size: 13px; }
+.cl-btn--primary {
+    background: var(--cl-navy);
+    color: #fff;
+}
+.cl-btn--primary:hover { background: var(--cl-navy-soft); }
+.cl-btn--secondary {
+    background: var(--cl-surface);
+    color: var(--cl-text);
+    border-color: var(--cl-border-strong);
+}
+.cl-btn--secondary:hover { background: var(--cl-surface-2); }
+.cl-btn--ghost {
+    background: transparent;
+    color: var(--cl-accent);
+    border-color: transparent;
+}
+.cl-btn--ghost:hover { background: var(--cl-surface-2); }
+.cl-btn--ghost-danger {
+    background: transparent;
+    color: var(--cl-danger);
+    border-color: transparent;
+}
+.cl-btn--ghost-danger:hover { background: var(--cl-danger-soft); }
+
+.cl-iconbtn {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--cl-border);
+    background: var(--cl-surface);
+    border-radius: var(--cl-radius-sm);
+    color: var(--cl-text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.cl-iconbtn:hover { background: var(--cl-surface-2); border-color: var(--cl-border-strong); }
+.cl-iconbtn[disabled],
+.cl-iconbtn:disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
+
+/* --- Helpers -------------------------------------------------------------- */
+.cl-help {
+    font-size: 12px;
+    color: var(--cl-text-subtle);
+    margin: 0;
+}
+.cl-help--success { color: var(--cl-success); font-weight: 500; }
+
+/* --- Alerts --------------------------------------------------------------- */
+.cl-alert {
+    padding: var(--cl-space-3) var(--cl-space-4);
+    border-radius: var(--cl-radius-sm);
+    font-size: 14px;
+    margin-bottom: var(--cl-space-4);
+}
+.cl-alert--danger {
+    background: var(--cl-danger-soft);
+    color: var(--cl-danger);
+    border: 1px solid color-mix(in srgb, var(--cl-danger) 25%, transparent);
+}
+.cl-alert > div + div { margin-top: var(--cl-space-1); }
+
+/* --- Entries list & entry card ------------------------------------------- */
+.cl-entries {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-4);
+}
+.cl-entry {
+    background: var(--cl-surface-2);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    padding: var(--cl-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-5);
+}
+@media (min-width: 768px) {
+    .cl-entry { padding: var(--cl-space-5); }
+}
+.cl-entry--error {
+    background: var(--cl-danger-soft);
+    border-color: var(--cl-danger);
+}
+.cl-entry__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cl-space-3);
+    flex-wrap: wrap;
+}
+.cl-entry__head-left {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-2);
+}
+.cl-entry__index {
+    font-weight: 600;
+    color: var(--cl-text-muted);
+    font-size: 14px;
+    margin-left: var(--cl-space-2);
+}
+
+/* --- Group within an entry: eyebrow + grid ------------------------------- */
+.cl-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-3);
+}
+.cl-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cl-text-subtle);
+    padding-bottom: var(--cl-space-2);
+    border-bottom: 1px solid var(--cl-border);
+}
+
+/* --- Photo grid ----------------------------------------------------------- */
+.cl-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: var(--cl-space-2);
+}
+.cl-photo-grid:empty { display: none; }
+.cl-photo-grid .photo-pill {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--cl-radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--cl-border);
+    background: var(--cl-surface-2);
+}
+.cl-photo-grid .photo-pill img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+/* Backwards-compat with JS that targets #dayPhotosPreview */
+#dayPhotosPreview { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--cl-space-2); }
+#dayPhotosPreview .photo-pill { position: relative; aspect-ratio: 1/1; border-radius: var(--cl-radius-sm); overflow: hidden; border: 1px solid var(--cl-border); background: var(--cl-surface-2); }
+#dayPhotosPreview .photo-pill img { width:100%; height:100%; object-fit: cover; display: block; }
+
+/* --- Sticky action bar ---------------------------------------------------- */
+.cl-actionbar {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: var(--cl-space-5) calc(var(--cl-space-4) * -1) 0;
+    padding: var(--cl-space-3) var(--cl-space-4);
+    padding-bottom: calc(var(--cl-space-3) + env(safe-area-inset-bottom, 0px));
+    background: rgba(255,255,255,.92);
+    backdrop-filter: saturate(180%) blur(10px);
+    -webkit-backdrop-filter: saturate(180%) blur(10px);
+    border-top: 1px solid var(--cl-border);
+    display: flex;
+    gap: var(--cl-space-3);
+    justify-content: flex-end;
+    z-index: 20;
+    box-shadow: 0 -4px 16px rgba(15,41,66,.04);
+}
+@media (min-width: 768px) {
+    .cl-actionbar { margin-left: calc(var(--cl-space-5) * -1); margin-right: calc(var(--cl-space-5) * -1); padding-left: var(--cl-space-5); padding-right: var(--cl-space-5); }
+}
+
+/* --- Compatibility shims for legacy JS hooks ----------------------------- */
+.cl-entry .move-up-btn[disabled],
+.cl-entry .move-down-btn[disabled] { opacity: .35; cursor: not-allowed; pointer-events: none; }
 </style>
-<script src="/static/js/logbook-day-entry.js?v=3"></script>
+<script src="/static/js/logbook-day-entry.js?v=4"></script>
 {% endblock %}

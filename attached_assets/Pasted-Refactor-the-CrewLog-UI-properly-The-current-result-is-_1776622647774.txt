@@ -1,0 +1,171 @@
+Refactor the CrewLog UI properly. The current result is not acceptable. It still looks like a compressed desktop admin form rather than a clean, responsive, premium tablet/mobile interface.
+
+The redesign must focus on:
+1. visual quality,
+2. strict field alignment,
+3. removal of duplicate/redundant labels and icons,
+4. better typography and spacing,
+5. consistent color system,
+6. readable buttons,
+7. clean card layout,
+8. proper responsive behavior on iPad and iPhone,
+9. a more premium, sleek maritime product feel.
+
+Problems to fix from the current version:
+- Headline looks visually weak and unbalanced.
+- Headings repeat unnecessarily with icons.
+- Too many icons are repeated and create clutter.
+- Fields still do not feel perfectly aligned.
+- Action buttons overlap visually with content.
+- Buttons are not readable enough.
+- Color coding is inconsistent and feels arbitrary.
+- Some cards and sections have too much empty space while other areas feel cramped.
+- The UI lacks a clear spacing system and consistent component rhythm.
+- The layout still feels “generated” instead of intentionally designed.
+
+Design direction:
+Build a sleek, modern, Apple-like / premium maritime UI.
+The result should feel calm, structured, elegant, and highly usable.
+Think: minimal, high-clarity, clean spacing, strong alignment, subtle hierarchy, restrained icon usage, disciplined colors.
+
+Mandatory design rules:
+1. Remove redundant icons.
+   - Do not repeat an icon in both page title and section title if it adds no value.
+   - Use icons only where they improve scanability.
+   - Avoid decorative clutter.
+
+2. Simplify headlines.
+   - One strong page title only.
+   - One clean section title per section.
+   - No repeated icon/title combinations.
+   - Typography must establish hierarchy through size, weight, spacing, not through icon repetition.
+
+3. Introduce a proper spacing system.
+   - Use a consistent spacing scale throughout the page.
+   - Standardize vertical gaps between sections, cards, field groups, labels, and buttons.
+   - Avoid random margins/paddings.
+
+4. Enforce strict field alignment.
+   - All fields within a row must align exactly.
+   - Labels must align consistently above inputs.
+   - Inputs/selects/textareas must have equal heights.
+   - No visual drift between columns.
+   - Long labels must not break alignment.
+   - Use a strict grid system with predictable column spans.
+
+5. Proper responsive grid behavior.
+   - iPhone: one-column layout for nearly all fields.
+   - iPad: two-column layout by default, three columns only where safe and visually balanced.
+   - Never allow fields to become too narrow.
+   - Never allow overlapping buttons or floating panels to cover fields.
+   - No horizontal scroll.
+
+6. Rebuild action areas.
+   - “Abbrechen” and “Alle speichern” must sit in a clean, stable action bar.
+   - The action bar must not overlap content.
+   - On tablet/mobile, action buttons should either:
+     a) sit in a dedicated sticky footer with proper spacing and background, or
+     b) appear inline at the bottom of the form without obstructing fields.
+   - Delete/edit buttons must not visually fight with primary actions.
+
+7. Improve button system.
+   - Buttons need better contrast and readability.
+   - Primary, secondary, destructive, and success actions must be clearly differentiated.
+   - Text inside buttons must be legible at a glance.
+   - Avoid oversaturated or clashing colors.
+   - Keep button height, padding, radius, and font treatment consistent.
+
+8. Fix color system.
+   - Define a restrained design palette and apply it consistently.
+   - Use brand navy / dark maritime blue as primary anchor.
+   - Use one primary action color.
+   - Use one success color.
+   - Use one danger color.
+   - Use neutral grays for structure.
+   - Remove inconsistent blue/green usage that currently feels random.
+   - Section accents should be subtle, not loud.
+
+9. Improve cards.
+   - Every entry card should have a clear structure:
+     - header row
+     - grouped field sections
+     - footer/actions
+   - Card padding must be consistent.
+   - Card shadows/borders should be subtle.
+   - Cards should feel premium and calm, not bulky.
+
+10. Improve list view / logbook overview cards.
+   - Rebuild the cards so they look intentional and balanced.
+   - Photo, title, metadata, and actions should be aligned properly.
+   - Avoid large empty areas.
+   - “Bearbeiten” and “Löschen” should be visually subordinate to the main content.
+   - Date grouping and entry cards should feel like part of one coherent design system.
+
+11. Improve typography.
+   - Use a stronger type hierarchy.
+   - Page title > section title > card title > label > helper text.
+   - Reduce visual noise from too many similar font sizes/weights.
+   - Ensure labels are readable but not overpowering.
+   - Avoid making the interface feel “default browser form”.
+
+12. Section structure for form entries:
+   Keep these content groups, but redesign them visually:
+   - Zeit & Manöver
+   - Position
+   - Wetter
+   - Segel & Motor
+   - Ereignis & Notizen
+   Each group should feel like part of a unified form, not a stack of unrelated fragments.
+
+Technical implementation requirements:
+- Audit all affected components and styles first.
+- Remove ad hoc fixes and replace them with a coherent layout system.
+- Use a mobile-first approach.
+- Use a proper grid/flex architecture, not patched fixed widths.
+- Avoid inline styling unless absolutely necessary.
+- Introduce reusable layout primitives for:
+  - page container
+  - section header
+  - card header
+  - field grid
+  - field wrapper
+  - action bar
+  - button variants
+- Ensure all form controls share consistent height, radius, border, font size, and internal padding.
+- Review sticky/fixed elements carefully so they never cover form content.
+- Ensure Safari on iPad and iPhone is explicitly handled.
+
+Expected breakpoint behavior:
+- iPhone portrait: single-column form, stacked actions where needed
+- iPhone landscape: still prioritize readability over density
+- iPad portrait: balanced 2-column form grid
+- iPad landscape: balanced 2- or 3-column grid depending on field type
+- Desktop: may expand, but keep the same design language
+
+Specific cleanup requests:
+- Remove duplicated heading/icon combinations.
+- Make the “Logbuch” page title look premium and clean.
+- Redesign the top action buttons so they are readable and visually coherent.
+- Fix the bottom save/cancel bar so it does not cover content.
+- Rework the list cards so they do not have awkward empty whitespace.
+- Ensure 100% alignment across labels, fields, selects, and cards.
+
+Do not just tweak the current CSS.
+This needs a proper component-level redesign and layout cleanup.
+
+Deliverables after implementation:
+1. summary of components refactored,
+2. summary of layout and spacing system introduced,
+3. button hierarchy and color system used,
+4. responsive behavior by breakpoint,
+5. confirmation that overlapping, repeated headings/icons, and field alignment issues are resolved.
+
+Acceptance criteria:
+- Interface looks intentionally designed, not auto-generated.
+- Headings are clean and not repetitive.
+- Buttons are readable and consistent.
+- No overlapping elements.
+- All fields align cleanly.
+- Cards look balanced and premium.
+- Responsive behavior is reliable on iPhone and iPad.
+- The whole UI feels sleek, modern, and production-grade.
