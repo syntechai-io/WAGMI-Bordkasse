@@ -146,8 +146,9 @@
                     </button>
                 </div>
                 <p id="receiptFileName" class="text-sm mt-2 ui-muted"></p>
+                <p id="ocrStatus" class="text-sm mt-1 hidden" style="color: var(--accent);"></p>
             </div>
-            
+
             <button type="submit" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
                 ✅ {{ t('expense.add_expense') }}
             </button>
@@ -294,7 +295,7 @@
             const file = e.target.files[0];
             const fileName = document.getElementById('receiptFileName');
             fileName.textContent = '{{ t("common.file_selected") }}' + file.name;
-            
+
             // Show preview for images when offline
             if (!navigator.onLine && file.type.startsWith('image/')) {
                 const reader = new FileReader();
@@ -303,17 +304,105 @@
                     preview.src = ev.target.result;
                     preview.className = 'mt-2 max-w-xs max-h-48 rounded-lg border-2';
                     preview.style.borderColor = 'var(--success)';
-                    
+
                     // Remove old preview if exists
                     const oldPreview = fileName.parentElement.querySelector('img');
                     if (oldPreview) oldPreview.remove();
-                    
+
                     fileName.parentElement.appendChild(preview);
                 };
                 reader.readAsDataURL(file);
             }
+
+            // Receipt OCR pre-fill (online only, image/PDF only)
+            if (navigator.onLine) {
+                runReceiptOCR(file);
+            }
         }
     });
+
+    // === Receipt OCR pre-fill ===========================================
+    function getCookie(name) {
+        const m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+    function setSuggested(el) {
+        if (!el) return;
+        el.dataset.ocrSuggested = '1';
+        el.style.background = 'rgba(245, 197, 24, 0.12)';
+        const wrap = el.parentElement;
+        if (!wrap || wrap.querySelector('.ocr-pill')) return;
+        const pill = document.createElement('span');
+        pill.className = 'ocr-pill inline-block ml-2 px-2 py-0.5 text-xs font-semibold rounded-full';
+        pill.style.background = 'var(--accent)';
+        pill.style.color = '#fff';
+        pill.textContent = '✨ {{ t("expense.ocr_suggested") }}';
+        const label = wrap.querySelector('label');
+        (label || wrap).appendChild(pill);
+        const clear = () => {
+            delete el.dataset.ocrSuggested;
+            el.style.background = '';
+            pill.remove();
+            el.removeEventListener('input', clear);
+            el.removeEventListener('change', clear);
+        };
+        el.addEventListener('input', clear);
+        el.addEventListener('change', clear);
+    }
+    function fillIfEmpty(selector, value) {
+        if (value === null || value === undefined || value === '') return false;
+        const el = document.querySelector(selector);
+        if (!el) return false;
+        const current = (el.value || '').trim();
+        if (current && current !== '0' && current !== '0.00') return false;
+        el.value = value;
+        setSuggested(el);
+        return true;
+    }
+    async function runReceiptOCR(file) {
+        const status = document.getElementById('ocrStatus');
+        if (!status) return;
+        const acceptable = file.type === 'application/pdf' || file.type.startsWith('image/');
+        if (!acceptable) return;
+        status.classList.remove('hidden');
+        status.style.color = 'var(--accent)';
+        status.textContent = '{{ t("expense.ocr_reading") }}';
+        try {
+            const fd = new FormData();
+            fd.append('receipt', file);
+            const res = await fetch('/expenses/ocr-suggest', {
+                method: 'POST',
+                headers: { 'x-csrftoken': getCookie('csrftoken') },
+                body: fd,
+                credentials: 'same-origin',
+            });
+            if (!res.ok) throw new Error('http ' + res.status);
+            const data = await res.json();
+            const s = data && data.suggestions;
+            if (!s) {
+                status.textContent = '{{ t("expense.ocr_no_data") }}';
+                status.style.color = 'var(--muted)';
+                return;
+            }
+            let filled = 0;
+            if (fillIfEmpty('input[name="amount"]', s.amount)) filled++;
+            if (fillIfEmpty('select[name="currency"]', s.currency)) filled++;
+            if (fillIfEmpty('input[name="expense_date"]', s.date)) filled++;
+            const desc = s.description || s.vendor;
+            if (fillIfEmpty('input[name="description"]', desc)) filled++;
+            if (fillIfEmpty('select[name="category"]', s.category)) filled++;
+            if (filled > 0) {
+                status.textContent = '{{ t("expense.ocr_filled") }}';
+                status.style.color = 'var(--success)';
+            } else {
+                status.textContent = '{{ t("expense.ocr_no_data") }}';
+                status.style.color = 'var(--muted)';
+            }
+        } catch (err) {
+            status.textContent = '{{ t("expense.ocr_error") }}';
+            status.style.color = 'var(--muted)';
+        }
+    }
 
     // Helper: Convert File to base64
     async function fileToBase64(file) {

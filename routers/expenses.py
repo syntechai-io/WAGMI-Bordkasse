@@ -8,12 +8,20 @@ from models import Expense, ExpenseParticipant, CrewMember, Receipt, PaidFromEnu
 from services.trip import TripService
 from services.currency import CurrencyService
 from services.audit import AuditService
+from services.receipt_ocr import (
+    extract_receipt as ocr_extract_receipt,
+    ReceiptOCRError,
+    ALLOWED_IMAGE_TYPES as OCR_IMAGE_TYPES,
+    ALLOWED_PDF_TYPE as OCR_PDF_TYPE,
+)
 from datetime import date, datetime
 from typing import List, Optional
 from pathlib import Path
 import uuid
 import logging
 from constants.expense_enums import EXPENSE_CATEGORY_KEYS, normalize_expense_category
+from limiter_config import limiter
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +41,70 @@ CATEGORIES = EXPENSE_CATEGORY_KEYS
 
 ALLOWED_CONTENT_TYPES = {"application/pdf", "image/jpeg", "image/png"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
+# OCR pre-fill: smaller cap so a single Anthropic vision call stays fast/cheap.
+OCR_MAX_FILE_SIZE = 8 * 1024 * 1024
+OCR_ALLOWED_CONTENT_TYPES = OCR_IMAGE_TYPES | {OCR_PDF_TYPE}
+
+
+@router.post("/ocr-suggest")
+@limiter.limit("20/minute")
+async def ocr_suggest_receipt(
+    request: Request,
+    receipt: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    """Read a receipt image/PDF and return suggested fields for the expense form.
+
+    Auth-gated by session, scoped to the active trip, rate-limited per IP.
+    Failures degrade silently (HTTP 200 with `suggestions: null` so the form
+    JS can fall back to manual entry without throwing).
+    """
+    # Require an active session + selected trip (mirrors create_expense)
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return JSONResponse({"ok": False, "error": "no_trip"}, status_code=401)
+
+    if not receipt or not receipt.filename:
+        return JSONResponse({"ok": False, "error": "no_file"}, status_code=400)
+
+    content_type = (receipt.content_type or "").lower()
+    if content_type not in OCR_ALLOWED_CONTENT_TYPES:
+        return JSONResponse(
+            {"ok": False, "error": "unsupported_type"}, status_code=415
+        )
+
+    file_bytes = await receipt.read()
+    if not file_bytes:
+        return JSONResponse({"ok": False, "error": "empty_file"}, status_code=400)
+    if len(file_bytes) > OCR_MAX_FILE_SIZE:
+        return JSONResponse(
+            {"ok": False, "error": "file_too_large"}, status_code=413
+        )
+
+    try:
+        suggestions = ocr_extract_receipt(
+            file_bytes=file_bytes,
+            content_type=content_type,
+            category_keys=list(EXPENSE_CATEGORY_KEYS),
+        )
+        return JSONResponse({"ok": True, "suggestions": suggestions})
+    except ReceiptOCRError as exc:
+        logger.warning(f"Receipt OCR failed: {exc}")
+        try:
+            AuditService.log(
+                db=db,
+                request=request,
+                action="OCR_FAILED",
+                entity_type="receipt",
+                details=str(exc)[:500],
+                trip_id=active_trip.id,
+            )
+        except Exception:
+            db.rollback()
+        return JSONResponse({"ok": True, "suggestions": None})
+    except Exception as exc:  # safety net — never break the form
+        logger.exception(f"Unexpected OCR error: {exc}")
+        return JSONResponse({"ok": True, "suggestions": None})
 
 @router.get("", response_class=HTMLResponse)
 async def list_expenses(request: Request, db: Session = Depends(get_db)):
