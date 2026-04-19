@@ -1120,6 +1120,7 @@
   "logbook.day_err_min_row": "At least one row required.",
   "logbook.day_msg_saved": "{n} logbook entries saved.",
   "logbook.photo_msg_added": "{n} photos added.",
+  "logbook.photo_too_many": "Too many photos at once — maximum {max} per upload.",
   "logbook.photo_msg_partial": "{n} of {total} photos uploaded. Skipped:",
   "logbook.photo_msg_none": "No photos uploaded. Skipped:",
   "trips.action_track": "Track",

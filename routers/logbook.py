@@ -34,6 +34,7 @@ templates = create_templates()
 
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/jpg"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
+MAX_PHOTOS_PER_UPLOAD = 10
 
 
 def build_logbook_entry(*, trip_id: int, entry_dt: datetime, **fields) -> LogbookEntry:
@@ -1141,6 +1142,9 @@ async def upload_photo(
 
     files = [f for f in (photo or []) if f and f.filename]
     if not files:
+        return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
+    if len(files) > MAX_PHOTOS_PER_UPLOAD:
+        request.session["error"] = _t(request, "logbook.photo_too_many").replace("{max}", str(MAX_PHOTOS_PER_UPLOAD))
         return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
 
     saved, failed = await _save_photos_for_entry(db, files, entry_id, request, active_trip.id, caption)

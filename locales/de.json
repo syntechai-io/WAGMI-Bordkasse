@@ -1120,6 +1120,7 @@
   "logbook.day_err_min_row": "Mindestens eine Zeile erforderlich.",
   "logbook.day_msg_saved": "{n} Logbuch-Einträge gespeichert.",
   "logbook.photo_msg_added": "{n} Fotos hinzugefügt.",
+  "logbook.photo_too_many": "Zu viele Fotos auf einmal — maximal {max} pro Upload.",
   "logbook.photo_msg_partial": "{n} von {total} Fotos hochgeladen. Übersprungen:",
   "logbook.photo_msg_none": "Keine Fotos hochgeladen. Übersprungen:",
   "trips.action_track": "Track",
