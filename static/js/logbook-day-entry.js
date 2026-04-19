@@ -129,6 +129,21 @@
         });
     }
 
+    function wireRow(row) {
+        const removeBtn = row.querySelector('.remove-row-btn');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function () {
+                if (container.children.length <= 1) {
+                    alert(i18n.minRow);
+                    return;
+                }
+                row.remove();
+                renumber();
+            });
+        }
+        wireReorder(row);
+    }
+
     function addRow(opts) {
         opts = opts || {};
         const clone = tpl.content.cloneNode(true);
@@ -142,19 +157,7 @@
                 t.value = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
             }
         }
-        // Wire remove button
-        const removeBtn = row.querySelector('.remove-row-btn');
-        if (removeBtn) {
-            removeBtn.addEventListener('click', function () {
-                if (container.children.length <= 1) {
-                    alert(i18n.minRow);
-                    return;
-                }
-                row.remove();
-                renumber();
-            });
-        }
-        wireReorder(row);
+        wireRow(row);
         container.appendChild(row);
         renumber();
         return row;
@@ -238,8 +241,20 @@
         });
     }
 
-    // Initial first row
-    addRow({ skipCarry: true });
+    // Wire up server-rendered rows (e.g. after a validation error redisplay).
+    // Only auto-add an initial row when none were rendered server-side.
+    const existingRows = container.querySelectorAll('.day-row');
+    if (existingRows.length === 0) {
+        addRow({ skipCarry: true });
+    } else {
+        existingRows.forEach(wireRow);
+        renumber();
+        // Scroll to first row with an inline error so the user sees it.
+        const firstErr = container.querySelector('.day-row.row-has-error');
+        if (firstErr && firstErr.scrollIntoView) {
+            firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
 
     // Day-photos: count + thumbnail previews
     const dayPhotos = document.getElementById('dayPhotosInput');

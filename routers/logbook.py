@@ -234,6 +234,41 @@ async def daily_logbook_view(request: Request, date: Optional[str] = None, db: S
         "entry_legs": entry_legs
     })
 
+def _render_day_form(
+    request: Request,
+    db: Session,
+    active_trip,
+    *,
+    header=None,
+    submitted_rows=None,
+    row_errors=None,
+    general_errors=None,
+    status_code: int = 200,
+):
+    """Shared renderer for the Day Logbook form. Used by GET and by POST when
+    validation fails so the user keeps everything they typed and sees per-row
+    errors inline."""
+    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.name).all()
+    sea_states = [s.value for s in SeaStateEnum]
+    now = datetime.utcnow()
+    return templates.TemplateResponse(
+        "logbook_day_form.html",
+        {
+            "request": request,
+            "active_trip": active_trip,
+            "crew_members": crew_members,
+            "sea_states": sea_states,
+            "default_date": now.strftime("%Y-%m-%d"),
+            "default_time": now.strftime("%H:%M"),
+            "header": header or {},
+            "submitted_rows": submitted_rows or [],
+            "row_errors": row_errors or [],
+            "general_errors": general_errors or [],
+        },
+        status_code=status_code,
+    )
+
+
 @router.get("/day-new", response_class=HTMLResponse)
 async def new_day_form(request: Request, db: Session = Depends(get_db)):
     """Render multi-row Day Logbook form."""
@@ -246,17 +281,7 @@ async def new_day_form(request: Request, db: Session = Depends(get_db)):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/logbook", status_code=303)
 
-    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.name).all()
-    sea_states = [s.value for s in SeaStateEnum]
-    now = datetime.utcnow()
-    return templates.TemplateResponse("logbook_day_form.html", {
-        "request": request,
-        "active_trip": active_trip,
-        "crew_members": crew_members,
-        "sea_states": sea_states,
-        "default_date": now.strftime("%Y-%m-%d"),
-        "default_time": now.strftime("%H:%M"),
-    })
+    return _render_day_form(request, db, active_trip)
 
 
 @router.post("/day-new")
@@ -275,23 +300,7 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse(url="/logbook", status_code=303)
 
     form = await request.form()
-    entry_date_str = (form.get("entry_date") or "").strip()
-    if not entry_date_str:
-        request.session["error"] = _t(request, "logbook.day_err_date_required")
-        return RedirectResponse(url="/logbook/day-new", status_code=303)
 
-    try:
-        base_date = datetime.strptime(entry_date_str, "%Y-%m-%d").date()
-    except ValueError:
-        request.session["error"] = _t(request, "logbook.day_err_date_invalid")
-        return RedirectResponse(url="/logbook/day-new", status_code=303)
-
-    # Header-level fields applied to first/last row
-    header_departure = (form.get("departure") or "").strip() or None
-    header_destination = (form.get("destination") or "").strip() or None
-    header_notes = (form.get("summary_notes") or "").strip() or None
-
-    # Repeating row fields — use getlist
     row_keys = [
         "row_time", "row_maneuver_type", "row_latitude", "row_longitude",
         "row_wind_direction", "row_wind_strength", "row_sea_state",
@@ -301,64 +310,114 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
     ]
     rows_data = {k: form.getlist(k) for k in row_keys}
     row_count = len(rows_data["row_time"])
-    if row_count == 0:
-        request.session["error"] = _t(request, "logbook.day_err_row_required")
-        return RedirectResponse(url="/logbook/day-new", status_code=303)
 
-    # Build entry list, validate, carry-forward position from previous row
+    # Snapshot of every submitted row (raw strings) so we can re-render the form
+    # with the user's data intact when validation fails.
+    submitted_rows = [
+        {k: ((rows_data[k][i] if i < len(rows_data[k]) else "") or "") for k in row_keys}
+        for i in range(row_count)
+    ]
+
+    entry_date_str = (form.get("entry_date") or "").strip()
+    header_departure_raw = (form.get("departure") or "").strip()
+    header_destination_raw = (form.get("destination") or "").strip()
+    header_notes_raw = (form.get("summary_notes") or "").strip()
+    header = {
+        "entry_date": entry_date_str,
+        "departure": header_departure_raw,
+        "destination": header_destination_raw,
+        "summary_notes": header_notes_raw,
+    }
+
+    general_errors = []
+    row_errors = [{} for _ in range(row_count)]
+
+    base_date = None
+    if not entry_date_str:
+        general_errors.append(_t(request, "logbook.day_err_date_required"))
+    else:
+        try:
+            base_date = datetime.strptime(entry_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            general_errors.append(_t(request, "logbook.day_err_date_invalid"))
+
+    header_departure = header_departure_raw or None
+    header_destination = header_destination_raw or None
+    header_notes = header_notes_raw or None
+
+    # Build entry list, collecting per-row/per-field errors instead of bailing.
     parsed_rows = []
     last_lat = None
     last_lon = None
     last_time = None
+
+    def _row_get(key, i, cast=None):
+        v = (submitted_rows[i].get(key, "") or "").strip()
+        if not v:
+            return None
+        if cast is None:
+            return v
+        try:
+            return cast(v)
+        except (ValueError, TypeError):
+            return None
+
     for i in range(row_count):
-        time_str = (rows_data["row_time"][i] or "").strip()
+        row = submitted_rows[i]
+        time_str = (row.get("row_time", "") or "").strip()
         if not time_str:
-            # Skip empty rows entirely
+            # Empty row — skipped silently like before.
             continue
-        try:
-            hh, mm = time_str.split(":")
-            entry_dt = datetime.combine(base_date, datetime.min.time()).replace(
-                hour=int(hh), minute=int(mm)
-            )
-        except (ValueError, IndexError):
-            request.session["error"] = f"Ungültige Uhrzeit in Zeile {i+1}: '{time_str}'"
-            return RedirectResponse(url="/logbook/day-new", status_code=303)
 
-        # Time monotonic validation
-        if last_time and entry_dt < last_time:
-            request.session["error"] = f"Zeit in Zeile {i+1} ({time_str}) liegt vor der vorherigen Zeile."
-            return RedirectResponse(url="/logbook/day-new", status_code=303)
-        last_time = entry_dt
-
-        def _get(key, idx, cast=None, strict=False, row_label=None):
-            lst = rows_data.get(key, [])
-            if idx >= len(lst):
-                return None
-            v = (lst[idx] or "").strip()
-            if not v:
-                return None
-            if cast is None:
-                return v
+        # Need a valid base_date to build a datetime; skip parsing rows when the
+        # date is bad but still let row-level errors collect for visibility.
+        entry_dt = None
+        if base_date is not None:
             try:
-                return cast(v)
-            except (ValueError, TypeError):
-                if strict:
-                    raise ValueError(f"Ungültiger Wert in Zeile {row_label}: '{v}'")
-                return None
+                hh, mm = time_str.split(":")
+                entry_dt = datetime.combine(base_date, datetime.min.time()).replace(
+                    hour=int(hh), minute=int(mm)
+                )
+            except (ValueError, IndexError):
+                row_errors[i]["row_time"] = f"Ungültige Uhrzeit: '{time_str}'"
 
-        try:
-            lat = _get("row_latitude", i, float, strict=True, row_label=f"{i+1} Latitude")
-            lon = _get("row_longitude", i, float, strict=True, row_label=f"{i+1} Longitude")
-        except ValueError as ve:
-            request.session["error"] = str(ve)
-            return RedirectResponse(url="/logbook/day-new", status_code=303)
+        if entry_dt is not None:
+            if last_time and entry_dt < last_time:
+                row_errors[i]["row_time"] = (
+                    f"Zeit ({time_str}) liegt vor der vorherigen Zeile."
+                )
+            else:
+                last_time = entry_dt
 
-        if lat is not None and not (-90.0 <= lat <= 90.0):
-            request.session["error"] = f"Zeile {i+1}: Latitude {lat} liegt außerhalb des gültigen Bereichs (-90..90)."
-            return RedirectResponse(url="/logbook/day-new", status_code=303)
-        if lon is not None and not (-180.0 <= lon <= 180.0):
-            request.session["error"] = f"Zeile {i+1}: Longitude {lon} liegt außerhalb des gültigen Bereichs (-180..180)."
-            return RedirectResponse(url="/logbook/day-new", status_code=303)
+        # Latitude
+        lat = None
+        lat_raw = (row.get("row_latitude", "") or "").strip()
+        if lat_raw:
+            try:
+                lat = float(lat_raw)
+            except ValueError:
+                row_errors[i]["row_latitude"] = f"Ungültiger Wert: '{lat_raw}'"
+                lat = None
+            if lat is not None and not (-90.0 <= lat <= 90.0):
+                row_errors[i]["row_latitude"] = (
+                    f"Latitude {lat} liegt außerhalb des gültigen Bereichs (-90..90)."
+                )
+                lat = None
+
+        # Longitude
+        lon = None
+        lon_raw = (row.get("row_longitude", "") or "").strip()
+        if lon_raw:
+            try:
+                lon = float(lon_raw)
+            except ValueError:
+                row_errors[i]["row_longitude"] = f"Ungültiger Wert: '{lon_raw}'"
+                lon = None
+            if lon is not None and not (-180.0 <= lon <= 180.0):
+                row_errors[i]["row_longitude"] = (
+                    f"Longitude {lon} liegt außerhalb des gültigen Bereichs (-180..180)."
+                )
+                lon = None
 
         # Carry-forward GPS position if not provided
         if lat is None:
@@ -370,41 +429,60 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
         else:
             last_lon = lon
 
-        engine_on_raw = _get("row_engine_on", i)
+        engine_on_raw = _row_get("row_engine_on", i)
         engine_on_val = None
         if engine_on_raw is not None:
             engine_on_val = engine_on_raw.lower() in ("true", "1", "yes", "on")
 
-        sea_state_raw = _get("row_sea_state", i)
+        sea_state_raw = _row_get("row_sea_state", i)
         sea_state_val = None
         if sea_state_raw:
             try:
                 sea_state_val = SeaStateEnum(sea_state_raw)
             except ValueError:
-                request.session["error"] = f"Zeile {i+1}: Ungültiger Seegang '{sea_state_raw}'."
-                return RedirectResponse(url="/logbook/day-new", status_code=303)
+                row_errors[i]["row_sea_state"] = f"Ungültiger Seegang '{sea_state_raw}'."
 
         parsed_rows.append({
+            "row_index": i,
             "entry_dt": entry_dt,
-            "maneuver_type": _get("row_maneuver_type", i) or "full",
+            "maneuver_type": _row_get("row_maneuver_type", i) or "full",
             "latitude": lat,
             "longitude": lon,
-            "wind_direction": _get("row_wind_direction", i),
-            "wind_strength": normalize_wind(_get("row_wind_strength", i)),
+            "wind_direction": _row_get("row_wind_direction", i),
+            "wind_strength": normalize_wind(_row_get("row_wind_strength", i)),
             "sea_state": sea_state_val,
-            "visibility": normalize_visibility(_get("row_visibility", i)),
-            "temperature": _get("row_temperature", i, float),
-            "sail_plan": normalize_sail_plan(_get("row_sail_plan", i)),
+            "visibility": normalize_visibility(_row_get("row_visibility", i)),
+            "temperature": _row_get("row_temperature", i, float),
+            "sail_plan": normalize_sail_plan(_row_get("row_sail_plan", i)),
             "engine_on": engine_on_val,
-            "eng_hours_total": _get("row_eng_hours_total", i, float),
-            "event_category": normalize_event_category(_get("row_event_category", i)) if _get("row_event_category", i) else None,
-            "event_details": _get("row_event_details", i),
-            "notes": _get("row_notes", i),
+            "eng_hours_total": _row_get("row_eng_hours_total", i, float),
+            "event_category": normalize_event_category(_row_get("row_event_category", i)) if _row_get("row_event_category", i) else None,
+            "event_details": _row_get("row_event_details", i),
+            "notes": _row_get("row_notes", i),
         })
 
-    if not parsed_rows:
-        request.session["error"] = _t(request, "logbook.day_err_row_required")
-        return RedirectResponse(url="/logbook/day-new", status_code=303)
+    has_row_errors = any(bool(re_) for re_ in row_errors)
+
+    # Need at least one non-empty row to save; only flag this when there are no
+    # other validation errors (otherwise users see a confusing extra message).
+    if not parsed_rows and not has_row_errors and not general_errors:
+        general_errors.append(_t(request, "logbook.day_err_row_required"))
+
+    if general_errors or has_row_errors:
+        return _render_day_form(
+            request,
+            db,
+            active_trip,
+            header=header,
+            submitted_rows=submitted_rows,
+            row_errors=row_errors,
+            general_errors=general_errors,
+            status_code=400,
+        )
+
+    # All validations passed — drop synthetic helper key before persisting.
+    for r in parsed_rows:
+        r.pop("row_index", None)
 
     created_ids = []
     try:
@@ -437,8 +515,16 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
         db.commit()
     except Exception as e:
         db.rollback()
-        request.session["error"] = f"Fehler beim Speichern: {str(e)}"
-        return RedirectResponse(url="/logbook/day-new", status_code=303)
+        return _render_day_form(
+            request,
+            db,
+            active_trip,
+            header=header,
+            submitted_rows=submitted_rows,
+            row_errors=row_errors,
+            general_errors=[f"Fehler beim Speichern: {str(e)}"],
+            status_code=500,
+        )
 
     # Optional multi-photo upload attached to the first created entry
     photo_files = (await request.form()).getlist("day_photos")
