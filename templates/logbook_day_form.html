@@ -13,7 +13,7 @@
         <div class="p-3 rounded-lg" style="background: var(--coral-soft); color: var(--coral);">{{ request.session.pop('error') }}</div>
     {% endif %}
 
-    <form action="/logbook/day-new" method="post" id="dayLogbookForm" class="space-y-6">
+    <form action="/logbook/day-new" method="post" id="dayLogbookForm" class="space-y-6" enctype="multipart/form-data">
         {{ csrf_input | safe }}
 
         {# Header card #}
@@ -63,6 +63,15 @@
             </div>
 
             <p class="text-xs ui-muted">{{ t('logbook.day_logbook_carry_forward_hint') }}</p>
+        </div>
+
+        {# Multi-photo upload — attached to first entry of the day #}
+        <div class="bg-white porthole-card p-4 space-y-3">
+            <h2 class="font-bold maritime-header">📷 {{ t('logbook.add_photo') }} ({{ t('logbook.photos_multi_hint') }})</h2>
+            <p class="text-xs ui-muted">{{ t('logbook.day_photos_hint') }}</p>
+            <input type="file" name="day_photos" multiple accept="image/jpeg,image/png,image/jpg"
+                   class="block w-full text-sm" id="dayPhotosInput">
+            <p id="dayPhotosCount" class="text-xs ui-muted"></p>
         </div>
 
         {# Sticky save bar #}

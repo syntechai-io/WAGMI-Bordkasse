@@ -280,6 +280,12 @@ async def finalize_trip_form(
         LogbookEntry.trip_id == trip.id
     ).order_by(LogbookEntry.entry_date.desc()).first()
 
+    # Sail hours = total active hours between first and last entry minus motor hours
+    sail_hours = 0.0
+    if first_entry and last_entry and last_entry.entry_date and first_entry.entry_date:
+        total_active = (last_entry.entry_date - first_entry.entry_date).total_seconds() / 3600.0
+        sail_hours = max(total_active - float(motor_hours), 0.0)
+
     summary = {
         "entry_count": entry_count,
         "photo_count": photo_count,
@@ -287,6 +293,7 @@ async def finalize_trip_form(
         "expense_total": float(expense_total),
         "total_nm": round(float(total_nm), 1),
         "motor_hours": round(float(motor_hours), 1),
+        "sail_hours": round(float(sail_hours), 1),
         "first_date": first_entry.entry_date if first_entry else None,
         "last_date": last_entry.entry_date if last_entry else None,
     }

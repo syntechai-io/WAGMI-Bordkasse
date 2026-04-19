@@ -1091,5 +1091,7 @@
   "trips.finalize_warning_2": "Only admin and trip admin can reopen the trip.",
   "trips.finalize_warning_3": "All existing data remains fully preserved and visible.",
   "trips.finalize_confirm_label": "I confirm that all entries are complete and the trip can be finalized.",
-  "trips.finalize_submit": "Finalize trip now"
+  "trips.finalize_submit": "Finalize trip now",
+  "trips.finalize_sail_hours": "Sail hours",
+  "logbook.day_photos_hint": "Optional: photos will be attached to the first entry of the day."
 }

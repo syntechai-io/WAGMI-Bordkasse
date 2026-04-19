@@ -1091,5 +1091,7 @@
   "trips.finalize_warning_2": "Nur Admin und Törn-Admin können den Törn wieder öffnen.",
   "trips.finalize_warning_3": "Bestehende Daten bleiben vollständig erhalten und sichtbar.",
   "trips.finalize_confirm_label": "Ich bestätige, dass alle Einträge vollständig sind und der Törn abgeschlossen werden kann.",
-  "trips.finalize_submit": "Törn jetzt abschließen"
+  "trips.finalize_submit": "Törn jetzt abschließen",
+  "trips.finalize_sail_hours": "Segelstunden",
+  "logbook.day_photos_hint": "Optional: Fotos werden dem ersten Eintrag des Tages hinzugefügt."
 }

@@ -26,7 +26,8 @@
         const carryFields = [
             'row_latitude', 'row_longitude', 'row_wind_direction',
             'row_wind_strength', 'row_sea_state', 'row_visibility',
-            'row_temperature', 'row_sail_plan', 'row_eng_hours_total'
+            'row_temperature', 'row_sail_plan', 'row_engine_on',
+            'row_eng_hours_total'
         ];
         carryFields.forEach(name => {
             const prevField = prev.querySelector('[name="' + name + '"]');
@@ -155,4 +156,15 @@
 
     // Initial first row
     addRow({ skipCarry: true });
+
+    // Day-photos count
+    const dayPhotos = document.getElementById('dayPhotosInput');
+    const dayPhotosCount = document.getElementById('dayPhotosCount');
+    if (dayPhotos && dayPhotosCount) {
+        dayPhotos.addEventListener('change', function() {
+            dayPhotosCount.textContent = dayPhotos.files.length
+                ? dayPhotos.files.length + ' ausgewählt'
+                : '';
+        });
+    }
 })();

@@ -26,6 +26,60 @@ templates = create_templates()
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/jpg"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
+
+def build_logbook_entry(*, trip_id: int, entry_dt: datetime, **fields) -> LogbookEntry:
+    """Shared helper used by /new and /day-new to construct a LogbookEntry
+    with consistent normalization and the entry_date_utc compliance field.
+
+    Pass already-validated values; this only applies normalize_* functions
+    and ensures entry_date / entry_date_utc are set together.
+    """
+    sea_state_val = fields.get("sea_state")
+    if sea_state_val is not None and not isinstance(sea_state_val, SeaStateEnum):
+        sea_state_val = SeaStateEnum(sea_state_val)
+    return LogbookEntry(
+        trip_id=trip_id,
+        client_temp_id=fields.get("client_temp_id"),
+        watch_leader_id=fields.get("watch_leader_id"),
+        entry_date=entry_dt,
+        entry_date_utc=entry_dt,
+        latitude=fields.get("latitude"),
+        longitude=fields.get("longitude"),
+        wind_direction=fields.get("wind_direction"),
+        wind_strength=normalize_wind(fields.get("wind_strength")),
+        sea_state=sea_state_val,
+        visibility=normalize_visibility(fields.get("visibility")),
+        temperature=fields.get("temperature"),
+        sail_plan=normalize_sail_plan(fields.get("sail_plan")),
+        engine_hours=fields.get("engine_hours"),
+        departure=fields.get("departure"),
+        destination=fields.get("destination"),
+        notes=fields.get("notes"),
+        safety_checks_completed=fields.get("safety_checks"),
+        cog_deg=fields.get("cog_deg"),
+        sog_kn=fields.get("sog_kn"),
+        log_kn=fields.get("log_kn"),
+        dist_day_nm=fields.get("dist_day_nm"),
+        pressure_hpa=fields.get("pressure_hpa"),
+        pressure_trend=fields.get("pressure_trend"),
+        weather_source=fields.get("weather_source"),
+        engine_on=fields.get("engine_on"),
+        engine_on_time=fields.get("engine_on_time"),
+        engine_off_time=fields.get("engine_off_time"),
+        eng_hours_total=fields.get("eng_hours_total"),
+        fuel_level_l=fields.get("fuel_level_l"),
+        main_furl_pct=fields.get("main_furl_pct"),
+        headsail=fields.get("headsail"),
+        sail_action=fields.get("sail_action"),
+        main_reef_level=fields.get("main_reef_level"),
+        headsail_type=fields.get("headsail_type") or None,
+        headsail_furl_percent=fields.get("headsail_furl_percent"),
+        extra_sail=fields.get("extra_sail") or None,
+        event_category=normalize_event_category(fields.get("event_category")) if fields.get("event_category") else None,
+        event_details=fields.get("event_details"),
+        maneuver_type=fields.get("maneuver_type") or "full",
+    )
+
 # Helper functions to convert empty strings to None for optional fields
 def optional_float(value: str = Form(None)) -> Optional[float]:
     """Convert empty string to None, otherwise parse as float"""
@@ -326,10 +380,9 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
         for idx, r in enumerate(parsed_rows):
             is_first = idx == 0
             is_last = idx == len(parsed_rows) - 1
-            entry = LogbookEntry(
+            entry = build_logbook_entry(
                 trip_id=active_trip.id,
-                entry_date=r["entry_dt"],
-                entry_date_utc=r["entry_dt"],
+                entry_dt=r["entry_dt"],
                 latitude=r["latitude"],
                 longitude=r["longitude"],
                 wind_direction=r["wind_direction"],
@@ -356,6 +409,23 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
         request.session["error"] = f"Fehler beim Speichern: {str(e)}"
         return RedirectResponse(url="/logbook/day-new", status_code=303)
 
+    # Optional multi-photo upload attached to the first created entry
+    photo_files = (await request.form()).getlist("day_photos")
+    valid_photos = [f for f in photo_files if hasattr(f, "filename") and f.filename]
+    photo_summary = None
+    if valid_photos and created_ids:
+        first_entry_id = created_ids[0]
+        saved, failed = await _save_photos_for_entry(db, valid_photos, first_entry_id, request, active_trip.id)
+        if failed:
+            photo_summary = f"{len(saved)} von {len(valid_photos)} Fotos hochgeladen. Übersprungen: " + ", ".join(failed)
+        else:
+            photo_summary = f"{len(saved)} Fotos hinzugefügt."
+
+    msg = f"{len(created_ids)} Logbuch-Einträge gespeichert."
+    if photo_summary:
+        msg += " " + photo_summary
+    request.session["success"] = msg
+
     # Audit log per entry
     for eid in created_ids:
         AuditService.log(
@@ -368,7 +438,6 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
             details=f"Created via day-logbook batch ({len(created_ids)} entries) for {entry_date_str}"
         )
 
-    request.session["success"] = f"{len(created_ids)} Logbuch-Einträge gespeichert."
     return RedirectResponse(url=f"/logbook/daily?date={entry_date_str}", status_code=303)
 
 
@@ -951,6 +1020,68 @@ async def create_addendum(
         request.session["error"] = f"Fehler beim Erstellen des Nachtrags: {str(e)}"
         return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
 
+async def _save_photos_for_entry(db: Session, files: list, entry_id: int, request: Request, trip_id: int, caption: Optional[str] = None):
+    """Save a batch of photos with per-file success/failure handling.
+
+    Valid files are committed; invalid ones are skipped and reported.
+    Returns (saved_filenames, failed_descriptions).
+    """
+    saved = []
+    failed = []
+    saved_paths = []
+    saved_records = []
+    for f in files:
+        try:
+            if f.content_type not in ALLOWED_CONTENT_TYPES:
+                failed.append(f"{f.filename} (Format)")
+                continue
+            content = await f.read()
+            if len(content) > MAX_FILE_SIZE:
+                failed.append(f"{f.filename} (>10MB)")
+                continue
+            ext = ".jpg" if "jpeg" in (f.content_type or "") else ".png"
+            filename = str(uuid.uuid4()) + ext
+            filepath = Path("uploads") / filename
+            filepath.write_bytes(content)
+            saved_paths.append(filepath)
+            rec = LogbookPhoto(
+                entry_id=entry_id,
+                stored_filename=filename,
+                original_name=f.filename or "unknown",
+                caption=caption,
+                content_type=f.content_type,
+                size_bytes=len(content),
+            )
+            db.add(rec)
+            db.flush()
+            saved_records.append(rec)
+            saved.append(f.filename)
+        except Exception as e:
+            failed.append(f"{getattr(f, 'filename', '?')} ({type(e).__name__})")
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        for p in saved_paths:
+            try:
+                if p.exists():
+                    p.unlink()
+            except Exception:
+                pass
+        raise
+    for rec in saved_records:
+        AuditService.log(
+            db=db,
+            request=request,
+            trip_id=trip_id,
+            action="upload",
+            entity_type="logbook_photo",
+            entity_id=rec.id,
+            details=f"Uploaded photo to logbook entry {entry_id} ({len(saved_records)} saved, {len(failed)} skipped)"
+        )
+    return saved, failed
+
+
 @router.post("/{entry_id}/photos/upload")
 async def upload_photo(
     request: Request,
@@ -959,7 +1090,7 @@ async def upload_photo(
     caption: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
-    """Upload one or more photos to a logbook entry. Each file is validated independently."""
+    """Upload one or more photos. Per-file results surfaced via session message."""
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
@@ -977,63 +1108,13 @@ async def upload_photo(
     if not files:
         return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
 
-    saved_records = []
-    saved_paths = []
-    try:
-        for f in files:
-            if f.content_type not in ALLOWED_CONTENT_TYPES:
-                raise HTTPException(status_code=415, detail=f"Only JPEG and PNG images are allowed (got {f.content_type})")
-            content = await f.read()
-            if len(content) > MAX_FILE_SIZE:
-                raise HTTPException(status_code=413, detail=f"File '{f.filename}' too large (max 10MB)")
-
-            ext = ".jpg" if "jpeg" in (f.content_type or "") else ".png"
-            filename = str(uuid.uuid4()) + ext
-            filepath = Path("uploads") / filename
-            filepath.write_bytes(content)
-            saved_paths.append(filepath)
-
-            photo_record = LogbookPhoto(
-                entry_id=entry_id,
-                stored_filename=filename,
-                original_name=f.filename or "unknown",
-                caption=caption,
-                content_type=f.content_type,
-                size_bytes=len(content),
-            )
-            db.add(photo_record)
-            db.flush()
-            saved_records.append(photo_record)
-        db.commit()
-    except HTTPException:
-        db.rollback()
-        for p in saved_paths:
-            try:
-                if p.exists():
-                    p.unlink()
-            except Exception:
-                pass
-        raise
-    except Exception as e:
-        db.rollback()
-        for p in saved_paths:
-            try:
-                if p.exists():
-                    p.unlink()
-            except Exception:
-                pass
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
-
-    for rec in saved_records:
-        AuditService.log(
-            db=db,
-            request=request,
-            trip_id=active_trip.id,
-            action="upload",
-            entity_type="logbook_photo",
-            entity_id=rec.id,
-            details=f"Uploaded photo to logbook entry {entry_id} ({len(saved_records)} in batch)"
-        )
+    saved, failed = await _save_photos_for_entry(db, files, entry_id, request, active_trip.id, caption)
+    if saved and not failed:
+        request.session["success"] = f"{len(saved)} Fotos hinzugefügt."
+    elif saved and failed:
+        request.session["success"] = f"{len(saved)} von {len(files)} Fotos hochgeladen. Übersprungen: " + ", ".join(failed)
+    elif failed and not saved:
+        request.session["error"] = "Keine Fotos hochgeladen. Übersprungen: " + ", ".join(failed)
 
     return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
 
