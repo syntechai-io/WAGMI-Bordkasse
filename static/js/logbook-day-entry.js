@@ -57,6 +57,74 @@
         }
     }
 
+    function moveRow(row, delta) {
+        const rows = Array.from(container.querySelectorAll('.day-row'));
+        const idx = rows.indexOf(row);
+        if (idx < 0) return;
+        const target = idx + delta;
+        if (target < 0 || target >= rows.length) return;
+        if (delta < 0) {
+            container.insertBefore(row, rows[target]);
+        } else {
+            container.insertBefore(row, rows[target].nextSibling);
+        }
+        renumber();
+    }
+
+    function wireReorder(row) {
+        const handle = row.querySelector('.drag-handle');
+        const upBtn = row.querySelector('.move-up-btn');
+        const downBtn = row.querySelector('.move-down-btn');
+        if (upBtn) upBtn.addEventListener('click', function () { moveRow(row, -1); });
+        if (downBtn) downBtn.addEventListener('click', function () { moveRow(row, 1); });
+        if (!handle) return;
+
+        handle.addEventListener('pointerdown', function (ev) {
+            ev.preventDefault();
+            try { handle.setPointerCapture(ev.pointerId); } catch (e) {}
+            row.classList.add('dragging');
+            row.style.opacity = '0.6';
+            row.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+            handle.style.cursor = 'grabbing';
+
+            function onMove(e) {
+                const y = e.clientY;
+                const others = Array.from(container.querySelectorAll('.day-row')).filter(r => r !== row);
+                let inserted = false;
+                for (const other of others) {
+                    const rect = other.getBoundingClientRect();
+                    const mid = rect.top + rect.height / 2;
+                    if (y < mid) {
+                        if (other.previousElementSibling !== row) {
+                            container.insertBefore(row, other);
+                        }
+                        inserted = true;
+                        break;
+                    }
+                }
+                if (!inserted && others.length) {
+                    const last = others[others.length - 1];
+                    if (last.nextElementSibling !== row) {
+                        container.appendChild(row);
+                    }
+                }
+            }
+            function onUp() {
+                row.classList.remove('dragging');
+                row.style.opacity = '';
+                row.style.boxShadow = '';
+                handle.style.cursor = 'grab';
+                document.removeEventListener('pointermove', onMove);
+                document.removeEventListener('pointerup', onUp);
+                document.removeEventListener('pointercancel', onUp);
+                renumber();
+            }
+            document.addEventListener('pointermove', onMove);
+            document.addEventListener('pointerup', onUp);
+            document.addEventListener('pointercancel', onUp);
+        });
+    }
+
     function addRow(opts) {
         opts = opts || {};
         const clone = tpl.content.cloneNode(true);
@@ -82,6 +150,7 @@
                 renumber();
             });
         }
+        wireReorder(row);
         container.appendChild(row);
         renumber();
         return row;

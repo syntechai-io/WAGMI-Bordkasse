@@ -92,8 +92,22 @@
 {# Row template (cloned by JS) #}
 <template id="dayRowTemplate">
     <div class="day-row p-3 rounded-lg border" style="border-color: var(--border); background: var(--surface);">
-        <div class="flex items-center justify-between mb-2">
-            <span class="font-semibold text-sm">⏱️ <span class="row-index">1</span></span>
+        <div class="flex items-center justify-between mb-2 gap-2">
+            <div class="flex items-center gap-2">
+                <button type="button" class="drag-handle touch-action select-none px-2 py-1 rounded cursor-grab"
+                        title="{{ t('logbook.day_logbook_drag_handle') }}"
+                        aria-label="{{ t('logbook.day_logbook_drag_handle') }}"
+                        style="background: var(--surface-2); color: var(--ink); touch-action: none;">⋮⋮</button>
+                <button type="button" class="move-up-btn px-2 py-1 rounded text-sm"
+                        title="{{ t('logbook.day_logbook_move_up') }}"
+                        aria-label="{{ t('logbook.day_logbook_move_up') }}"
+                        style="background: var(--surface-2);">▲</button>
+                <button type="button" class="move-down-btn px-2 py-1 rounded text-sm"
+                        title="{{ t('logbook.day_logbook_move_down') }}"
+                        aria-label="{{ t('logbook.day_logbook_move_down') }}"
+                        style="background: var(--surface-2);">▼</button>
+                <span class="font-semibold text-sm">⏱️ <span class="row-index">1</span></span>
+            </div>
             <button type="button" class="remove-row-btn text-sm hover:underline" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-6 gap-2">
@@ -197,5 +211,5 @@
     </div>
 </template>
 
-<script src="/static/js/logbook-day-entry.js?v=1"></script>
+<script src="/static/js/logbook-day-entry.js?v=2"></script>
 {% endblock %}
