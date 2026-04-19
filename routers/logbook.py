@@ -162,11 +162,22 @@ async def daily_logbook_view(request: Request, date: Optional[str] = None, db: S
         LogbookEntry.entry_date >= start_datetime,
         LogbookEntry.entry_date <= end_datetime
     ).order_by(LogbookEntry.entry_date.asc()).all()
-    
+
+    # Compute haversine leg distance per entry. Use the trip-wide leg map so the
+    # first leg of the day is measured from the previous day's last positioned
+    # entry (matching the trip Track view).
+    from services.track import compute_entry_legs
+    trip_leg_map = compute_entry_legs(db, active_trip.id)
+    entry_legs = {e.id: trip_leg_map.get(e.id) for e in entries if not e.is_superseded}
+    auto_total = round(sum(v for v in entry_legs.values() if v is not None), 2) or None
+
     # Calculate summary stats
+    manual_distance = sum(e.dist_day_nm for e in entries if e.dist_day_nm)
     summary = {
         "total_entries": len(entries),
-        "total_distance": sum(e.dist_day_nm for e in entries if e.dist_day_nm),
+        "total_distance": manual_distance if manual_distance else auto_total,
+        "auto_distance": auto_total,
+        "manual_distance": manual_distance if manual_distance else None,
         "total_engine_hours": None,
         "route": None
     }
@@ -209,7 +220,8 @@ async def daily_logbook_view(request: Request, date: Optional[str] = None, db: S
         "selected_date_formatted": selected_date_formatted,
         "prev_date": prev_date,
         "next_date": next_date,
-        "summary": summary
+        "summary": summary,
+        "entry_legs": entry_legs
     })
 
 @router.get("/day-new", response_class=HTMLResponse)

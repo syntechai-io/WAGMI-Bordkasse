@@ -1115,5 +1115,21 @@
   "logbook.day_msg_saved": "{n} logbook entries saved.",
   "logbook.photo_msg_added": "{n} photos added.",
   "logbook.photo_msg_partial": "{n} of {total} photos uploaded. Skipped:",
-  "logbook.photo_msg_none": "No photos uploaded. Skipped:"
+  "logbook.photo_msg_none": "No photos uploaded. Skipped:",
+  "trips.action_track": "Track",
+  "track.title": "Trip Map & Distances",
+  "track.total_distance": "Total Distance",
+  "track.entries": "Entries",
+  "track.positions": "With Position",
+  "track.no_positions": "No positions recorded",
+  "track.no_positions_desc": "Once logbook entries with GPS positions are recorded, the route will appear on the map here.",
+  "track.daily_breakdown": "Daily Legs",
+  "track.day_distance": "Distance",
+  "track.total": "Total",
+  "track.source_manual": "manual",
+  "track.source_manual_desc": "Distance taken from the 'Distance Today' logbook field.",
+  "track.source_auto": "auto",
+  "track.source_auto_desc": "Distance computed automatically from GPS positions (haversine).",
+  "track.leg": "Leg",
+  "track.leg_hint": "Distance since the previous entry (haversine)."
 }

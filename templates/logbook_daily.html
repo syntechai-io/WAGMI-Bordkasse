@@ -135,6 +135,9 @@
                         {% if entry.sog_kn %}
                         <div><span class="font-medium">SOG:</span> {{ "%.1f"|format(entry.sog_kn) }} kn</div>
                         {% endif %}
+                        {% if entry_legs and entry_legs.get(entry.id) is not none %}
+                        <div title="{{ t('track.leg_hint') }}"><span class="font-medium">{{ t('track.leg') }}:</span> {{ "%.2f"|format(entry_legs.get(entry.id)) }} nm</div>
+                        {% endif %}
                         {% if entry.wind_direction %}
                         <div><span class="font-medium">{{ t('logbook.wind') }}:</span> {{ entry.wind_direction }}</div>
                         {% endif %}

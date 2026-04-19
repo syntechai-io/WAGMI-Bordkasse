@@ -8,6 +8,11 @@
             <a href="/logbook/day-new" class="px-4 py-2 rounded-lg transition touch-action font-semibold text-white" style="background: var(--success);">
                 📅 {{ t('logbook.day_logbook_title') }}
             </a>
+            {% if active_trip %}
+            <a href="/trips/{{ active_trip.id }}/track" class="px-4 py-2 rounded-lg transition touch-action font-semibold text-white" style="background: var(--accent);">
+                🗺️ {{ t('track.title') }}
+            </a>
+            {% endif %}
             <a href="/logbook/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
                 ➕ {{ t('logbook.new_entry') }}
             </a>

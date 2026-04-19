@@ -1115,5 +1115,21 @@
   "logbook.day_msg_saved": "{n} Logbuch-Einträge gespeichert.",
   "logbook.photo_msg_added": "{n} Fotos hinzugefügt.",
   "logbook.photo_msg_partial": "{n} von {total} Fotos hochgeladen. Übersprungen:",
-  "logbook.photo_msg_none": "Keine Fotos hochgeladen. Übersprungen:"
+  "logbook.photo_msg_none": "Keine Fotos hochgeladen. Übersprungen:",
+  "trips.action_track": "Track",
+  "track.title": "Törn-Karte & Distanzen",
+  "track.total_distance": "Gesamtstrecke",
+  "track.entries": "Einträge",
+  "track.positions": "Mit Position",
+  "track.no_positions": "Keine Positionen aufgezeichnet",
+  "track.no_positions_desc": "Sobald Logbuch-Einträge mit GPS-Position erstellt werden, erscheint hier die Route auf der Karte.",
+  "track.daily_breakdown": "Tagesetappen",
+  "track.day_distance": "Distanz",
+  "track.total": "Gesamt",
+  "track.source_manual": "manuell",
+  "track.source_manual_desc": "Distanz aus dem Feld 'Distance Today' im Logbuch.",
+  "track.source_auto": "auto",
+  "track.source_auto_desc": "Distanz automatisch aus den GPS-Positionen berechnet (Haversine).",
+  "track.leg": "Etappe",
+  "track.leg_hint": "Distanz seit dem vorherigen Eintrag (Haversine)."
 }

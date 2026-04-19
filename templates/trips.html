@@ -123,6 +123,7 @@
                                 {{ csrf_input | safe }}
                                 <button type="submit" class="hover:underline touch-action" style="color: var(--accent);">👁️ {{ t('trips.action_view') }}</button>
                             </form>
+                            <a href="/trips/{{ trip.id }}/track" class="hover:underline touch-action inline" style="color: var(--accent);" title="{{ t('track.title') }}">🗺️ {{ t('trips.action_track') }}</a>
                             
                             {% if request.session.get('role') == 'admin' or is_saas_owner %}
                                 {% if trip.is_closed == 0 %}

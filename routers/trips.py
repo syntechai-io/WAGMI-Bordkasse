@@ -7,6 +7,7 @@ from models import Trip, TripStatus, CrewMember, UserPreferences, TripMember, Tr
 from services.trip import TripService
 from services.quick_start import TripQuickStartService
 from services.wagmi_report import WagmiAnnualReportService
+from services.track import compute_track_summary
 from auth_saas import enforce_free_limits_for_trip_creation, get_active_account_id, get_effective_plan
 from models import SaaSUser, PlanEnum
 from datetime import date, datetime
@@ -366,6 +367,39 @@ async def rename_trip(
     db.commit()
 
     return RedirectResponse(url="/trips/", status_code=303)
+
+
+@router.get("/{trip_id}/track", response_class=HTMLResponse)
+async def trip_track_page(
+    trip_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Trip track page: Leaflet map + per-day distances + totals."""
+    trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+
+    summary = compute_track_summary(db, trip.id)
+
+    return templates.TemplateResponse("trip_track.html", {
+        "request": request,
+        "trip": trip,
+        "summary": summary,
+    })
+
+
+@router.get("/{trip_id}/track.json")
+async def trip_track_json(
+    trip_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """JSON endpoint feeding the Leaflet map."""
+    trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    return compute_track_summary(db, trip.id)
 
 
 @router.post("/{trip_id}/select")
