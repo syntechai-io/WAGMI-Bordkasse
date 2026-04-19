@@ -4,9 +4,14 @@
 <div class="space-y-6">
     <div class="flex justify-between items-center">
         <h1 class="ui-title maritime-header" style="margin-bottom: 0;">📓 {{ t('logbook.title') }}</h1>
-        <a href="/logbook/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
-            ➕ {{ t('logbook.new_entry') }}
-        </a>
+        <div class="flex gap-2">
+            <a href="/logbook/day-new" class="px-4 py-2 rounded-lg transition touch-action font-semibold text-white" style="background: var(--success);">
+                📅 {{ t('logbook.day_logbook_title') }}
+            </a>
+            <a href="/logbook/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
+                ➕ {{ t('logbook.new_entry') }}
+            </a>
+        </div>
     </div>
 
     {% if entries %}

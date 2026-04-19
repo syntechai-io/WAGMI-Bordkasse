@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="space-y-6 max-w-3xl mx-auto">
+    <div class="flex items-center justify-between">
+        <h1 class="ui-title maritime-header" style="margin-bottom:0;">🏁 {{ t('trips.finalize_title') }}</h1>
+        <a href="/trips/" class="text-sm hover:underline" style="color: var(--accent);">← {{ t('common.back') }}</a>
+    </div>
+
+    <p class="ui-muted">{{ t('trips.finalize_intro') }}</p>
+
+    <div class="bg-white porthole-card p-6 space-y-4">
+        <h2 class="font-bold maritime-header">📋 {{ trip.name }}</h2>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+                <p class="text-xs ui-muted">{{ t('trips.col_start') }}</p>
+                <p class="font-semibold">{{ summary.first_date.strftime('%d.%m.%Y') if summary.first_date else (trip.start_date.strftime('%d.%m.%Y') if trip.start_date else '—') }}</p>
+            </div>
+            <div>
+                <p class="text-xs ui-muted">{{ t('trips.col_end') }}</p>
+                <p class="font-semibold">{{ summary.last_date.strftime('%d.%m.%Y') if summary.last_date else '—' }}</p>
+            </div>
+            <div>
+                <p class="text-xs ui-muted">📓 {{ t('logbook.entries_count') }}</p>
+                <p class="font-semibold">{{ summary.entry_count }}</p>
+            </div>
+            <div>
+                <p class="text-xs ui-muted">🌊 {{ t('logbook.distance') }}</p>
+                <p class="font-semibold">{{ summary.total_nm }} nm</p>
+            </div>
+            <div>
+                <p class="text-xs ui-muted">🔧 {{ t('logbook.engine_hours') }}</p>
+                <p class="font-semibold">{{ summary.motor_hours }} h</p>
+            </div>
+            <div>
+                <p class="text-xs ui-muted">📷 {{ t('logbook.photos') }}</p>
+                <p class="font-semibold">{{ summary.photo_count }}</p>
+            </div>
+            <div>
+                <p class="text-xs ui-muted">💶 {{ t('expense.title') }}</p>
+                <p class="font-semibold">{{ summary.expense_count }} ({{ "%.2f"|format(summary.expense_total) }})</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white porthole-card p-6 space-y-4" style="border-left: 4px solid var(--coral);">
+        <h3 class="font-bold" style="color: var(--coral);">⚠️ {{ t('trips.finalize_warning_title') }}</h3>
+        <ul class="list-disc list-inside text-sm space-y-1 ui-muted">
+            <li>{{ t('trips.finalize_warning_1') }}</li>
+            <li>{{ t('trips.finalize_warning_2') }}</li>
+            <li>{{ t('trips.finalize_warning_3') }}</li>
+        </ul>
+
+        <form action="/trips/{{ trip.id }}/close" method="post" class="space-y-3" id="finalizeForm">
+            {{ csrf_input | safe }}
+            <input type="hidden" name="confirm" value="yes">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="finalizeConfirm" required class="w-5 h-5">
+                <span class="font-medium">{{ t('trips.finalize_confirm_label') }}</span>
+            </label>
+            <div class="flex gap-2 justify-end">
+                <a href="/trips/" class="px-4 py-2 rounded-lg" style="background: var(--surface-2);">{{ t('common.cancel') }}</a>
+                <button type="submit" id="finalizeSubmit" disabled
+                        class="px-6 py-2 rounded-lg font-semibold text-white opacity-50"
+                        style="background: var(--coral);">
+                    🔒 {{ t('trips.finalize_submit') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function() {
+    const cb = document.getElementById('finalizeConfirm');
+    const btn = document.getElementById('finalizeSubmit');
+    cb.addEventListener('change', function() {
+        btn.disabled = !cb.checked;
+        btn.classList.toggle('opacity-50', !cb.checked);
+    });
+})();
+</script>
+{% endblock %}

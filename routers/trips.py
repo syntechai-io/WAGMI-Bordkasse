@@ -237,16 +237,81 @@ async def archive_trip(
     
     return RedirectResponse(url="/trips/", status_code=303)
 
-@router.post("/{trip_id}/close")
-async def close_trip(
+@router.get("/{trip_id}/finalize", response_class=HTMLResponse)
+async def finalize_trip_form(
     trip_id: int,
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Close a trip — scoped to account"""
+    """Render finalize summary + confirmation page before closing the trip."""
+    if not _is_admin_or_owner(request, db):
+        raise HTTPException(status_code=403, detail="Only admin can finalize trips")
+
+    trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+
+    # Compute summary stats from logbook entries
+    from models import LogbookEntry, LogbookPhoto, Expense
+    from sqlalchemy import func
+    entry_count = db.query(func.count(LogbookEntry.id)).filter(LogbookEntry.trip_id == trip.id).scalar() or 0
+    total_nm = db.query(func.coalesce(func.sum(LogbookEntry.dist_day_nm), 0)).filter(
+        LogbookEntry.trip_id == trip.id
+    ).scalar() or 0
+    photo_count = db.query(func.count(LogbookPhoto.id)).join(
+        LogbookEntry, LogbookEntry.id == LogbookPhoto.entry_id
+    ).filter(LogbookEntry.trip_id == trip.id).scalar() or 0
+    expense_count = db.query(func.count(Expense.id)).filter(Expense.trip_id == trip.id).scalar() or 0
+    expense_total = db.query(func.coalesce(func.sum(Expense.amount), 0)).filter(
+        Expense.trip_id == trip.id
+    ).scalar() or 0
+
+    eng_readings = db.query(LogbookEntry.eng_hours_total).filter(
+        LogbookEntry.trip_id == trip.id,
+        LogbookEntry.eng_hours_total.isnot(None)
+    ).all()
+    eng_values = [r[0] for r in eng_readings if r[0] is not None]
+    motor_hours = (max(eng_values) - min(eng_values)) if len(eng_values) >= 2 else 0
+
+    first_entry = db.query(LogbookEntry).filter(
+        LogbookEntry.trip_id == trip.id
+    ).order_by(LogbookEntry.entry_date.asc()).first()
+    last_entry = db.query(LogbookEntry).filter(
+        LogbookEntry.trip_id == trip.id
+    ).order_by(LogbookEntry.entry_date.desc()).first()
+
+    summary = {
+        "entry_count": entry_count,
+        "photo_count": photo_count,
+        "expense_count": expense_count,
+        "expense_total": float(expense_total),
+        "total_nm": round(float(total_nm), 1),
+        "motor_hours": round(float(motor_hours), 1),
+        "first_date": first_entry.entry_date if first_entry else None,
+        "last_date": last_entry.entry_date if last_entry else None,
+    }
+
+    return templates.TemplateResponse("trip_finalize.html", {
+        "request": request,
+        "trip": trip,
+        "summary": summary,
+    })
+
+
+@router.post("/{trip_id}/close")
+async def close_trip(
+    trip_id: int,
+    request: Request,
+    confirm: str = Form(default=""),
+    db: Session = Depends(get_db)
+):
+    """Close a trip — scoped to account. Requires explicit confirm=yes from finalize form."""
     if not _is_admin_or_owner(request, db):
         raise HTTPException(status_code=403, detail="Only admin can close trips")
-    
+
+    if (confirm or "").strip().lower() != "yes":
+        return RedirectResponse(url=f"/trips/{trip_id}/finalize", status_code=303)
+
     trip = _scoped_trip_query(db, request).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")

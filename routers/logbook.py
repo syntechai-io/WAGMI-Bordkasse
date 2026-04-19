@@ -149,6 +149,229 @@ async def daily_logbook_view(request: Request, date: Optional[str] = None, db: S
         "summary": summary
     })
 
+@router.get("/day-new", response_class=HTMLResponse)
+async def new_day_form(request: Request, db: Session = Depends(get_db)):
+    """Render multi-row Day Logbook form."""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role, request):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/logbook", status_code=303)
+
+    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == active_trip.id).order_by(CrewMember.name).all()
+    sea_states = [s.value for s in SeaStateEnum]
+    now = datetime.utcnow()
+    return templates.TemplateResponse("logbook_day_form.html", {
+        "request": request,
+        "active_trip": active_trip,
+        "crew_members": crew_members,
+        "sea_states": sea_states,
+        "default_date": now.strftime("%Y-%m-%d"),
+        "default_time": now.strftime("%H:%M"),
+    })
+
+
+@router.post("/day-new")
+async def create_day_entries(request: Request, db: Session = Depends(get_db)):
+    """Create multiple LogbookEntry rows from a single Day Logbook submission.
+
+    Transactional: either all rows are saved or none.
+    """
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+
+    user_role = request.session.get("role", "crew")
+    if not TripService.is_trip_editable(active_trip, user_role, request):
+        request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
+        return RedirectResponse(url="/logbook", status_code=303)
+
+    form = await request.form()
+    entry_date_str = (form.get("entry_date") or "").strip()
+    if not entry_date_str:
+        request.session["error"] = "Datum ist erforderlich."
+        return RedirectResponse(url="/logbook/day-new", status_code=303)
+
+    try:
+        base_date = datetime.strptime(entry_date_str, "%Y-%m-%d").date()
+    except ValueError:
+        request.session["error"] = "Ungültiges Datum."
+        return RedirectResponse(url="/logbook/day-new", status_code=303)
+
+    # Header-level fields applied to first/last row
+    header_departure = (form.get("departure") or "").strip() or None
+    header_destination = (form.get("destination") or "").strip() or None
+    header_notes = (form.get("summary_notes") or "").strip() or None
+
+    # Repeating row fields — use getlist
+    row_keys = [
+        "row_time", "row_maneuver_type", "row_latitude", "row_longitude",
+        "row_wind_direction", "row_wind_strength", "row_sea_state",
+        "row_visibility", "row_temperature", "row_sail_plan",
+        "row_engine_on", "row_eng_hours_total",
+        "row_event_category", "row_event_details", "row_notes",
+    ]
+    rows_data = {k: form.getlist(k) for k in row_keys}
+    row_count = len(rows_data["row_time"])
+    if row_count == 0:
+        request.session["error"] = "Mindestens eine Zeile erforderlich."
+        return RedirectResponse(url="/logbook/day-new", status_code=303)
+
+    # Build entry list, validate, carry-forward position from previous row
+    parsed_rows = []
+    last_lat = None
+    last_lon = None
+    last_time = None
+    for i in range(row_count):
+        time_str = (rows_data["row_time"][i] or "").strip()
+        if not time_str:
+            # Skip empty rows entirely
+            continue
+        try:
+            hh, mm = time_str.split(":")
+            entry_dt = datetime.combine(base_date, datetime.min.time()).replace(
+                hour=int(hh), minute=int(mm)
+            )
+        except (ValueError, IndexError):
+            request.session["error"] = f"Ungültige Uhrzeit in Zeile {i+1}: '{time_str}'"
+            return RedirectResponse(url="/logbook/day-new", status_code=303)
+
+        # Time monotonic validation
+        if last_time and entry_dt < last_time:
+            request.session["error"] = f"Zeit in Zeile {i+1} ({time_str}) liegt vor der vorherigen Zeile."
+            return RedirectResponse(url="/logbook/day-new", status_code=303)
+        last_time = entry_dt
+
+        def _get(key, idx, cast=None, strict=False, row_label=None):
+            lst = rows_data.get(key, [])
+            if idx >= len(lst):
+                return None
+            v = (lst[idx] or "").strip()
+            if not v:
+                return None
+            if cast is None:
+                return v
+            try:
+                return cast(v)
+            except (ValueError, TypeError):
+                if strict:
+                    raise ValueError(f"Ungültiger Wert in Zeile {row_label}: '{v}'")
+                return None
+
+        try:
+            lat = _get("row_latitude", i, float, strict=True, row_label=f"{i+1} Latitude")
+            lon = _get("row_longitude", i, float, strict=True, row_label=f"{i+1} Longitude")
+        except ValueError as ve:
+            request.session["error"] = str(ve)
+            return RedirectResponse(url="/logbook/day-new", status_code=303)
+
+        if lat is not None and not (-90.0 <= lat <= 90.0):
+            request.session["error"] = f"Zeile {i+1}: Latitude {lat} liegt außerhalb des gültigen Bereichs (-90..90)."
+            return RedirectResponse(url="/logbook/day-new", status_code=303)
+        if lon is not None and not (-180.0 <= lon <= 180.0):
+            request.session["error"] = f"Zeile {i+1}: Longitude {lon} liegt außerhalb des gültigen Bereichs (-180..180)."
+            return RedirectResponse(url="/logbook/day-new", status_code=303)
+
+        # Carry-forward GPS position if not provided
+        if lat is None:
+            lat = last_lat
+        else:
+            last_lat = lat
+        if lon is None:
+            lon = last_lon
+        else:
+            last_lon = lon
+
+        engine_on_raw = _get("row_engine_on", i)
+        engine_on_val = None
+        if engine_on_raw is not None:
+            engine_on_val = engine_on_raw.lower() in ("true", "1", "yes", "on")
+
+        sea_state_raw = _get("row_sea_state", i)
+        sea_state_val = None
+        if sea_state_raw:
+            try:
+                sea_state_val = SeaStateEnum(sea_state_raw)
+            except ValueError:
+                request.session["error"] = f"Zeile {i+1}: Ungültiger Seegang '{sea_state_raw}'."
+                return RedirectResponse(url="/logbook/day-new", status_code=303)
+
+        parsed_rows.append({
+            "entry_dt": entry_dt,
+            "maneuver_type": _get("row_maneuver_type", i) or "full",
+            "latitude": lat,
+            "longitude": lon,
+            "wind_direction": _get("row_wind_direction", i),
+            "wind_strength": normalize_wind(_get("row_wind_strength", i)),
+            "sea_state": sea_state_val,
+            "visibility": normalize_visibility(_get("row_visibility", i)),
+            "temperature": _get("row_temperature", i, float),
+            "sail_plan": normalize_sail_plan(_get("row_sail_plan", i)),
+            "engine_on": engine_on_val,
+            "eng_hours_total": _get("row_eng_hours_total", i, float),
+            "event_category": normalize_event_category(_get("row_event_category", i)) if _get("row_event_category", i) else None,
+            "event_details": _get("row_event_details", i),
+            "notes": _get("row_notes", i),
+        })
+
+    if not parsed_rows:
+        request.session["error"] = "Mindestens eine Zeile mit Uhrzeit erforderlich."
+        return RedirectResponse(url="/logbook/day-new", status_code=303)
+
+    created_ids = []
+    try:
+        for idx, r in enumerate(parsed_rows):
+            is_first = idx == 0
+            is_last = idx == len(parsed_rows) - 1
+            entry = LogbookEntry(
+                trip_id=active_trip.id,
+                entry_date=r["entry_dt"],
+                entry_date_utc=r["entry_dt"],
+                latitude=r["latitude"],
+                longitude=r["longitude"],
+                wind_direction=r["wind_direction"],
+                wind_strength=r["wind_strength"],
+                sea_state=r["sea_state"],
+                visibility=r["visibility"],
+                temperature=r["temperature"],
+                sail_plan=r["sail_plan"],
+                engine_on=r["engine_on"],
+                eng_hours_total=r["eng_hours_total"],
+                event_category=r["event_category"],
+                event_details=r["event_details"],
+                notes=(header_notes if is_first and not r["notes"] else r["notes"]),
+                departure=(header_departure if is_first else None),
+                destination=(header_destination if is_last else None),
+                maneuver_type=r["maneuver_type"],
+            )
+            db.add(entry)
+            db.flush()
+            created_ids.append(entry.id)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        request.session["error"] = f"Fehler beim Speichern: {str(e)}"
+        return RedirectResponse(url="/logbook/day-new", status_code=303)
+
+    # Audit log per entry
+    for eid in created_ids:
+        AuditService.log(
+            db=db,
+            request=request,
+            trip_id=active_trip.id,
+            action="create",
+            entity_type="logbook_entry",
+            entity_id=eid,
+            details=f"Created via day-logbook batch ({len(created_ids)} entries) for {entry_date_str}"
+        )
+
+    request.session["success"] = f"{len(created_ids)} Logbuch-Einträge gespeichert."
+    return RedirectResponse(url=f"/logbook/daily?date={entry_date_str}", status_code=303)
+
+
 @router.get("/new", response_class=HTMLResponse)
 async def new_entry_form(request: Request, db: Session = Depends(get_db)):
     active_trip = TripService.get_selected_trip(request, db)
@@ -732,61 +955,86 @@ async def create_addendum(
 async def upload_photo(
     request: Request,
     entry_id: int,
-    photo: UploadFile = File(...),
+    photo: List[UploadFile] = File(...),
     caption: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
+    """Upload one or more photos to a logbook entry. Each file is validated independently."""
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips", status_code=303)
-    
-    # Check if trip is editable by current user
+
     user_role = request.session.get("role", "crew")
     if not TripService.is_trip_editable(active_trip, user_role, request):
         request.session["error"] = "Dieser Törn wurde geschlossen. Nur der Admin kann Änderungen vornehmen."
         return RedirectResponse(url="/logbook", status_code=303)
-    
+
     entry = db.query(LogbookEntry).filter(LogbookEntry.id == entry_id, LogbookEntry.trip_id == active_trip.id).first()
     if not entry:
         return RedirectResponse(url="/logbook", status_code=303)
-    
-    # Validate file
-    if photo.content_type not in ALLOWED_CONTENT_TYPES:
-        raise HTTPException(status_code=415, detail="Only JPEG and PNG images are allowed")
-    
-    content = await photo.read()
-    if len(content) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=413, detail="File too large (max 10MB)")
-    
-    # Save file
-    ext = ".jpg" if "jpeg" in photo.content_type else ".png"
-    filename = str(uuid.uuid4()) + ext
-    filepath = Path("uploads") / filename
-    filepath.write_bytes(content)
-    
-    # Create photo record
-    photo_record = LogbookPhoto(
-        entry_id=entry_id,
-        stored_filename=filename,
-        original_name=photo.filename or "unknown",
-        caption=caption,
-        content_type=photo.content_type,
-        size_bytes=len(content)
-    )
-    db.add(photo_record)
-    db.commit()
-    
-    # Audit log
-    AuditService.log(
-        db=db,
-        request=request,
-        trip_id=active_trip.id,
-        action="upload",
-        entity_type="logbook_photo",
-        entity_id=photo_record.id,
-        details=f"Uploaded photo to logbook entry {entry_id}"
-    )
-    
+
+    files = [f for f in (photo or []) if f and f.filename]
+    if not files:
+        return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
+
+    saved_records = []
+    saved_paths = []
+    try:
+        for f in files:
+            if f.content_type not in ALLOWED_CONTENT_TYPES:
+                raise HTTPException(status_code=415, detail=f"Only JPEG and PNG images are allowed (got {f.content_type})")
+            content = await f.read()
+            if len(content) > MAX_FILE_SIZE:
+                raise HTTPException(status_code=413, detail=f"File '{f.filename}' too large (max 10MB)")
+
+            ext = ".jpg" if "jpeg" in (f.content_type or "") else ".png"
+            filename = str(uuid.uuid4()) + ext
+            filepath = Path("uploads") / filename
+            filepath.write_bytes(content)
+            saved_paths.append(filepath)
+
+            photo_record = LogbookPhoto(
+                entry_id=entry_id,
+                stored_filename=filename,
+                original_name=f.filename or "unknown",
+                caption=caption,
+                content_type=f.content_type,
+                size_bytes=len(content),
+            )
+            db.add(photo_record)
+            db.flush()
+            saved_records.append(photo_record)
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        for p in saved_paths:
+            try:
+                if p.exists():
+                    p.unlink()
+            except Exception:
+                pass
+        raise
+    except Exception as e:
+        db.rollback()
+        for p in saved_paths:
+            try:
+                if p.exists():
+                    p.unlink()
+            except Exception:
+                pass
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+    for rec in saved_records:
+        AuditService.log(
+            db=db,
+            request=request,
+            trip_id=active_trip.id,
+            action="upload",
+            entity_type="logbook_photo",
+            entity_id=rec.id,
+            details=f"Uploaded photo to logbook entry {entry_id} ({len(saved_records)} in batch)"
+        )
+
     return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
 
 @router.post("/photos/{photo_id}/delete")

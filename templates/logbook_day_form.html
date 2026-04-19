@@ -1,0 +1,187 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <div class="flex items-center justify-between">
+        <h1 class="ui-title maritime-header" style="margin-bottom:0;">📅 {{ t('logbook.day_logbook_title') }}</h1>
+        <a href="/logbook" class="text-sm hover:underline" style="color: var(--accent);">← {{ t('logbook.back_to_list') }}</a>
+    </div>
+
+    <p class="ui-muted text-sm">{{ t('logbook.day_logbook_help') }}</p>
+
+    {% if request.session.get('error') %}
+        <div class="p-3 rounded-lg" style="background: var(--coral-soft); color: var(--coral);">{{ request.session.pop('error') }}</div>
+    {% endif %}
+
+    <form action="/logbook/day-new" method="post" id="dayLogbookForm" class="space-y-6">
+        {{ csrf_input | safe }}
+
+        {# Header card #}
+        <div class="bg-white porthole-card p-6 space-y-4">
+            <h2 class="font-bold maritime-header">{{ t('logbook.day_logbook_header') }}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">📅 {{ t('logbook.date_label') }} *</label>
+                    <input type="date" name="entry_date" value="{{ default_date }}" required
+                           class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">🏁 {{ t('logbook.departure') }}</label>
+                    <input type="text" name="departure" placeholder="{{ t('logbook.departure_placeholder') }}"
+                           class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">🏁 {{ t('logbook.destination') }}</label>
+                    <input type="text" name="destination" placeholder="{{ t('logbook.destination_placeholder') }}"
+                           class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">📝 {{ t('common.notes') }}</label>
+                <textarea name="summary_notes" rows="2" placeholder="{{ t('logbook.notes_placeholder') }}"
+                          class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);"></textarea>
+            </div>
+            <div class="flex gap-2 flex-wrap">
+                <button type="button" id="quickFillFirstRow" class="px-4 py-2 rounded-lg font-semibold text-white touch-action" style="background: var(--accent);">
+                    ⚡ {{ t('logbook.day_logbook_quick_fill_first') }}
+                </button>
+                <span id="quickFillStatus" class="text-sm ui-muted self-center"></span>
+            </div>
+        </div>
+
+        {# Rows container #}
+        <div class="bg-white porthole-card p-4 space-y-3" id="rowsCard">
+            <div class="flex items-center justify-between">
+                <h2 class="font-bold maritime-header">⏱️ {{ t('logbook.day_logbook_entries') }}</h2>
+                <button type="button" id="addRowBtn" class="px-3 py-1 rounded-lg text-sm font-semibold text-white touch-action" style="background: var(--success);">
+                    ➕ {{ t('logbook.day_logbook_add_row') }}
+                </button>
+            </div>
+
+            <div id="rowsContainer" class="space-y-3">
+                {# JS will inject rows here. Initial row added by JS on DOMContentLoaded. #}
+            </div>
+
+            <p class="text-xs ui-muted">{{ t('logbook.day_logbook_carry_forward_hint') }}</p>
+        </div>
+
+        {# Sticky save bar #}
+        <div class="sticky bottom-0 bg-white border-t p-3 flex gap-2 justify-end" style="border-color: var(--border); z-index: 10;">
+            <a href="/logbook" class="px-4 py-2 rounded-lg" style="background: var(--surface-2);">{{ t('common.cancel') }}</a>
+            <button type="submit" class="ocean-gradient text-white px-6 py-2 rounded-lg font-semibold touch-action">
+                💾 {{ t('logbook.day_logbook_save_all') }} (<span id="rowCounter">0</span>)
+            </button>
+        </div>
+    </form>
+</div>
+
+{# Row template (cloned by JS) #}
+<template id="dayRowTemplate">
+    <div class="day-row p-3 rounded-lg border" style="border-color: var(--border); background: var(--surface);">
+        <div class="flex items-center justify-between mb-2">
+            <span class="font-semibold text-sm">⏱️ <span class="row-index">1</span></span>
+            <button type="button" class="remove-row-btn text-sm hover:underline" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-2">
+            <div>
+                <label class="block text-xs ui-muted">⏱️ {{ t('logbook.time_input') }} *</label>
+                <input type="time" name="row_time" required class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">{{ t('logbook.maneuver_type') }}</label>
+                <select name="row_maneuver_type" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+                    <option value="full">📝 {{ t('logbook.maneuver_full') }}</option>
+                    <option value="departure">🚢 {{ t('logbook.maneuver_departure') }}</option>
+                    <option value="sail_change">⛵ {{ t('logbook.maneuver_sail_change') }}</option>
+                    <option value="motor">🔧 {{ t('logbook.maneuver_motor') }}</option>
+                    <option value="anchor">⚓ {{ t('logbook.maneuver_anchor') }}</option>
+                    <option value="weather">🌤️ {{ t('logbook.maneuver_weather') }}</option>
+                    <option value="arrival">🏁 {{ t('logbook.maneuver_arrival') }}</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">{{ t('logbook.latitude') }}</label>
+                <input type="number" step="any" name="row_latitude" placeholder="54.32" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">{{ t('logbook.longitude') }}</label>
+                <input type="number" step="any" name="row_longitude" placeholder="10.13" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">{{ t('logbook.wind_direction') }}</label>
+                <input type="text" name="row_wind_direction" maxlength="3" placeholder="SW" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">{{ t('logbook.wind_strength') }}</label>
+                <select name="row_wind_strength" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+                    <option value=""></option>
+                    {% for n in range(0, 13) %}
+                    <option value="{{ n }}">{{ n }} Bft</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">🌊 {{ t('logbook.sea_state') }}</label>
+                <select name="row_sea_state" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+                    <option value=""></option>
+                    {% for s in sea_states %}
+                    <option value="{{ s }}">{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">{{ t('logbook.visibility') }}</label>
+                <select name="row_visibility" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+                    <option value=""></option>
+                    <option value="very_good">{{ t('logbook.visibility_very_good') }}</option>
+                    <option value="good">{{ t('logbook.visibility_good') }}</option>
+                    <option value="moderate">{{ t('logbook.visibility_moderate') }}</option>
+                    <option value="poor">{{ t('logbook.visibility_poor') }}</option>
+                    <option value="very_poor">{{ t('logbook.visibility_very_poor') }}</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">🌡️ {{ t('logbook.temperature') }} (°C)</label>
+                <input type="number" step="0.1" name="row_temperature" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">⛵ {{ t('logbook.sail_plan') }}</label>
+                <input type="text" name="row_sail_plan" placeholder="Genoa+Main" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">🔧 {{ t('logbook.engine_status') }}</label>
+                <select name="row_engine_on" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+                    <option value="">—</option>
+                    <option value="true">{{ t('logbook.engine_on') }}</option>
+                    <option value="false">{{ t('logbook.engine_off') }}</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs ui-muted">{{ t('logbook.engine_hours_total') }}</label>
+                <input type="number" step="0.1" name="row_eng_hours_total" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+            </div>
+            <div class="col-span-2 md:col-span-3">
+                <label class="block text-xs ui-muted">⚠️ {{ t('logbook.event_category') }}</label>
+                <select name="row_event_category" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+                    <option value=""></option>
+                    <option value="safety">{{ t('logbook.event_safety') }}</option>
+                    <option value="equipment">{{ t('logbook.event_equipment') }}</option>
+                    <option value="navigation">{{ t('logbook.event_navigation_event') }}</option>
+                    <option value="crew">{{ t('logbook.event_crew_event') }}</option>
+                    <option value="other">{{ t('logbook.event_other') }}</option>
+                </select>
+            </div>
+            <div class="col-span-2 md:col-span-3">
+                <label class="block text-xs ui-muted">{{ t('logbook.event_details') }}</label>
+                <input type="text" name="row_event_details" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+            </div>
+            <div class="col-span-2 md:col-span-6">
+                <label class="block text-xs ui-muted">📝 {{ t('common.notes') }}</label>
+                <input type="text" name="row_notes" placeholder="{{ t('logbook.notes_placeholder') }}" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+            </div>
+        </div>
+    </div>
+</template>
+
+<script src="/static/js/logbook-day-entry.js?v=1"></script>
+{% endblock %}

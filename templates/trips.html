@@ -126,10 +126,7 @@
                             
                             {% if request.session.get('role') == 'admin' or is_saas_owner %}
                                 {% if trip.is_closed == 0 %}
-                                <form action="/trips/{{ trip.id }}/close" method="post" class="inline">
-                                    {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action" style="color: var(--coral);" title="{{ t('trips.help_close') }}">🔒 {{ t('trips.action_close') }}</button>
-                                </form>
+                                <a href="/trips/{{ trip.id }}/finalize" class="hover:underline touch-action inline" style="color: var(--coral);" title="{{ t('trips.finalize_title') }}">🏁 {{ t('trips.finalize_action') }}</a>
                                 {% else %}
                                 <form action="/trips/{{ trip.id }}/reopen" method="post" class="inline">
                                     {{ csrf_input | safe }}

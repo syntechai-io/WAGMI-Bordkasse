@@ -189,8 +189,8 @@
             <form action="/logbook/{{ entry.id }}/photos/upload" method="post" enctype="multipart/form-data" class="space-y-3" id="photoUploadForm">
                 {{ csrf_input | safe }}
                 <div>
-                    <label class="block text-sm font-medium mb-2">📷 {{ t('logbook.add_photo') }}</label>
-                    <input type="file" id="photoInput" accept="image/jpeg,image/png,image/jpg" required class="hidden">
+                    <label class="block text-sm font-medium mb-2">📷 {{ t('logbook.add_photo') }} ({{ t('logbook.photos_multi_hint') }})</label>
+                    <input type="file" id="photoInput" name="photo" multiple accept="image/jpeg,image/png,image/jpg" required class="hidden">
                     <div class="flex gap-3">
                         <button type="button" onclick="activateCamera()" 
                                 class="btn btn-primary flex-1 text-white px-4 py-3 rounded-lg transition touch-action font-semibold text-center">
@@ -218,19 +218,18 @@
                 
                 function activateCamera() {
                     photoInput.setAttribute('capture', 'environment');
-                    photoInput.setAttribute('name', 'photo');
                     photoInput.click();
                 }
                 
                 function activateFile() {
                     photoInput.removeAttribute('capture');
-                    photoInput.setAttribute('name', 'photo');
                     photoInput.click();
                 }
                 
                 photoInput.addEventListener('change', function(e) {
                     if (e.target.files.length > 0) {
-                        document.getElementById('photoFileName').textContent = '{{ t("common.file_selected") }}' + e.target.files[0].name;
+                        const names = Array.from(e.target.files).map(f => f.name).join(', ');
+                        document.getElementById('photoFileName').textContent = '{{ t("common.file_selected") }}' + '(' + e.target.files.length + ') ' + names;
                         document.getElementById('uploadButton').disabled = false;
                         document.getElementById('uploadButton').classList.remove('opacity-50');
                     }
