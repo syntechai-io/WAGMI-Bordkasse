@@ -259,3 +259,46 @@ ios_app/
 - [APP_STORE_ASSETS.md](./APP_STORE_ASSETS.md) — Screenshots, descriptions, metadata
 - [Capacitor Documentation](https://capacitorjs.com/docs)
 - [Apple App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
+
+---
+
+## Home / Lock Screen Widget
+
+CrewLog ships a WidgetKit extension that shows the active trip at a glance on the iOS home screen and lock screen. Web-side, the user enables it from the **About** page; iOS-side, this requires a one-time Xcode setup.
+
+### Web side (already implemented)
+- `POST /api/widget/token` issues a long-lived bearer token.
+- `DELETE /api/widget/token` revokes all tokens for the current user.
+- `GET /api/widget/snapshot` (Bearer auth) returns trip name, day, distance, motor hours, last entry timestamp + position.
+- The Capacitor bridge stores the token in the iOS Keychain via `@aparajita/capacitor-secure-storage` under the keys `crewlog.widget.token` and `crewlog.widget.baseUrl`.
+
+### Xcode setup (one-time, on your Mac)
+
+1. **Add a Widget Extension target.**
+   - In Xcode: `File → New → Target… → Widget Extension`.
+   - Product Name: `CrewLogWidget`. Bundle ID: `app.crewlog.mobile.widget`. Language: Swift. Uncheck "Include Configuration Intent" for now.
+
+2. **Replace the generated files** with the ones in `ios_app/WidgetExtension/`:
+   - `CrewLogWidget.swift`
+   - `Info.plist`
+   - `CrewLogWidget.entitlements`
+
+3. **App Group + Keychain Sharing** — both targets (host app + widget) must enable:
+   - **Signing & Capabilities → App Groups**: add `group.app.crewlog.mobile`.
+   - **Signing & Capabilities → Keychain Sharing**: add the access group `app.crewlog.mobile` (Xcode prefixes it with your team ID at build time).
+
+4. **Embed the widget** in the host app's "Frameworks, Libraries, and Embedded Content" section if Xcode has not done so automatically.
+
+5. **Build and run on a real device** (the simulator's widget gallery is unreliable).
+
+### End-user flow
+
+1. User signs in to the app (SaaS only).
+2. User opens **Help → About**, taps **Enable widget**.
+3. Long-press the home or lock screen → **+** → search "CrewLog" → add small or medium widget.
+4. The widget refreshes ~3×/hour and on app foreground.
+5. User can revoke at any time from the same About page (**Revoke widget access**).
+
+### Empty / signed-out states
+- No active trip → "Open CrewLog to start a trip".
+- Token revoked or expired (HTTP 401) → "Open CrewLog to sign in".

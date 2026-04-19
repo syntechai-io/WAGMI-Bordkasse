@@ -462,6 +462,24 @@ class PasswordResetToken(Base):
     user = relationship("SaaSUser")
 
 
+class WidgetToken(Base):
+    """Long-lived bearer token used by the iOS WidgetKit extension to fetch
+    snapshot data without a session cookie. Stored hashed; plain value is
+    returned exactly once at issuance and kept by the iOS Keychain."""
+    __tablename__ = "widget_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("new_users.id"), nullable=False, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False, index=True)
+    token_hash = Column(String(128), nullable=False, unique=True, index=True)
+    label = Column(String(100), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    last_used_at = Column(DateTime, nullable=True)
+    revoked_at = Column(DateTime, nullable=True, index=True)
+
+    user = relationship("SaaSUser")
+
+
 class TripMember(Base):
     __tablename__ = "trip_members"
 

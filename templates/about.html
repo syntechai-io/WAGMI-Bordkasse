@@ -45,6 +45,35 @@
         </div>
     </div>
 
+    {% if session_mode == 'saas' %}
+    <div class="bg-white porthole-card p-6 space-y-3">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-bold maritime-header">{{ t('about.widget_title') }}</h2>
+                <p class="text-sm ui-muted mt-1">{{ t('about.widget_intro') }}</p>
+            </div>
+            <div>
+                {% if widget_enabled %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold text-white" style="background: var(--success);">{{ t('about.widget_on') }}</span>
+                {% else %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-200 text-gray-700">{{ t('about.widget_off') }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% if widget_enabled %}
+        <div class="text-xs ui-muted space-y-1">
+            <div>{{ t('about.widget_issued_at') }}: <span class="font-mono">{{ widget_issued_at.strftime('%Y-%m-%d %H:%M UTC') if widget_issued_at else '—' }}</span></div>
+            <div>{{ t('about.widget_last_used') }}: <span class="font-mono">{{ widget_last_used_at.strftime('%Y-%m-%d %H:%M UTC') if widget_last_used_at else '—' }}</span></div>
+        </div>
+        {% endif %}
+        <div class="flex flex-wrap gap-2 pt-2">
+            <button type="button" id="widget-issue-btn" class="px-3 py-1.5 rounded text-sm font-semibold text-white" style="background: var(--accent);">{{ t('about.widget_issue_btn') }}</button>
+            <button type="button" id="widget-revoke-btn" class="px-3 py-1.5 rounded text-sm font-semibold" style="background: var(--danger-light); color: var(--danger);" {% if not widget_enabled %}disabled{% endif %}>{{ t('about.widget_revoke_btn') }}</button>
+        </div>
+        <div id="widget-status-msg" class="text-xs" style="display:none;"></div>
+    </div>
+    {% endif %}
+
     <div class="bg-white porthole-card p-6" id="native-info" style="display:none;">
         <h2 class="text-lg font-bold maritime-header mb-3">{{ t('about.native_info') }}</h2>
         <div class="grid grid-cols-2 gap-4">
@@ -87,6 +116,70 @@
                 }).catch(function() {});
             }
         } catch(e) {}
+    }
+})();
+
+// Widget access controls
+(function() {
+    var issueBtn = document.getElementById('widget-issue-btn');
+    var revokeBtn = document.getElementById('widget-revoke-btn');
+    var msg = document.getElementById('widget-status-msg');
+    if (!issueBtn) return;
+
+    function getCsrf() {
+        var m = document.cookie.match(/csrftoken=([^;]+)/);
+        return m ? m[1] : '';
+    }
+
+    function showMsg(text, isError) {
+        msg.textContent = text;
+        msg.style.color = isError ? 'var(--danger)' : 'var(--success)';
+        msg.style.display = '';
+    }
+
+    function tellNative(token) {
+        try {
+            if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+                window.dispatchEvent(new CustomEvent('crewlog:widget-token-issued', { detail: { token: token } }));
+            }
+        } catch(e) {}
+    }
+
+    issueBtn.addEventListener('click', function() {
+        issueBtn.disabled = true;
+        fetch('/api/widget/token', { method: 'POST', credentials: 'same-origin', headers: { 'x-csrftoken': getCsrf() } })
+            .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function(j) {
+                tellNative(j.token);
+                showMsg('{{ t("about.widget_issued_ok") }}', false);
+                setTimeout(function() { window.location.reload(); }, 700);
+            })
+            .catch(function() {
+                showMsg('{{ t("about.widget_error") }}', true);
+                issueBtn.disabled = false;
+            });
+    });
+
+    if (revokeBtn) {
+        revokeBtn.addEventListener('click', function() {
+            if (!confirm('{{ t("about.widget_revoke_confirm") }}')) return;
+            revokeBtn.disabled = true;
+            fetch('/api/widget/token', { method: 'DELETE', credentials: 'same-origin', headers: { 'x-csrftoken': getCsrf() } })
+                .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(function() {
+                    try {
+                        if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+                            window.dispatchEvent(new CustomEvent('crewlog:widget-token-revoked'));
+                        }
+                    } catch(e) {}
+                    showMsg('{{ t("about.widget_revoked_ok") }}', false);
+                    setTimeout(function() { window.location.reload(); }, 700);
+                })
+                .catch(function() {
+                    showMsg('{{ t("about.widget_error") }}', true);
+                    revokeBtn.disabled = false;
+                });
+        });
     }
 })();
 </script>

@@ -27,6 +27,7 @@ from routers.logbook import router as logbook_router
 from routers.templates import router as templates_router
 from routers.groups import router as groups_router
 from routers.api import router as api_router
+from routers.widget import router as widget_router
 from routes_auth import router as saas_auth_router
 from routes_billing import router as billing_router
 from routes_billing_ui import router as billing_ui_router
@@ -121,6 +122,7 @@ with next(get_db()) as db:
 
 app.include_router(auth_router)
 app.include_router(api_router, prefix="/api")
+app.include_router(widget_router, prefix="/api")
 app.include_router(trips_router)
 app.include_router(crew_router)
 app.include_router(deposits_router)
@@ -181,6 +183,26 @@ async def about_page(request: Request, db: Session = Depends(get_db)):
     user_id = request.session.get("user_id")
     role = request.session.get("role")
     session_mode = "saas" if saas_user_id else ("legacy" if user_id else "none")
+
+    widget_enabled = False
+    widget_issued_at = None
+    widget_last_used_at = None
+    if saas_user_id:
+        from models import WidgetToken
+        active = (
+            db.query(WidgetToken)
+            .filter(
+                WidgetToken.user_id == saas_user_id,
+                WidgetToken.revoked_at.is_(None),
+            )
+            .order_by(WidgetToken.created_at.desc())
+            .first()
+        )
+        if active:
+            widget_enabled = True
+            widget_issued_at = active.created_at
+            widget_last_used_at = active.last_used_at
+
     return templates.TemplateResponse("about.html", {
         "request": request,
         "app_version": "1.0.0",
@@ -188,6 +210,9 @@ async def about_page(request: Request, db: Session = Depends(get_db)):
         "session_mode": session_mode,
         "account_id": account_id,
         "current_lang": lang,
+        "widget_enabled": widget_enabled,
+        "widget_issued_at": widget_issued_at,
+        "widget_last_used_at": widget_last_used_at,
     })
 
 @app.get("/set-language")

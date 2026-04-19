@@ -272,4 +272,44 @@
     save: bioSaveCredentials,
     clear: bioClearCredentials
   };
+
+  // ---------------------------------------------------------------------------
+  // iOS Home/Lock Screen Widget — Keychain bridge
+  // ---------------------------------------------------------------------------
+  // The web /about page issues a long-lived bearer token via POST /api/widget/token.
+  // We persist that token to the iOS Keychain so the WidgetKit extension can read
+  // it (the extension uses an App Group keychain access group declared in its
+  // entitlements; see ios_app/README_IOS.md). The bridge also writes the API
+  // base URL so the widget knows where to fetch /api/widget/snapshot.
+  var WIDGET_KEY_TOKEN = 'crewlog.widget.token';
+  var WIDGET_KEY_BASE_URL = 'crewlog.widget.baseUrl';
+
+  async function widgetSaveToken(token) {
+    var s = _securePlugin();
+    if (!s) return false;
+    try {
+      await s.set({ key: WIDGET_KEY_TOKEN, value: String(token || '') });
+      await s.set({ key: WIDGET_KEY_BASE_URL, value: String(window.location.origin || '') });
+      return true;
+    } catch (e) { return false; }
+  }
+  async function widgetClearToken() {
+    var s = _securePlugin();
+    if (!s) return;
+    try { await s.remove({ key: WIDGET_KEY_TOKEN }); } catch (e) {}
+    try { await s.remove({ key: WIDGET_KEY_BASE_URL }); } catch (e) {}
+  }
+
+  window.addEventListener('crewlog:widget-token-issued', function(ev) {
+    var tok = ev && ev.detail && ev.detail.token;
+    if (tok) widgetSaveToken(tok);
+  });
+  window.addEventListener('crewlog:widget-token-revoked', function() {
+    widgetClearToken();
+  });
+
+  window.CrewlogWidget = {
+    saveToken: widgetSaveToken,
+    clearToken: widgetClearToken
+  };
 })();
