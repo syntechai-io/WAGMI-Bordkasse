@@ -15,8 +15,8 @@
 <label class="cl-label">{{ text }}</label>
 {%- endmacro %}
 
-{% macro group_eyebrow(text) -%}
-<div class="cl-eyebrow">{{ text }}</div>
+{% macro group_eyebrow(text, icon='') -%}
+<div class="cl-eyebrow">{% if icon %}<span class="cl-eyebrow__icon" aria-hidden="true">{{ icon }}</span>{% endif %}<span>{{ text }}</span></div>
 {%- endmacro %}
 
 {% macro render_row(values, errors) -%}
@@ -28,7 +28,7 @@
         <div class="cl-entry__head-left">
             <button type="button" class="move-up-btn cl-iconbtn" aria-label="{{ t('logbook.day_logbook_move_up') }}" title="{{ t('logbook.day_logbook_move_up') }}">▲</button>
             <button type="button" class="move-down-btn cl-iconbtn" aria-label="{{ t('logbook.day_logbook_move_down') }}" title="{{ t('logbook.day_logbook_move_down') }}">▼</button>
-            <span class="cl-entry__index">#<span class="row-index">1</span></span>
+            <span class="cl-entry__index"><span class="row-index">#1</span></span>
         </div>
         <button type="button" class="remove-row-btn cl-btn cl-btn--ghost-danger cl-btn--sm">
             {{ t('common.delete') }}
@@ -36,7 +36,7 @@
     </header>
 
     <section class="cl-group">
-        {{ group_eyebrow(t('logbook.day_section_time')) }}
+        {{ group_eyebrow(t('logbook.day_section_time'), '⏱') }}
         <div class="cl-grid cl-grid--2">
             <div class="cl-field">
                 {{ lbl(t('logbook.time_input') ~ ' *') }}
@@ -61,7 +61,7 @@
     </section>
 
     <section class="cl-group">
-        {{ group_eyebrow(t('logbook.day_section_position')) }}
+        {{ group_eyebrow(t('logbook.day_section_position'), '📍') }}
         <div class="cl-grid cl-grid--2">
             <div class="cl-field">
                 {{ lbl(t('logbook.latitude')) }}
@@ -79,7 +79,7 @@
     </section>
 
     <section class="cl-group">
-        {{ group_eyebrow(t('logbook.day_section_weather')) }}
+        {{ group_eyebrow(t('logbook.day_section_weather'), '☁') }}
         <div class="cl-grid cl-grid--3">
             <div class="cl-field">
                 {{ lbl(t('logbook.wind_direction')) }}
@@ -134,7 +134,7 @@
     </section>
 
     <section class="cl-group">
-        {{ group_eyebrow(t('logbook.day_section_sail_engine')) }}
+        {{ group_eyebrow(t('logbook.day_section_sail_engine'), '⛵') }}
         <div class="cl-grid cl-grid--3">
             <div class="cl-field">
                 {{ lbl(t('logbook.sail_plan')) }}
@@ -165,7 +165,7 @@
     </section>
 
     <section class="cl-group">
-        {{ group_eyebrow(t('logbook.day_section_event_notes')) }}
+        {{ group_eyebrow(t('logbook.day_section_event_notes'), '📝') }}
         <div class="cl-grid cl-grid--2">
             <div class="cl-field">
                 {{ lbl(t('logbook.event_category')) }}
@@ -334,13 +334,16 @@
 
     max-width: 960px;
     margin: 0 auto;
-    padding: var(--cl-space-5) var(--cl-space-4);
+    /* Generous top padding so the page title clears the navy topbar with breathing room.
+       Outer .ui-section already adds vertical rhythm; we add a little more so the intro
+       sits in its own zone, never tucked under the nav. */
+    padding: var(--cl-space-6) var(--cl-space-4) 0;
     color: var(--cl-text);
     font-size: 15px;
     line-height: 1.45;
 }
 @media (min-width: 768px) {
-    .cl-page { padding: var(--cl-space-6) var(--cl-space-5); }
+    .cl-page { padding: var(--cl-space-7) var(--cl-space-5) 0; }
 }
 
 /* --- Page header ---------------------------------------------------------- */
@@ -373,8 +376,12 @@
     display: flex;
     flex-direction: column;
     gap: var(--cl-space-5);
-    /* Reserve space so the sticky action bar never overlaps the last card */
-    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    /* Reserve space so the FIXED action bar never overlaps the last card.
+       Falls back to a 96px reserve; the inline script below measures the
+       actual bar height and updates --cl-actionbar-h so the reserve always
+       matches the rendered bar — even if buttons wrap on narrow screens or
+       the user has larger text. iOS safe area is added on top. */
+    padding-bottom: calc(var(--cl-actionbar-h, 96px) + var(--cl-space-3) + env(safe-area-inset-bottom, 0px));
 }
 
 /* --- Card ----------------------------------------------------------------- */
@@ -442,6 +449,11 @@
     color: var(--cl-text-muted);
     letter-spacing: 0.01em;
     line-height: 1.3;
+    /* Reserve space for one or two label lines so wrapping never staggers
+       adjacent fields in the same grid row. */
+    min-height: 2.6em;
+    display: flex;
+    align-items: flex-end;
 }
 .cl-input {
     width: 100%;
@@ -629,6 +641,9 @@
     gap: var(--cl-space-3);
 }
 .cl-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-2);
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -636,6 +651,13 @@
     color: var(--cl-text-subtle);
     padding-bottom: var(--cl-space-2);
     border-bottom: 1px solid var(--cl-border);
+}
+.cl-eyebrow__icon {
+    /* Restrained icon — supports orientation, doesn't dominate */
+    font-size: 13px;
+    line-height: 1;
+    opacity: .85;
+    filter: grayscale(.2);
 }
 
 /* --- Photo grid ----------------------------------------------------------- */
@@ -663,27 +685,38 @@
 #dayPhotosPreview .photo-pill { position: relative; aspect-ratio: 1/1; border-radius: var(--cl-radius-sm); overflow: hidden; border: 1px solid var(--cl-border); background: var(--cl-surface-2); }
 #dayPhotosPreview .photo-pill img { width:100%; height:100%; object-fit: cover; display: block; }
 
-/* --- Sticky action bar ---------------------------------------------------- */
+/* --- Fixed action bar ----------------------------------------------------
+   Anchored to the viewport (not to the form), so it ALWAYS sits in its own
+   layer below the content. The form reserves matching padding-bottom, so
+   the last card is always fully readable above the bar.
+   ----------------------------------------------------------------------- */
 .cl-actionbar {
-    position: sticky;
-    bottom: 0;
+    position: fixed;
     left: 0;
     right: 0;
-    margin: var(--cl-space-5) calc(var(--cl-space-4) * -1) 0;
+    bottom: 0;
+    z-index: 40;
     padding: var(--cl-space-3) var(--cl-space-4);
     padding-bottom: calc(var(--cl-space-3) + env(safe-area-inset-bottom, 0px));
-    background: rgba(255,255,255,.92);
-    backdrop-filter: saturate(180%) blur(10px);
-    -webkit-backdrop-filter: saturate(180%) blur(10px);
+    background: rgba(255,255,255,.94);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
     border-top: 1px solid var(--cl-border);
     display: flex;
     gap: var(--cl-space-3);
     justify-content: flex-end;
-    z-index: 20;
-    box-shadow: 0 -4px 16px rgba(15,41,66,.04);
+    align-items: center;
+    box-shadow: 0 -6px 20px rgba(15,41,66,.06);
 }
-@media (min-width: 768px) {
-    .cl-actionbar { margin-left: calc(var(--cl-space-5) * -1); margin-right: calc(var(--cl-space-5) * -1); padding-left: var(--cl-space-5); padding-right: var(--cl-space-5); }
+.cl-actionbar > * { flex: 0 0 auto; }
+@media (max-width: 480px) {
+    .cl-actionbar { gap: var(--cl-space-2); padding-left: var(--cl-space-3); padding-right: var(--cl-space-3); }
+    .cl-actionbar .cl-btn { flex: 1 1 auto; min-width: 0; }
+}
+/* Night-mode darken for the bar */
+html[data-theme="night"] .cl-actionbar {
+    background: rgba(20, 0, 0, .85);
+    border-top-color: rgba(255, 90, 90, .25);
 }
 
 /* --- Compatibility shims for legacy JS hooks ----------------------------- */
@@ -691,4 +724,24 @@
 .cl-entry .move-down-btn[disabled] { opacity: .35; cursor: not-allowed; pointer-events: none; }
 </style>
 <script src="/static/js/logbook-day-entry.js?v=4"></script>
+<script>
+/* Measure the fixed action bar's true rendered height and expose it as a CSS
+   variable so the form's bottom reserve always matches — no overlap regardless
+   of locale, text-scale, button-wrapping, or future bar content changes. */
+(function () {
+    const bar = document.querySelector('.cl-actionbar');
+    if (!bar) return;
+    const root = document.documentElement;
+    const apply = () => {
+        const h = Math.ceil(bar.getBoundingClientRect().height);
+        root.style.setProperty('--cl-actionbar-h', h + 'px');
+    };
+    apply();
+    if ('ResizeObserver' in window) {
+        new ResizeObserver(apply).observe(bar);
+    }
+    window.addEventListener('resize', apply, { passive: true });
+    window.addEventListener('orientationchange', apply, { passive: true });
+})();
+</script>
 {% endblock %}

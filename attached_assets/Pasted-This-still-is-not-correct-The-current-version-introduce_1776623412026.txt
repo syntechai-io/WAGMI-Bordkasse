@@ -1,0 +1,247 @@
+This still is not correct. The current version introduced new problems:
+
+1. Header and page content still overlap visually.
+2. The bottom action bar still covers content.
+3. Field alignment is better but not yet fully disciplined.
+4. Icons were removed too aggressively — now the UI lost useful scanability and brand character.
+5. The page still does not feel like a polished production interface for iPad/iPhone.
+
+You need to fix this as a layout architecture issue, not as isolated CSS tweaks.
+
+PRIMARY OBJECTIVE
+Build a clean, layered, responsive UI with:
+- a stable header region,
+- a separate content region,
+- a non-obstructive bottom action region,
+- exact field alignment,
+- selective and purposeful icon use.
+
+-----------------------------------
+1. FIX THE PAGE SHELL FIRST
+-----------------------------------
+
+Rebuild the page shell into 3 distinct layers:
+
+A. APP HEADER / NAVIGATION
+- Fixed or sticky top navigation must have its own height and reserved space.
+- The page content must start BELOW the header, never underneath it.
+- No visual overlap between navbar and page title/content.
+- If the header is sticky, add proper top padding/margin to the page container equal to the actual header height.
+- Check Safari/iPad viewport behavior specifically.
+
+B. MAIN CONTENT AREA
+- The content area must scroll independently and safely below the header.
+- Use a consistent max width and centered content container.
+- All cards and sections must sit within a structured vertical flow.
+
+C. BOTTOM ACTION AREA
+- The save/cancel bar must never cover content.
+- If using sticky footer actions, reserve bottom padding in the content area equal to footer height + safe area.
+- Respect iPad/iPhone safe-area insets.
+- Buttons must remain visible but must not sit on top of form cards.
+
+Implementation requirement:
+Create a real page layout wrapper, not ad hoc spacing hacks.
+
+Suggested structure:
+- AppShell
+- TopNav
+- MainContent
+- StickyActionBar
+
+-----------------------------------
+2. FIX HEADER / CONTENT OVERLAP
+-----------------------------------
+
+Current issue:
+The title “Tages-Logbuch” sits too close to the header and the overall top section feels compressed.
+
+Required fix:
+- Increase vertical separation below the nav.
+- Create a clear page intro area:
+  - page title
+  - supporting text
+  - back link/action
+- This intro area should sit in a stable grid:
+  - left: title + subtitle
+  - right: back link or utility action
+- On mobile, stack this cleanly.
+- On tablet, allow balanced left/right layout.
+
+Acceptance criteria:
+- No content should visually tuck under the blue nav bar.
+- The first card must begin with comfortable spacing below the intro.
+- The page should breathe.
+
+-----------------------------------
+3. RESTORE ICONS, BUT PROPERLY
+-----------------------------------
+
+Do NOT remove all icons.
+Instead, use icons selectively and consistently.
+
+Keep icons only where they add real value:
+- top navigation items
+- page-level functional actions where helpful
+- section identifiers if they improve scanability
+- entry metadata in list cards
+- buttons only where appropriate
+
+Remove icon duplication:
+- Do not show the same decorative icon repeatedly in title + section + label if it adds no meaning.
+- Avoid using icons on every label.
+- Do not create clutter.
+
+Design rule:
+Icons should support orientation, not dominate it.
+
+Specific request:
+- Restore meaningful icons in the navigation.
+- Restore useful icons in list entries/cards where they help scanning.
+- Keep section headers mostly text-driven unless one restrained icon helps.
+
+-----------------------------------
+4. ENFORCE 100% FIELD ALIGNMENT
+-----------------------------------
+
+All form fields must align exactly.
+
+Rules:
+- labels always above inputs
+- consistent label spacing
+- consistent input heights
+- consistent internal padding
+- consistent border radius
+- exact alignment of field edges within each grid row
+- textareas and full-width fields should snap to the same grid logic
+
+Grid behavior:
+- iPhone: one column
+- iPad portrait: two columns
+- iPad landscape: two columns, occasionally three only for short fields
+- Never let fields become uneven because of content length
+- Never allow one field to push another into awkward offsets
+
+Important:
+Long labels must not distort field heights or row alignment.
+If needed, shorten visible labels while preserving accessibility via aria-label/title/helper text.
+
+-----------------------------------
+5. FIX THE STICKY ACTION BAR
+-----------------------------------
+
+Current issue:
+The bottom bar with “Abbrechen” and “Alle speichern” still covers form content.
+
+Required fix:
+- Sticky action bar must sit as a distinct footer layer.
+- Main content must include bottom spacing so the final card and last fields remain fully visible above it.
+- The action bar must have:
+  - solid/light background
+  - top border or subtle shadow
+  - proper horizontal padding
+  - safe-area padding on iOS
+- On narrow screens, buttons may stack or compress gracefully, but never overlap content.
+
+Acceptance criteria:
+- User can see and interact with the last card fields without obstruction.
+- Footer looks deliberate and premium, not like a floating patch.
+
+-----------------------------------
+6. TUNE VISUAL HIERARCHY
+-----------------------------------
+
+The page still needs stronger hierarchy.
+
+Apply:
+- One strong page title
+- One concise descriptive subtitle
+- Clear card titles
+- Clear section titles
+- Reduced visual noise in labels
+- More whitespace between major blocks
+
+Typography hierarchy:
+- Page title: strongest
+- Card title: second
+- Section title: third
+- Label: subtle but readable
+- Helper text: quiet
+
+-----------------------------------
+7. KEEP THE MARITIME PRODUCT FEEL
+-----------------------------------
+
+The UI should feel modern, calm, premium, maritime.
+
+Use:
+- dark navy header
+- restrained neutral backgrounds
+- subtle borders
+- quiet shadows
+- controlled accent colors
+- readable dark text
+- no random bright color jumps
+
+Buttons:
+- primary action = strong navy or brand primary
+- secondary = neutral/light
+- destructive = restrained red
+- success/add action = consistent, readable accent
+
+-----------------------------------
+8. COMPONENTS TO REWORK
+-----------------------------------
+
+Please refactor these specific areas:
+
+1. Top navigation / app shell
+2. Page intro section for Tages-Logbuch
+3. Tages-Übersicht card
+4. Einträge an diesem Tag section
+5. Entry card header and field grid
+6. Sticky save/cancel action bar
+7. Logbook list cards / overview cards
+8. Shared form field component styling
+9. Shared button styling
+10. Shared icon usage rules
+
+-----------------------------------
+9. DO NOT PATCH — RESTRUCTURE
+-----------------------------------
+
+Do not solve this with random margin-top, z-index, or overflow hacks only.
+Do not just hide overlap symptoms.
+Restructure the page shell and layout primitives properly.
+
+Please inspect:
+- navbar height
+- sticky offsets
+- z-index layers
+- content container padding-top
+- content container padding-bottom
+- safe-area handling
+- grid wrappers
+- flex alignment
+- overflow behavior in Safari
+
+-----------------------------------
+10. DELIVERABLES AFTER FIX
+-----------------------------------
+
+After implementing, provide:
+1. which layout wrapper/components were changed
+2. how header/content/footer separation is now handled
+3. how bottom action bar avoids covering content
+4. where icons were restored and why
+5. which grid rules are now used on iPhone vs iPad
+6. confirmation that overlap issues are fully resolved
+
+FINAL ACCEPTANCE CRITERIA
+- Header does not overlap content
+- Content starts clearly below nav
+- Sticky footer does not cover fields
+- Icons are restored selectively and elegantly
+- Fields are fully aligned
+- UI looks polished and intentional on iPad and iPhone
+- The result feels like a premium app, not a patched admin form
