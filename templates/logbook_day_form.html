@@ -84,7 +84,15 @@
             <select name="row_sea_state" class="w-full px-2 py-1 border rounded text-sm" style="border-color: {% if errors.get('row_sea_state') %}var(--coral){% else %}var(--border){% endif %};">
                 <option value=""></option>
                 {% for s in sea_states %}
-                <option value="{{ s }}"{% if ss == s %} selected{% endif %}>{{ s }}</option>
+                <option value="{{ s }}"{% if ss == s %} selected{% endif %}>
+                    {% if s == 'calm' %}{{ t('logbook.sea_calm') }}
+                    {% elif s == 'slight' %}{{ t('logbook.sea_slight') }}
+                    {% elif s == 'moderate' %}{{ t('logbook.sea_moderate') }}
+                    {% elif s == 'rough' %}{{ t('logbook.sea_rough') }}
+                    {% elif s == 'very_rough' %}{{ t('logbook.sea_very_rough') }}
+                    {% elif s == 'high' %}{{ t('logbook.sea_high') }}
+                    {% else %}{{ s }}{% endif %}
+                </option>
                 {% endfor %}
             </select>
             {{ field_error(errors, 'row_sea_state') }}
@@ -108,8 +116,15 @@
         </div>
         <div>
             <label class="block text-xs ui-muted">⛵ {{ t('logbook.sail_plan') }}</label>
-            <input type="text" name="row_sail_plan" placeholder="Genoa+Main" value="{{ values.get('row_sail_plan', '') }}"
-                   class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+            {% set sp = values.get('row_sail_plan', '') %}
+            <select name="row_sail_plan" class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
+                <option value=""></option>
+                <option value="motor_none"{% if sp == 'motor_none' %} selected{% endif %}>🚤 {{ t('logbook.sail_motor_none') }}</option>
+                <option value="mainsail"{% if sp == 'mainsail' %} selected{% endif %}>⛵ {{ t('logbook.sail_mainsail') }}</option>
+                <option value="genoa"{% if sp == 'genoa' %} selected{% endif %}>🎐 {{ t('logbook.sail_genoa') }}</option>
+                <option value="main_genoa"{% if sp == 'main_genoa' %} selected{% endif %}>⛵ {{ t('logbook.sail_main_genoa') }}</option>
+                <option value="no_sails"{% if sp == 'no_sails' %} selected{% endif %}>⚓ {{ t('logbook.sail_none') }}</option>
+            </select>
         </div>
         <div>
             <label class="block text-xs ui-muted">🔧 {{ t('logbook.engine_status') }}</label>
