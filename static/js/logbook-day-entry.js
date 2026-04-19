@@ -9,6 +9,17 @@
 
     if (!tpl || !container) return;
 
+    const i18n = {
+        rowRequired: form ? form.dataset.i18nRowRequired || 'At least one row is required.' : 'At least one row is required.',
+        timeMissing: form ? form.dataset.i18nTimeMissing || 'Time missing in row {n}.' : 'Time missing in row {n}.',
+        timeMonotonic: form ? form.dataset.i18nTimeMonotonic || 'Row {n}: time {time} is before previous ({prev}).' : 'Row {n}: time {time} is before previous ({prev}).',
+        minRow: form ? form.dataset.i18nMinRow || 'At least one row required.' : 'At least one row required.',
+        photosSelected: form ? form.dataset.i18nPhotosSelected || '{n} selected' : '{n} selected'
+    };
+    function fmt(tpl, vars) {
+        return tpl.replace(/\{(\w+)\}/g, (_, k) => vars[k] != null ? vars[k] : '');
+    }
+
     function renumber() {
         const rows = container.querySelectorAll('.day-row');
         rows.forEach((r, i) => {
@@ -64,7 +75,7 @@
         if (removeBtn) {
             removeBtn.addEventListener('click', function () {
                 if (container.children.length <= 1) {
-                    alert('Mindestens eine Zeile erforderlich.');
+                    alert(i18n.minRow);
                     return;
                 }
                 row.remove();
@@ -133,7 +144,7 @@
             const rows = container.querySelectorAll('.day-row');
             if (rows.length === 0) {
                 ev.preventDefault();
-                alert('Mindestens eine Zeile erforderlich.');
+                alert(i18n.rowRequired);
                 return;
             }
             let lastT = null;
@@ -141,12 +152,12 @@
                 const tv = rows[i].querySelector('[name="row_time"]').value;
                 if (!tv) {
                     ev.preventDefault();
-                    alert('Zeile ' + (i + 1) + ': Uhrzeit fehlt.');
+                    alert(fmt(i18n.timeMissing, {n: i + 1}));
                     return;
                 }
                 if (lastT && tv < lastT) {
                     ev.preventDefault();
-                    alert('Zeile ' + (i + 1) + ': Zeit ' + tv + ' liegt vor vorheriger (' + lastT + ').');
+                    alert(fmt(i18n.timeMonotonic, {n: i + 1, time: tv, prev: lastT}));
                     return;
                 }
                 lastT = tv;
@@ -163,7 +174,7 @@
     if (dayPhotos && dayPhotosCount) {
         dayPhotos.addEventListener('change', function() {
             dayPhotosCount.textContent = dayPhotos.files.length
-                ? dayPhotos.files.length + ' ausgewählt'
+                ? fmt(i18n.photosSelected, {n: dayPhotos.files.length})
                 : '';
         });
     }

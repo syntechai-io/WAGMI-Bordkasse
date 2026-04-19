@@ -13,7 +13,12 @@
         <div class="p-3 rounded-lg" style="background: var(--coral-soft); color: var(--coral);">{{ request.session.pop('error') }}</div>
     {% endif %}
 
-    <form action="/logbook/day-new" method="post" id="dayLogbookForm" class="space-y-6" enctype="multipart/form-data">
+    <form action="/logbook/day-new" method="post" id="dayLogbookForm" class="space-y-6" enctype="multipart/form-data"
+          data-i18n-row-required="{{ t('logbook.day_err_row_required') }}"
+          data-i18n-time-missing="{{ t('logbook.day_err_time_missing') }}"
+          data-i18n-time-monotonic="{{ t('logbook.day_err_time_monotonic') }}"
+          data-i18n-min-row="{{ t('logbook.day_err_min_row') }}"
+          data-i18n-photos-selected="{{ t('logbook.day_photos_selected') }}">
         {{ csrf_input | safe }}
 
         {# Header card #}

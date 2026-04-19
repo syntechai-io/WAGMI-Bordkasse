@@ -1093,5 +1093,16 @@
   "trips.finalize_confirm_label": "I confirm that all entries are complete and the trip can be finalized.",
   "trips.finalize_submit": "Finalize trip now",
   "trips.finalize_sail_hours": "Sail hours",
-  "logbook.day_photos_hint": "Optional: photos will be attached to the first entry of the day."
+  "logbook.day_photos_hint": "Optional: photos will be attached to the first entry of the day.",
+  "logbook.day_photos_selected": "{n} selected",
+  "logbook.day_err_date_required": "Date is required.",
+  "logbook.day_err_date_invalid": "Invalid date.",
+  "logbook.day_err_row_required": "At least one row with a time is required.",
+  "logbook.day_err_time_missing": "Row {n}: time is missing.",
+  "logbook.day_err_time_monotonic": "Row {n}: time {time} is before previous ({prev}).",
+  "logbook.day_err_min_row": "At least one row required.",
+  "logbook.day_msg_saved": "{n} logbook entries saved.",
+  "logbook.photo_msg_added": "{n} photos added.",
+  "logbook.photo_msg_partial": "{n} of {total} photos uploaded. Skipped:",
+  "logbook.photo_msg_none": "No photos uploaded. Skipped:"
 }

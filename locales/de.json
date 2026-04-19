@@ -1093,5 +1093,16 @@
   "trips.finalize_confirm_label": "Ich bestätige, dass alle Einträge vollständig sind und der Törn abgeschlossen werden kann.",
   "trips.finalize_submit": "Törn jetzt abschließen",
   "trips.finalize_sail_hours": "Segelstunden",
-  "logbook.day_photos_hint": "Optional: Fotos werden dem ersten Eintrag des Tages hinzugefügt."
+  "logbook.day_photos_hint": "Optional: Fotos werden dem ersten Eintrag des Tages hinzugefügt.",
+  "logbook.day_photos_selected": "{n} ausgewählt",
+  "logbook.day_err_date_required": "Datum ist erforderlich.",
+  "logbook.day_err_date_invalid": "Ungültiges Datum.",
+  "logbook.day_err_row_required": "Mindestens eine Zeile mit Uhrzeit erforderlich.",
+  "logbook.day_err_time_missing": "Zeile {n}: Uhrzeit fehlt.",
+  "logbook.day_err_time_monotonic": "Zeile {n}: Zeit {time} liegt vor vorheriger ({prev}).",
+  "logbook.day_err_min_row": "Mindestens eine Zeile erforderlich.",
+  "logbook.day_msg_saved": "{n} Logbuch-Einträge gespeichert.",
+  "logbook.photo_msg_added": "{n} Fotos hinzugefügt.",
+  "logbook.photo_msg_partial": "{n} von {total} Fotos hochgeladen. Übersprungen:",
+  "logbook.photo_msg_none": "Keine Fotos hochgeladen. Übersprungen:"
 }

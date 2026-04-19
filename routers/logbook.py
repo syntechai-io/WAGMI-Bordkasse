@@ -19,6 +19,15 @@ from constants.logbook_enums import (
     normalize_wind, normalize_visibility, normalize_sail_plan,
     normalize_event_category, display_event_category, display_sea_state,
 )
+from i18n import get_lang, t as i18n_t
+
+
+def _t(request, key, **kw):
+    """Localize a message using the request's current language (DE/EN)."""
+    try:
+        return i18n_t(get_lang(request), key, **kw)
+    except Exception:
+        return key
 
 router = APIRouter(prefix="/logbook", tags=["logbook"])
 templates = create_templates()
@@ -246,13 +255,13 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
     form = await request.form()
     entry_date_str = (form.get("entry_date") or "").strip()
     if not entry_date_str:
-        request.session["error"] = "Datum ist erforderlich."
+        request.session["error"] = _t(request, "logbook.day_err_date_required")
         return RedirectResponse(url="/logbook/day-new", status_code=303)
 
     try:
         base_date = datetime.strptime(entry_date_str, "%Y-%m-%d").date()
     except ValueError:
-        request.session["error"] = "Ungültiges Datum."
+        request.session["error"] = _t(request, "logbook.day_err_date_invalid")
         return RedirectResponse(url="/logbook/day-new", status_code=303)
 
     # Header-level fields applied to first/last row
@@ -271,7 +280,7 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
     rows_data = {k: form.getlist(k) for k in row_keys}
     row_count = len(rows_data["row_time"])
     if row_count == 0:
-        request.session["error"] = "Mindestens eine Zeile erforderlich."
+        request.session["error"] = _t(request, "logbook.day_err_row_required")
         return RedirectResponse(url="/logbook/day-new", status_code=303)
 
     # Build entry list, validate, carry-forward position from previous row
@@ -372,7 +381,7 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
         })
 
     if not parsed_rows:
-        request.session["error"] = "Mindestens eine Zeile mit Uhrzeit erforderlich."
+        request.session["error"] = _t(request, "logbook.day_err_row_required")
         return RedirectResponse(url="/logbook/day-new", status_code=303)
 
     created_ids = []
@@ -417,11 +426,16 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
         first_entry_id = created_ids[0]
         saved, failed = await _save_photos_for_entry(db, valid_photos, first_entry_id, request, active_trip.id)
         if failed:
-            photo_summary = f"{len(saved)} von {len(valid_photos)} Fotos hochgeladen. Übersprungen: " + ", ".join(failed)
+            photo_summary = (
+                _t(request, "logbook.photo_msg_partial")
+                .replace("{n}", str(len(saved)))
+                .replace("{total}", str(len(valid_photos)))
+                + " " + ", ".join(failed)
+            )
         else:
-            photo_summary = f"{len(saved)} Fotos hinzugefügt."
+            photo_summary = _t(request, "logbook.photo_msg_added").replace("{n}", str(len(saved)))
 
-    msg = f"{len(created_ids)} Logbuch-Einträge gespeichert."
+    msg = _t(request, "logbook.day_msg_saved").replace("{n}", str(len(created_ids)))
     if photo_summary:
         msg += " " + photo_summary
     request.session["success"] = msg
@@ -1110,11 +1124,16 @@ async def upload_photo(
 
     saved, failed = await _save_photos_for_entry(db, files, entry_id, request, active_trip.id, caption)
     if saved and not failed:
-        request.session["success"] = f"{len(saved)} Fotos hinzugefügt."
+        request.session["success"] = _t(request, "logbook.photo_msg_added").replace("{n}", str(len(saved)))
     elif saved and failed:
-        request.session["success"] = f"{len(saved)} von {len(files)} Fotos hochgeladen. Übersprungen: " + ", ".join(failed)
+        request.session["success"] = (
+            _t(request, "logbook.photo_msg_partial")
+            .replace("{n}", str(len(saved)))
+            .replace("{total}", str(len(files)))
+            + " " + ", ".join(failed)
+        )
     elif failed and not saved:
-        request.session["error"] = "Keine Fotos hochgeladen. Übersprungen: " + ", ".join(failed)
+        request.session["error"] = _t(request, "logbook.photo_msg_none") + " " + ", ".join(failed)
 
     return RedirectResponse(url=f"/logbook/{entry_id}", status_code=303)
 
