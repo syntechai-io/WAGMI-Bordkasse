@@ -37,6 +37,8 @@
     <link rel="stylesheet" href="/static/ui_desktop_skin.css">
     <link rel="stylesheet" href="/static/ui_navy_contrast_fix.css">
     <link rel="stylesheet" href="/static/ui_mobile_skin.css">
+    <link rel="stylesheet" href="/static/ui_night_mode.css">
+    <script>(function(){try{var t=localStorage.getItem('crewlog-theme');if(t==='night'){document.documentElement.setAttribute('data-theme','night');}}catch(e){}})();</script>
     {% if branding.accent_color %}
     <style>
         :root {
@@ -404,6 +406,7 @@
     </footer>
 
     <script src="/static/ui_nav.js"></script>
+    <script src="/static/js/night-mode.js"></script>
     <script>
         // Dropdown navigation for touch/click devices (desktop)
         document.addEventListener('DOMContentLoaded', function() {

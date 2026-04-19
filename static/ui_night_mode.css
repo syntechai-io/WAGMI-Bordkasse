@@ -1,0 +1,207 @@
+/* CrewLog Night Mode — red on black for night sailing.
+   Activated by setting `data-theme="night"` on <html>.
+   Goal: preserve dark adaptation. Everything is a shade of red on near-black. */
+
+html[data-theme="night"] {
+  color-scheme: dark;
+
+  --night-red: #ff2a2a;
+  --night-red-dim: #cc2020;
+  --night-red-faint: #8a1010;
+  --night-red-muted: #b01818;
+
+  --bg: #000000;
+  --surface: #0a0000;
+  --surface-2: #140404;
+  --border: #4a0a0a;
+  --border-light: #2a0606;
+  --text: var(--night-red);
+  --text-secondary: var(--night-red-dim);
+  --muted: var(--night-red-faint);
+
+  --accent: var(--night-red);
+  --accent-light: #2a0606;
+  --accent-2: var(--night-red-dim);
+
+  --warning: var(--night-red);
+  --success: var(--night-red);
+  --success-light: #1a0303;
+  --warn: var(--night-red);
+  --warn-light: #1a0303;
+  --danger: var(--night-red);
+  --danger-light: #1a0303;
+  --coral: var(--night-red);
+
+  --navy-deep: #0a0000;
+  --shadow-sm: 0 1px 2px rgba(255, 42, 42, 0.10);
+  --shadow: 0 4px 12px rgba(255, 42, 42, 0.10);
+  --shadow-lg: 0 8px 24px rgba(255, 42, 42, 0.15);
+}
+
+html[data-theme="night"],
+html[data-theme="night"] body {
+  background: #000 !important;
+  color: var(--night-red) !important;
+}
+
+/* Tame whites/grays from Tailwind utility classes everywhere */
+html[data-theme="night"] *,
+html[data-theme="night"] *::before,
+html[data-theme="night"] *::after {
+  border-color: var(--border) !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="night"] .bg-white,
+html[data-theme="night"] [class*="bg-gray-"],
+html[data-theme="night"] [class*="bg-slate-"],
+html[data-theme="night"] [class*="bg-sky-"],
+html[data-theme="night"] [class*="bg-blue-"],
+html[data-theme="night"] [class*="bg-indigo-"],
+html[data-theme="night"] [class*="bg-emerald-"],
+html[data-theme="night"] [class*="bg-green-"],
+html[data-theme="night"] [class*="bg-amber-"],
+html[data-theme="night"] [class*="bg-yellow-"],
+html[data-theme="night"] [class*="bg-red-"],
+html[data-theme="night"] [class*="bg-rose-"],
+html[data-theme="night"] [class*="bg-orange-"] {
+  background-color: var(--surface) !important;
+  background-image: none !important;
+}
+
+html[data-theme="night"] [class*="text-white"],
+html[data-theme="night"] [class*="text-gray-"],
+html[data-theme="night"] [class*="text-slate-"],
+html[data-theme="night"] [class*="text-sky-"],
+html[data-theme="night"] [class*="text-blue-"],
+html[data-theme="night"] [class*="text-indigo-"],
+html[data-theme="night"] [class*="text-emerald-"],
+html[data-theme="night"] [class*="text-green-"],
+html[data-theme="night"] [class*="text-amber-"],
+html[data-theme="night"] [class*="text-yellow-"],
+html[data-theme="night"] [class*="text-red-"],
+html[data-theme="night"] [class*="text-rose-"],
+html[data-theme="night"] [class*="text-orange-"],
+html[data-theme="night"] .ui-muted,
+html[data-theme="night"] .maritime-header {
+  color: var(--night-red) !important;
+}
+
+html[data-theme="night"] [class*="border-"] {
+  border-color: var(--border) !important;
+}
+
+/* Cards / surfaces */
+html[data-theme="night"] .porthole-card,
+html[data-theme="night"] .ui-card,
+html[data-theme="night"] .navy-shell,
+html[data-theme="night"] .topbar,
+html[data-theme="night"] .footer-bar,
+html[data-theme="night"] .nav-drawer,
+html[data-theme="night"] .dropdown-content,
+html[data-theme="night"] .ocean-gradient {
+  background: var(--surface) !important;
+  background-image: none !important;
+  color: var(--night-red) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+/* Inputs */
+html[data-theme="night"] input,
+html[data-theme="night"] select,
+html[data-theme="night"] textarea {
+  background-color: #000 !important;
+  color: var(--night-red) !important;
+  border: 1px solid var(--border) !important;
+  caret-color: var(--night-red) !important;
+}
+html[data-theme="night"] input::placeholder,
+html[data-theme="night"] textarea::placeholder {
+  color: var(--night-red-muted) !important;
+  opacity: 1 !important;
+}
+html[data-theme="night"] input:focus,
+html[data-theme="night"] select:focus,
+html[data-theme="night"] textarea:focus {
+  outline: 1px solid var(--night-red) !important;
+  outline-offset: 1px !important;
+  box-shadow: 0 0 0 2px rgba(255, 42, 42, 0.25) !important;
+}
+
+/* Buttons */
+html[data-theme="night"] button,
+html[data-theme="night"] .ocean-gradient,
+html[data-theme="night"] a.nav-item {
+  color: var(--night-red) !important;
+}
+html[data-theme="night"] button:not([disabled]):hover,
+html[data-theme="night"] a:hover {
+  color: #ff5555 !important;
+}
+
+/* Visible focus on all interactive elements for accessibility */
+html[data-theme="night"] a:focus-visible,
+html[data-theme="night"] button:focus-visible,
+html[data-theme="night"] [role="button"]:focus-visible {
+  outline: 2px solid var(--night-red) !important;
+  outline-offset: 2px !important;
+}
+
+/* Links */
+html[data-theme="night"] a { color: var(--night-red) !important; }
+html[data-theme="night"] a:hover { color: #ff5555 !important; }
+
+/* Photos & receipts: dim user-uploaded imagery so it doesn't blow out night vision.
+   Scope kept narrow — does NOT touch icons, logos, or charts. */
+html[data-theme="night"] .photo-thumb img,
+html[data-theme="night"] .receipt-thumb img,
+html[data-theme="night"] img[src*="/uploads/"] {
+  filter: brightness(0.5) sepia(0.6) hue-rotate(-50deg) saturate(3) !important;
+}
+
+/* SVG icons inherit color */
+html[data-theme="night"] svg { color: var(--night-red) !important; fill: currentColor; stroke: currentColor; }
+
+/* Toggle button visual (used by the night-mode pill) */
+.night-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.10);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  margin-right: 0.4rem;
+  line-height: 1;
+}
+html[data-theme="night"] .night-toggle {
+  background: var(--night-red-faint) !important;
+  color: var(--night-red) !important;
+  border: 1px solid var(--night-red-dim) !important;
+}
+
+/* Scrollbar */
+html[data-theme="night"] ::-webkit-scrollbar { background: #000; }
+html[data-theme="night"] ::-webkit-scrollbar-thumb { background: var(--night-red-faint); }
+
+/* Selection */
+html[data-theme="night"] ::selection {
+  background: var(--night-red-dim);
+  color: #000;
+}
+
+/* Brand logos in nav: dim slightly but keep recognizable */
+html[data-theme="night"] .drawer-brand img,
+html[data-theme="night"] .topbar img {
+  filter: brightness(0.6) sepia(0.5) hue-rotate(-40deg) saturate(2.5) !important;
+}
+
+/* Hide theme color flash by setting body bg early via inline JS */
+html[data-theme="night"] [class*="hover:bg-"]:hover {
+  background-color: var(--surface-2) !important;
+}
