@@ -1,76 +1,74 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold maritime-header">📋 {{ t('expense.detail_title') }}</h1>
-        <a href="/expenses" class="hover:underline touch-action" style="color: var(--accent);">← {{ t('common.back') }}</a>
-    </div>
-    
-    <div class="bg-white porthole-card p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">📋 {{ t('expense.detail_title') }}</h1>
+        </div>
+        <div class="cl-pageheader__actions">
+            <a href="/expenses" class="cl-btn cl-btn--ghost">← {{ t('common.back') }}</a>
+        </div>
+    </header>
+
+    <article class="cl-card">
+        <div class="cl-grid cl-grid--2">
             <div>
-                <p class="text-sm ui-muted">📅 {{ t('common.date') }}</p>
-                <p class="text-lg font-semibold">{{ expense.date }}</p>
+                <p class="cl-help cl-help--muted">📅 {{ t('common.date') }}</p>
+                <p style="font-size: 16px; font-weight: 600; margin: 4px 0 0;">{{ expense.date }}</p>
             </div>
             <div>
-                <p class="text-sm ui-muted">📂 {{ t('common.category') }}</p>
-                <p class="text-lg font-semibold">{{ display_expense_cat(expense.category) }}</p>
+                <p class="cl-help cl-help--muted">📂 {{ t('common.category') }}</p>
+                <p style="font-size: 16px; font-weight: 600; margin: 4px 0 0;">{{ display_expense_cat(expense.category) }}</p>
             </div>
             <div>
-                <p class="text-sm ui-muted">👤 {{ t('expense.paid_by') }}</p>
-                <p class="text-lg font-semibold">
-                    {% if expense.payer %}
-                        {{ expense.payer.code }} - {{ expense.payer.name }}
-                    {% else %}
-                        🌐 {{ t('expense.external_charge') }}
-                    {% endif %}
+                <p class="cl-help cl-help--muted">👤 {{ t('expense.paid_by') }}</p>
+                <p style="font-size: 16px; font-weight: 600; margin: 4px 0 0;">
+                    {% if expense.payer %}{{ expense.payer.code }} - {{ expense.payer.name }}{% else %}🌐 {{ t('expense.external_charge') }}{% endif %}
                 </p>
             </div>
             <div>
-                <p class="text-sm ui-muted">💵 {{ t('common.amount') }}</p>
-                <p class="text-lg font-semibold" style="color: var(--coral);">{{ "%.2f"|format(expense.amount_eur) }} €</p>
+                <p class="cl-help cl-help--muted">💵 {{ t('common.amount') }}</p>
+                <p class="cl-num" style="font-size: 18px; color: var(--cl-danger); margin: 4px 0 0;">{{ "%.2f"|format(expense.amount_eur) }} €</p>
             </div>
             <div>
-                <p class="text-sm ui-muted">💰 {{ t('expense.paid_from') }}</p>
-                <p class="text-lg font-semibold">{% if expense.paid_from.value == 'wallet' %}{{ t('common.wallet') }}{% else %}{{ t('common.private') }}{% endif %}</p>
+                <p class="cl-help cl-help--muted">💰 {{ t('expense.paid_from') }}</p>
+                <p style="font-size: 16px; font-weight: 600; margin: 4px 0 0;">{% if expense.paid_from.value == 'wallet' %}{{ t('common.wallet') }}{% else %}{{ t('common.private') }}{% endif %}</p>
             </div>
             <div>
-                <p class="text-sm ui-muted">🎯 {{ t('expense.split_mode') }}</p>
-                <p class="text-lg font-semibold">{% if expense.split_mode.value == 'equal' %}{{ t('expense.split_equal') }}{% elif expense.split_mode.value == 'participants' %}{{ t('expense.split_participants') }}{% else %}{{ t('expense.split_percentage') }}{% endif %}</p>
+                <p class="cl-help cl-help--muted">🎯 {{ t('expense.split_mode') }}</p>
+                <p style="font-size: 16px; font-weight: 600; margin: 4px 0 0;">{% if expense.split_mode.value == 'equal' %}{{ t('expense.split_equal') }}{% elif expense.split_mode.value == 'participants' %}{{ t('expense.split_participants') }}{% else %}{{ t('expense.split_percentage') }}{% endif %}</p>
             </div>
-            <div class="md:col-span-2">
-                <p class="text-sm ui-muted">📝 {{ t('common.description') }}</p>
-                <p class="text-lg font-semibold">{{ expense.description }}</p>
+            <div style="grid-column: 1 / -1;">
+                <p class="cl-help cl-help--muted">📝 {{ t('common.description') }}</p>
+                <p style="font-size: 16px; font-weight: 600; margin: 4px 0 0;">{{ expense.description }}</p>
             </div>
-            <div class="md:col-span-2">
-                <p class="text-sm ui-muted">👥 {{ t('expense.participants') }}</p>
-                <p class="text-lg">
-                    {% for p in expense.participants %}
-                        {{ p.member.code }}{% if not loop.last %}, {% endif %}
-                    {% endfor %}
+            <div style="grid-column: 1 / -1;">
+                <p class="cl-help cl-help--muted">👥 {{ t('expense.participants') }}</p>
+                <p style="margin: 4px 0 0;">
+                    {% for p in expense.participants %}{{ p.member.code }}{% if not loop.last %}, {% endif %}{% endfor %}
                 </p>
             </div>
         </div>
-        
-        <div class="rope-divider"></div>
-        
-        <div class="pt-4">
-            <h3 class="text-lg font-bold maritime-header mb-4">📎 {{ t('expense.receipts') }}</h3>
+
+        <div style="height: 1px; background: var(--cl-border); margin: var(--cl-space-2) 0;"></div>
+
+        <section>
+            <h2 class="cl-section-title">📎 {{ t('expense.receipts') }}</h2>
             {% if expense.receipts %}
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="cl-grid cl-grid--4">
                 {% for receipt in expense.receipts %}
-                <a href="/receipts/{{ receipt.stored_filename }}" class="block porthole-card p-3 touch-action" style="transition: transform 0.2s; border-color: var(--border);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                    <p class="text-sm font-medium truncate">{{ receipt.original_name }}</p>
-                    <p class="text-xs ui-muted">{{ (receipt.size_bytes / 1024) | round(1) }} KB</p>
+                <a href="/receipts/{{ receipt.stored_filename }}" class="cl-card-link" style="display: block; padding: var(--cl-space-3); border: 1px solid var(--cl-border); border-radius: var(--cl-radius-sm); background: var(--cl-surface-2);">
+                    <p style="font-size: 13px; font-weight: 600; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ receipt.original_name }}</p>
+                    <p class="cl-help cl-help--muted" style="margin: 4px 0 0;">{{ (receipt.size_bytes / 1024) | round(1) }} KB</p>
                 </a>
                 {% endfor %}
             </div>
             {% else %}
-            <p class="ui-muted">{{ t('expense.no_receipts') }}</p>
+            <p class="cl-muted">{{ t('expense.no_receipts') }}</p>
             {% endif %}
-            <p class="text-sm mt-3 ui-muted">💡 {{ t('expense.receipt_tip') }}</p>
-        </div>
-    </div>
+            <p class="cl-help cl-help--muted" style="margin-top: var(--cl-space-3);">💡 {{ t('expense.receipt_tip') }}</p>
+        </section>
+    </article>
 </div>
 {% endblock %}

@@ -1,93 +1,89 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="space-y-6">
-    <h1 class="text-3xl font-bold maritime-header">📊 {{ t('balance.title') }}</h1>
-    
-    <div class="porthole-card px-4 py-3 rounded-lg" style="background: var(--surface-2); border-color: var(--accent);">
-        <p class="font-semibold">💰 {{ t('balance.wallet_balance') }}: {{ "%.2f"|format(wallet_balance) }} €</p>
-    </div>
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">📊 {{ t('balance.title') }}</h1>
+        </div>
+    </header>
 
-    <div class="bg-white porthole-card overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full">
-                <thead style="background: var(--surface-2);">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('balance.col_member') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('balance.col_paid') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('balance.col_share') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('balance.col_net') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('balance.col_status') }}</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-sky-200">
-                    {% for balance in balances %}
-                    <tr {% if balance.get('grouped') and not balance.get('is_representative') %}class="opacity-60"{% endif %}>
-                        <td class="px-6 py-4 whitespace-nowrap font-semibold">
-                            <div class="flex items-center space-x-2">
-                                <span>{{ balance.member.code }} - {{ balance.member.name }}</span>
-                                {% if balance.get('is_representative') %}
-                                <span class="px-2 py-1 text-xs rounded-full text-white" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);" title="Representative for {{ balance.get('group_name') }}">
-                                    👑 Rep
-                                </span>
-                                {% elif balance.get('grouped') %}
-                                <span class="px-2 py-1 text-xs rounded-full text-white" style="background: var(--success);" title="Settled by {{ balance.get('representative_code') }}">
-                                    👥 {{ balance.get('group_name') }}
-                                </span>
+    <div class="cl-stack">
+        <div class="cl-kpi">
+            <span class="cl-kpi__label">💰 {{ t('balance.wallet_balance') }}</span>
+            <span class="cl-kpi__value">{{ "%.2f"|format(wallet_balance) }} €</span>
+        </div>
+
+        <section class="cl-table-wrap">
+            <div class="cl-table-scroll">
+                <table class="cl-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t('balance.col_member') }}</th>
+                            <th>{{ t('balance.col_paid') }}</th>
+                            <th>{{ t('balance.col_share') }}</th>
+                            <th>{{ t('balance.col_net') }}</th>
+                            <th>{{ t('balance.col_status') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for balance in balances %}
+                        <tr {% if balance.get('grouped') and not balance.get('is_representative') %}style="opacity: .6;"{% endif %}>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: var(--cl-space-2); flex-wrap: wrap;">
+                                    <strong>{{ balance.member.code }} - {{ balance.member.name }}</strong>
+                                    {% if balance.get('is_representative') %}
+                                    <span class="cl-pill cl-pill--warn" title="Representative for {{ balance.get('group_name') }}">👑 Rep</span>
+                                    {% elif balance.get('grouped') %}
+                                    <span class="cl-pill cl-pill--solid-success" title="Settled by {{ balance.get('representative_code') }}">👥 {{ balance.get('group_name') }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="cl-num">{{ "%.2f"|format(balance.paid_total) }} €</td>
+                            <td class="cl-num">{{ "%.2f"|format(balance.share_owed) }} €</td>
+                            <td class="cl-num" style="color: {% if balance.net > 0 %}var(--cl-success){% elif balance.net < 0 %}var(--cl-danger){% else %}var(--cl-text-muted){% endif %};">
+                                {{ "%.2f"|format(balance.net) }} €
+                            </td>
+                            <td>
+                                {% if balance.get('grouped') and not balance.get('is_representative') %}
+                                <span class="cl-pill cl-pill--solid-accent">→ {{ balance.get('representative_code') }}</span>
+                                {% else %}
+                                    {% if balance.status == 'receives' %}
+                                    <span class="cl-pill cl-pill--solid-success">⬆️ {{ t('balance.status_receives') }}</span>
+                                    {% elif balance.status == 'pays' %}
+                                    <span class="cl-pill cl-pill--solid-danger">⬇️ {{ t('balance.status_pays') }}</span>
+                                    {% else %}
+                                    <span class="cl-pill">✅ {{ t('balance.status_even') }}</span>
+                                    {% endif %}
                                 {% endif %}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ "%.2f"|format(balance.paid_total) }} €</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ "%.2f"|format(balance.share_owed) }} €</td>
-                        <td class="px-6 py-4 whitespace-nowrap font-bold" style="color: {% if balance.net > 0 %}var(--success){% elif balance.net < 0 %}var(--coral){% else %}var(--sand){% endif %};">
-                            {{ "%.2f"|format(balance.net) }} €
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if balance.get('grouped') and not balance.get('is_representative') %}
-                            <span class="px-2 py-1 text-xs rounded-full text-white" style="background: var(--accent);">
-                                → {{ balance.get('representative_code') }}
-                            </span>
-                            {% else %}
-                            <span class="px-2 py-1 text-xs rounded-full text-white" 
-                                style="background: {% if balance.status == 'receives' %}linear-gradient(135deg, var(--success) 0%, #27ae60 100%){% elif balance.status == 'pays' %}linear-gradient(135deg, var(--coral) 0%, #e74c3c 100%){% else %}linear-gradient(135deg, var(--sand) 0%, #c9a961 100%){% endif %}">
-                                {% if balance.status == 'receives' %}⬆️ {{ t('balance.status_receives') }}
-                                {% elif balance.status == 'pays' %}⬇️ {{ t('balance.status_pays') }}
-                                {% else %}✅ {{ t('balance.status_even') }}{% endif %}
-                            </span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% if balance.get('is_representative') %}
-                    <tr class="bg-blue-50">
-                        <td colspan="5" class="px-6 py-3">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-4 text-sm">
-                                    <span class="font-semibold text-blue-900">👥 {{ t('balance.settlement_group') }} "{{ balance.get('group_name') }}":</span>
-                                    <span class="text-blue-700">{{ t('balance.individual') }}: {{ "%.2f"|format(balance.net) }} €</span>
-                                    <span class="text-blue-900 font-bold">→</span>
-                                    <span class="font-bold px-3 py-1 rounded" style="background: var(--surface-2); color: {% if settlement_net_map[balance.member.code] > 0 %}var(--success){% elif settlement_net_map[balance.member.code] < 0 %}var(--coral){% else %}var(--sand){% endif %};">
+                            </td>
+                        </tr>
+                        {% if balance.get('is_representative') %}
+                        <tr style="background: var(--cl-accent-soft);">
+                            <td colspan="5">
+                                <div style="display: flex; align-items: center; gap: var(--cl-space-3); flex-wrap: wrap; font-size: 13px;">
+                                    <strong style="color: var(--cl-navy);">👥 {{ t('balance.settlement_group') }} "{{ balance.get('group_name') }}":</strong>
+                                    <span class="cl-muted">{{ t('balance.individual') }}: {{ "%.2f"|format(balance.net) }} €</span>
+                                    <span style="font-weight: 700;">→</span>
+                                    <span class="cl-pill" style="background: var(--cl-surface); color: {% if settlement_net_map[balance.member.code] > 0 %}var(--cl-success){% elif settlement_net_map[balance.member.code] < 0 %}var(--cl-danger){% else %}var(--cl-text-muted){% endif %};">
                                         {{ t('balance.group_total') }}: {{ "%.2f"|format(settlement_net_map[balance.member.code]) }} €
                                     </span>
+                                    <span class="cl-help cl-help--muted" style="font-style: italic;">({{ t('balance.used_for_settlement') }})</span>
                                 </div>
-                                <span class="text-xs text-blue-600 italic">
-                                    ({{ t('balance.used_for_settlement') }})
-                                </span>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div style="display: flex; justify-content: center;">
+            <a href="/settlement" class="cl-btn cl-btn--primary" style="height: 48px; padding: 0 var(--cl-space-6); font-size: 15px;">
+                ⛵ {{ t('balance.calculate_settlement') }} →
+            </a>
         </div>
-    </div>
-
-    <div class="rope-divider"></div>
-
-    <div class="flex justify-center">
-        <a href="/settlement" class="text-white px-8 py-3 rounded-lg text-lg font-semibold transition touch-action" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
-            ⛵ {{ t('balance.calculate_settlement') }} →
-        </a>
     </div>
 </div>
 {% endblock %}

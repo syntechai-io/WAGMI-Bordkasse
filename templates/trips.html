@@ -1,213 +1,207 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
-        <h1 class="ui-title maritime-header" style="margin-bottom: 0;">⛵ {{ t('trips.title') }}</h1>
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">⛵ {{ t('trips.title') }}</h1>
+        </div>
         {% if request.session.get('role') == 'admin' or is_saas_owner %}
-        <a href="/trips/yearly/report" class="text-white px-4 py-2 rounded-lg hover:shadow-lg transition font-semibold" style="background: var(--accent);">
-            📊 {{ branding.brand_name }} {{ t('trips.yearly_overview') }}
-        </a>
+        <div class="cl-pageheader__actions">
+            <a href="/trips/yearly/report" class="cl-btn cl-btn--accent">
+                📊 {{ branding.brand_name }} {{ t('trips.yearly_overview') }}
+            </a>
+        </div>
         {% endif %}
-    </div>
+    </header>
 
-    {% if request.query_params.get('upgrade_required') and not is_legacy_admin %}
-    <div class="rounded-xl p-4" style="background: #fef3c7; border: 1px solid #f59e0b;" data-ios-hide>
-        <p class="font-semibold" style="color: #92400e;">⚠️ {{ t('billing.over_limit_title') }}</p>
-        <p class="text-sm mt-1" style="color: #92400e;">{{ t('billing.over_limit_info') }}</p>
-        <a href="/billing" class="inline-block mt-2 text-white px-4 py-2 rounded-lg font-semibold text-sm" style="background: var(--accent);">
-            {{ t('billing.over_limit_upgrade') }}
-        </a>
-    </div>
-    {% endif %}
-    
-    {% if request.session.get('role') == 'admin' or is_saas_owner %}
-    <div class="bg-white porthole-card p-6">
-        <div class="flex flex-col md:flex-row gap-4 mb-4">
-            <div class="flex-1">
-                <h2 class="text-xl font-bold maritime-header">➕ {{ t('trips.create_title') }}</h2>
+    <div class="cl-stack">
+        {% if request.query_params.get('upgrade_required') and not is_legacy_admin %}
+        <div class="cl-alert cl-alert--warn" data-ios-hide>
+            <strong>⚠️ {{ t('billing.over_limit_title') }}</strong>
+            <div>{{ t('billing.over_limit_info') }}</div>
+            <div style="margin-top: var(--cl-space-2);">
+                <a href="/billing" class="cl-btn cl-btn--accent cl-btn--sm">{{ t('billing.over_limit_upgrade') }}</a>
             </div>
-            <div>
-                <form method="post" action="/trips/quick-start" class="inline">
+        </div>
+        {% endif %}
+
+        {% if request.session.get('role') == 'admin' or is_saas_owner %}
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">➕ {{ t('trips.create_title') }}</h2>
+                <form method="post" action="/trips/quick-start" style="margin: 0;">
                     {{ csrf_input | safe }}
-                    <button type="submit" class="w-full md:w-auto text-white px-6 py-3 rounded-lg transition touch-action font-bold text-lg shadow-lg hover:shadow-xl" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                    <button type="submit" class="cl-btn cl-btn--warn">
                         ⚡ {{ t('trips.quick_start') }} {{ branding.brand_name }}
                     </button>
                 </form>
-                <p class="text-xs mt-1 text-center ui-muted">{{ t('trips.quick_start_hint') }}</p>
-            </div>
-        </div>
-        <form method="post" action="/trips/new" class="space-y-4">
-            {{ csrf_input | safe }}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">⛵ {{ t('trips.name_label') }}</label>
-                    <input type="text" name="name" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);" placeholder="{{ t('trips.name_placeholder') }}">
+            </header>
+            <p class="cl-help cl-help--muted">{{ t('trips.quick_start_hint') }}</p>
+
+            <form method="post" action="/trips/new" class="cl-stack cl-stack--sm">
+                {{ csrf_input | safe }}
+                <div class="cl-grid cl-grid--3">
+                    <div class="cl-field">
+                        <label class="cl-label">⛵ {{ t('trips.name_label') }}</label>
+                        <input type="text" name="name" required class="cl-input" placeholder="{{ t('trips.name_placeholder') }}">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">📅 {{ t('trips.start_date') }}</label>
+                        <input type="date" name="start_date" required class="cl-input">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">&nbsp;</label>
+                        <button type="submit" class="cl-btn cl-btn--success cl-btn--block">
+                            ✅ {{ t('trips.create_submit') }}
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">📅 {{ t('trips.start_date') }}</label>
-                    <input type="date" name="start_date" required class="w-full px-3 py-2 border rounded-lg" style="border-color: var(--border);">
-                </div>
-                <div class="flex items-end">
-                    <button type="submit" class="w-full text-white px-6 py-2 rounded-lg transition touch-action font-semibold" style="background: var(--success);">
-                        ✅ {{ t('trips.create_submit') }}
-                    </button>
-                </div>
-            </div>
-            <div class="flex items-center space-x-2 p-3 rounded-lg" style="background: var(--surface-2);">
-                <input type="checkbox" name="solo_sailing" id="solo_sailing" value="true" class="w-4 h-4" style="accent-color: var(--accent);">
-                <label for="solo_sailing" class="text-sm font-medium cursor-pointer">
-                    👤 {{ t('trips.solo_sailing') }}
+                <label class="cl-check-row">
+                    <input type="checkbox" name="solo_sailing" id="solo_sailing" value="true">
+                    <span class="cl-check-row__label">👤 {{ t('trips.solo_sailing') }}</span>
                 </label>
+                <p class="cl-help cl-help--muted">{{ t('trips.create_hint') }}</p>
+            </form>
+        </section>
+        {% endif %}
+
+        <section class="cl-table-wrap">
+            <div style="padding: var(--cl-space-4) var(--cl-space-5); background: var(--cl-surface-2); border-bottom: 1px solid var(--cl-border);">
+                <h2 class="cl-section-title" style="margin: 0;">📋 {{ t('trips.all_trips') }}</h2>
             </div>
-        </form>
-        <p class="text-sm mt-2 ui-muted">{{ t('trips.create_hint') }}</p>
-    </div>
-
-    <div class="rope-divider"></div>
-    {% endif %}
-
-    <div class="bg-white porthole-card overflow-hidden">
-        <div class="p-6 mb-4" style="background: var(--surface-2);">
-            <h2 class="text-xl font-bold maritime-header">📋 {{ t('trips.all_trips') }}</h2>
-        </div>
-        
-        <div class="overflow-x-auto">
-            <table class="min-w-full">
-                <thead style="background: var(--surface-2);">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_name') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_start') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_end') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_distance') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_status') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-sky-200">
-                    {% for trip in trips %}
-                    <tr>
-                        <td class="px-6 py-4 font-semibold">
-                            <div id="trip-name-display-{{ trip.id }}" class="flex items-center gap-1 flex-wrap">
-                                <span>{{ trip.name }}</span>
-                                {% if trip.id == active_trip.id %}
-                                <span class="text-xs px-2 py-1 rounded-full" style="background: var(--success); color: white;">{{ t('trips.status_active') }}</span>
-                                {% endif %}
-                                {% if trip.is_closed == 1 %}
-                                <span class="text-xs px-2 py-1 rounded-full" style="background: var(--coral); color: white;">🔒 {{ t('trips.status_closed') }}</span>
-                                {% endif %}
+            <div class="cl-table-scroll">
+                <table class="cl-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t('trips.col_name') }}</th>
+                            <th>{{ t('trips.col_start') }}</th>
+                            <th>{{ t('trips.col_end') }}</th>
+                            <th>{{ t('trips.col_distance') }}</th>
+                            <th>{{ t('trips.col_status') }}</th>
+                            <th>{{ t('trips.col_actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trip in trips %}
+                        <tr>
+                            <td>
+                                <div id="trip-name-display-{{ trip.id }}" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                                    <strong>{{ trip.name }}</strong>
+                                    {% if trip.id == active_trip.id %}
+                                    <span class="cl-pill cl-pill--solid-success">{{ t('trips.status_active') }}</span>
+                                    {% endif %}
+                                    {% if trip.is_closed == 1 %}
+                                    <span class="cl-pill cl-pill--solid-danger">🔒 {{ t('trips.status_closed') }}</span>
+                                    {% endif %}
+                                    {% if request.session.get('role') == 'admin' or is_saas_owner %}
+                                    <button type="button" onclick="toggleRename({{ trip.id }})" class="cl-iconbtn" style="width: 28px; height: 28px; font-size: 12px;" title="{{ t('trips.action_rename') }}">✏️</button>
+                                    {% endif %}
+                                </div>
                                 {% if request.session.get('role') == 'admin' or is_saas_owner %}
-                                <button type="button" onclick="toggleRename({{ trip.id }})" class="text-xs hover:opacity-70 touch-action" style="color: var(--text-secondary);" title="{{ t('trips.action_rename') }}">✏️</button>
+                                <form id="trip-rename-form-{{ trip.id }}" action="/trips/{{ trip.id }}/rename" method="post" class="hidden" style="margin-top: 8px; display: flex; gap: 4px; align-items: center;">
+                                    {{ csrf_input | safe }}
+                                    <input type="text" name="name" value="{{ trip.name }}" required class="cl-input" style="height: 36px; flex: 1;">
+                                    <button type="submit" class="cl-btn cl-btn--success cl-btn--sm">✔</button>
+                                    <button type="button" onclick="toggleRename({{ trip.id }})" class="cl-btn cl-btn--secondary cl-btn--sm">✖</button>
+                                </form>
                                 {% endif %}
-                            </div>
-                            {% if request.session.get('role') == 'admin' or is_saas_owner %}
-                            <form id="trip-rename-form-{{ trip.id }}" action="/trips/{{ trip.id }}/rename" method="post" class="hidden mt-2 flex gap-1 items-center" style="min-width:180px;">
-                                {{ csrf_input | safe }}
-                                <input type="text" name="name" value="{{ trip.name }}" required
-                                       class="flex-1 px-2 py-1 border rounded text-sm" style="border-color: var(--border); min-width: 120px;">
-                                <button type="submit" class="text-white px-2 py-1 rounded text-xs font-bold touch-action" style="background: var(--success);">✔</button>
-                                <button type="button" onclick="toggleRename({{ trip.id }})" class="px-2 py-1 rounded text-xs touch-action" style="background: var(--border);">✖</button>
-                            </form>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ trip.start_date }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ trip.end_date or '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            {% set total_nm = trip_totals.get(trip.id) %}
-                            {% if total_nm %}
-                                <span class="font-semibold">{{ "%.1f"|format(total_nm) }}</span> <span class="ui-muted">nm</span>
-                            {% else %}
-                                <span class="ui-muted">—</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if trip.status.value == 'active' %}
-                            <span class="px-3 py-1 rounded-lg font-semibold" style="background: var(--success); color: white;">{{ t('trips.status_active') }}</span>
-                            {% else %}
-                            <span class="px-3 py-1 rounded-lg font-semibold" style="background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.2) 100%);">{{ t('trips.status_archived') }}</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                            <form action="/trips/{{ trip.id }}/select" method="post" class="inline">
-                                {{ csrf_input | safe }}
-                                <button type="submit" class="hover:underline touch-action" style="color: var(--accent);">👁️ {{ t('trips.action_view') }}</button>
-                            </form>
-                            <a href="/trips/{{ trip.id }}/track" class="hover:underline touch-action inline" style="color: var(--accent);" title="{{ t('track.title') }}">🗺️ {{ t('trips.action_track') }}</a>
-                            
-                            {% if request.session.get('role') == 'admin' or is_saas_owner %}
-                                {% if trip.is_closed == 0 %}
-                                <a href="/trips/{{ trip.id }}/finalize" class="hover:underline touch-action inline" style="color: var(--coral);" title="{{ t('trips.finalize_title') }}">🏁 {{ t('trips.finalize_action') }}</a>
+                            </td>
+                            <td>{{ trip.start_date }}</td>
+                            <td>{{ trip.end_date or '-' }}</td>
+                            <td class="cl-num">
+                                {% set total_nm = trip_totals.get(trip.id) %}
+                                {% if total_nm %}
+                                    {{ "%.1f"|format(total_nm) }} <span class="cl-help cl-help--muted">nm</span>
                                 {% else %}
-                                <form action="/trips/{{ trip.id }}/reopen" method="post" class="inline">
-                                    {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action" style="color: var(--success);" title="{{ t('trips.help_reopen') }}">🔓 {{ t('trips.action_reopen') }}</button>
-                                </form>
+                                    <span class="cl-help cl-help--muted">—</span>
                                 {% endif %}
-                                
-                                {% if trip.status.value == 'archived' %}
-                                <form action="/trips/{{ trip.id }}/activate" method="post" class="inline">
-                                    {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action" style="color: var(--accent);">✅ {{ t('trips.action_activate') }}</button>
-                                </form>
-                                {% elif trip.id != active_trip.id %}
-                                <form action="/trips/{{ trip.id }}/archive" method="post" class="inline" onsubmit="return confirm('{{ t('trips.confirm_archive') }}')">
-                                    {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action">📦 {{ t('trips.action_archive') }}</button>
-                                </form>
+                            </td>
+                            <td>
+                                {% if trip.status.value == 'active' %}
+                                <span class="cl-pill cl-pill--solid-success">{{ t('trips.status_active') }}</span>
+                                {% else %}
+                                <span class="cl-pill">{{ t('trips.status_archived') }}</span>
                                 {% endif %}
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    
-    {% if is_saas_owner and current_plan == 'FREE' and not is_legacy_admin %}
-    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-lg p-4" data-ios-hide>
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-                <p class="font-bold">🚀 {{ t('trips.upgrade_title') }}</p>
-                <p class="text-sm mt-1 ui-muted">{{ t('trips.upgrade_desc') }}</p>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="startCheckout('monthly')" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: var(--accent);">
-                    {{ t('trips.upgrade_monthly') }}
-                </button>
-                <button onclick="startCheckout('yearly')" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
-                    {{ t('trips.upgrade_yearly') }}
-                </button>
-            </div>
-        </div>
-    </div>
-    {% elif is_saas_owner and current_plan == 'SKIPPER_PLUS' %}
-    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-4" data-ios-hide>
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-                <p class="font-bold">✅ {{ t('trips.active_plan') }}</p>
-                <p class="text-sm mt-1 ui-muted">{{ t('trips.active_plan_desc') }}</p>
-            </div>
-            <button onclick="openBillingPortal()" class="text-white px-4 py-2 rounded-lg font-semibold text-sm transition hover:shadow-lg" style="background: var(--accent);">
-                {{ t('trips.manage_sub') }}
-            </button>
-        </div>
-    </div>
-    {% endif %}
+                            </td>
+                            <td>
+                                <div class="cl-actions">
+                                    <form action="/trips/{{ trip.id }}/select" method="post" style="margin:0;">
+                                        {{ csrf_input | safe }}
+                                        <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">👁️ {{ t('trips.action_view') }}</button>
+                                    </form>
+                                    <a href="/trips/{{ trip.id }}/track" class="cl-btn cl-btn--ghost cl-btn--sm" title="{{ t('track.title') }}">🗺️ {{ t('trips.action_track') }}</a>
 
-    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-        <p class="text-sm font-semibold mb-2">💡 {{ t('trips.help_title') }}</p>
-        <ul class="text-sm space-y-1">
-            <li><strong>👁️ {{ t('trips.action_view') }}:</strong> {{ t('trips.help_view') }}</li>
-            {% if request.session.get('role') == 'admin' or is_saas_owner %}
-            <li><strong>🔒 {{ t('trips.action_close') }}:</strong> {{ t('trips.help_close') }}</li>
-            <li><strong>🔓 {{ t('trips.action_reopen') }}:</strong> {{ t('trips.help_reopen') }}</li>
-            <li><strong>✅ {{ t('trips.action_activate') }}:</strong> {{ t('trips.help_activate') }}</li>
-            <li><strong>📦 {{ t('trips.action_archive') }}:</strong> {{ t('trips.help_archive') }}</li>
-            {% else %}
-            <li><strong>🔒 {{ t('trips.status_closed') }}:</strong> {{ t('trips.help_closed') }}</li>
-            {% endif %}
-        </ul>
+                                    {% if request.session.get('role') == 'admin' or is_saas_owner %}
+                                        {% if trip.is_closed == 0 %}
+                                        <a href="/trips/{{ trip.id }}/finalize" class="cl-btn cl-btn--ghost-danger cl-btn--sm" title="{{ t('trips.finalize_title') }}">🏁 {{ t('trips.finalize_action') }}</a>
+                                        {% else %}
+                                        <form action="/trips/{{ trip.id }}/reopen" method="post" style="margin:0;">
+                                            {{ csrf_input | safe }}
+                                            <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm" style="color: var(--cl-success);" title="{{ t('trips.help_reopen') }}">🔓 {{ t('trips.action_reopen') }}</button>
+                                        </form>
+                                        {% endif %}
+
+                                        {% if trip.status.value == 'archived' %}
+                                        <form action="/trips/{{ trip.id }}/activate" method="post" style="margin:0;">
+                                            {{ csrf_input | safe }}
+                                            <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">✅ {{ t('trips.action_activate') }}</button>
+                                        </form>
+                                        {% elif trip.id != active_trip.id %}
+                                        <form action="/trips/{{ trip.id }}/archive" method="post" style="margin:0;" onsubmit="return confirm('{{ t('trips.confirm_archive') }}')">
+                                            {{ csrf_input | safe }}
+                                            <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">📦 {{ t('trips.action_archive') }}</button>
+                                        </form>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {% if is_saas_owner and current_plan == 'FREE' and not is_legacy_admin %}
+        <div class="cl-alert cl-alert--warn" data-ios-hide>
+            <div style="display: flex; flex-direction: column; gap: var(--cl-space-3); align-items: flex-start;">
+                <div>
+                    <strong>🚀 {{ t('trips.upgrade_title') }}</strong>
+                    <div>{{ t('trips.upgrade_desc') }}</div>
+                </div>
+                <div style="display: flex; gap: var(--cl-space-2); flex-wrap: wrap;">
+                    <button onclick="startCheckout('monthly')" class="cl-btn cl-btn--accent cl-btn--sm">{{ t('trips.upgrade_monthly') }}</button>
+                    <button onclick="startCheckout('yearly')" class="cl-btn cl-btn--warn cl-btn--sm">{{ t('trips.upgrade_yearly') }}</button>
+                </div>
+            </div>
+        </div>
+        {% elif is_saas_owner and current_plan == 'SKIPPER_PLUS' %}
+        <div class="cl-alert cl-alert--success" data-ios-hide>
+            <div style="display: flex; flex-direction: column; gap: var(--cl-space-3); align-items: flex-start;">
+                <div>
+                    <strong>✅ {{ t('trips.active_plan') }}</strong>
+                    <div>{{ t('trips.active_plan_desc') }}</div>
+                </div>
+                <button onclick="openBillingPortal()" class="cl-btn cl-btn--accent cl-btn--sm">{{ t('trips.manage_sub') }}</button>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="cl-alert cl-alert--info">
+            <strong>💡 {{ t('trips.help_title') }}</strong>
+            <ul style="margin: var(--cl-space-2) 0 0; padding-left: 1.2em; font-size: 13px;">
+                <li><strong>👁️ {{ t('trips.action_view') }}:</strong> {{ t('trips.help_view') }}</li>
+                {% if request.session.get('role') == 'admin' or is_saas_owner %}
+                <li><strong>🔒 {{ t('trips.action_close') }}:</strong> {{ t('trips.help_close') }}</li>
+                <li><strong>🔓 {{ t('trips.action_reopen') }}:</strong> {{ t('trips.help_reopen') }}</li>
+                <li><strong>✅ {{ t('trips.action_activate') }}:</strong> {{ t('trips.help_activate') }}</li>
+                <li><strong>📦 {{ t('trips.action_archive') }}:</strong> {{ t('trips.help_archive') }}</li>
+                {% else %}
+                <li><strong>🔒 {{ t('trips.status_closed') }}:</strong> {{ t('trips.help_closed') }}</li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -222,36 +216,19 @@ async function startCheckout(interval) {
     const form = new FormData();
     form.append('interval', interval);
     try {
-        const res = await fetch('/billing/checkout', {
-            method: 'POST',
-            body: form,
-            headers: { 'x-csrftoken': getCsrfToken() }
-        });
+        const res = await fetch('/billing/checkout', { method: 'POST', body: form, headers: { 'x-csrftoken': getCsrfToken() } });
         const data = await res.json();
-        if (data.checkout_url) {
-            window.location.href = data.checkout_url;
-        } else {
-            alert(data.detail || '{{ t("trips.checkout_error") }}');
-        }
-    } catch (e) {
-        alert('{{ t("trips.checkout_fetch_error") }}');
-    }
+        if (data.checkout_url) window.location.href = data.checkout_url;
+        else alert(data.detail || '{{ t("trips.checkout_error") }}');
+    } catch (e) { alert('{{ t("trips.checkout_fetch_error") }}'); }
 }
 async function openBillingPortal() {
     try {
-        const res = await fetch('/billing/portal', {
-            method: 'POST',
-            headers: { 'x-csrftoken': getCsrfToken() }
-        });
+        const res = await fetch('/billing/portal', { method: 'POST', headers: { 'x-csrftoken': getCsrfToken() } });
         const data = await res.json();
-        if (data.portal_url) {
-            window.location.href = data.portal_url;
-        } else {
-            alert(data.detail || '{{ t("trips.portal_error") }}');
-        }
-    } catch (e) {
-        alert('{{ t("trips.portal_fetch_error") }}');
-    }
+        if (data.portal_url) window.location.href = data.portal_url;
+        else alert(data.detail || '{{ t("trips.portal_error") }}');
+    } catch (e) { alert('{{ t("trips.portal_fetch_error") }}'); }
 }
 function toggleRename(tripId) {
     var display = document.getElementById('trip-name-display-' + tripId);

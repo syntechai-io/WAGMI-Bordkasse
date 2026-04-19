@@ -23,134 +23,78 @@ function setCurrentLocalTime(inputId) {
 }
 </script>
 
-<div class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h1 class="ui-title" style="margin-bottom: 0;">{{ t('dashboard.title') }}</h1>
-        <div class="text-right">
-            <p class="text-xs" style="color: var(--muted);">{{ t('dashboard.selected_trip') }}</p>
-            <p class="text-base font-semibold" style="color: var(--accent);">{{ active_trip.name }}</p>
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">{{ t('dashboard.title') }}</h1>
+            <p class="cl-subtitle">
+                {{ t('dashboard.selected_trip') }}:
+                <strong style="color: var(--cl-accent);">{{ active_trip.name }}</strong>
+            </p>
         </div>
-    </div>
-    
-    {% if not is_editable and request.session.get('role') == 'crew' %}
-    <div class="alert alert-warn">
-        <div class="text-xl">🔒</div>
-        <div>
-            <p class="font-bold">{{ t('dashboard.trip_closed') }}</p>
-            <p class="text-sm mt-0.5">{{ t('dashboard.trip_closed_desc') }}</p>
-        </div>
-    </div>
-    {% endif %}
-    
-    <a href="/logbook/new" class="dash-hero block md:hidden touch-action" style="min-height: 80px;">
-        <div class="text-2xl">📓</div>
-        <div class="flex-1">
-            <h3 class="text-base font-bold">{{ t('dashboard.quick_log') }}</h3>
-            <p class="text-sm opacity-80">{{ t('dashboard.quick_log_desc') }}</p>
-        </div>
-        <div class="text-lg opacity-50">→</div>
-    </a>
-    
-    {% if request.session.get('role') == 'admin' %}
-    <form method="post" action="/trips/quick-start" class="hidden md:block">
-        {{ csrf_input | safe }}
-        <button type="submit" class="w-full dash-hero touch-action text-left">
-            <div class="text-xl" style="color: var(--accent);">⚡</div>
-            <div class="flex-1">
-                <h3 class="text-base font-bold">{{ t('dashboard.quick_start') }} {{ branding.brand_name }}</h3>
-                <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.quick_start_desc') }}</p>
-            </div>
-            <div class="text-base" style="color: var(--muted);">→</div>
-        </button>
-    </form>
-    {% endif %}
-    
-    <div class="grid grid-cols-2 gap-4 md:hidden">
-        <div class="kpi-card">
-            <p class="text-xs font-medium mb-1" style="color: var(--text-secondary);">{{ t('dashboard.expenses_label') }}</p>
-            <p class="text-2xl font-bold" style="color: var(--text);">{{ "%.2f"|format(total_expenses) }} €</p>
-        </div>
-        
-        <a href="/expenses" class="dash-tile touch-action" style="min-height: 80px;">
-            <div class="tile-icon">⚓</div>
-            <p class="tile-label">{{ t('dashboard.expense_action') }}</p>
-        </a>
-    </div>
-    
-    <div class="grid grid-cols-2 gap-4 md:hidden">
-        <a href="/logbook" class="dash-tile touch-action" style="min-height: 72px;">
-            <div class="tile-icon">📓</div>
-            <p class="tile-label">{{ t('dashboard.all_entries') }}</p>
-        </a>
-        
-        <a href="/crew" class="dash-tile touch-action" style="min-height: 72px;">
-            <div class="tile-icon">👥</div>
-            <p class="tile-label">{{ t('dashboard.crew_label') }}</p>
-        </a>
-        
-        <a href="/balances" class="dash-tile touch-action" style="min-height: 72px;">
-            <div class="tile-icon">📊</div>
-            <p class="tile-label">{{ t('dashboard.balances_label') }}</p>
-        </a>
-        
-        <a href="/settlement" class="dash-tile touch-action" style="min-height: 72px;">
-            <div class="tile-icon">⛵</div>
-            <p class="tile-label">{{ t('dashboard.settlement_label') }}</p>
-        </a>
-    </div>
+    </header>
 
-    <div class="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-4">
-            <h2 class="font-bold" style="color: var(--text);">{{ t('dashboard.logbook_section') }}</h2>
-            
-            <a href="/logbook" class="dash-hero touch-action">
-                <div class="text-2xl opacity-45">📓</div>
-                <div class="flex-1">
-                    <h3 class="text-base font-bold">{{ t('dashboard.keep_logbook') }}</h3>
-                    <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.keep_logbook_desc') }}</p>
-                </div>
-                <div class="text-base" style="color: var(--muted);">→</div>
-            </a>
-            
-            <a href="/crew" class="dash-hero touch-action">
-                <div class="text-2xl opacity-45">👥</div>
-                <div class="flex-1">
-                    <h3 class="text-base font-bold">{{ t('dashboard.manage_crew') }}</h3>
-                    <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.manage_crew_desc') }}</p>
-                </div>
-                <div class="text-base" style="color: var(--muted);">→</div>
+    <div class="cl-stack">
+        {% if not is_editable and request.session.get('role') == 'crew' %}
+        <div class="cl-alert cl-alert--warn">
+            <strong>🔒 {{ t('dashboard.trip_closed') }}</strong>
+            <div>{{ t('dashboard.trip_closed_desc') }}</div>
+        </div>
+        {% endif %}
+
+        {# Primary action: log entry — first thing skipper reaches for on mobile #}
+        <a href="/logbook/new" class="cl-hero">
+            <span class="cl-hero__icon" aria-hidden="true">📓</span>
+            <div class="cl-hero__body">
+                <p class="cl-hero__title">{{ t('dashboard.quick_log') }}</p>
+                <p class="cl-hero__desc">{{ t('dashboard.quick_log_desc') }}</p>
+            </div>
+            <span class="cl-hero__chev" aria-hidden="true">›</span>
+        </a>
+
+        {% if request.session.get('role') == 'admin' %}
+        <form method="post" action="/trips/quick-start" style="margin: 0;">
+            {{ csrf_input | safe }}
+            <button type="submit" class="cl-hero" style="width: 100%; text-align: left; cursor: pointer; font: inherit;">
+                <span class="cl-hero__icon" aria-hidden="true">⚡</span>
+                <span class="cl-hero__body">
+                    <span class="cl-hero__title" style="display:block;">{{ t('dashboard.quick_start') }} {{ branding.brand_name }}</span>
+                    <span class="cl-hero__desc" style="display:block;">{{ t('dashboard.quick_start_desc') }}</span>
+                </span>
+                <span class="cl-hero__chev" aria-hidden="true">›</span>
+            </button>
+        </form>
+        {% endif %}
+
+        {# Bordkasse summary KPI #}
+        <div class="cl-grid cl-grid--2">
+            <div class="cl-kpi">
+                <span class="cl-kpi__label">{{ t('dashboard.total_expenses') }}</span>
+                <span class="cl-kpi__value">{{ "%.2f"|format(total_expenses) }} €</span>
+            </div>
+            <a href="/expenses" class="cl-tile">
+                <span class="cl-tile__icon" aria-hidden="true">⚓</span>
+                <span class="cl-tile__label">{{ t('dashboard.expense_action') }}</span>
             </a>
         </div>
-        
-        <div class="space-y-4">
-            <h2 class="font-bold" style="color: var(--text);">{{ t('dashboard.bordkasse_section') }}</h2>
-            
-            <div class="kpi-card">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium mb-1" style="color: var(--text-secondary);">{{ t('dashboard.total_expenses') }}</p>
-                        <p class="text-3xl font-bold" style="color: var(--text);">{{ "%.2f"|format(total_expenses) }} €</p>
-                    </div>
-                    <div class="text-3xl opacity-15">💸</div>
-                </div>
-            </div>
-            
-            <a href="/expenses" class="dash-hero touch-action">
-                <div class="text-2xl opacity-45">⚓</div>
-                <div class="flex-1">
-                    <h3 class="text-base font-bold">{{ t('dashboard.record_expense') }}</h3>
-                    <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.record_expense_desc') }}</p>
-                </div>
-                <div class="text-base" style="color: var(--muted);">→</div>
+
+        {# Secondary navigation tiles #}
+        <div class="cl-grid cl-grid--2">
+            <a href="/logbook" class="cl-tile">
+                <span class="cl-tile__icon" aria-hidden="true">📓</span>
+                <span class="cl-tile__label">{{ t('dashboard.all_entries') }}</span>
             </a>
-            
-            <a href="/settlement" class="dash-hero touch-action">
-                <div class="text-2xl opacity-45">⛵</div>
-                <div class="flex-1">
-                    <h3 class="text-base font-bold">{{ t('dashboard.show_settlement') }}</h3>
-                    <p class="text-sm" style="color: var(--text-secondary);">{{ t('dashboard.show_settlement_desc') }}</p>
-                </div>
-                <div class="text-base" style="color: var(--muted);">→</div>
+            <a href="/crew" class="cl-tile">
+                <span class="cl-tile__icon" aria-hidden="true">👥</span>
+                <span class="cl-tile__label">{{ t('dashboard.crew_label') }}</span>
+            </a>
+            <a href="/balances" class="cl-tile">
+                <span class="cl-tile__icon" aria-hidden="true">📊</span>
+                <span class="cl-tile__label">{{ t('dashboard.balances_label') }}</span>
+            </a>
+            <a href="/settlement" class="cl-tile">
+                <span class="cl-tile__icon" aria-hidden="true">⛵</span>
+                <span class="cl-tile__label">{{ t('dashboard.settlement_label') }}</span>
             </a>
         </div>
     </div>

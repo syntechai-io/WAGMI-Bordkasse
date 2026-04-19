@@ -1,0 +1,688 @@
+/* ==========================================================================
+   CrewLog — Apple-maritime mobile-native design system
+   Single source of truth for the new "cl-*" primitives.
+   Mobile-first. iPhone = 1 column. iPad = 2 columns. Desktop = 2-3 columns.
+   ========================================================================== */
+
+/* --- Design tokens (global, so any page can use cl-* primitives) ---------- */
+:root {
+    --cl-bg:           #f6f8fb;
+    --cl-surface:      #ffffff;
+    --cl-surface-2:    #f1f4f8;
+    --cl-border:       #e2e6ec;
+    --cl-border-strong:#cdd3db;
+    --cl-text:         #1a2540;
+    --cl-text-muted:   #5a6479;
+    --cl-text-subtle:  #8a93a4;
+    --cl-navy:         #0f2942;
+    --cl-navy-soft:    #1a3a5c;
+    --cl-accent:       #1d6fbb;
+    --cl-accent-soft:  #e7f0fa;
+    --cl-success:      #2f7a4d;
+    --cl-success-soft: #e6f3ec;
+    --cl-warn:         #b8741b;
+    --cl-warn-soft:    #fbf1e0;
+    --cl-danger:       #c53e3e;
+    --cl-danger-soft:  #fdecec;
+
+    --cl-radius:       12px;
+    --cl-radius-sm:    8px;
+    --cl-shadow:       0 1px 2px rgba(15,41,66,.04), 0 4px 12px rgba(15,41,66,.04);
+
+    --cl-space-1:      4px;
+    --cl-space-2:      8px;
+    --cl-space-3:      12px;
+    --cl-space-4:      16px;
+    --cl-space-5:      24px;
+    --cl-space-6:      32px;
+    --cl-space-7:      48px;
+
+    /* Reserved heights (measured at runtime by cl_shell.js) */
+    --cl-tabbar-h:     0px;
+    --cl-actionbar-h:  0px;
+}
+
+/* --- Page wrapper --------------------------------------------------------- */
+.cl-page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: var(--cl-space-6) var(--cl-space-4) 0;
+    color: var(--cl-text);
+    font-size: 15px;
+    line-height: 1.45;
+}
+@media (min-width: 768px) {
+    .cl-page { padding: var(--cl-space-7) var(--cl-space-5) 0; }
+}
+.cl-page--wide { max-width: 1200px; }
+
+/* --- Page header ---------------------------------------------------------- */
+.cl-pageheader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--cl-space-4);
+    margin-bottom: var(--cl-space-5);
+    flex-wrap: wrap;
+}
+.cl-pageheader__main { min-width: 0; flex: 1 1 auto; }
+.cl-pageheader__actions {
+    display: flex;
+    gap: var(--cl-space-2);
+    flex-wrap: wrap;
+}
+.cl-title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--cl-navy);
+    margin: 0 0 var(--cl-space-2);
+    line-height: 1.2;
+}
+@media (min-width: 768px) { .cl-title { font-size: 30px; } }
+.cl-subtitle {
+    font-size: 14px;
+    color: var(--cl-text-muted);
+    margin: 0;
+    max-width: 60ch;
+}
+.cl-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--cl-navy);
+    margin: 0 0 var(--cl-space-3);
+    letter-spacing: -0.005em;
+}
+
+/* --- Stack (vertical rhythm replacement for space-y-*) -------------------- */
+.cl-stack { display: flex; flex-direction: column; gap: var(--cl-space-5); }
+.cl-stack--sm { gap: var(--cl-space-3); }
+.cl-stack--lg { gap: var(--cl-space-6); }
+
+/* --- Form layout ---------------------------------------------------------- */
+.cl-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-5);
+    /* Reserve space so any FIXED action bar never overlaps the last card.
+       --cl-actionbar-h already includes the bar's own safe-area padding
+       (measured at runtime by cl_shell.js), so we don't add env() again. */
+    padding-bottom: calc(var(--cl-actionbar-h, 0px) + var(--cl-space-3));
+}
+
+/* --- Card ----------------------------------------------------------------- */
+.cl-card {
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    box-shadow: var(--cl-shadow);
+    padding: var(--cl-space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-4);
+}
+@media (min-width: 768px) {
+    .cl-card { padding: var(--cl-space-6); gap: var(--cl-space-5); }
+}
+.cl-card--flat { box-shadow: none; }
+.cl-card--quiet { background: var(--cl-surface-2); }
+.cl-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cl-space-3);
+    flex-wrap: wrap;
+}
+.cl-card__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--cl-navy);
+    margin: 0;
+    letter-spacing: -0.005em;
+}
+.cl-card__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-3);
+    flex-wrap: wrap;
+    margin-top: var(--cl-space-2);
+}
+.cl-card__hint { margin-top: var(--cl-space-2); }
+
+/* Tappable card (whole card acts as link) */
+.cl-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: transform .15s, box-shadow .15s;
+}
+.cl-card-link:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(15,41,66,.08); }
+.cl-card-link:active { transform: translateY(0); }
+
+/* --- Field grid ----------------------------------------------------------- */
+.cl-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--cl-space-4);
+}
+@media (min-width: 640px) {
+    .cl-grid--2,
+    .cl-grid--3,
+    .cl-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+    .cl-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cl-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* --- Field & input -------------------------------------------------------- */
+.cl-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-2);
+    min-width: 0;
+}
+.cl-field--full { grid-column: 1 / -1; }
+.cl-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--cl-text-muted);
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+    /* Reserve space for one or two label lines so wrapping never staggers
+       adjacent fields in the same grid row. */
+    min-height: 2.6em;
+    display: flex;
+    align-items: flex-end;
+}
+.cl-label--inline { min-height: 0; }
+.cl-input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 44px;
+    padding: 0 var(--cl-space-3);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-sm);
+    background: var(--cl-surface);
+    font-size: 16px;            /* prevents iOS auto-zoom */
+    line-height: 1.4;
+    color: var(--cl-text);
+    transition: border-color .15s, box-shadow .15s;
+    font-family: inherit;
+}
+.cl-input:focus {
+    outline: none;
+    border-color: var(--cl-accent);
+    box-shadow: 0 0 0 3px rgba(29,111,187,.18);
+}
+.cl-input--textarea {
+    height: auto;
+    min-height: 72px;
+    padding: var(--cl-space-3);
+    resize: vertical;
+}
+.cl-input--file {
+    height: auto;
+    padding: var(--cl-space-3);
+    background: var(--cl-surface-2);
+    cursor: pointer;
+}
+.cl-input--error {
+    border-color: var(--cl-danger);
+    background: var(--cl-danger-soft);
+}
+.cl-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%235a6479' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+.cl-field__error {
+    font-size: 12px;
+    color: var(--cl-danger);
+    margin: 0;
+}
+
+/* Checkbox / radio rows */
+.cl-check-row {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-3);
+    padding: var(--cl-space-2) var(--cl-space-3);
+    border-radius: var(--cl-radius-sm);
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    cursor: pointer;
+    min-height: 44px;
+    box-sizing: border-box;
+}
+.cl-check-row:hover { background: var(--cl-surface-2); }
+.cl-check-row input[type="checkbox"],
+.cl-check-row input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--cl-accent);
+    flex-shrink: 0;
+}
+.cl-check-row__label { font-size: 15px; color: var(--cl-text); flex: 1 1 auto; }
+
+/* --- Buttons -------------------------------------------------------------- */
+.cl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--cl-space-2);
+    height: 44px;
+    padding: 0 var(--cl-space-4);
+    border-radius: var(--cl-radius-sm);
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+    box-sizing: border-box;
+    white-space: nowrap;
+    font-family: inherit;
+}
+.cl-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(29,111,187,.25);
+}
+.cl-btn--sm { height: 36px; padding: 0 var(--cl-space-3); font-size: 13px; }
+.cl-btn--block { width: 100%; }
+.cl-btn--primary {
+    background: var(--cl-navy);
+    color: #fff;
+}
+.cl-btn--primary:hover { background: var(--cl-navy-soft); }
+.cl-btn--accent {
+    background: var(--cl-accent);
+    color: #fff;
+}
+.cl-btn--accent:hover { background: #155a9b; }
+.cl-btn--success {
+    background: var(--cl-success);
+    color: #fff;
+}
+.cl-btn--success:hover { background: #25623d; }
+.cl-btn--warn {
+    background: var(--cl-warn);
+    color: #fff;
+}
+.cl-btn--warn:hover { background: #976015; }
+.cl-btn--secondary {
+    background: var(--cl-surface);
+    color: var(--cl-text);
+    border-color: var(--cl-border-strong);
+}
+.cl-btn--secondary:hover { background: var(--cl-surface-2); }
+.cl-btn--ghost {
+    background: transparent;
+    color: var(--cl-accent);
+    border-color: transparent;
+}
+.cl-btn--ghost:hover { background: var(--cl-accent-soft); }
+.cl-btn--ghost-danger {
+    background: transparent;
+    color: var(--cl-danger);
+    border-color: transparent;
+}
+.cl-btn--ghost-danger:hover { background: var(--cl-danger-soft); }
+
+.cl-iconbtn {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--cl-border);
+    background: var(--cl-surface);
+    border-radius: var(--cl-radius-sm);
+    color: var(--cl-text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.cl-iconbtn:hover { background: var(--cl-surface-2); border-color: var(--cl-border-strong); }
+.cl-iconbtn[disabled],
+.cl-iconbtn:disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
+
+/* --- Pills / Badges ------------------------------------------------------- */
+.cl-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--cl-space-1);
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.6;
+    border-radius: 999px;
+    background: var(--cl-surface-2);
+    color: var(--cl-text-muted);
+    border: 1px solid var(--cl-border);
+}
+.cl-pill--accent  { background: var(--cl-accent-soft);  color: var(--cl-accent);  border-color: transparent; }
+.cl-pill--success { background: var(--cl-success-soft); color: var(--cl-success); border-color: transparent; }
+.cl-pill--warn    { background: var(--cl-warn-soft);    color: var(--cl-warn);    border-color: transparent; }
+.cl-pill--danger  { background: var(--cl-danger-soft);  color: var(--cl-danger);  border-color: transparent; }
+.cl-pill--solid-success { background: var(--cl-success); color: #fff; border-color: transparent; }
+.cl-pill--solid-danger  { background: var(--cl-danger);  color: #fff; border-color: transparent; }
+.cl-pill--solid-accent  { background: var(--cl-accent);  color: #fff; border-color: transparent; }
+
+/* --- Helpers -------------------------------------------------------------- */
+.cl-help {
+    font-size: 12px;
+    color: var(--cl-text-subtle);
+    margin: 0;
+}
+.cl-help--muted   { color: var(--cl-text-muted); }
+.cl-help--success { color: var(--cl-success); font-weight: 500; }
+.cl-help--warn    { color: var(--cl-warn); }
+
+.cl-muted   { color: var(--cl-text-muted); }
+.cl-subtle  { color: var(--cl-text-subtle); }
+
+/* --- Alerts --------------------------------------------------------------- */
+.cl-alert {
+    padding: var(--cl-space-3) var(--cl-space-4);
+    border-radius: var(--cl-radius-sm);
+    font-size: 14px;
+    margin-bottom: var(--cl-space-4);
+    border: 1px solid transparent;
+}
+.cl-alert--danger {
+    background: var(--cl-danger-soft);
+    color: var(--cl-danger);
+    border-color: color-mix(in srgb, var(--cl-danger) 25%, transparent);
+}
+.cl-alert--warn {
+    background: var(--cl-warn-soft);
+    color: var(--cl-warn);
+    border-color: color-mix(in srgb, var(--cl-warn) 25%, transparent);
+}
+.cl-alert--success {
+    background: var(--cl-success-soft);
+    color: var(--cl-success);
+    border-color: color-mix(in srgb, var(--cl-success) 25%, transparent);
+}
+.cl-alert--info {
+    background: var(--cl-accent-soft);
+    color: var(--cl-accent);
+    border-color: color-mix(in srgb, var(--cl-accent) 25%, transparent);
+}
+.cl-alert > div + div { margin-top: var(--cl-space-1); }
+
+/* --- Entries list & entry card ------------------------------------------- */
+.cl-entries { display: flex; flex-direction: column; gap: var(--cl-space-4); }
+.cl-entry {
+    background: var(--cl-surface-2);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    padding: var(--cl-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-5);
+}
+@media (min-width: 768px) { .cl-entry { padding: var(--cl-space-5); } }
+.cl-entry--error { background: var(--cl-danger-soft); border-color: var(--cl-danger); }
+.cl-entry__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cl-space-3);
+    flex-wrap: wrap;
+}
+.cl-entry__head-left {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-2);
+}
+.cl-entry__index {
+    font-weight: 600;
+    color: var(--cl-text-muted);
+    font-size: 14px;
+    margin-left: var(--cl-space-2);
+}
+
+/* --- Group within an entry: eyebrow + grid ------------------------------- */
+.cl-group { display: flex; flex-direction: column; gap: var(--cl-space-3); }
+.cl-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-2);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cl-text-subtle);
+    padding-bottom: var(--cl-space-2);
+    border-bottom: 1px solid var(--cl-border);
+}
+.cl-eyebrow__icon { font-size: 13px; line-height: 1; opacity: .85; filter: grayscale(.2); }
+
+/* --- Photo grid ----------------------------------------------------------- */
+.cl-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: var(--cl-space-2);
+}
+.cl-photo-grid:empty { display: none; }
+.cl-photo-grid .photo-pill {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--cl-radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--cl-border);
+    background: var(--cl-surface-2);
+}
+.cl-photo-grid .photo-pill img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Backwards-compat with JS that targets #dayPhotosPreview */
+#dayPhotosPreview { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--cl-space-2); }
+#dayPhotosPreview .photo-pill { position: relative; aspect-ratio: 1/1; border-radius: var(--cl-radius-sm); overflow: hidden; border: 1px solid var(--cl-border); background: var(--cl-surface-2); }
+#dayPhotosPreview .photo-pill img { width:100%; height:100%; object-fit: cover; display: block; }
+
+/* --- Tables (clean, mobile-aware) ---------------------------------------- */
+.cl-table-wrap {
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    overflow: hidden;
+    box-shadow: var(--cl-shadow);
+}
+.cl-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.cl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.cl-table thead th {
+    text-align: left;
+    padding: var(--cl-space-3) var(--cl-space-4);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cl-text-subtle);
+    background: var(--cl-surface-2);
+    border-bottom: 1px solid var(--cl-border);
+    white-space: nowrap;
+}
+.cl-table tbody td {
+    padding: var(--cl-space-3) var(--cl-space-4);
+    border-bottom: 1px solid var(--cl-border);
+    color: var(--cl-text);
+    vertical-align: middle;
+}
+.cl-table tbody tr:last-child td { border-bottom: none; }
+.cl-table tbody tr:hover { background: var(--cl-surface-2); }
+.cl-table .cl-num { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
+.cl-table .cl-actions {
+    display: flex;
+    gap: var(--cl-space-1);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* --- KPI tiles (Apple-style soft surfaces) ------------------------------- */
+.cl-kpi {
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    padding: var(--cl-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-1);
+    box-shadow: var(--cl-shadow);
+}
+.cl-kpi__label { font-size: 12px; color: var(--cl-text-muted); font-weight: 500; }
+.cl-kpi__value { font-size: 22px; font-weight: 700; color: var(--cl-navy); font-variant-numeric: tabular-nums; }
+@media (min-width: 768px) { .cl-kpi__value { font-size: 28px; } }
+.cl-kpi__delta { font-size: 12px; color: var(--cl-text-subtle); }
+
+/* --- Tile (icon + label, tappable) --------------------------------------- */
+.cl-tile {
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    padding: var(--cl-space-4);
+    min-height: 88px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--cl-space-2);
+    text-decoration: none;
+    color: inherit;
+    transition: transform .15s, box-shadow .15s;
+    box-shadow: var(--cl-shadow);
+}
+.cl-tile:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(15,41,66,.08); }
+.cl-tile__icon { font-size: 22px; line-height: 1; opacity: .8; }
+.cl-tile__label { font-size: 14px; font-weight: 600; color: var(--cl-text); }
+
+/* --- Hero row (icon + text + arrow) -------------------------------------- */
+.cl-hero {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-4);
+    padding: var(--cl-space-4) var(--cl-space-5);
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--cl-shadow);
+    transition: transform .15s, box-shadow .15s;
+}
+.cl-hero:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(15,41,66,.08); }
+.cl-hero__icon { font-size: 26px; line-height: 1; opacity: .85; }
+.cl-hero__body { flex: 1 1 auto; min-width: 0; }
+.cl-hero__title { font-size: 16px; font-weight: 700; color: var(--cl-navy); margin: 0 0 2px; }
+.cl-hero__desc  { font-size: 13px; color: var(--cl-text-muted); margin: 0; }
+.cl-hero__chev  { color: var(--cl-text-subtle); font-size: 18px; }
+
+/* --- Fixed action bar ----------------------------------------------------
+   Anchored to the viewport. Form reserves matching padding-bottom via
+   --cl-actionbar-h (set by cl_shell.js). iOS safe area added on top.
+   ----------------------------------------------------------------------- */
+.cl-actionbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 45;
+    padding: var(--cl-space-3) var(--cl-space-4);
+    padding-bottom: calc(var(--cl-space-3) + env(safe-area-inset-bottom, 0px));
+    background: rgba(255,255,255,.94);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    border-top: 1px solid var(--cl-border);
+    display: flex;
+    gap: var(--cl-space-3);
+    justify-content: flex-end;
+    align-items: center;
+    box-shadow: 0 -6px 20px rgba(15,41,66,.06);
+}
+.cl-actionbar > * { flex: 0 0 auto; }
+@media (max-width: 480px) {
+    .cl-actionbar { gap: var(--cl-space-2); padding-left: var(--cl-space-3); padding-right: var(--cl-space-3); }
+    .cl-actionbar .cl-btn { flex: 1 1 auto; min-width: 0; }
+}
+
+/* --- Bottom tab bar (mobile only, native iOS look) -----------------------
+   Hidden on desktop. Hidden on pages that have a .cl-actionbar (handled by
+   cl_shell.js adding body[data-has-actionbar]).
+   ----------------------------------------------------------------------- */
+.cl-tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: none;             /* shown on mobile via media query below */
+    background: rgba(255,255,255,.96);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-top: 1px solid var(--cl-border);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.cl-tabbar__inner {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: stretch;
+    height: 56px;
+}
+.cl-tabbar__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-decoration: none;
+    color: var(--cl-text-subtle);
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 4px 2px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color .15s;
+}
+.cl-tabbar__item:hover,
+.cl-tabbar__item:focus-visible { color: var(--cl-accent); outline: none; }
+.cl-tabbar__icon { font-size: 20px; line-height: 1; opacity: .9; }
+.cl-tabbar__item--active { color: var(--cl-accent); }
+.cl-tabbar__item--active .cl-tabbar__icon { opacity: 1; }
+
+@media (max-width: 1023px) {
+    .cl-tabbar { display: block; }
+    /* --cl-tabbar-h already includes safe-area-inset-bottom (the tab bar's own
+       padding-bottom: env(...)), measured at runtime — do not double-count. */
+    body { padding-bottom: var(--cl-tabbar-h, 56px); }
+    /* When an actionbar exists on the page, the tab bar yields. */
+    body[data-has-actionbar="1"] .cl-tabbar { display: none; }
+    body[data-has-actionbar="1"] { padding-bottom: 0; }
+}
+
+/* --- Compatibility shims for legacy JS hooks ----------------------------- */
+.cl-entry .move-up-btn[disabled],
+.cl-entry .move-down-btn[disabled] { opacity: .35; cursor: not-allowed; pointer-events: none; }
+
+/* --- Night mode adjustments for cl-* surfaces ---------------------------- */
+html[data-theme="night"] .cl-actionbar {
+    background: rgba(20, 0, 0, .85);
+    border-top-color: rgba(255, 90, 90, .25);
+}
+html[data-theme="night"] .cl-tabbar {
+    background: rgba(20, 0, 0, .9);
+    border-top-color: rgba(255, 90, 90, .25);
+}
+html[data-theme="night"] .cl-tabbar__item { color: rgba(255, 80, 80, .55); }
+html[data-theme="night"] .cl-tabbar__item--active,
+html[data-theme="night"] .cl-tabbar__item:hover { color: rgba(255, 80, 80, .95); }

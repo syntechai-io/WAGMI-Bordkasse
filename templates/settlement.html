@@ -1,123 +1,107 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold maritime-header">⛵ {{ t('settlement.title') }}</h1>
-        <a href="/export/csv" class="text-white px-6 py-2 rounded-lg transition touch-action font-semibold" style="background: var(--success);">
-            📋 {{ t('settlement.csv_export') }}
-        </a>
-    </div>
-
-    {% if transfers %}
-    <div class="bg-white porthole-card p-6">
-        <h2 class="text-xl font-bold maritime-header mb-4">💸 {{ t('settlement.min_transfers') }}</h2>
-        <div class="space-y-4">
-            {% for transfer in transfers %}
-            <div class="flex items-center justify-between p-4 rounded-lg" style="background: var(--surface-2);">
-                <div class="flex items-center space-x-4 flex-1">
-                    <div class="text-center min-w-[100px]">
-                        <p class="font-bold">{{ transfer.from_code }}</p>
-                        <p class="text-sm ui-muted">{{ transfer.from_name }}</p>
-                    </div>
-                    <div class="flex-1 flex items-center justify-center">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--accent);">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                        </svg>
-                    </div>
-                    <div class="text-center min-w-[100px]">
-                        <p class="font-bold">{{ transfer.to_code }}</p>
-                        <p class="text-sm ui-muted">{{ transfer.to_name }}</p>
-                    </div>
-                </div>
-                <div class="text-right min-w-[120px]">
-                    <p class="text-2xl font-bold" style="color: var(--success);">{{ "%.2f"|format(transfer.amount) }} €</p>
-                </div>
-            </div>
-            {% endfor %}
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">⛵ {{ t('settlement.title') }}</h1>
         </div>
-    </div>
-
-    <!-- Explanation Section -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg porthole-card p-6">
-        <div class="flex items-start space-x-3 mb-4">
-            <div class="text-3xl">📊</div>
-            <div class="flex-1">
-                <h3 class="text-xl font-bold maritime-header mb-2">{{ t('settlement.how_calculated') }}</h3>
-                <p class="text-sm text-blue-800 mb-4">
-                    {{ t('settlement.how_desc') }}
-                </p>
-            </div>
+        <div class="cl-pageheader__actions">
+            <a href="/export/csv" class="cl-btn cl-btn--success">
+                📋 {{ t('settlement.csv_export') }}
+            </a>
         </div>
+    </header>
 
-        <div class="space-y-4">
-            <!-- Step 1: Individual Balances -->
-            <div class="bg-white rounded-lg p-4 border border-blue-100">
-                <h4 class="font-semibold text-blue-900 mb-2 flex items-center">
-                    <span class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">1</span>
-                    {{ t('settlement.step1_title') }}
-                </h4>
-                <p class="text-sm text-blue-800 ml-8">
-                    {{ t('settlement.step1_desc') }}<br>
-                    <strong>{{ t('settlement.step1_formula') }}</strong>
-                </p>
-                <div class="mt-2 ml-8 text-xs text-blue-700 bg-blue-50 p-2 rounded">
-                    <strong>{{ t('settlement.step1_example') }}</strong>
+    <div class="cl-stack">
+        {% if transfers %}
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">💸 {{ t('settlement.min_transfers') }}</h2>
+            </header>
+            <div class="cl-stack cl-stack--sm">
+                {% for transfer in transfers %}
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--cl-space-3); padding: var(--cl-space-4); background: var(--cl-surface-2); border-radius: var(--cl-radius-sm); flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: var(--cl-space-4); flex: 1 1 auto; min-width: 0;">
+                        <div style="text-align: center; min-width: 88px;">
+                            <p style="font-weight: 700; margin: 0; color: var(--cl-navy);">{{ transfer.from_code }}</p>
+                            <p class="cl-help cl-help--muted" style="margin: 0;">{{ transfer.from_name }}</p>
+                        </div>
+                        <span style="color: var(--cl-accent); font-size: 22px;" aria-hidden="true">→</span>
+                        <div style="text-align: center; min-width: 88px;">
+                            <p style="font-weight: 700; margin: 0; color: var(--cl-navy);">{{ transfer.to_code }}</p>
+                            <p class="cl-help cl-help--muted" style="margin: 0;">{{ transfer.to_name }}</p>
+                        </div>
+                    </div>
+                    <div style="text-align: right; min-width: 120px;">
+                        <p class="cl-num" style="font-size: 22px; color: var(--cl-success); margin: 0;">{{ "%.2f"|format(transfer.amount) }} €</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="cl-card cl-card--quiet">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">📊 {{ t('settlement.how_calculated') }}</h2>
+            </header>
+            <p class="cl-muted" style="margin: 0;">{{ t('settlement.how_desc') }}</p>
+
+            <div class="cl-stack cl-stack--sm">
+                <div class="cl-card" style="padding: var(--cl-space-4); gap: var(--cl-space-2);">
+                    <h3 class="cl-card__title" style="font-size: 15px;">
+                        <span class="cl-pill cl-pill--solid-accent" style="margin-right: 8px;">1</span>
+                        {{ t('settlement.step1_title') }}
+                    </h3>
+                    <p class="cl-help cl-help--muted" style="margin: 0;">
+                        {{ t('settlement.step1_desc') }}<br>
+                        <strong>{{ t('settlement.step1_formula') }}</strong>
+                    </p>
+                    <p class="cl-help" style="background: var(--cl-accent-soft); padding: 8px; border-radius: 6px; margin: 0;">
+                        <strong>{{ t('settlement.step1_example') }}</strong>
+                    </p>
+                </div>
+
+                <div class="cl-card" style="padding: var(--cl-space-4); gap: var(--cl-space-2);">
+                    <h3 class="cl-card__title" style="font-size: 15px;">
+                        <span class="cl-pill cl-pill--solid-accent" style="margin-right: 8px;">2</span>
+                        {{ t('settlement.step2_title') }}
+                    </h3>
+                    <p class="cl-help cl-help--muted" style="margin: 0;">{{ t('settlement.step2_desc') }}</p>
+                    <p class="cl-help" style="background: var(--cl-accent-soft); padding: 8px; border-radius: 6px; margin: 0;">
+                        <strong>{{ t('settlement.step2_example') }}</strong><br>
+                        → {{ t('settlement.step2_result') }}
+                    </p>
+                </div>
+
+                <div class="cl-card" style="padding: var(--cl-space-4); gap: var(--cl-space-2);">
+                    <h3 class="cl-card__title" style="font-size: 15px;">
+                        <span class="cl-pill cl-pill--solid-accent" style="margin-right: 8px;">3</span>
+                        {{ t('settlement.step3_title') }}
+                    </h3>
+                    <p class="cl-help cl-help--muted" style="margin: 0;">{{ t('settlement.step3_desc') }}</p>
+                    <p class="cl-help" style="background: var(--cl-accent-soft); padding: 8px; border-radius: 6px; margin: 0;">
+                        <strong>{{ t('settlement.step3_benefit') }}</strong>
+                    </p>
                 </div>
             </div>
 
-            <!-- Step 2: Settlement Groups -->
-            <div class="bg-white rounded-lg p-4 border border-blue-100">
-                <h4 class="font-semibold text-blue-900 mb-2 flex items-center">
-                    <span class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">2</span>
-                    {{ t('settlement.step2_title') }}
-                </h4>
-                <p class="text-sm text-blue-800 ml-8">
-                    {{ t('settlement.step2_desc') }}
-                </p>
-                <div class="mt-2 ml-8 text-xs text-blue-700 bg-blue-50 p-2 rounded">
-                    <strong>{{ t('settlement.step2_example') }}</strong><br>
-                    → {{ t('settlement.step2_result') }}
-                </div>
-            </div>
-
-            <!-- Step 3: Greedy Algorithm -->
-            <div class="bg-white rounded-lg p-4 border border-blue-100">
-                <h4 class="font-semibold text-blue-900 mb-2 flex items-center">
-                    <span class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">3</span>
-                    {{ t('settlement.step3_title') }}
-                </h4>
-                <p class="text-sm text-blue-800 ml-8">
-                    {{ t('settlement.step3_desc') }}
-                </p>
-                <div class="mt-2 ml-8 text-xs text-blue-700 bg-blue-50 p-2 rounded">
-                    <strong>{{ t('settlement.step3_benefit') }}</strong>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-4 pt-4 border-t border-blue-200">
-            <p class="text-xs text-blue-600 italic">
+            <p class="cl-help cl-help--muted" style="margin: 0; font-style: italic;">
                 💡 <strong>{{ t('settlement.currency_note') }}</strong>
             </p>
-        </div>
-    </div>
+        </section>
 
-    <div class="bg-yellow-50 border border-yellow-200 rounded-lg porthole-card p-4">
-        <div class="flex items-start space-x-3">
-            <div class="text-2xl">💡</div>
-            <div>
-                <h3 class="font-semibold text-yellow-800 maritime-header">{{ t('settlement.hint_title') }}</h3>
-                <p class="text-sm text-yellow-700">{{ t('settlement.hint_desc') }}</p>
-            </div>
+        <div class="cl-alert cl-alert--warn">
+            <strong>💡 {{ t('settlement.hint_title') }}</strong>
+            <div>{{ t('settlement.hint_desc') }}</div>
         </div>
+        {% else %}
+        <div class="cl-card" style="text-align: center; padding: var(--cl-space-7) var(--cl-space-5);">
+            <p style="font-size: 56px; margin: 0 0 var(--cl-space-3);">✅</p>
+            <p style="font-size: 22px; font-weight: 700; color: var(--cl-success); margin: 0 0 var(--cl-space-2);">{{ t('settlement.all_settled') }}</p>
+            <p class="cl-muted" style="margin: 0;">{{ t('settlement.no_transfers') }}</p>
+        </div>
+        {% endif %}
     </div>
-    {% else %}
-    <div class="bg-green-50 border border-green-200 rounded-lg porthole-card p-6 text-center">
-        <div class="text-6xl mb-4">✅</div>
-        <h2 class="text-2xl font-bold maritime-header mb-2" style="color: var(--success);">{{ t('settlement.all_settled') }}</h2>
-        <p class="text-green-700">{{ t('settlement.no_transfers') }}</p>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}

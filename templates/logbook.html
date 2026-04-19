@@ -1,30 +1,29 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h1 class="ui-title maritime-header" style="margin-bottom: 0;">📓 {{ t('logbook.title') }}</h1>
-        <div class="flex gap-2">
-            <a href="/logbook/day-new" class="px-4 py-2 rounded-lg transition touch-action font-semibold text-white" style="background: var(--success);">
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">📓 {{ t('logbook.title') }}</h1>
+        </div>
+        <div class="cl-pageheader__actions">
+            <a href="/logbook/day-new" class="cl-btn cl-btn--success">
                 📅 {{ t('logbook.day_logbook_title') }}
             </a>
             {% if active_trip %}
-            <a href="/trips/{{ active_trip.id }}/track" class="px-4 py-2 rounded-lg transition touch-action font-semibold text-white" style="background: var(--accent);">
+            <a href="/trips/{{ active_trip.id }}/track" class="cl-btn cl-btn--accent">
                 🗺️ {{ t('track.title') }}
             </a>
             {% endif %}
-            <a href="/logbook/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
+            <a href="/logbook/new" class="cl-btn cl-btn--primary">
                 ➕ {{ t('logbook.new_entry') }}
             </a>
         </div>
-    </div>
+    </header>
 
     {% if entries %}
-    <div id="entriesContainer" class="space-y-6">
-        {% set current_date = namespace(value=None) %}
+    <div id="entriesContainer" class="cl-stack cl-stack--lg">
         {% set date_groups = {} %}
-        
-        {# Group entries by date #}
         {% for entry in entries %}
             {% set entry_date_str = entry.entry_date.strftime('%Y-%m-%d') %}
             {% if entry_date_str not in date_groups %}
@@ -32,157 +31,122 @@
             {% endif %}
             {% set _ = date_groups[entry_date_str].append(entry) %}
         {% endfor %}
-        
-        {# Render grouped entries #}
+
         {% for date_str, day_entries in date_groups.items() %}
-            <div class="space-y-4">
-                <a href="/logbook/daily?date={{ date_str }}" 
-                   class="block hover:opacity-80 transition touch-action">
-                    <div class="flex items-center gap-3 mb-3">
-                        <h2 class="text-2xl font-bold maritime-header">
-                            📅 {{ day_entries[0].entry_date.strftime('%d.%m.%Y') }}
-                        </h2>
-                        <span class="text-sm px-3 py-1 rounded-full" style="background: var(--surface-2); color: var(--accent);">
-                            📖 {{ t('logbook.daily_view') }} →
-                        </span>
-                    </div>
-                </a>
-                
-                {% for entry in day_entries %}
-            
-        <div class="bg-white porthole-card p-6 hover:shadow-lg transition-shadow ml-4 md:ml-8">
-            <div class="flex flex-col md:flex-row gap-4">
-                {% if entry.photos %}
-                <div class="md:w-32 h-32 flex-shrink-0">
-                    <img src="/logbook/photos/{{ entry.photos[0].id }}/view" 
-                         alt="Logbuch Foto" 
-                         class="w-full h-full object-cover rounded-lg cursor-pointer"
-                         onclick="window.location='/logbook/{{ entry.id }}'">
-                </div>
-                {% endif %}
-                
-                <div class="flex-1">
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <h3 class="text-xl font-bold maritime-header">
-                                ⏱️ {{ entry.entry_date.strftime('%H:%M') }} {{ t('logbook.time_label') }}
+        <section class="cl-stack cl-stack--sm">
+            <a href="/logbook/daily?date={{ date_str }}" class="cl-card-link" style="display: flex; align-items: center; gap: var(--cl-space-3); padding: var(--cl-space-3) var(--cl-space-4); background: var(--cl-surface-2); border: 1px solid var(--cl-border); border-radius: var(--cl-radius-sm);">
+                <span style="font-size: 18px; font-weight: 700; color: var(--cl-navy);">📅 {{ day_entries[0].entry_date.strftime('%d.%m.%Y') }}</span>
+                <span class="cl-pill cl-pill--accent">📖 {{ t('logbook.daily_view') }} →</span>
+            </a>
+
+            {% for entry in day_entries %}
+            <article class="cl-card" style="padding: var(--cl-space-4);">
+                <div class="cl-card__head" style="align-items: flex-start;">
+                    <div style="display: flex; gap: var(--cl-space-3); align-items: flex-start; flex: 1 1 auto; min-width: 0;">
+                        {% if entry.photos %}
+                        <img src="/logbook/photos/{{ entry.photos[0].id }}/view" alt=""
+                             style="width: 64px; height: 64px; object-fit: cover; border-radius: var(--cl-radius-sm); cursor: pointer; flex-shrink: 0;"
+                             onclick="window.location='/logbook/{{ entry.id }}'">
+                        {% endif %}
+                        <div style="flex: 1 1 auto; min-width: 0;">
+                            <p class="cl-card__title" style="display: flex; align-items: center; gap: 6px;">
+                                ⏱️ {{ entry.entry_date.strftime('%H:%M') }}
                                 {% if entry.maneuver_type %}
-                                    {% if entry.maneuver_type == 'departure' %}🚢
+                                    <span style="font-weight: 400;">{% if entry.maneuver_type == 'departure' %}🚢
                                     {% elif entry.maneuver_type == 'sail_change' %}⛵
                                     {% elif entry.maneuver_type == 'motor' %}🔧
                                     {% elif entry.maneuver_type == 'anchor' %}⚓
                                     {% elif entry.maneuver_type == 'weather' %}🌤️
                                     {% elif entry.maneuver_type == 'arrival' %}🏁
                                     {% elif entry.maneuver_type == 'full' %}📝
-                                    {% endif %}
+                                    {% endif %}</span>
                                 {% endif %}
-                            </h3>
+                            </p>
                             {% if entry.departure or entry.destination %}
-                            <p class="text-sm mt-1" style="color: var(--accent);">
+                            <p class="cl-help cl-help--muted" style="margin-top: 4px; color: var(--cl-accent);">
                                 {% if entry.departure %}🏁 {{ entry.departure }}{% endif %}
                                 {% if entry.departure and entry.destination %} → {% endif %}
                                 {% if entry.destination %}🏁 {{ entry.destination }}{% endif %}
                             </p>
                             {% endif %}
                         </div>
-                        
-                        <div class="flex gap-2">
-                            <a href="/logbook/{{ entry.id }}/edit" 
-                               class="text-sm hover:underline touch-action px-3 py-1 rounded" 
-                               style="color: var(--accent);">
-                                ✏️ {{ t('common.edit') }}
-                            </a>
-                            <form action="/logbook/{{ entry.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ t('common.confirm_delete_entry') }}')">
-                                {{ csrf_input | safe }}
-                                <button type="submit" 
-                                        class="text-sm hover:underline touch-action px-3 py-1 rounded" 
-                                        style="color: var(--coral);">
-                                    🗑️ {{ t('common.delete') }}
-                                </button>
-                            </form>
-                        </div>
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                        {% if entry.latitude and entry.longitude %}
-                        <div class="text-sm">
-                            <span class="ui-muted">📍 {{ t('logbook.position') }}:</span>
-                            <span class="font-medium ml-1">
-                                {{ "%.4f"|format(entry.latitude) }}°, {{ "%.4f"|format(entry.longitude) }}°
-                            </span>
-                        </div>
-                        {% endif %}
-                        
-                        {% if entry.wind_direction or entry.wind_strength %}
-                        <div class="text-sm">
-                            <span class="ui-muted">💨 {{ t('logbook.wind') }}:</span>
-                            <span class="font-medium ml-1">
-                                {% if entry.wind_direction %}{{ entry.wind_direction }}{% endif %}
-                                {% if entry.wind_strength %}{{ display_wind(entry.wind_strength) }}{% endif %}
-                            </span>
-                        </div>
-                        {% endif %}
-                        
-                        {% if entry.sea_state %}
-                        <div class="text-sm">
-                            <span class="ui-muted">🌊 {{ t('logbook.sea_state') }}:</span>
-                            <span class="font-medium ml-1">{{ display_sea_state(entry.sea_state) }}</span>
-                        </div>
-                        {% endif %}
-                        
-                        {% if entry.temperature %}
-                        <div class="text-sm">
-                            <span class="ui-muted">🌡️ {{ t('logbook.temperature') }}:</span>
-                            <span class="font-medium ml-1">{{ entry.temperature }}°C</span>
-                        </div>
-                        {% endif %}
-
-                        {% set leg_nm = entry_legs.get(entry.id) if entry_legs else None %}
-                        {% if leg_nm is not none %}
-                        <div class="text-sm">
-                            <span class="ui-muted">📏 {{ t('track.leg') }}:</span>
-                            <span class="font-medium ml-1">{{ "%.2f"|format(leg_nm) }} nm</span>
-                        </div>
-                        {% endif %}
+                    <div class="cl-actions">
+                        <a href="/logbook/{{ entry.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm">
+                            ✏️ {{ t('common.edit') }}
+                        </a>
+                        <form action="/logbook/{{ entry.id }}/delete" method="post" style="margin: 0;" onsubmit="return confirm('{{ t('common.confirm_delete_entry') }}')">
+                            {{ csrf_input | safe }}
+                            <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️</button>
+                        </form>
                     </div>
-                    
-                    {% if entry.crew_on_watch %}
-                    <div class="mb-3">
-                        <span class="text-sm ui-muted">👥 {{ t('logbook.watch') }}:</span>
-                        <div class="inline-flex flex-wrap gap-2 ml-2">
-                            {% for watch in entry.crew_on_watch %}
-                            <span class="inline-block px-3 py-1 rounded-full text-sm font-medium text-white" 
-                                  style="background: var(--accent);">
-                                {{ watch.member.code }}
-                            </span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    {% if entry.notes %}
-                    <p class="text-sm mt-3 p-3 rounded-lg" style="background: var(--surface-2);">
-                        {{ entry.notes }}
-                    </p>
-                    {% endif %}
-                    
-                    <a href="/logbook/{{ entry.id }}" 
-                       class="inline-block mt-3 text-sm font-medium touch-action hover:underline" 
-                       style="color: var(--accent);">
-                        👁️ {{ t('logbook.show_details') }} →
-                    </a>
                 </div>
-            </div>
-        </div>
-                {% endfor %} {# End day_entries loop #}
-            </div> {# Close date group #}
-        {% endfor %} {# End date_groups loop #}
-    </div> {# Close entriesContainer #}
+
+                <div class="cl-grid cl-grid--3" style="gap: var(--cl-space-3);">
+                    {% if entry.latitude and entry.longitude %}
+                    <div class="cl-help cl-help--muted">
+                        <span class="cl-subtle">📍 {{ t('logbook.position') }}:</span>
+                        <strong style="color: var(--cl-text);">{{ "%.4f"|format(entry.latitude) }}°, {{ "%.4f"|format(entry.longitude) }}°</strong>
+                    </div>
+                    {% endif %}
+                    {% if entry.wind_direction or entry.wind_strength %}
+                    <div class="cl-help cl-help--muted">
+                        <span class="cl-subtle">💨 {{ t('logbook.wind') }}:</span>
+                        <strong style="color: var(--cl-text);">
+                            {% if entry.wind_direction %}{{ entry.wind_direction }}{% endif %}
+                            {% if entry.wind_strength %}{{ display_wind(entry.wind_strength) }}{% endif %}
+                        </strong>
+                    </div>
+                    {% endif %}
+                    {% if entry.sea_state %}
+                    <div class="cl-help cl-help--muted">
+                        <span class="cl-subtle">🌊 {{ t('logbook.sea_state') }}:</span>
+                        <strong style="color: var(--cl-text);">{{ display_sea_state(entry.sea_state) }}</strong>
+                    </div>
+                    {% endif %}
+                    {% if entry.temperature %}
+                    <div class="cl-help cl-help--muted">
+                        <span class="cl-subtle">🌡️ {{ t('logbook.temperature') }}:</span>
+                        <strong style="color: var(--cl-text);">{{ entry.temperature }}°C</strong>
+                    </div>
+                    {% endif %}
+                    {% set leg_nm = entry_legs.get(entry.id) if entry_legs else None %}
+                    {% if leg_nm is not none %}
+                    <div class="cl-help cl-help--muted">
+                        <span class="cl-subtle">📏 {{ t('track.leg') }}:</span>
+                        <strong style="color: var(--cl-text);">{{ "%.2f"|format(leg_nm) }} nm</strong>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if entry.crew_on_watch %}
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                    <span class="cl-help cl-help--muted">👥 {{ t('logbook.watch') }}:</span>
+                    {% for watch in entry.crew_on_watch %}
+                    <span class="cl-pill cl-pill--solid-accent">{{ watch.member.code }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if entry.notes %}
+                <p style="background: var(--cl-surface-2); padding: var(--cl-space-3); border-radius: var(--cl-radius-sm); font-size: 14px; color: var(--cl-text); margin: 0;">
+                    {{ entry.notes }}
+                </p>
+                {% endif %}
+
+                <a href="/logbook/{{ entry.id }}" class="cl-btn cl-btn--ghost cl-btn--sm" style="align-self: flex-start;">
+                    👁️ {{ t('logbook.show_details') }} →
+                </a>
+            </article>
+            {% endfor %}
+        </section>
+        {% endfor %}
+    </div>
     {% else %}
-    <div class="bg-white porthole-card p-12 text-center">
-        <p class="text-xl maritime-header mb-4">📓 {{ t('logbook.no_entries') }}</p>
-        <p class="mb-6 ui-muted">{{ t('logbook.no_entries_desc') }}</p>
-        <a href="/logbook/new" class="ocean-gradient text-white px-6 py-3 rounded-lg transition touch-action font-semibold inline-block">
+    <div class="cl-card" style="text-align: center; padding: var(--cl-space-7) var(--cl-space-5);">
+        <p style="font-size: 22px; font-weight: 700; color: var(--cl-navy); margin: 0 0 var(--cl-space-3);">📓 {{ t('logbook.no_entries') }}</p>
+        <p class="cl-muted" style="margin: 0 0 var(--cl-space-5);">{{ t('logbook.no_entries_desc') }}</p>
+        <a href="/logbook/new" class="cl-btn cl-btn--primary">
             ➕ {{ t('logbook.create_first') }}
         </a>
     </div>

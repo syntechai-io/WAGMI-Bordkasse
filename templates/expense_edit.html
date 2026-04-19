@@ -1,151 +1,130 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold maritime-header mb-6">✏️ {{ t('expense.edit_expense') }}</h1>
-    
-    <form method="post" enctype="multipart/form-data" class="bg-white porthole-card p-6 space-y-4">
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">✏️ {{ t('expense.edit_expense') }}</h1>
+        </div>
+        <div class="cl-pageheader__actions">
+            <a href="/expenses" class="cl-btn cl-btn--ghost">← {{ t('common.cancel') }}</a>
+        </div>
+    </header>
+
+    <form method="post" enctype="multipart/form-data" class="cl-form">
         {{ csrf_input | safe }}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block font-medium mb-2">👤 {{ t('expense.paid_by') }}</label>
-                <select name="payer_id" class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
-                    <option value="" {% if expense and not expense.payer_id %}selected{% endif %}>🌐 {{ t('expense.external_charge') }}</option>
-                    {% for member in crew_members %}
-                    <option value="{{ member.id }}" {% if expense and expense.payer_id == member.id %}selected{% endif %}>
-                        {{ member.code }} - {{ member.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div>
-                <label class="block font-medium mb-2">📅 {{ t('common.date') }} *</label>
-                <input type="date" name="expense_date" value="{% if expense %}{{ expense.date }}{% endif %}" required
-                    class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
-            </div>
-            
-            <div>
-                <label class="block font-medium mb-2">📂 {{ t('common.category') }} *</label>
-                <select name="category" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
-                    {% for cat in categories %}
-                    <option value="{{ cat }}" {% if expense and norm_expense_cat(expense.category) == cat %}selected{% endif %}>{{ display_expense_cat(cat) }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div>
-                <label class="block font-medium mb-2">💵 {{ t('common.amount') }} *</label>
-                <input type="number" name="amount" step="0.01" value="{% if expense %}{{ expense.amount }}{% endif %}" required
-                    class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
-            </div>
-            
-            <div>
-                <label class="block font-medium mb-2">💱 {{ t('common.currency') }} *</label>
-                <select name="currency" class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
-                    <option value="EUR" {% if expense and expense.currency.value == 'EUR' %}selected{% endif %}>EUR (€)</option>
-                    <option value="DKK" {% if expense and expense.currency.value == 'DKK' %}selected{% endif %}>DKK (kr)</option>
-                    <option value="SEK" {% if expense and expense.currency.value == 'SEK' %}selected{% endif %}>SEK (kr)</option>
-                    <option value="GBP" {% if expense and expense.currency.value == 'GBP' %}selected{% endif %}>GBP (£)</option>
-                </select>
-            </div>
-            
-            <div class="md:col-span-2">
-                <label class="block font-medium mb-2">📝 {{ t('common.description') }} *</label>
-                <input type="text" name="description" value="{% if expense %}{{ expense.description }}{% endif %}" required
-                    class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
-            </div>
-            
-            <div>
-                <label class="block font-medium mb-2">💰 {{ t('expense.paid_from') }} *</label>
-                <select name="paid_from" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
-                    <option value="private" {% if not expense or expense.paid_from.value == 'private' %}selected{% endif %}>{{ t('common.private') }}</option>
-                    <option value="wallet" {% if expense and expense.paid_from.value == 'wallet' %}selected{% endif %}>{{ t('common.wallet') }}</option>
-                </select>
-            </div>
-            
-            <div>
-                <label class="block font-medium mb-2">🎯 {{ t('expense.split_mode') }} *</label>
-                <select name="split_mode" id="split_mode" required class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
-                    <option value="equal" {% if expense and expense.split_mode.value == 'equal' %}selected{% endif %}>{{ t('expense.split_equal') }}</option>
-                    <option value="participants" {% if expense and expense.split_mode.value == 'participants' %}selected{% endif %}>{{ t('expense.split_participants') }}</option>
-                    <option value="percentage" {% if expense and expense.split_mode.value == 'percentage' %}selected{% endif %}>{{ t('expense.split_percentage') }}</option>
-                </select>
-            </div>
-            
-            <div id="participants_div" class="md:col-span-2 {% if not expense or expense.split_mode.value != 'participants' %}hidden{% endif %}">
-                <label class="block font-medium mb-2">👥 {{ t('expense.participants') }}</label>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    {% for member in crew_members %}
-                    <label class="flex items-center space-x-2">
-                        <input type="checkbox" name="participant_ids" value="{{ member.id }}" 
-                            {% if member.id in participant_ids %}checked{% endif %}
-                            class="rounded h-5 w-5">
-                        <span class="text-lg">{{ member.code }} - {{ member.name }}</span>
-                    </label>
-                    {% endfor %}
+        <section class="cl-card">
+            <div class="cl-grid cl-grid--2">
+                <div class="cl-field">
+                    <label class="cl-label">👤 {{ t('expense.paid_by') }}</label>
+                    <select name="payer_id" class="cl-input cl-select">
+                        <option value="" {% if expense and not expense.payer_id %}selected{% endif %}>🌐 {{ t('expense.external_charge') }}</option>
+                        {% for member in crew_members %}
+                        <option value="{{ member.id }}" {% if expense and expense.payer_id == member.id %}selected{% endif %}>{{ member.code }} - {{ member.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-            </div>
-            
-            <div id="percentage_div" class="md:col-span-2 {% if not expense or expense.split_mode.value != 'percentage' %}hidden{% endif %}">
-                <label class="block font-medium mb-2">📊 {{ t('expense.split_percentage') }}</label>
-                <p class="text-sm mb-3 ui-muted">{{ t('expense.percentage_must_100') }}</p>
-                <div class="space-y-3">
-                    {% for member in crew_members %}
-                    <div class="flex items-center gap-3">
-                        <label class="flex items-center space-x-2 flex-1">
-                            <input type="checkbox" name="participant_ids" value="{{ member.id }}" 
-                                {% if member.id in participant_ids %}checked{% endif %}
-                                class="rounded h-5 w-5 percentage-participant">
-                            <span class="text-lg">{{ member.code }} - {{ member.name }}</span>
+                <div class="cl-field">
+                    <label class="cl-label">📅 {{ t('common.date') }}</label>
+                    <input type="date" name="expense_date" value="{% if expense %}{{ expense.date }}{% endif %}" required class="cl-input">
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label">📂 {{ t('common.category') }}</label>
+                    <select name="category" required class="cl-input cl-select">
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if expense and norm_expense_cat(expense.category) == cat %}selected{% endif %}>{{ display_expense_cat(cat) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label">💵 {{ t('common.amount') }}</label>
+                    <input type="number" name="amount" step="0.01" value="{% if expense %}{{ expense.amount }}{% endif %}" required class="cl-input">
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label">💱 {{ t('common.currency') }}</label>
+                    <select name="currency" class="cl-input cl-select">
+                        <option value="EUR" {% if expense and expense.currency.value == 'EUR' %}selected{% endif %}>EUR (€)</option>
+                        <option value="DKK" {% if expense and expense.currency.value == 'DKK' %}selected{% endif %}>DKK (kr)</option>
+                        <option value="SEK" {% if expense and expense.currency.value == 'SEK' %}selected{% endif %}>SEK (kr)</option>
+                        <option value="GBP" {% if expense and expense.currency.value == 'GBP' %}selected{% endif %}>GBP (£)</option>
+                    </select>
+                </div>
+                <div class="cl-field cl-field--full">
+                    <label class="cl-label">📝 {{ t('common.description') }}</label>
+                    <input type="text" name="description" value="{% if expense %}{{ expense.description }}{% endif %}" required class="cl-input">
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label">💰 {{ t('expense.paid_from') }}</label>
+                    <select name="paid_from" required class="cl-input cl-select">
+                        <option value="private" {% if not expense or expense.paid_from.value == 'private' %}selected{% endif %}>{{ t('common.private') }}</option>
+                        <option value="wallet" {% if expense and expense.paid_from.value == 'wallet' %}selected{% endif %}>{{ t('common.wallet') }}</option>
+                    </select>
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label">🎯 {{ t('expense.split_mode') }}</label>
+                    <select name="split_mode" id="split_mode" required class="cl-input cl-select">
+                        <option value="equal" {% if expense and expense.split_mode.value == 'equal' %}selected{% endif %}>{{ t('expense.split_equal') }}</option>
+                        <option value="participants" {% if expense and expense.split_mode.value == 'participants' %}selected{% endif %}>{{ t('expense.split_participants') }}</option>
+                        <option value="percentage" {% if expense and expense.split_mode.value == 'percentage' %}selected{% endif %}>{{ t('expense.split_percentage') }}</option>
+                    </select>
+                </div>
+
+                <div id="participants_div" class="cl-field cl-field--full {% if not expense or expense.split_mode.value != 'participants' %}hidden{% endif %}">
+                    <label class="cl-label cl-label--inline">👥 {{ t('expense.participants') }}</label>
+                    <div class="cl-grid cl-grid--2">
+                        {% for member in crew_members %}
+                        <label class="cl-check-row">
+                            <input type="checkbox" name="participant_ids" value="{{ member.id }}" {% if member.id in participant_ids %}checked{% endif %}>
+                            <span class="cl-check-row__label">{{ member.code }} - {{ member.name }}</span>
                         </label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" 
-                                name="participant_percentages" 
-                                min="0" 
-                                max="100" 
-                                step="0.01" 
-                                value="{% if member.id in participant_percentages %}{{ participant_percentages[member.id] }}{% else %}0{% endif %}"
-                                class="w-24 px-3 py-2 border rounded-lg text-lg percentage-input" 
-                                style="border-color: var(--border);"
-                                data-member-id="{{ member.id }}">
-                            <span class="text-lg">%</span>
-                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
-                <div id="percentage_warning" class="hidden mt-3 text-sm font-medium" style="color: var(--coral);">
-                    ⚠️ {{ t('expense.percentage_warning') }} <span id="percentage_sum">0</span>% {{ t('expense.percentage_should_be') }}
+
+                <div id="percentage_div" class="cl-field cl-field--full {% if not expense or expense.split_mode.value != 'percentage' %}hidden{% endif %}">
+                    <label class="cl-label cl-label--inline">📊 {{ t('expense.split_percentage') }}</label>
+                    <p class="cl-help cl-help--muted">{{ t('expense.percentage_must_100') }}</p>
+                    <div class="cl-stack cl-stack--sm">
+                        {% for member in crew_members %}
+                        <div style="display: flex; align-items: center; gap: var(--cl-space-3);">
+                            <label class="cl-check-row" style="flex: 1 1 auto;">
+                                <input type="checkbox" name="participant_ids" value="{{ member.id }}" {% if member.id in participant_ids %}checked{% endif %} class="percentage-participant">
+                                <span class="cl-check-row__label">{{ member.code }} - {{ member.name }}</span>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <input type="number" name="participant_percentages" min="0" max="100" step="0.01"
+                                    value="{% if member.id in participant_percentages %}{{ participant_percentages[member.id] }}{% else %}0{% endif %}"
+                                    class="cl-input percentage-input" style="width: 80px;" data-member-id="{{ member.id }}">
+                                <span class="cl-help">%</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <p id="percentage_warning" class="cl-help cl-help--warn hidden" style="margin-top: 8px;">
+                        ⚠️ {{ t('expense.percentage_warning') }} <span id="percentage_sum">0</span>% {{ t('expense.percentage_should_be') }}
+                    </p>
                 </div>
             </div>
-            
-            <div class="md:col-span-2">
-                <label class="block font-medium mb-2">📎 {{ t('expense.receipt_optional') }}</label>
+
+            <div class="cl-field">
+                <label class="cl-label cl-label--inline">📎 {{ t('expense.receipt_optional') }}</label>
                 <input type="file" id="receiptInput" accept="image/*,.pdf" class="hidden">
-                <div class="flex gap-3">
-                    <button type="button" onclick="activateReceiptCamera()" 
-                            class="btn btn-primary flex-1 text-white px-4 py-3 rounded-lg transition touch-action font-semibold text-center">
+                <div style="display: flex; gap: var(--cl-space-2);">
+                    <button type="button" onclick="activateReceiptCamera()" class="cl-btn cl-btn--accent" style="flex: 1;">
                         📷 {{ t('common.camera') }}
                     </button>
-                    <button type="button" onclick="activateReceiptFile()" 
-                            class="btn btn-primary flex-1 text-white px-4 py-3 rounded-lg transition touch-action font-semibold text-center">
+                    <button type="button" onclick="activateReceiptFile()" class="cl-btn cl-btn--secondary" style="flex: 1;">
                         📁 {{ t('common.file') }}
                     </button>
                 </div>
-                <p id="receiptFileName" class="text-sm mt-2 ui-muted"></p>
-                <p id="ocrStatus" class="text-sm mt-1 hidden" style="color: var(--accent);"></p>
+                <p id="receiptFileName" class="cl-help cl-help--muted"></p>
+                <p id="ocrStatus" class="cl-help hidden" style="color: var(--cl-accent);"></p>
             </div>
-        </div>
-        
-        <div class="rope-divider"></div>
-        
-        <div class="flex gap-4 pt-4">
-            <button type="submit" class="flex-1 ocean-gradient text-white font-bold py-3 px-4 rounded-lg transition touch-action">
-                💾 {{ t('common.save') }}
-            </button>
-            <a href="/expenses" class="btn btn-primary flex-1 text-white font-bold py-3 px-4 rounded-lg text-center transition touch-action">
-                ❌ {{ t('common.cancel') }}
-            </a>
+        </section>
+
+        <div class="cl-actionbar">
+            <a href="/expenses" class="cl-btn cl-btn--secondary">❌ {{ t('common.cancel') }}</a>
+            <button type="submit" class="cl-btn cl-btn--primary">💾 {{ t('common.save') }}</button>
         </div>
     </form>
 </div>
@@ -156,10 +135,9 @@
     const percentageDiv = document.getElementById('percentage_div');
     const percentageWarning = document.getElementById('percentage_warning');
     const percentageSumSpan = document.getElementById('percentage_sum');
-    
+
     function updateSplitMode() {
         const mode = splitModeSelect.value;
-        
         if (mode === 'participants') {
             participantsDiv.classList.remove('hidden');
             percentageDiv.classList.add('hidden');
@@ -172,75 +150,35 @@
             percentageDiv.classList.add('hidden');
         }
     }
-    
     function validatePercentages() {
-        const percentageInputs = document.querySelectorAll('.percentage-input');
-        const participantCheckboxes = document.querySelectorAll('.percentage-participant');
+        const inputs = document.querySelectorAll('.percentage-input');
+        const checks = document.querySelectorAll('.percentage-participant');
         let sum = 0;
-        
-        percentageInputs.forEach((input, index) => {
-            const checkbox = participantCheckboxes[index];
-            if (checkbox.checked) {
-                sum += parseFloat(input.value) || 0;
-            }
-        });
-        
+        inputs.forEach((input, i) => { if (checks[i] && checks[i].checked) sum += parseFloat(input.value) || 0; });
         percentageSumSpan.textContent = sum.toFixed(2);
-        
-        if (Math.abs(sum - 100) > 0.01 && sum > 0) {
-            percentageWarning.classList.remove('hidden');
-        } else {
-            percentageWarning.classList.add('hidden');
-        }
+        percentageWarning.classList.toggle('hidden', !(Math.abs(sum - 100) > 0.01 && sum > 0));
     }
-    
     splitModeSelect.addEventListener('change', updateSplitMode);
-    
-    document.querySelectorAll('.percentage-input').forEach(input => {
-        input.addEventListener('input', validatePercentages);
-    });
-    
-    document.querySelectorAll('.percentage-participant').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const memberId = this.value;
-            const percentageInput = document.querySelector(`.percentage-input[data-member-id="${memberId}"]`);
-            if (!this.checked && percentageInput) {
-                percentageInput.value = '0';
-            }
-            validatePercentages();
-        });
-    });
-    
+    document.querySelectorAll('.percentage-input').forEach(i => i.addEventListener('input', validatePercentages));
+    document.querySelectorAll('.percentage-participant').forEach(c => c.addEventListener('change', function() {
+        const el = document.querySelector(`.percentage-input[data-member-id="${this.value}"]`);
+        if (!this.checked && el) el.value = '0';
+        validatePercentages();
+    }));
     updateSplitMode();
-    
+
     const receiptInput = document.getElementById('receiptInput');
-    
-    function activateReceiptCamera() {
-        receiptInput.setAttribute('capture', 'environment');
-        receiptInput.setAttribute('name', 'receipt');
-        receiptInput.click();
-    }
-    
-    function activateReceiptFile() {
-        receiptInput.removeAttribute('capture');
-        receiptInput.setAttribute('name', 'receipt');
-        receiptInput.click();
-    }
-    
+    function activateReceiptCamera() { receiptInput.setAttribute('capture','environment'); receiptInput.setAttribute('name','receipt'); receiptInput.click(); }
+    function activateReceiptFile()   { receiptInput.removeAttribute('capture');         receiptInput.setAttribute('name','receipt'); receiptInput.click(); }
     receiptInput.addEventListener('change', function(e) {
         if (e.target.files.length > 0) {
-            const file = e.target.files[0];
-            const fileName = document.getElementById('receiptFileName');
-            fileName.textContent = '{{ t("common.file_selected") }}' + file.name;
-            if (navigator.onLine) runReceiptOCR(file);
+            const f = e.target.files[0];
+            document.getElementById('receiptFileName').textContent = '{{ t("common.file_selected") }}' + f.name;
+            if (navigator.onLine) runReceiptOCR(f);
         }
     });
 
-    // === Receipt OCR pre-fill ===========================================
-    function getCookie(name) {
-        const m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
-        return m ? decodeURIComponent(m[1]) : '';
-    }
+    function getCookie(name) { const m = document.cookie.match('(?:^|; )' + name + '=([^;]*)'); return m ? decodeURIComponent(m[1]) : ''; }
     function setSuggested(el) {
         if (!el) return;
         el.dataset.ocrSuggested = '1';
@@ -248,19 +186,12 @@
         const wrap = el.parentElement;
         if (!wrap || wrap.querySelector('.ocr-pill')) return;
         const pill = document.createElement('span');
-        pill.className = 'ocr-pill inline-block ml-2 px-2 py-0.5 text-xs font-semibold rounded-full';
-        pill.style.background = 'var(--accent)';
-        pill.style.color = '#fff';
+        pill.className = 'ocr-pill cl-pill cl-pill--solid-accent';
+        pill.style.marginLeft = '8px';
         pill.textContent = '✨ {{ t("expense.ocr_suggested") }}';
         const label = wrap.querySelector('label');
         (label || wrap).appendChild(pill);
-        const clear = () => {
-            delete el.dataset.ocrSuggested;
-            el.style.background = '';
-            pill.remove();
-            el.removeEventListener('input', clear);
-            el.removeEventListener('change', clear);
-        };
+        const clear = () => { delete el.dataset.ocrSuggested; el.style.background = ''; pill.remove(); el.removeEventListener('input', clear); el.removeEventListener('change', clear); };
         el.addEventListener('input', clear);
         el.addEventListener('change', clear);
     }
@@ -272,8 +203,7 @@
     function fillIfSuggestable(selector, value) {
         if (value === null || value === undefined || value === '') return false;
         const el = document.querySelector(selector);
-        if (!el) return false;
-        if (el.dataset.userTouched === '1') return false;
+        if (!el || el.dataset.userTouched === '1') return false;
         const current = (el.value || '').trim();
         if (el.tagName === 'INPUT' && el.type !== 'date' && current && current !== '0' && current !== '0.00') return false;
         if (String(el.value) === String(value)) return false;
@@ -284,28 +214,18 @@
     async function runReceiptOCR(file) {
         const status = document.getElementById('ocrStatus');
         if (!status) return;
-        const acceptable = file.type === 'application/pdf' || file.type.startsWith('image/');
-        if (!acceptable) return;
+        if (!(file.type === 'application/pdf' || file.type.startsWith('image/'))) return;
         status.classList.remove('hidden');
-        status.style.color = 'var(--accent)';
+        status.style.color = 'var(--cl-accent)';
         status.textContent = '{{ t("expense.ocr_reading") }}';
         try {
             const fd = new FormData();
             fd.append('receipt', file);
-            const res = await fetch('/expenses/ocr-suggest', {
-                method: 'POST',
-                headers: { 'x-csrftoken': getCookie('csrftoken') },
-                body: fd,
-                credentials: 'same-origin',
-            });
+            const res = await fetch('/expenses/ocr-suggest', { method: 'POST', headers: { 'x-csrftoken': getCookie('csrftoken') }, body: fd, credentials: 'same-origin' });
             if (!res.ok) throw new Error('http ' + res.status);
             const data = await res.json();
             const s = data && data.suggestions;
-            if (!s) {
-                status.textContent = '{{ t("expense.ocr_no_data") }}';
-                status.style.color = 'var(--muted)';
-                return;
-            }
+            if (!s) { status.textContent = '{{ t("expense.ocr_no_data") }}'; status.style.color = 'var(--cl-text-muted)'; return; }
             let filled = 0;
             if (fillIfSuggestable('input[name="amount"]', s.amount)) filled++;
             if (fillIfSuggestable('select[name="currency"]', s.currency)) filled++;
@@ -313,17 +233,9 @@
             const desc = s.description || s.vendor;
             if (fillIfSuggestable('input[name="description"]', desc)) filled++;
             if (fillIfSuggestable('select[name="category"]', s.category)) filled++;
-            if (filled > 0) {
-                status.textContent = '{{ t("expense.ocr_filled") }}';
-                status.style.color = 'var(--success)';
-            } else {
-                status.textContent = '{{ t("expense.ocr_no_data") }}';
-                status.style.color = 'var(--muted)';
-            }
-        } catch (err) {
-            status.textContent = '{{ t("expense.ocr_error") }}';
-            status.style.color = 'var(--muted)';
-        }
+            if (filled > 0) { status.textContent = '{{ t("expense.ocr_filled") }}'; status.style.color = 'var(--cl-success)'; }
+            else            { status.textContent = '{{ t("expense.ocr_no_data") }}'; status.style.color = 'var(--cl-text-muted)'; }
+        } catch (e) { status.textContent = '{{ t("expense.ocr_error") }}'; status.style.color = 'var(--cl-text-muted)'; }
     }
 </script>
 {% endblock %}

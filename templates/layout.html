@@ -38,6 +38,7 @@
     <link rel="stylesheet" href="/static/ui_navy_contrast_fix.css">
     <link rel="stylesheet" href="/static/ui_mobile_skin.css">
     <link rel="stylesheet" href="/static/ui_night_mode.css">
+    <link rel="stylesheet" href="/static/cl_design.css">
     <script>
     (function(){
       // Early-paint theme application. Precedence:
@@ -89,11 +90,6 @@
         }
         @media (min-width: 768px) {
             .topbar-brand-name { max-width: 200px; }
-        }
-        @media (max-width: 640px) {
-            body {
-                padding-bottom: 80px;
-            }
         }
         
         .touch-action {
@@ -428,6 +424,33 @@
         {% block content %}{% endblock %}
     </main>
 
+    {% if request.session.get('user_id') or request.session.get('saas_user_id') %}
+    <nav class="cl-tabbar" aria-label="{{ t('nav.navigation') }}">
+        <div class="cl-tabbar__inner">
+            <a href="/" class="cl-tabbar__item" data-match="/">
+                <span class="cl-tabbar__icon" aria-hidden="true">🧭</span>
+                <span>{{ t('nav.dashboard') }}</span>
+            </a>
+            <a href="/logbook" class="cl-tabbar__item" data-match="/logbook">
+                <span class="cl-tabbar__icon" aria-hidden="true">📓</span>
+                <span>{{ t('nav.logbook') }}</span>
+            </a>
+            <a href="/expenses" class="cl-tabbar__item" data-match="/expenses|/deposits|/balances|/settlement|/templates">
+                <span class="cl-tabbar__icon" aria-hidden="true">💰</span>
+                <span>{{ t('nav.finances') }}</span>
+            </a>
+            <a href="/trips/" class="cl-tabbar__item" data-match="/trips">
+                <span class="cl-tabbar__icon" aria-hidden="true">⛵</span>
+                <span>{{ t('nav.trips') }}</span>
+            </a>
+            <button type="button" class="cl-tabbar__item" id="tabbar-more" aria-label="{{ t('nav.open_menu') }}">
+                <span class="cl-tabbar__icon" aria-hidden="true">☰</span>
+                <span>{{ t('nav.admin') }}</span>
+            </button>
+        </div>
+    </nav>
+    {% endif %}
+
     <footer class="footer-bar navy-shell">
         <p><strong>{{ t('footer.title') }}</strong></p>
         <p class="mt-1">{{ t('footer.subtitle') }}</p>
@@ -439,6 +462,18 @@
     </footer>
 
     <script src="/static/ui_nav.js"></script>
+    <script src="/static/js/cl_shell.js"></script>
+    <script>
+      // Wire bottom-bar "More" button to open the existing off-canvas drawer.
+      (function () {
+        var btn = document.getElementById('tabbar-more');
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+          var opener = document.getElementById('drawer-open');
+          if (opener) opener.click();
+        });
+      })();
+    </script>
     <script>
       window.__crewlogThemeLabels = {
         auto:  {{ t('theme.auto')  | tojson }},
