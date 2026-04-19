@@ -25,6 +25,10 @@
         rows.forEach((r, i) => {
             const idx = r.querySelector('.row-index');
             if (idx) idx.textContent = '#' + (i + 1);
+            const upBtn = r.querySelector('.move-up-btn');
+            const downBtn = r.querySelector('.move-down-btn');
+            if (upBtn) upBtn.disabled = (i === 0);
+            if (downBtn) downBtn.disabled = (i === rows.length - 1);
         });
         if (counter) counter.textContent = rows.length;
     }
@@ -237,14 +241,33 @@
     // Initial first row
     addRow({ skipCarry: true });
 
-    // Day-photos count
+    // Day-photos: count + thumbnail previews
     const dayPhotos = document.getElementById('dayPhotosInput');
     const dayPhotosCount = document.getElementById('dayPhotosCount');
-    if (dayPhotos && dayPhotosCount) {
+    const dayPhotosPreview = document.getElementById('dayPhotosPreview');
+    if (dayPhotos) {
         dayPhotos.addEventListener('change', function() {
-            dayPhotosCount.textContent = dayPhotos.files.length
-                ? fmt(i18n.photosSelected, {n: dayPhotos.files.length})
-                : '';
+            const files = Array.from(dayPhotos.files || []);
+            if (dayPhotosCount) {
+                dayPhotosCount.textContent = files.length
+                    ? '✅ ' + fmt(i18n.photosSelected, {n: files.length})
+                    : '';
+            }
+            if (dayPhotosPreview) {
+                dayPhotosPreview.innerHTML = '';
+                files.forEach(function(f) {
+                    if (!f.type || !f.type.startsWith('image/')) return;
+                    const cell = document.createElement('div');
+                    cell.className = 'photo-pill';
+                    const img = document.createElement('img');
+                    img.alt = f.name;
+                    const url = URL.createObjectURL(f);
+                    img.src = url;
+                    img.onload = function() { URL.revokeObjectURL(url); };
+                    cell.appendChild(img);
+                    dayPhotosPreview.appendChild(cell);
+                });
+            }
         });
     }
 })();

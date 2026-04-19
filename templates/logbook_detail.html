@@ -201,7 +201,8 @@
                             📁 {{ t('logbook.select_file') }}
                         </button>
                     </div>
-                    <p id="photoFileName" class="text-sm mt-2 ui-muted"></p>
+                    <p id="photoFileName" class="text-sm mt-2 font-medium" style="color: var(--success);"></p>
+                    <div id="photoPreview" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 mt-2"></div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-2">💬 {{ t('logbook.caption') }} ({{ t('common.optional') }})</label>
@@ -227,11 +228,35 @@
                 }
                 
                 photoInput.addEventListener('change', function(e) {
-                    if (e.target.files.length > 0) {
-                        const names = Array.from(e.target.files).map(f => f.name).join(', ');
-                        document.getElementById('photoFileName').textContent = '{{ t("common.file_selected") }}' + '(' + e.target.files.length + ') ' + names;
-                        document.getElementById('uploadButton').disabled = false;
-                        document.getElementById('uploadButton').classList.remove('opacity-50');
+                    const files = Array.from(e.target.files || []);
+                    const preview = document.getElementById('photoPreview');
+                    const label = document.getElementById('photoFileName');
+                    const btn = document.getElementById('uploadButton');
+                    if (preview) preview.innerHTML = '';
+                    if (files.length > 0) {
+                        label.textContent = '✅ {{ t("common.file_selected") }}' + '(' + files.length + ')';
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50');
+                        if (preview) {
+                            files.forEach(function(f) {
+                                if (!f.type || !f.type.startsWith('image/')) return;
+                                const cell = document.createElement('div');
+                                cell.className = 'photo-pill';
+                                cell.style.cssText = 'position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--surface-2);';
+                                const img = document.createElement('img');
+                                img.alt = f.name;
+                                img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+                                const url = URL.createObjectURL(f);
+                                img.src = url;
+                                img.onload = function() { URL.revokeObjectURL(url); };
+                                cell.appendChild(img);
+                                preview.appendChild(cell);
+                            });
+                        }
+                    } else {
+                        label.textContent = '';
+                        btn.disabled = true;
+                        btn.classList.add('opacity-50');
                     }
                 });
             </script>

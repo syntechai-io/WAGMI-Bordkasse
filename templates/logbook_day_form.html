@@ -76,7 +76,8 @@
             <p class="text-xs ui-muted">{{ t('logbook.day_photos_hint') }}</p>
             <input type="file" name="day_photos" multiple accept="image/jpeg,image/png,image/jpg"
                    class="block w-full text-sm" id="dayPhotosInput">
-            <p id="dayPhotosCount" class="text-xs ui-muted"></p>
+            <p id="dayPhotosCount" class="text-xs font-medium" style="color: var(--success);"></p>
+            <div id="dayPhotosPreview" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2"></div>
         </div>
 
         {# Sticky save bar #}
@@ -92,25 +93,22 @@
 {# Row template (cloned by JS) #}
 <template id="dayRowTemplate">
     <div class="day-row p-3 rounded-lg border" style="border-color: var(--border); background: var(--surface);">
-        <div class="flex items-center justify-between mb-2 gap-2">
-            <div class="flex items-center gap-2">
-                <button type="button" class="drag-handle touch-action select-none px-2 py-1 rounded cursor-grab"
-                        title="{{ t('logbook.day_logbook_drag_handle') }}"
-                        aria-label="{{ t('logbook.day_logbook_drag_handle') }}"
-                        style="background: var(--surface-2); color: var(--ink); touch-action: none;">⋮⋮</button>
-                <button type="button" class="move-up-btn px-2 py-1 rounded text-sm"
+        <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
+            <div class="flex items-center gap-1">
+                <button type="button" class="move-up-btn flex items-center justify-center rounded touch-action"
                         title="{{ t('logbook.day_logbook_move_up') }}"
                         aria-label="{{ t('logbook.day_logbook_move_up') }}"
-                        style="background: var(--surface-2);">▲</button>
-                <button type="button" class="move-down-btn px-2 py-1 rounded text-sm"
+                        style="background: var(--surface-2); width:40px; height:40px; font-size:18px;">▲</button>
+                <button type="button" class="move-down-btn flex items-center justify-center rounded touch-action"
                         title="{{ t('logbook.day_logbook_move_down') }}"
                         aria-label="{{ t('logbook.day_logbook_move_down') }}"
-                        style="background: var(--surface-2);">▼</button>
-                <span class="font-semibold text-sm">⏱️ <span class="row-index">1</span></span>
+                        style="background: var(--surface-2); width:40px; height:40px; font-size:18px;">▼</button>
+                <span class="font-semibold text-sm ml-2">⏱️ <span class="row-index">1</span></span>
             </div>
-            <button type="button" class="remove-row-btn text-sm hover:underline" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
+            <button type="button" class="remove-row-btn text-sm font-medium px-3 py-2 rounded touch-action"
+                    style="color: var(--coral); background: var(--surface-2);">🗑️ {{ t('common.delete') }}</button>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-2">
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
             <div>
                 <label class="block text-xs ui-muted">⏱️ {{ t('logbook.time_input') }} *</label>
                 <input type="time" name="row_time" required class="w-full px-2 py-1 border rounded text-sm" style="border-color: var(--border);">
@@ -211,5 +209,16 @@
     </div>
 </template>
 
-<script src="/static/js/logbook-day-entry.js?v=2"></script>
+<style>
+    .day-row label { min-height: 2.4rem; display: block; line-height: 1.15; }
+    .day-row .grid > div > input,
+    .day-row .grid > div > select { min-height: 40px; }
+    .day-row .move-up-btn[disabled],
+    .day-row .move-down-btn[disabled] { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+    #dayPhotosPreview .photo-pill { position: relative; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); }
+    #dayPhotosPreview .photo-pill img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #photoPreview .photo-pill { position: relative; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); }
+    #photoPreview .photo-pill img { width: 100%; height: 100%; object-fit: cover; display: block; }
+</style>
+<script src="/static/js/logbook-day-entry.js?v=3"></script>
 {% endblock %}
