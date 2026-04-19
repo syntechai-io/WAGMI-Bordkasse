@@ -32,3 +32,17 @@ def init_db():
             "ALTER TABLE user_preferences "
             "ADD COLUMN IF NOT EXISTS theme VARCHAR(10)"
         ))
+        conn.execute(text(
+            "ALTER TABLE user_preferences "
+            "ADD COLUMN IF NOT EXISTS saas_user_id INTEGER"
+        ))
+        conn.execute(text(
+            "ALTER TABLE user_preferences "
+            "ALTER COLUMN user_id DROP NOT NULL"
+        ))
+        conn.execute(text(
+            "CREATE UNIQUE INDEX IF NOT EXISTS "
+            "ix_user_preferences_saas_user_id "
+            "ON user_preferences(saas_user_id) "
+            "WHERE saas_user_id IS NOT NULL"
+        ))

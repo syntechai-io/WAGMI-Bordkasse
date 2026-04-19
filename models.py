@@ -379,7 +379,8 @@ class UserPreferences(Base):
     __tablename__ = "user_preferences"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, unique=True, index=True)
+    saas_user_id = Column(Integer, ForeignKey("new_users.id"), nullable=True, unique=True, index=True)
     skipper_name = Column(String(100), nullable=True)
     skipper_code = Column(String(20), nullable=True)
     boat_name = Column(String(100), nullable=True)

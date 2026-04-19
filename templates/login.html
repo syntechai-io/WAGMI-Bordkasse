@@ -15,12 +15,14 @@
     <link rel="stylesheet" href="/static/ui_night_mode.css">
     <script>
     (function(){
+      // Login is unauth, so localStorage > seeded > 'auto'.
       try {
         var seeded = {{ (saved_theme or "auto")|tojson }};
         var stored = null;
         try { stored = localStorage.getItem('crewlog-theme'); } catch(e) {}
         var pref = (stored === 'auto' || stored === 'light' || stored === 'night') ? stored : seeded;
         window.__crewlogThemePref = pref;
+        window.__crewlogThemeAuthoritative = false;
         var resolved = pref;
         if (pref === 'auto') {
           var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;

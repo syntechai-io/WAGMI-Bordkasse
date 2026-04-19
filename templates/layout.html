@@ -40,14 +40,26 @@
     <link rel="stylesheet" href="/static/ui_night_mode.css">
     <script>
     (function(){
-      // Early-paint theme application. Reads (in priority): localStorage > server-seeded > 'auto'.
+      // Early-paint theme application. Precedence:
+      //   - For signed-in users with an explicit DB preference (theme_authoritative=true),
+      //     server-seeded value WINS over localStorage so prefs follow the user across
+      //     devices/browsers and cannot be hijacked by a previous user's localStorage.
+      //   - Otherwise (anonymous, or signed-in user with no stored value yet),
+      //     localStorage wins. Any later toggle is POSTed to the server and becomes
+      //     authoritative on the next load.
       // 'auto' resolves to 'night' iff prefers-color-scheme: dark, else 'light'.
       try {
         var seeded = {{ (saved_theme or "auto")|tojson }};
+        var authoritative = {{ (theme_authoritative or false)|tojson }};
         var stored = null;
         try { stored = localStorage.getItem('crewlog-theme'); } catch(e) {}
-        var pref = (stored === 'auto' || stored === 'light' || stored === 'night') ? stored : seeded;
+        var validStored = (stored === 'auto' || stored === 'light' || stored === 'night') ? stored : null;
+        var pref = authoritative ? seeded : (validStored || seeded);
+        if (authoritative && validStored !== seeded) {
+          try { localStorage.setItem('crewlog-theme', seeded); } catch(e) {}
+        }
         window.__crewlogThemePref = pref;
+        window.__crewlogThemeAuthoritative = authoritative;
         var resolved = pref;
         if (pref === 'auto') {
           var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;

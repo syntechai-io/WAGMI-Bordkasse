@@ -136,19 +136,27 @@ def i18n_context_processor(request: Request) -> Dict[str, Any]:
     def _normalize_expense_category_val(value):
         return normalize_expense_category(value) if value else ""
 
-    # Resolve user's saved theme preference (legacy users only have UserPreferences row).
+    # Resolve user's saved theme preference (legacy or SaaS users via UserPreferences row).
     # 'auto' is the default; client-side JS resolves Auto -> Day/Night via prefers-color-scheme.
+    # theme_authoritative=True iff signed-in user has an explicit stored value -> server wins
+    # over localStorage on the client. Otherwise client falls back to localStorage.
     saved_theme = "auto"
+    theme_authoritative = False
     try:
         user_id = request.session.get("user_id")
-        if user_id:
+        saas_user_id = request.session.get("saas_user_id")
+        if user_id or saas_user_id:
             from db import SessionLocal
             from models import UserPreferences
             _db = SessionLocal()
             try:
-                pref = _db.query(UserPreferences).filter_by(user_id=user_id).first()
+                if user_id:
+                    pref = _db.query(UserPreferences).filter_by(user_id=user_id).first()
+                else:
+                    pref = _db.query(UserPreferences).filter_by(saas_user_id=saas_user_id).first()
                 if pref and pref.theme in ("auto", "light", "night"):
                     saved_theme = pref.theme
+                    theme_authoritative = True
             finally:
                 _db.close()
     except Exception:
@@ -158,6 +166,7 @@ def i18n_context_processor(request: Request) -> Dict[str, Any]:
         "lang": lang,
         "t": _t,
         "saved_theme": saved_theme,
+        "theme_authoritative": theme_authoritative,
         "display_wind": _display_wind,
         "display_visibility": _display_visibility,
         "display_sail_plan": _display_sail_plan,

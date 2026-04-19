@@ -177,8 +177,9 @@ async def apple_app_site_association():
 @app.post("/api/preferences/theme")
 async def set_theme_preference(request: Request, db: Session = Depends(get_db)):
     """Persist the user's theme choice. Body: {"theme": "auto"|"light"|"night"}.
-    For legacy users, upserts UserPreferences.theme. For SaaS / anonymous, just acks
-    (client keeps the value in localStorage). CSRF-protected by global middleware."""
+    Upserts UserPreferences.theme keyed by legacy user_id OR saas_user_id, depending
+    on the active session. Anonymous callers get a 200 ack (localStorage only).
+    CSRF-protected by global middleware."""
     try:
         body = await request.json()
         theme = (body or {}).get("theme")
@@ -188,11 +189,19 @@ async def set_theme_preference(request: Request, db: Session = Depends(get_db)):
         return JSONResponse({"error": "invalid theme"}, status_code=400)
 
     user_id = request.session.get("user_id")
-    if user_id:
+    saas_user_id = request.session.get("saas_user_id")
+    if user_id or saas_user_id:
         from models import UserPreferences
-        pref = db.query(UserPreferences).filter_by(user_id=user_id).first()
+        if user_id:
+            pref = db.query(UserPreferences).filter_by(user_id=user_id).first()
+        else:
+            pref = db.query(UserPreferences).filter_by(saas_user_id=saas_user_id).first()
         if pref is None:
-            pref = UserPreferences(user_id=user_id, theme=theme)
+            pref = UserPreferences(
+                user_id=user_id or None,
+                saas_user_id=saas_user_id or None,
+                theme=theme,
+            )
             db.add(pref)
         else:
             pref.theme = theme
