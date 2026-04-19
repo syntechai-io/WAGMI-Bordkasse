@@ -41,21 +41,22 @@
     <script>
     (function(){
       // Early-paint theme application. Precedence:
-      //   - For signed-in users with an explicit DB preference (theme_authoritative=true),
-      //     server-seeded value WINS over localStorage so prefs follow the user across
-      //     devices/browsers and cannot be hijacked by a previous user's localStorage.
-      //   - Otherwise (anonymous, or signed-in user with no stored value yet),
-      //     localStorage wins. Any later toggle is POSTed to the server and becomes
-      //     authoritative on the next load.
+      //   - For ANY signed-in session, server-seeded value WINS over localStorage. This
+      //     keeps per-user isolation strict on shared devices: a prior user's
+      //     localStorage cannot bleed into the next account's first paint, even before
+      //     the new user has explicitly toggled. The seeded value is the user's stored
+      //     DB preference if present, otherwise the system default ('auto').
+      //   - Anonymous (login/unauth) pages fall back to localStorage.
       // 'auto' resolves to 'night' iff prefers-color-scheme: dark, else 'light'.
       try {
         var seeded = {{ (saved_theme or "auto")|tojson }};
+        var signedIn = {{ (theme_signed_in or false)|tojson }};
         var authoritative = {{ (theme_authoritative or false)|tojson }};
         var stored = null;
         try { stored = localStorage.getItem('crewlog-theme'); } catch(e) {}
         var validStored = (stored === 'auto' || stored === 'light' || stored === 'night') ? stored : null;
-        var pref = authoritative ? seeded : (validStored || seeded);
-        if (authoritative && validStored !== seeded) {
+        var pref = signedIn ? seeded : (validStored || seeded);
+        if (signedIn && validStored !== seeded) {
           try { localStorage.setItem('crewlog-theme', seeded); } catch(e) {}
         }
         window.__crewlogThemePref = pref;

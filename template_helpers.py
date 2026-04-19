@@ -142,9 +142,10 @@ def i18n_context_processor(request: Request) -> Dict[str, Any]:
     # over localStorage on the client. Otherwise client falls back to localStorage.
     saved_theme = "auto"
     theme_authoritative = False
+    user_id = request.session.get("user_id") if hasattr(request, "session") else None
+    saas_user_id = request.session.get("saas_user_id") if hasattr(request, "session") else None
+    theme_signed_in = bool(user_id or saas_user_id)
     try:
-        user_id = request.session.get("user_id")
-        saas_user_id = request.session.get("saas_user_id")
         if user_id or saas_user_id:
             from db import SessionLocal
             from models import UserPreferences
@@ -167,6 +168,7 @@ def i18n_context_processor(request: Request) -> Dict[str, Any]:
         "t": _t,
         "saved_theme": saved_theme,
         "theme_authoritative": theme_authoritative,
+        "theme_signed_in": theme_signed_in,
         "display_wind": _display_wind,
         "display_visibility": _display_visibility,
         "display_sail_plan": _display_sail_plan,
