@@ -124,10 +124,15 @@ async def list_logbook_entries(request: Request, db: Session = Depends(get_db)):
         joinedload(LogbookEntry.photos),
         joinedload(LogbookEntry.crew_on_watch).joinedload(CrewOnWatch.member)
     ).filter(LogbookEntry.trip_id == active_trip.id).order_by(LogbookEntry.entry_date.desc()).all()
-    
+
+    from services.track import compute_entry_legs
+    trip_leg_map = compute_entry_legs(db, active_trip.id)
+    entry_legs = {e.id: trip_leg_map.get(e.id) for e in entries if not e.is_superseded}
+
     return templates.TemplateResponse("logbook.html", {
         "request": request,
         "entries": entries,
+        "entry_legs": entry_legs,
         "active_trip": active_trip
     })
 
@@ -172,7 +177,7 @@ async def daily_logbook_view(request: Request, date: Optional[str] = None, db: S
     auto_total = round(sum(v for v in entry_legs.values() if v is not None), 2) or None
 
     # Calculate summary stats
-    manual_distance = sum(e.dist_day_nm for e in entries if e.dist_day_nm)
+    manual_distance = sum(e.dist_day_nm for e in entries if e.dist_day_nm and not e.is_superseded)
     summary = {
         "total_entries": len(entries),
         "total_distance": manual_distance if manual_distance else auto_total,

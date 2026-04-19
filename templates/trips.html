@@ -79,6 +79,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_name') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_start') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_end') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_distance') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_status') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('trips.col_actions') }}</th>
                     </tr>
@@ -111,6 +112,14 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ trip.start_date }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ trip.end_date or '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            {% set total_nm = trip_totals.get(trip.id) %}
+                            {% if total_nm %}
+                                <span class="font-semibold">{{ "%.1f"|format(total_nm) }}</span> <span class="ui-muted">nm</span>
+                            {% else %}
+                                <span class="ui-muted">—</span>
+                            {% endif %}
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             {% if trip.status.value == 'active' %}
                             <span class="px-3 py-1 rounded-lg font-semibold" style="background: var(--success); color: white;">{{ t('trips.status_active') }}</span>

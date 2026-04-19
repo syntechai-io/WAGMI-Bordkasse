@@ -70,6 +70,17 @@ def compute_entry_legs(db: Session, trip_id: int) -> dict:
     return {e.id: leg for e, leg in zip(entries, legs)}
 
 
+def compute_trip_totals(db: Session, trip_ids: list) -> dict:
+    """Return {trip_id: total_nm} where total_nm prefers any manual
+    `dist_day_nm` per day (max), falling back to summed haversine legs.
+    Used by the trips list to show one number per row."""
+    out = {}
+    for tid in trip_ids:
+        s = compute_track_summary(db, tid)
+        out[tid] = s.get("total_nm")
+    return out
+
+
 def compute_track_summary(db: Session, trip_id: int) -> dict:
     """Return per-day distances, total trip distance, route polyline coords.
 

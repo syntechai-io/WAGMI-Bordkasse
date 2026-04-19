@@ -33,7 +33,7 @@
     </div>
 
     <div class="bg-white porthole-card p-4">
-        {% if summary.positioned_count > 0 %}
+        {% if summary.positioned_count >= 2 %}
         <div id="trip-map" style="height: 480px; border-radius: 12px; overflow: hidden;"></div>
         {% else %}
         <div class="text-center p-12">
@@ -97,7 +97,7 @@
 {% endblock %}
 
 {% block scripts %}
-{% if summary.positioned_count > 0 %}
+{% if summary.positioned_count >= 2 %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>

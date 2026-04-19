@@ -154,6 +154,7 @@
   "trips.col_start": "Startdatum",
   "trips.col_end": "Enddatum",
   "trips.col_status": "Status",
+  "trips.col_distance": "Distanz",
   "trips.col_actions": "Aktionen",
   "trips.status_active": "Aktiv",
   "trips.status_archived": "Archiviert",

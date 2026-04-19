@@ -136,6 +136,14 @@
                             <span class="font-medium ml-1">{{ entry.temperature }}°C</span>
                         </div>
                         {% endif %}
+
+                        {% set leg_nm = entry_legs.get(entry.id) if entry_legs else None %}
+                        {% if leg_nm %}
+                        <div class="text-sm">
+                            <span class="ui-muted">📏 {{ t('track.leg') }}:</span>
+                            <span class="font-medium ml-1">{{ "%.2f"|format(leg_nm) }} nm</span>
+                        </div>
+                        {% endif %}
                     </div>
                     
                     {% if entry.crew_on_watch %}

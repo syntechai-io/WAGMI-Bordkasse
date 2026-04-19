@@ -68,12 +68,16 @@ async def trips_page(request: Request, db: Session = Depends(get_db)):
         current_plan = get_effective_plan(1, db).value
         is_saas_owner = True
 
+    from services.track import compute_trip_totals
+    trip_totals = compute_trip_totals(db, [t.id for t in trips])
+
     return templates.TemplateResponse("trips.html", {
         "request": request,
         "trips": trips,
         "active_trip": active_trip,
         "current_plan": current_plan,
         "is_saas_owner": is_saas_owner,
+        "trip_totals": trip_totals,
     })
 
 @router.post("/quick-start")
