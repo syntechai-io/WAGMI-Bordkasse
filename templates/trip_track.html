@@ -108,6 +108,12 @@
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
+    // Re-paint the map when the user toggles theme so the dimming filter
+    // takes effect on already-rendered tiles.
+    window.addEventListener('crewlog:theme-changed', function () {
+        try { map.invalidateSize(); } catch(e) {}
+    });
+
     fetch('/trips/{{ trip.id }}/track.json', { credentials: 'same-origin' })
         .then(function(r) { return r.json(); })
         .then(function(data) {

@@ -136,9 +136,28 @@ def i18n_context_processor(request: Request) -> Dict[str, Any]:
     def _normalize_expense_category_val(value):
         return normalize_expense_category(value) if value else ""
 
+    # Resolve user's saved theme preference (legacy users only have UserPreferences row).
+    # 'auto' is the default; client-side JS resolves Auto -> Day/Night via prefers-color-scheme.
+    saved_theme = "auto"
+    try:
+        user_id = request.session.get("user_id")
+        if user_id:
+            from db import SessionLocal
+            from models import UserPreferences
+            _db = SessionLocal()
+            try:
+                pref = _db.query(UserPreferences).filter_by(user_id=user_id).first()
+                if pref and pref.theme in ("auto", "light", "night"):
+                    saved_theme = pref.theme
+            finally:
+                _db.close()
+    except Exception:
+        pass
+
     return {
         "lang": lang,
         "t": _t,
+        "saved_theme": saved_theme,
         "display_wind": _display_wind,
         "display_visibility": _display_visibility,
         "display_sail_plan": _display_sail_plan,

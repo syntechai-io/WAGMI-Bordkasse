@@ -163,7 +163,7 @@ html[data-theme="night"] img[src*="/uploads/"] {
 /* SVG icons inherit color */
 html[data-theme="night"] svg { color: var(--night-red) !important; fill: currentColor; stroke: currentColor; }
 
-/* Toggle button visual (used by the night-mode pill) */
+/* Toggle button visual (legacy 2-way pill, kept for backward compat) */
 .night-toggle {
   display: inline-flex;
   align-items: center;
@@ -183,6 +183,69 @@ html[data-theme="night"] .night-toggle {
   background: var(--night-red-faint) !important;
   color: var(--night-red) !important;
   border: 1px solid var(--night-red-dim) !important;
+}
+
+/* 3-segment Auto / Day / Night switch (topbar + drawer) */
+.theme-switch {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.10);
+  margin-right: 0.5rem;
+}
+.theme-switch__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 9999px;
+  background: transparent;
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  min-height: 28px;
+}
+.theme-switch__btn .theme-switch__lbl { display: none; }
+.theme-switch--drawer .theme-switch__btn .theme-switch__lbl {
+  display: inline;
+  margin-left: 0.25rem;
+}
+.theme-switch__btn:hover { background: rgba(255,255,255,0.10); }
+.theme-switch__btn.is-active {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a2f4a;
+}
+html[data-theme="night"] .theme-switch {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+}
+html[data-theme="night"] .theme-switch__btn {
+  color: var(--night-red-dim) !important;
+}
+html[data-theme="night"] .theme-switch__btn.is-active {
+  background: var(--night-red-faint) !important;
+  color: var(--night-red) !important;
+  border: 1px solid var(--night-red-dim) !important;
+}
+
+/* Leaflet basemap dimming for Night — no blinding white tiles. */
+html[data-theme="night"] .leaflet-tile,
+html[data-theme="night"] .leaflet-tile-pane {
+  filter: brightness(0.45) contrast(1.1) hue-rotate(-25deg) saturate(0.6) !important;
+}
+html[data-theme="night"] .leaflet-container {
+  background: #000 !important;
+}
+html[data-theme="night"] .leaflet-control-attribution,
+html[data-theme="night"] .leaflet-control-zoom a {
+  background: var(--surface) !important;
+  color: var(--night-red) !important;
+  border-color: var(--border) !important;
 }
 
 /* Scrollbar */

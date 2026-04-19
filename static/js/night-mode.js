@@ -2,90 +2,160 @@
   'use strict';
 
   var STORAGE_KEY = 'crewlog-theme';
-  var THEMES = { LIGHT: 'light', NIGHT: 'night' };
+  var THEMES = { AUTO: 'auto', LIGHT: 'light', NIGHT: 'night' };
+  var VALID = { auto: 1, light: 1, night: 1 };
 
-  function getTheme() {
-    try { return localStorage.getItem(STORAGE_KEY) || THEMES.LIGHT; }
-    catch (e) { return THEMES.LIGHT; }
+  var mql = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)')) || null;
+
+  function getPref() {
+    try {
+      var v = localStorage.getItem(STORAGE_KEY);
+      if (v && VALID[v]) return v;
+    } catch (e) {}
+    if (window.__crewlogThemePref && VALID[window.__crewlogThemePref]) {
+      return window.__crewlogThemePref;
+    }
+    return THEMES.AUTO;
   }
 
-  function setTheme(theme) {
-    if (theme !== THEMES.LIGHT && theme !== THEMES.NIGHT) theme = THEMES.LIGHT;
-    document.documentElement.setAttribute('data-theme', theme);
-    try { localStorage.setItem(STORAGE_KEY, theme); } catch (e) { /* noop */ }
+  function resolve(pref) {
+    if (pref === THEMES.AUTO) {
+      return (mql && mql.matches) ? THEMES.NIGHT : THEMES.LIGHT;
+    }
+    return pref === THEMES.NIGHT ? THEMES.NIGHT : THEMES.LIGHT;
+  }
+
+  function apply(pref) {
+    var resolved = resolve(pref);
+    if (resolved === THEMES.NIGHT) {
+      document.documentElement.setAttribute('data-theme', 'night');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', theme === THEMES.NIGHT ? '#000000' : '#1a2f4a');
-    refreshButtons();
-    try { window.dispatchEvent(new CustomEvent('crewlog:theme-changed', { detail: { theme: theme } })); }
-    catch (e) { /* noop */ }
+    if (meta) meta.setAttribute('content', resolved === THEMES.NIGHT ? '#000000' : '#1a2f4a');
+    try {
+      window.dispatchEvent(new CustomEvent('crewlog:theme-changed', {
+        detail: { pref: pref, resolved: resolved }
+      }));
+    } catch (e) {}
   }
 
-  function toggle() {
-    setTheme(getTheme() === THEMES.NIGHT ? THEMES.LIGHT : THEMES.NIGHT);
+  function getCsrfToken() {
+    try {
+      var m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+      return m ? decodeURIComponent(m[1]) : '';
+    } catch (e) { return ''; }
   }
 
-  function refreshButtons() {
-    var current = getTheme();
-    var label = current === THEMES.NIGHT ? '☀️' : '🌙';
-    var aria = current === THEMES.NIGHT ? 'Switch to day mode' : 'Switch to night mode';
-    document.querySelectorAll('[data-night-toggle]').forEach(function (btn) {
-      var icon = btn.querySelector('.night-toggle-icon');
-      if (icon) icon.textContent = label;
-      else btn.textContent = label;
-      btn.setAttribute('aria-pressed', String(current === THEMES.NIGHT));
-      btn.setAttribute('title', aria);
-      btn.setAttribute('aria-label', aria);
+  function persistRemote(pref) {
+    try {
+      fetch('/api/preferences/theme', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrftoken': getCsrfToken()
+        },
+        body: JSON.stringify({ theme: pref })
+      }).catch(function () { /* offline ok */ });
+    } catch (e) {}
+  }
+
+  function setPref(pref) {
+    if (!VALID[pref]) pref = THEMES.AUTO;
+    try { localStorage.setItem(STORAGE_KEY, pref); } catch (e) {}
+    window.__crewlogThemePref = pref;
+    apply(pref);
+    refreshSwitches();
+    persistRemote(pref);
+  }
+
+  function buildSwitch(idPrefix) {
+    var wrap = document.createElement('div');
+    wrap.className = 'theme-switch';
+    wrap.setAttribute('role', 'group');
+    wrap.setAttribute('aria-label', 'Theme');
+
+    var modes = [
+      { key: THEMES.AUTO,  label: '◐', titleKey: 'theme.auto'  },
+      { key: THEMES.LIGHT, label: '☀', titleKey: 'theme.day'   },
+      { key: THEMES.NIGHT, label: '☾', titleKey: 'theme.night' }
+    ];
+    var labels = (window.__crewlogThemeLabels) || { auto: 'Auto', day: 'Day', night: 'Night' };
+
+    modes.forEach(function (m) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'theme-switch__btn';
+      b.setAttribute('data-theme-pref', m.key);
+      b.setAttribute('id', idPrefix + '-' + m.key);
+      b.setAttribute('title', labels[m.key === 'light' ? 'day' : m.key] || m.key);
+      b.setAttribute('aria-label', labels[m.key === 'light' ? 'day' : m.key] || m.key);
+      b.innerHTML = '<span aria-hidden="true">' + m.label + '</span>' +
+                    '<span class="theme-switch__lbl">' + (labels[m.key === 'light' ? 'day' : m.key] || '') + '</span>';
+      b.addEventListener('click', function () { setPref(m.key); });
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
+  function refreshSwitches() {
+    var current = getPref();
+    document.querySelectorAll('.theme-switch__btn').forEach(function (btn) {
+      var on = btn.getAttribute('data-theme-pref') === current;
+      btn.setAttribute('aria-pressed', String(on));
+      btn.classList.toggle('is-active', on);
     });
   }
 
-  function ensureTopbarToggle() {
-    if (document.getElementById('night-toggle-topbar')) return;
+  function ensureTopbarSwitch() {
+    if (document.getElementById('theme-switch-topbar-wrap')) return;
     var langPill = document.querySelector('nav.topbar .desktop-nav .lang-pill');
     if (!langPill || !langPill.parentNode) return;
-    var btn = document.createElement('button');
-    btn.id = 'night-toggle-topbar';
-    btn.type = 'button';
-    btn.className = 'night-toggle';
-    btn.setAttribute('data-night-toggle', '1');
-    btn.innerHTML = '<span class="night-toggle-icon">🌙</span>';
-    langPill.parentNode.insertBefore(btn, langPill);
-    btn.addEventListener('click', toggle);
+    var sw = buildSwitch('theme-switch-topbar');
+    sw.id = 'theme-switch-topbar-wrap';
+    langPill.parentNode.insertBefore(sw, langPill);
   }
 
-  function ensureDrawerToggle() {
+  function ensureDrawerSwitch() {
     var drawerBody = document.querySelector('#nav-drawer .drawer-body');
-    if (!drawerBody || document.getElementById('night-toggle-drawer')) return;
-    var wrap = document.createElement('div');
-    wrap.style.cssText = 'padding: 0.5rem 1.15rem;';
-    var btn = document.createElement('button');
-    btn.id = 'night-toggle-drawer';
-    btn.type = 'button';
-    btn.className = 'night-toggle';
-    btn.setAttribute('data-night-toggle', '1');
-    btn.innerHTML = '<span class="night-toggle-icon">🌙</span><span style="margin-left:0.4rem;">Night</span>';
-    btn.addEventListener('click', toggle);
-    wrap.appendChild(btn);
+    if (!drawerBody || document.getElementById('theme-switch-drawer-wrap')) return;
+    var holder = document.createElement('div');
+    holder.id = 'theme-switch-drawer-wrap';
+    holder.style.cssText = 'padding: 0.5rem 1.15rem;';
+    var sw = buildSwitch('theme-switch-drawer');
+    sw.classList.add('theme-switch--drawer');
+    holder.appendChild(sw);
     var langPillContainer = drawerBody.querySelector('.lang-pill');
     if (langPillContainer && langPillContainer.parentNode && langPillContainer.parentNode.parentNode === drawerBody) {
-      drawerBody.insertBefore(wrap, langPillContainer.parentNode);
+      drawerBody.insertBefore(holder, langPillContainer.parentNode);
     } else {
-      drawerBody.appendChild(wrap);
+      drawerBody.appendChild(holder);
     }
   }
 
-  // Apply early to avoid flash
-  setTheme(getTheme());
+  // Re-resolve on system color scheme change while in Auto mode.
+  if (mql && mql.addEventListener) {
+    mql.addEventListener('change', function () {
+      if (getPref() === THEMES.AUTO) apply(THEMES.AUTO);
+    });
+  } else if (mql && mql.addListener) {
+    mql.addListener(function () { if (getPref() === THEMES.AUTO) apply(THEMES.AUTO); });
+  }
+
+  // Apply on script eval (no-flash backup; head script already did this for night).
+  apply(getPref());
 
   document.addEventListener('DOMContentLoaded', function () {
-    ensureTopbarToggle();
-    ensureDrawerToggle();
-    refreshButtons();
+    ensureTopbarSwitch();
+    ensureDrawerSwitch();
+    refreshSwitches();
   });
 
   window.CrewlogNightMode = {
-    get: getTheme,
-    set: setTheme,
-    toggle: toggle,
+    get: getPref,
+    set: setPref,
     THEMES: THEMES
   };
 })();

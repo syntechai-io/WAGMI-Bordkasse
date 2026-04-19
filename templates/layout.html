@@ -38,7 +38,27 @@
     <link rel="stylesheet" href="/static/ui_navy_contrast_fix.css">
     <link rel="stylesheet" href="/static/ui_mobile_skin.css">
     <link rel="stylesheet" href="/static/ui_night_mode.css">
-    <script>(function(){try{var t=localStorage.getItem('crewlog-theme');if(t==='night'){document.documentElement.setAttribute('data-theme','night');}}catch(e){}})();</script>
+    <script>
+    (function(){
+      // Early-paint theme application. Reads (in priority): localStorage > server-seeded > 'auto'.
+      // 'auto' resolves to 'night' iff prefers-color-scheme: dark, else 'light'.
+      try {
+        var seeded = {{ (saved_theme or "auto")|tojson }};
+        var stored = null;
+        try { stored = localStorage.getItem('crewlog-theme'); } catch(e) {}
+        var pref = (stored === 'auto' || stored === 'light' || stored === 'night') ? stored : seeded;
+        window.__crewlogThemePref = pref;
+        var resolved = pref;
+        if (pref === 'auto') {
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          resolved = prefersDark ? 'night' : 'light';
+        }
+        if (resolved === 'night') {
+          document.documentElement.setAttribute('data-theme', 'night');
+        }
+      } catch(e) {}
+    })();
+    </script>
     {% if branding.accent_color %}
     <style>
         :root {
@@ -406,6 +426,13 @@
     </footer>
 
     <script src="/static/ui_nav.js"></script>
+    <script>
+      window.__crewlogThemeLabels = {
+        auto:  {{ t('theme.auto')  | tojson }},
+        day:   {{ t('theme.day')   | tojson }},
+        night: {{ t('theme.night') | tojson }}
+      };
+    </script>
     <script src="/static/js/night-mode.js"></script>
     <script>
         // Dropdown navigation for touch/click devices (desktop)

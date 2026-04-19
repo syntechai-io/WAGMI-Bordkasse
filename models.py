@@ -387,6 +387,7 @@ class UserPreferences(Base):
     home_lat = Column(Float, nullable=True)
     home_lon = Column(Float, nullable=True)
     default_currency = Column(SQLEnum(Currency), nullable=False, default=Currency.EUR)
+    theme = Column(String(10), nullable=True)  # 'auto' | 'light' | 'night' (NULL = use default 'auto')
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

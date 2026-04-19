@@ -174,6 +174,32 @@ async def apple_app_site_association():
     }
     return JSONResponse(content=aasa, media_type="application/json")
 
+@app.post("/api/preferences/theme")
+async def set_theme_preference(request: Request, db: Session = Depends(get_db)):
+    """Persist the user's theme choice. Body: {"theme": "auto"|"light"|"night"}.
+    For legacy users, upserts UserPreferences.theme. For SaaS / anonymous, just acks
+    (client keeps the value in localStorage). CSRF-protected by global middleware."""
+    try:
+        body = await request.json()
+        theme = (body or {}).get("theme")
+    except Exception:
+        theme = None
+    if theme not in ("auto", "light", "night"):
+        return JSONResponse({"error": "invalid theme"}, status_code=400)
+
+    user_id = request.session.get("user_id")
+    if user_id:
+        from models import UserPreferences
+        pref = db.query(UserPreferences).filter_by(user_id=user_id).first()
+        if pref is None:
+            pref = UserPreferences(user_id=user_id, theme=theme)
+            db.add(pref)
+        else:
+            pref.theme = theme
+        db.commit()
+    return JSONResponse({"ok": True, "theme": theme})
+
+
 @app.get("/about")
 async def about_page(request: Request, db: Session = Depends(get_db)):
     from i18n import get_lang

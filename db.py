@@ -25,3 +25,10 @@ def get_db():
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    # Idempotent column adds for fields introduced after table creation.
+    from sqlalchemy import text
+    with engine.begin() as conn:
+        conn.execute(text(
+            "ALTER TABLE user_preferences "
+            "ADD COLUMN IF NOT EXISTS theme VARCHAR(10)"
+        ))
