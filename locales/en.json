@@ -54,7 +54,7 @@
   "admin.boat_setup.read_only": "Only the account owner can edit boat settings.",
   "admin.boat_setup.specs": "Boat Specifications",
   "admin.boat_setup.stats_default_name": "My Boat",
-  "admin.boat_setup.stats_helper": "Only trips with \"🚢 Trip on my own boat\" enabled are counted.",
+  "admin.boat_setup.stats_helper": "Only trips with \"🚢 WAGMI-Trip\" enabled are counted.",
   "admin.boat_setup.stats_kpi_last_trip": "Last trip",
   "admin.boat_setup.stats_kpi_motor_h": "Engine hours",
   "admin.boat_setup.stats_kpi_nm": "Nautical miles sailed",
@@ -1220,6 +1220,6 @@
   "trips.upgrade_title": "Upgrade to Skipper Plus",
   "trips.upgrade_yearly": "Yearly (discount)",
   "trips.use_main_boat_hint": "counts toward engine & nautical-mile stats",
-  "trips.use_main_boat_label": "Trip on my own boat",
+  "trips.use_main_boat_label": "WAGMI-Trip",
   "trips.yearly_overview": "Yearly Overview"
 }

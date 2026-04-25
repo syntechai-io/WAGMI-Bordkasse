@@ -54,7 +54,7 @@
   "admin.boat_setup.read_only": "Nur der Account-Inhaber kann die Boot-Einstellungen bearbeiten.",
   "admin.boat_setup.specs": "Boot-Spezifikationen",
   "admin.boat_setup.stats_default_name": "Mein Boot",
-  "admin.boat_setup.stats_helper": "Nur Törns mit aktiviertem \"🚢 Törn auf meinem Boot\" werden gezählt.",
+  "admin.boat_setup.stats_helper": "Nur Törns mit aktiviertem \"🚢 WAGMI-Törn\" werden gezählt.",
   "admin.boat_setup.stats_kpi_last_trip": "Letzter Törn",
   "admin.boat_setup.stats_kpi_motor_h": "Motorstunden",
   "admin.boat_setup.stats_kpi_nm": "Gesegelte Seemeilen",
@@ -1220,6 +1220,6 @@
   "trips.upgrade_title": "Upgrade auf Skipper Plus",
   "trips.upgrade_yearly": "Jährlich (Rabatt)",
   "trips.use_main_boat_hint": "zählt für Motor- & Seemeilen-Statistik",
-  "trips.use_main_boat_label": "Törn auf meinem Boot",
+  "trips.use_main_boat_label": "WAGMI-Törn",
   "trips.yearly_overview": "Jahresübersicht"
 }
