@@ -1,0 +1,197 @@
+/* ==========================================================================
+   CrewLog — iOS Premium Mobile Overrides
+   Loaded LAST, after all other CSS files.
+   All rules scoped to max-width: 1023px (mobile + tablet).
+   ========================================================================== */
+
+/* ── 1. Topbar: account for Dynamic Island / notch safe-area ── */
+.topbar {
+    padding-top: env(safe-area-inset-top, 0px);
+}
+/* Compensate: the inner flex row already has h-12 (48px). Adding safe-area
+   padding above it extends the bar correctly without re-sizing the flex row. */
+@media (max-width: 1023px) {
+    .topbar .container > .flex {
+        /* Keep the 48px inner row height; top padding is on the .topbar itself */
+        height: 48px;
+    }
+}
+
+/* ── 2. Hide footer on mobile — tabbar replaces it ── */
+@media (max-width: 1023px) {
+    .footer-bar { display: none !important; }
+}
+
+/* ── 3. Main content container — consistent padding on mobile ── */
+@media (max-width: 1023px) {
+    main.ui-container,
+    main.content-container {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 20px;
+    }
+}
+
+/* ── 4. Tab bar active state — pill indicator (iOS-style) ── */
+@media (max-width: 1023px) {
+    .cl-tabbar__item--active .cl-tabbar__icon {
+        background: var(--cl-accent-soft, #e7f0fa);
+        border-radius: 10px;
+        padding: 4px 14px;
+        margin-bottom: 1px;
+        transition: background .2s;
+    }
+    .cl-tabbar__item {
+        padding: 6px 2px 4px;
+    }
+    /* Slightly taller inner bar on mobile for comfortable tap targets */
+    .cl-tabbar__inner {
+        height: 52px;
+    }
+}
+
+/* ── 5. Global card upgrades for legacy pages ── */
+/* Apply card-like styling to any .ui-card or .card that is NOT already cl-card */
+@media (max-width: 1023px) {
+    .ui-card:not(.cl-card),
+    .card:not(.cl-card) {
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(15,41,66,.06), 0 4px 14px rgba(15,41,66,.05);
+        margin-bottom: 12px;
+    }
+}
+
+/* ── 6. List rows — minimum tap target 44px ── */
+@media (max-width: 1023px) {
+    /* Expense, deposit, crew list rows */
+    .expense-row,
+    .deposit-row,
+    .crew-row,
+    .list-row,
+    tr.clickable {
+        min-height: 44px;
+    }
+
+    /* Table rows with links: make entire row tappable feel */
+    .cl-table tbody tr td {
+        padding-top: 13px;
+        padding-bottom: 13px;
+    }
+
+    /* Table wrapper: horizontal scroll with momentum */
+    .cl-table-scroll,
+    .table-responsive,
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+    }
+}
+
+/* ── 7. All form inputs globally — prevent iOS zoom, enforce tap height ── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
+    font-size: 16px !important;  /* prevents iOS auto-zoom */
+    min-height: 44px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+textarea {
+    min-height: 88px;
+}
+
+/* ── 8. Buttons — minimum tap target everywhere ── */
+button,
+.btn,
+a.btn,
+[role="button"],
+.cl-btn {
+    min-height: 44px;
+}
+
+/* ── 9. Page-level vertical scroll momentum ── */
+html, body {
+    -webkit-overflow-scrolling: touch;
+}
+main {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ── 10. Drawer refinements ── */
+@media (max-width: 1023px) {
+    .nav-drawer {
+        /* Wider drawer on larger phones */
+        --drawer-width: min(84vw, 320px);
+    }
+    .drawer-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    .drawer-footer {
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+/* ── 11. Night mode — replace red tones with nautical deep blue ── */
+html[data-theme="night"] .cl-tabbar {
+    background: rgba(10, 18, 35, .95) !important;
+    border-top-color: rgba(100, 140, 200, .2) !important;
+}
+html[data-theme="night"] .cl-tabbar__item {
+    color: rgba(180, 200, 230, .55) !important;
+}
+html[data-theme="night"] .cl-tabbar__item--active,
+html[data-theme="night"] .cl-tabbar__item:hover {
+    color: rgba(100, 170, 255, .95) !important;
+}
+html[data-theme="night"] .cl-tabbar__item--active .cl-tabbar__icon {
+    background: rgba(29, 111, 187, .2) !important;
+}
+html[data-theme="night"] .cl-actionbar {
+    background: rgba(10, 18, 35, .92) !important;
+    border-top-color: rgba(100, 140, 200, .2) !important;
+}
+html[data-theme="night"] .topbar {
+    background: rgba(8, 15, 28, .98) !important;
+}
+
+/* ── 12. Overscroll background colour matches topbar on pull-down ── */
+@media (max-width: 1023px) {
+    html {
+        background-color: #0f2942;  /* matches --cl-navy; shows on rubber-band */
+        overscroll-behavior-y: none;
+    }
+    body {
+        background-color: var(--cl-bg, #f6f8fb);
+        overscroll-behavior-y: none;
+    }
+}
+
+/* ── 13. Pill/badge sizing on mobile ── */
+@media (max-width: 1023px) {
+    .cl-pill {
+        font-size: 11px;
+        padding: 2px 8px;
+    }
+}
+
+/* ── 14. Hero/KPI grids — single column on narrow phones ── */
+@media (max-width: 374px) {
+    .cl-grid--2,
+    .cl-grid--3,
+    .cl-grid--4 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ── 15. Flash/alert messages — full width on mobile ── */
+@media (max-width: 1023px) {
+    .cl-alert {
+        border-radius: 10px;
+        padding: 12px 14px;
+    }
+}

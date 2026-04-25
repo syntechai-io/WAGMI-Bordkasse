@@ -656,7 +656,21 @@
 }
 .cl-tabbar__item:hover,
 .cl-tabbar__item:focus-visible { color: var(--cl-accent); outline: none; }
-.cl-tabbar__icon { font-size: 20px; line-height: 1; opacity: .9; }
+.cl-tabbar__icon {
+    font-size: 20px;
+    line-height: 1;
+    opacity: .9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 24px;
+}
+.cl-tabbar__icon svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
 .cl-tabbar__item--active { color: var(--cl-accent); }
 .cl-tabbar__item--active .cl-tabbar__icon { opacity: 1; }
 

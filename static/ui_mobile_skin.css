@@ -19,32 +19,30 @@
 
   /* ══════════════════════════════════════════
      CALM MARITIME MOBILE SKIN
-     Scoped to: .logbook-detail-wrapper (detail page)
-                .logbook-form-wrapper  (edit/new page)
+     Applies site-wide on mobile (was previously
+     scoped to .logbook-form-wrapper /
+     .logbook-detail-wrapper only).
      ══════════════════════════════════════════ */
 
   /* ── 1) Typography: tame heading sizes ── */
-  .logbook-form-wrapper .ui-title,
-  .logbook-detail-wrapper .ui-title,
-  .logbook-detail-wrapper h1 {
+  .ui-title,
+  h1 {
     font-size: 1.5rem !important;
     font-weight: 600;
   }
 
-  .logbook-detail-wrapper h2.text-2xl {
+  h2.text-2xl {
     font-size: 1.25rem !important;
     font-weight: 600;
   }
 
-  .logbook-form-wrapper h3.text-lg,
-  .logbook-detail-wrapper h3.text-lg {
+  h3.text-lg {
     font-size: 1.1rem !important;
     font-weight: 600;
   }
 
   /* ── 2) Cards: calm white, 16px radius, subtle shadow ── */
-  .logbook-form-wrapper .porthole-card,
-  .logbook-detail-wrapper .porthole-card {
+  .porthole-card {
     background: #ffffff;
     border: 1px solid #E5E7EB;
     border-radius: 16px;
@@ -52,56 +50,49 @@
   }
 
   /* ── 3) Buttons: consistent radius, height, hierarchy ── */
-  .logbook-form-wrapper .btn,
-  .logbook-detail-wrapper .btn {
+  .btn {
     border-radius: 12px;
     min-height: 44px;
     font-weight: 600;
   }
 
-  .logbook-form-wrapper .btn-primary,
-  .logbook-detail-wrapper .btn-primary {
+  .btn-primary {
     background: #2C6BED;
     border-color: #2C6BED;
     color: #fff;
   }
 
-  .logbook-form-wrapper .btn-primary:hover,
-  .logbook-form-wrapper .btn-primary:active,
-  .logbook-detail-wrapper .btn-primary:hover,
-  .logbook-detail-wrapper .btn-primary:active {
+  .btn-primary:hover,
+  .btn-primary:active {
     background: #1E56C8;
     border-color: #1E56C8;
   }
 
-  .logbook-form-wrapper .btn-secondary,
-  .logbook-detail-wrapper .btn-secondary {
+  .btn-secondary {
     background: #ffffff;
     border: 1px solid #D1D5DB;
     color: #1F2937;
   }
 
-  .logbook-form-wrapper .btn-secondary:hover,
-  .logbook-form-wrapper .btn-secondary:active,
-  .logbook-detail-wrapper .btn-secondary:hover,
-  .logbook-detail-wrapper .btn-secondary:active {
+  .btn-secondary:hover,
+  .btn-secondary:active {
     background: #F9FAFB;
   }
 
-  .logbook-detail-wrapper .btn-danger {
+  .btn-danger {
     background: #DC2626;
     border-color: #DC2626;
     color: #fff;
     border-radius: 12px;
   }
 
-  .logbook-detail-wrapper .btn-danger:hover,
-  .logbook-detail-wrapper .btn-danger:active {
+  .btn-danger:hover,
+  .btn-danger:active {
     background: #B91C1C;
     border-color: #B91C1C;
   }
 
-  .logbook-detail-wrapper .ocean-gradient {
+  .ocean-gradient {
     background: #2C6BED;
     border-radius: 12px;
     color: #fff;
@@ -110,13 +101,13 @@
     align-items: center;
   }
 
-  .logbook-detail-wrapper .ocean-gradient:hover,
-  .logbook-detail-wrapper .ocean-gradient:active {
+  .ocean-gradient:hover,
+  .ocean-gradient:active {
     background: #1E56C8;
   }
 
   /* ── 4) Maneuver tiles: calm white, no blue fill ── */
-  .logbook-form-wrapper .maneuver-btn {
+  .maneuver-btn {
     background: #ffffff;
     border: 2px solid #E5E7EB !important;
     border-radius: 12px;
@@ -125,27 +116,27 @@
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .logbook-form-wrapper .maneuver-btn:hover {
+  .maneuver-btn:hover {
     border-color: #2C6BED !important;
     box-shadow: 0 2px 8px rgba(44, 107, 237, 0.12);
   }
 
-  .logbook-form-wrapper .maneuver-btn.selected,
-  .logbook-form-wrapper .maneuver-btn.active,
-  .logbook-form-wrapper .maneuver-btn[style*="accent"] {
+  .maneuver-btn.selected,
+  .maneuver-btn.active,
+  .maneuver-btn[style*="accent"] {
     border-color: #2C6BED !important;
     background: #EFF6FF;
     box-shadow: 0 0 0 1px #2C6BED;
   }
 
   /* ── 5) Data cells within detail view ── */
-  .logbook-detail-wrapper div[style*="surface-2"] {
+  div[style*="surface-2"] {
     background: #F9FAFB !important;
     border-radius: 12px;
   }
 
   /* ── 6) Logbook sections (accordion) ── */
-  .logbook-form-wrapper .logbook-section {
+  .logbook-section {
     background: #ffffff;
     border: 1px solid #E5E7EB;
     border-radius: 16px;
@@ -154,20 +145,19 @@
   }
 
   /* ── 7) Photo camera/file buttons: secondary style ── */
-  .logbook-detail-wrapper form[action*="photos/upload"] .btn-primary {
+  form[action*="photos/upload"] .btn-primary {
     background: #ffffff;
     border: 1px solid #D1D5DB;
     color: #1F2937;
   }
 
-  .logbook-detail-wrapper form[action*="photos/upload"] .btn-primary:hover,
-  .logbook-detail-wrapper form[action*="photos/upload"] .btn-primary:active {
+  form[action*="photos/upload"] .btn-primary:hover,
+  form[action*="photos/upload"] .btn-primary:active {
     background: #F9FAFB;
   }
 
   /* ── 8) Rope dividers: subtle ── */
-  .logbook-form-wrapper .rope-divider,
-  .logbook-detail-wrapper .rope-divider {
+  .rope-divider {
     background: #E5E7EB;
     height: 1px;
     margin: 1rem 0;
@@ -188,7 +178,7 @@
   }
 
   /* ── 10) Details/summary: calm style ── */
-  .logbook-form-wrapper details.porthole-card {
+  details.porthole-card {
     background: #ffffff;
     border: 1px solid #E5E7EB;
     border-radius: 16px;
@@ -196,34 +186,34 @@
   }
 
   /* ── 11) Quick Fill button: keep primary but tame ── */
-  .logbook-form-wrapper .js-original-quick-fill .btn-primary {
+  .js-original-quick-fill .btn-primary {
     background: #2C6BED;
     border-color: #2C6BED;
     border-radius: 12px;
   }
 
   /* ── 12) Form inputs: consistent styling ── */
-  .logbook-form-wrapper input[type="text"],
-  .logbook-form-wrapper input[type="number"],
-  .logbook-form-wrapper input[type="date"],
-  .logbook-form-wrapper input[type="time"],
-  .logbook-form-wrapper select,
-  .logbook-form-wrapper textarea {
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
     border: 1px solid #D1D5DB;
     border-radius: 12px;
     background: #ffffff;
   }
 
-  .logbook-form-wrapper input:focus,
-  .logbook-form-wrapper select:focus,
-  .logbook-form-wrapper textarea:focus {
+  input:focus,
+  select:focus,
+  textarea:focus {
     border-color: #2C6BED;
     outline: none;
     box-shadow: 0 0 0 3px rgba(44, 107, 237, 0.15);
   }
 
   /* ── 13) Detail page card padding ── */
-  .logbook-detail-wrapper .porthole-card {
+  .porthole-card {
     padding: 1rem;
   }
 }

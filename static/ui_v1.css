@@ -1,4 +1,8 @@
 :root {
+  /* ── Topbar height + safe-area helper for Dynamic Island offsets ── */
+  --topbar-h: 48px;
+  --topbar-safe-h: calc(48px + env(safe-area-inset-top, 0px));
+
   /* ── Color tokens (unchanged) ── */
   --bg: #f7f8fa;
   --surface: #ffffff;

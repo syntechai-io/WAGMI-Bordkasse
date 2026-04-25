@@ -39,6 +39,7 @@
     <link rel="stylesheet" href="/static/ui_mobile_skin.css">
     <link rel="stylesheet" href="/static/ui_night_mode.css">
     <link rel="stylesheet" href="/static/cl_design.css">
+    <link rel="stylesheet" href="/static/ui_ios_prime.css">
     <script>
     (function(){
       // Early-paint theme application. Precedence:
@@ -291,7 +292,7 @@
     </aside>
 
     <!-- Topbar -->
-    <nav class="topbar navy-shell sticky top-0 z-50">
+    <nav class="topbar navy-shell sticky top-0 z-50" style="padding-top: env(safe-area-inset-top, 0px);">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-12">
                 <div class="flex items-center space-x-2.5">
@@ -428,23 +429,49 @@
     <nav class="cl-tabbar" aria-label="{{ t('nav.navigation') }}">
         <div class="cl-tabbar__inner">
             <a href="/" class="cl-tabbar__item" data-match="/">
-                <span class="cl-tabbar__icon" aria-hidden="true">🧭</span>
+                <span class="cl-tabbar__icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </span>
                 <span>{{ t('nav.dashboard') }}</span>
             </a>
             <a href="/logbook" class="cl-tabbar__item" data-match="/logbook">
-                <span class="cl-tabbar__icon" aria-hidden="true">📓</span>
+                <span class="cl-tabbar__icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                </span>
                 <span>{{ t('nav.logbook') }}</span>
             </a>
             <a href="/expenses" class="cl-tabbar__item" data-match="/expenses|/deposits|/balances|/settlement|/templates">
-                <span class="cl-tabbar__icon" aria-hidden="true">💰</span>
+                <span class="cl-tabbar__icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="2"/>
+                        <line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                </span>
                 <span>{{ t('nav.finances') }}</span>
             </a>
             <a href="/trips/" class="cl-tabbar__item" data-match="/trips">
-                <span class="cl-tabbar__icon" aria-hidden="true">⛵</span>
+                <span class="cl-tabbar__icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 18H2a4 4 0 0 0 4-4V6l5 4 3-5 3 5 5-4v8a4 4 0 0 0 4 4z"/>
+                        <line x1="2" y1="22" x2="22" y2="22"/>
+                    </svg>
+                </span>
                 <span>{{ t('nav.trips') }}</span>
             </a>
             <button type="button" class="cl-tabbar__item" id="tabbar-more" aria-label="{{ t('nav.open_menu') }}">
-                <span class="cl-tabbar__icon" aria-hidden="true">☰</span>
+                <span class="cl-tabbar__icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </span>
                 <span>{{ t('nav.admin') }}</span>
             </button>
         </div>
