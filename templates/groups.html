@@ -125,7 +125,7 @@
                             ✏️ {{ t('common.edit') }}
                         </button>
                         <form action="/groups/{{ group.id }}/delete" method="post" class="inline" 
-                              onsubmit="return confirm('Delete group \'{{ group.name }}\'? Members will become independent again.')">
+                              onsubmit="return confirm({{ t('group.confirm_delete', name=group.name) | tojson }})">
                             {{ csrf_input | safe }}
                             <button type="submit" class="btn btn-danger px-3 py-1 text-sm">
                                 🗑️ {{ t('common.delete') }}

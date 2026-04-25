@@ -7,31 +7,31 @@
     <h1 class="ui-title maritime-header">{{ t('footer.privacy_policy') }}</h1>
 
     <div class="bg-white porthole-card p-6 space-y-4 text-sm leading-relaxed">
-        <h2 class="text-lg font-bold">1. Data Collection</h2>
-        <p>CrewLog collects only the data necessary to provide maritime logbook and expense tracking services. This includes account information (email, name), trip data, logbook entries (including GPS coordinates when permitted), crew information, and financial data for expense splitting.</p>
+        <h2 class="text-lg font-bold">{{ t('privacy.data_collection_title') }}</h2>
+        <p>{{ t('privacy.data_collection_body') }}</p>
 
-        <h2 class="text-lg font-bold">2. GPS & Location Data</h2>
-        <p>Location data is collected only when you actively use the logbook entry feature and grant permission. GPS coordinates are stored as part of your logbook entries to comply with maritime documentation standards. Location data is never shared with third parties or used for tracking purposes.</p>
+        <h2 class="text-lg font-bold">{{ t('privacy.gps_title') }}</h2>
+        <p>{{ t('privacy.gps_body') }}</p>
 
-        <h2 class="text-lg font-bold">3. Camera & Photos</h2>
-        <p>Camera access is used solely for attaching receipt photos and logbook documentation. Photos are stored securely and associated with your trip data only.</p>
+        <h2 class="text-lg font-bold">{{ t('privacy.camera_title') }}</h2>
+        <p>{{ t('privacy.camera_body') }}</p>
 
-        <h2 class="text-lg font-bold">4. Data Storage</h2>
-        <p>All data is stored on secure, encrypted servers. Financial data related to expense splitting is used only for calculation purposes within your trip.</p>
+        <h2 class="text-lg font-bold">{{ t('privacy.storage_title') }}</h2>
+        <p>{{ t('privacy.storage_body') }}</p>
 
-        <h2 class="text-lg font-bold">5. Third-Party Services</h2>
-        <p>CrewLog uses the following third-party services:</p>
+        <h2 class="text-lg font-bold">{{ t('privacy.third_party_title') }}</h2>
+        <p>{{ t('privacy.third_party_intro') }}</p>
         <ul class="list-disc ml-5 space-y-1">
-            <li>Open-Meteo API for weather data retrieval</li>
-            <li>European Central Bank API for currency exchange rates</li>
-            <li>Payment processing for subscription management (via our website only)</li>
+            <li>{{ t('privacy.third_party_meteo') }}</li>
+            <li>{{ t('privacy.third_party_ecb') }}</li>
+            <li>{{ t('privacy.third_party_payment') }}</li>
         </ul>
 
-        <h2 class="text-lg font-bold">6. Data Retention</h2>
-        <p>Your data is retained for as long as your account is active. You may request deletion of your account and all associated data at any time by contacting us.</p>
+        <h2 class="text-lg font-bold">{{ t('privacy.retention_title') }}</h2>
+        <p>{{ t('privacy.retention_body') }}</p>
 
-        <h2 class="text-lg font-bold">7. Contact</h2>
-        <p>For privacy-related inquiries, please contact us through the application.</p>
+        <h2 class="text-lg font-bold">{{ t('privacy.contact_title') }}</h2>
+        <p>{{ t('privacy.contact_body') }}</p>
     </div>
 </div>
 {% endblock %}

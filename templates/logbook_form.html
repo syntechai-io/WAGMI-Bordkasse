@@ -792,6 +792,25 @@ const i18n = {
     gps_last_update: {{ t("logbook.gps_last_update") | tojson }},
     gps_position_prefix: {{ t("logbook.gps_position_prefix") | tojson }},
     gps_error_prefix: {{ t("logbook.gps_error_prefix") | tojson }},
+    gps_get_position: {{ t("logbook.gps_get_position") | tojson }},
+    gps_position_retrieved: {{ t("logbook.gps_position_retrieved") | tojson }},
+    gps_fetching: {{ t("logbook.gps_fetching") | tojson }},
+    gps_blocked_alert: {{ t("logbook.gps_blocked_alert") | tojson }},
+    gps_denied_alert: {{ t("logbook.gps_denied_alert") | tojson }},
+    gps_denied_short: {{ t("logbook.gps_denied_short") | tojson }},
+    gps_no_signal_short: {{ t("logbook.gps_no_signal_short") | tojson }},
+    gps_timeout_short: {{ t("logbook.gps_timeout_short") | tojson }},
+    gps_unknown_alert: {{ t("logbook.gps_unknown_alert") | tojson }},
+    error_short: {{ t("logbook.error_short") | tojson }},
+    weather_loading: {{ t("logbook.weather_loading") | tojson }},
+    weather_loaded: {{ t("logbook.weather_loaded") | tojson }},
+    toggle_to_dropdown: {{ t("logbook.toggle_to_dropdown") | tojson }},
+    toggle_to_manual: {{ t("logbook.toggle_to_manual") | tojson }},
+    offline_saving: {{ t("logbook.offline_saving") | tojson }},
+    offline_saved: {{ t("logbook.offline_saved") | tojson }},
+    offline_save_failed: {{ t("logbook.offline_save_failed") | tojson }},
+    offline_alert_prefix: {{ t("logbook.offline_alert_prefix") | tojson }},
+    csrf_alert: {{ t("logbook.csrf_alert") | tojson }},
     lang: {{ lang | tojson }},
 };
 
@@ -974,7 +993,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update toggle button
         toggleBtn.setAttribute('aria-expanded', 'true');
-        toggleBtn.textContent = '📋 Dropdown verwenden';
+        toggleBtn.textContent = i18n.toggle_to_dropdown;
     }
     
     function disableManualMode(fieldName) {
@@ -1002,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update toggle button
         toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.textContent = '✏️ Eigenen Wert eingeben';
+        toggleBtn.textContent = i18n.toggle_to_manual;
     }
     
     // Helper function to get active control (select or manual)
@@ -1032,14 +1051,14 @@ document.getElementById('weather-button').addEventListener('click', async functi
     
     const btn = this;
     const originalText = btn.textContent;
-    btn.textContent = '⏳ Lade Wetterdaten...';
+    btn.textContent = i18n.weather_loading;
     btn.disabled = true;
     
     try {
         const response = await fetch(`/logbook/weather?lat=${lat}&lon=${lon}`);
         
         if (!response.ok) {
-            throw new Error('Wetter-API Fehler');
+            throw new Error('Weather API error');
         }
         
         const data = await response.json();
@@ -1073,7 +1092,7 @@ document.getElementById('weather-button').addEventListener('click', async functi
         // Set weather source
         document.querySelector('input[name="weather_source"]').value = 'Open-Meteo API';
         
-        btn.textContent = '✅ Wetterdaten geladen!';
+        btn.textContent = i18n.weather_loaded;
         setTimeout(() => {
             btn.textContent = originalText;
             btn.disabled = false;
@@ -1103,7 +1122,7 @@ document.getElementById('gps-button').addEventListener('click', async function()
     console.log('✅ Geolocation API available');
     
     const button = this;
-    button.textContent = '⏳ GPS-Position wird abgerufen...';
+    button.textContent = i18n.gps_fetching;
     button.disabled = true;
     
     // Check permission status if API is available
@@ -1115,10 +1134,10 @@ document.getElementById('gps-button').addEventListener('click', async function()
             if (permissionStatus.state === 'denied') {
                 console.error('🚫 Permission explicitly denied');
                 const instructions = getPermissionInstructions();
-                alert(`🚫 Standort-Zugriff blockiert!\n\n${instructions}`);
+                alert(i18n.gps_blocked_alert.replace('{instructions}', instructions));
                 button.textContent = '🔒 ' + i18n.location_blocked;
                 setTimeout(() => {
-                    button.textContent = '📍 GPS-Position abrufen';
+                    button.textContent = i18n.gps_get_position;
                     button.disabled = false;
                 }, 3000);
                 return;
@@ -1170,9 +1189,9 @@ document.getElementById('gps-button').addEventListener('click', async function()
             }
             
             console.log('=== GPS DEBUG END (SUCCESS) ===');
-            button.textContent = '✅ Position abgerufen!';
+            button.textContent = i18n.gps_position_retrieved;
             setTimeout(() => {
-                button.textContent = '📍 GPS-Position abrufen';
+                button.textContent = i18n.gps_get_position;
                 button.disabled = false;
             }, 2000);
         },
@@ -1196,30 +1215,34 @@ document.getElementById('gps-button').addEventListener('click', async function()
                     console.error('  - Not HTTPS (required for geolocation in production)');
                     console.error('  - Blocked in iframe by browser policy');
                     const instructions = getPermissionInstructions();
-                    errorMessage = `🚫 Standort-Zugriff verweigert!\n\n${instructions}${debugInfo}`;
-                    button.textContent = '🔒 Zugriff verweigert';
+                    errorMessage = i18n.gps_denied_alert
+                        .replace('{instructions}', instructions)
+                        .replace('{debug}', debugInfo);
+                    button.textContent = '🔒 ' + i18n.gps_denied_short;
                     break;
                 case error.POSITION_UNAVAILABLE:
                     console.error('📡 Position unavailable - GPS signal issues');
                     errorMessage = i18n.gps_unavailable + debugInfo;
-                    button.textContent = '📡 Kein Signal';
+                    button.textContent = '📡 ' + i18n.gps_no_signal_short;
                     break;
                 case error.TIMEOUT:
                     console.error('⏱️ Timeout - GPS took too long (>10s)');
                     errorMessage = i18n.gps_timeout + debugInfo;
-                    button.textContent = '⏱️ Timeout';
+                    button.textContent = '⏱️ ' + i18n.gps_timeout_short;
                     break;
                 default:
                     console.error('❌ Unknown error:', error.message);
-                    errorMessage = `❌ GPS-Fehler: ${error.message}\n\nBitte versuche es erneut oder gib die Position manuell ein.${debugInfo}`;
-                    button.textContent = '❌ Fehler';
+                    errorMessage = i18n.gps_unknown_alert
+                        .replace('{error}', error.message)
+                        .replace('{debug}', debugInfo);
+                    button.textContent = i18n.error_short;
             }
             
             console.log('=== GPS DEBUG END (ERROR) ===');
             alert(errorMessage);
             
             setTimeout(() => {
-                button.textContent = '📍 GPS-Position abrufen';
+                button.textContent = i18n.gps_get_position;
                 button.disabled = false;
             }, 3000);
         },
@@ -1385,25 +1408,25 @@ form.addEventListener('submit', async function(e) {
         
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
-        submitBtn.textContent = '⏳ Offline speichern...';
+        submitBtn.textContent = i18n.offline_saving;
         submitBtn.disabled = true;
         
         try {
             const result = await window.createOfflineEntry('logbookEntries', entryData, '/logbook/new');
             
             if (result && result.success) {
-                submitBtn.textContent = '✅ Offline gespeichert!';
+                submitBtn.textContent = i18n.offline_saved;
                 setTimeout(() => {
                     window.location.href = '/logbook';
                 }, 1000);
             } else {
-                throw new Error(result?.error || 'Offline-Speicherung fehlgeschlagen');
+                throw new Error(result?.error || i18n.offline_save_failed);
             }
         } catch (err) {
             console.error('Offline save failed:', err);
-            submitBtn.textContent = '❌ Fehler';
+            submitBtn.textContent = i18n.error_short;
             submitBtn.disabled = false;
-            alert('Fehler beim Offline-Speichern: ' + err.message);
+            alert(i18n.offline_alert_prefix + err.message);
             setTimeout(() => {
                 submitBtn.textContent = originalText;
             }, 2000);
@@ -1430,9 +1453,7 @@ window.addEventListener('unhandledrejection', function(event) {
     if (event.reason && event.reason.message && event.reason.message.includes('CSRF')) {
         event.preventDefault();
         
-        const errorMsg = `🔒 Sicherheits-Token abgelaufen!\n\nDeine Sitzung war zu lange inaktiv.\n\nSo behebst du das Problem:\n\n1. Lade diese Seite neu (F5 oder ⟳)\n2. Deine Formulardaten gehen NICHT verloren\n3. Sende das Formular erneut ab\n\nTipp: Bei langen Formularen zwischendurch speichern!`;
-        
-        alert(errorMsg);
+        alert(i18n.csrf_alert);
     }
 });
 </script>

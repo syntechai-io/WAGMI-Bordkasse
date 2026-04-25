@@ -83,7 +83,7 @@
                             <div class="flex gap-2 flex-wrap">
                                 <a href="/crew/{{ member.id }}/edit" class="hover:underline touch-action" style="color: var(--accent);">✏️ {{ t('common.edit') }}</a>
                                 {% if member.departed_at %}
-                                <form action="/crew/{{ member.id }}/reactivate" method="post" class="inline" onsubmit="return confirm('{{ member.name }} wieder aktivieren?')">
+                                <form action="/crew/{{ member.id }}/reactivate" method="post" class="inline" onsubmit="return confirm({{ t('crew.confirm_reactivate', name=member.name) | tojson }})">
                                     {{ csrf_input | safe }}
                                     <button type="submit" class="hover:underline touch-action" style="color: var(--success);">🔄 {{ t('crew.reactivate') }}</button>
                                 </form>

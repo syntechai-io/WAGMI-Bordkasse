@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Return to CrewLog</title>
+    <title>{{ t('ios_return.title') }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -42,9 +42,9 @@
     <div class="container">
         <div class="logo">⛵</div>
         <h1>CrewLog</h1>
-        <p>Your action has been completed. Tap below to return to the app.</p>
-        <a href="crewlog://return" class="btn" id="openApp">Open CrewLog</a>
-        <p class="note">If the button doesn't work, open CrewLog from your home screen.</p>
+        <p>{{ t('ios_return.message') }}</p>
+        <a href="crewlog://return" class="btn" id="openApp">{{ t('ios_return.open_app') }}</a>
+        <p class="note">{{ t('ios_return.note') }}</p>
     </div>
     <script>
         setTimeout(function() {
