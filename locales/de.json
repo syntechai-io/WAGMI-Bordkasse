@@ -52,6 +52,7 @@
   "admin.boat_setup.port_name": "Hafenname",
   "admin.boat_setup.port_name_placeholder": "z.B. Fredericia",
   "admin.boat_setup.read_only": "Nur der Account-Inhaber kann die Boot-Einstellungen bearbeiten.",
+  "admin.boat_setup.sails": "Segel",
   "admin.boat_setup.specs": "Boot-Spezifikationen",
   "admin.boat_setup.stats_default_name": "Mein Boot",
   "admin.boat_setup.stats_helper": "Nur Törns mit aktiviertem \"🚢 WAGMI-Törn\" werden gezählt.",

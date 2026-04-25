@@ -320,6 +320,33 @@ session.session.cookies  # Should contain session cookie
 # Check file size limits (max 10MB for receipts)
 ```
 
+## i18n Hardcoded-String Regression
+
+`test_i18n_no_hardcoded_strings.py` scans every file under `templates/` and
+fails the build if it finds German-only characters (`ä`, `ö`, `ü`, `ß`, …) or
+known German words (`Törn`, `Statistik`, …) outside `{{ t('your.key') }}`
+calls and template comments. It also cross-checks that every `t('foo.bar')`
+referenced in a template exists in both `locales/de.json` and
+`locales/en.json`.
+
+Run it with the rest of the suite via `pytest`, or on its own:
+
+```bash
+pytest test_i18n_no_hardcoded_strings.py -v
+```
+
+### Adding a legitimate exception
+
+If a German-looking token is intentional (date format, brand name, proper
+noun used in both languages), add a tuple `(template_filename, snippet)` to
+the `ALLOWLIST` constant at the top of `test_i18n_no_hardcoded_strings.py`.
+The `snippet` is matched as a substring of the offending line — keep it
+short and unique. Add a one-line comment explaining why the exception is
+legitimate.
+
+For translation keys that are intentionally staged but not yet present in
+both locale files, add the key to `MISSING_KEY_ALLOWLIST` in the same file.
+
 ## Support
 
 For issues with the test suite:

@@ -52,6 +52,7 @@
   "admin.boat_setup.port_name": "Port Name",
   "admin.boat_setup.port_name_placeholder": "e.g. Fredericia",
   "admin.boat_setup.read_only": "Only the account owner can edit boat settings.",
+  "admin.boat_setup.sails": "Sails",
   "admin.boat_setup.specs": "Boat Specifications",
   "admin.boat_setup.stats_default_name": "My Boat",
   "admin.boat_setup.stats_helper": "Only trips with \"🚢 WAGMI-Trip\" enabled are counted.",
