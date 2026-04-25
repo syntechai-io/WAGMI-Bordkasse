@@ -1,0 +1,537 @@
+You are working on the CrewLog FastAPI app. Build two new features:
+1. "Tages-Recap" — fill out a full day's maneuvers at once (new form + routes)
+2. "Tagesstörn" — single-day trip type (no DB migration needed)
+
+Do NOT change any Python model files or run migrations.
+Match ALL existing code style: cl-* CSS classes, build_logbook_entry() helper,
+TripService, normalize_event_category(), etc.
+
+─────────────────────────────────────────────────────────────────────────────
+FEATURE 1 — Tages-Recap: Log an entire day's events at once
+─────────────────────────────────────────────────────────────────────────────
+
+── Step 1A: Add two routes to routers/logbook.py ────────────────────────────
+
+After the existing imports and `router = APIRouter(...)` declaration, add 
+these two routes. Insert them after the existing helper functions and BEFORE 
+the `@router.get("")` list_logbook_entries route.
+
+First, add this import at the top of the file alongside existing imports:
+    import json as _json
+
+Then add these two routes:
+
+---
+
+@router.get("/day-recap", response_class=HTMLResponse)
+async def day_recap_form(request: Request, db: Session = Depends(get_db)):
+    """Render the Day Recap form — log multiple maneuvers for one day at once."""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips/", status_code=303)
+    crew = db.query(CrewMember).filter(
+        CrewMember.trip_id == active_trip.id
+    ).order_by(CrewMember.name).all()
+    today = date.today().isoformat()
+    return templates.TemplateResponse("logbook_day_recap.html", {
+        "request": request,
+        "active_trip": active_trip,
+        "crew": crew,
+        "today": today,
+    })
+
+
+@router.post("/day-recap")
+async def day_recap_submit(
+    request: Request,
+    recap_date: str = Form(...),
+    departure_port: str = Form(""),
+    destination_port: str = Form(""),
+    total_nm_str: str = Form(""),
+    events_json: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    """Save multiple logbook entries from a Day Recap submission."""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips/", status_code=303)
+
+    try:
+        events = _json.loads(events_json)
+    except Exception:
+        events = []
+
+    try:
+        recap_dt_date = date.fromisoformat(recap_date)
+    except ValueError:
+        recap_dt_date = date.today()
+
+    total_nm = None
+    try:
+        if total_nm_str.strip():
+            total_nm = float(total_nm_str.strip())
+    except (ValueError, TypeError):
+        pass
+
+    saved = 0
+    for i, ev in enumerate(events):
+        time_str = (ev.get("time") or "12:00").strip()
+        parts = time_str.split(":")
+        try:
+            hh = int(parts[0])
+            mm = int(parts[1]) if len(parts) > 1 else 0
+        except (ValueError, IndexError):
+            hh, mm = 12, 0
+        entry_dt = datetime(
+            recap_dt_date.year, recap_dt_date.month, recap_dt_date.day,
+            hh, mm, 0
+        )
+
+        is_last = (i == len(events) - 1)
+
+        entry = build_logbook_entry(
+            trip_id=active_trip.id,
+            entry_dt=entry_dt,
+            maneuver_type="recap",
+            event_category=ev.get("category") or None,
+            event_details=ev.get("notes") or None,
+            latitude=float(ev["lat"]) if ev.get("lat") else None,
+            longitude=float(ev["lon"]) if ev.get("lon") else None,
+            departure=departure_port if i == 0 else None,
+            destination=destination_port if is_last else None,
+            dist_day_nm=total_nm if is_last else None,
+        )
+        db.add(entry)
+        saved += 1
+
+    if saved > 0:
+        db.commit()
+
+    return RedirectResponse(url="/logbook", status_code=303)
+
+---
+
+── Step 1B: Create templates/logbook_day_recap.html ─────────────────────────
+
+Create this file with the following exact content:
+
+---
+
+{% extends "layout.html" %}
+
+{% block title %}Tages-Recap – CrewLog{% endblock %}
+
+{% block content %}
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">📋 Tages-Recap</h1>
+            <p class="cl-subtitle">{{ active_trip.name }} — Alle Ereignisse des Tages auf einmal erfassen</p>
+        </div>
+        <div class="cl-pageheader__actions">
+            <a href="/logbook" class="cl-btn cl-btn--secondary cl-btn--sm">← Logbuch</a>
+        </div>
+    </header>
+
+    <form id="recap-form" method="post" action="/logbook/day-recap" class="cl-form" novalidate>
+        {{ csrf_input | safe }}
+        <input type="hidden" name="events_json" id="events_json" value="[]">
+
+        {# ── Day overview card ── #}
+        <section class="cl-card">
+            <h2 class="cl-card__title">🗓️ Tag & Übersicht</h2>
+            <div class="cl-grid cl-grid--2">
+                <div class="cl-field cl-field--full">
+                    <label class="cl-label cl-label--inline" for="recap_date">Datum</label>
+                    <input type="date" id="recap_date" name="recap_date"
+                           class="cl-input" value="{{ today }}" required>
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline" for="departure_port">Abfahrthafen</label>
+                    <input type="text" id="departure_port" name="departure_port"
+                           class="cl-input" placeholder="z. B. Fredericia">
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline" for="destination_port">Zielhafen</label>
+                    <input type="text" id="destination_port" name="destination_port"
+                           class="cl-input" placeholder="z. B. Middelfart">
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline" for="total_nm_str">Tagesstrecke (sm)</label>
+                    <input type="number" id="total_nm_str" name="total_nm_str"
+                           class="cl-input" placeholder="0.0" step="0.1" min="0">
+                </div>
+            </div>
+        </section>
+
+        {# ── Events timeline ── #}
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">⏱ Manöver-Ereignisse</h2>
+                <button type="button" id="add-event-btn" class="cl-btn cl-btn--accent cl-btn--sm">
+                    + Ereignis
+                </button>
+            </header>
+            <p class="cl-help">Füge jeden Manöverpunkt in chronologischer Reihenfolge hinzu.</p>
+
+            <div id="events-container" class="cl-stack cl-stack--sm">
+                {# Seeded by JS below #}
+            </div>
+        </section>
+
+    </form>
+</div>
+
+{# ── Fixed action bar ── #}
+<div class="cl-actionbar">
+    <a href="/logbook" class="cl-btn cl-btn--secondary">Abbrechen</a>
+    <button type="button" class="cl-btn cl-btn--primary" id="save-recap-btn">
+        💾 Alle speichern
+    </button>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ── Maneuver type options ──────────────────────────────────────────
+    const MANEUVER_OPTIONS = [
+        { value: 'Ablegen',       label: '🚢 Ablegen',       cat: 'Manöver' },
+        { value: 'Motor an',      label: '⚙️ Motor an',      cat: 'Manöver' },
+        { value: 'Segel setzen',  label: '⛵ Segel setzen',  cat: 'Manöver' },
+        { value: 'Wende/Halse',   label: '🔄 Wende / Halse', cat: 'Manöver' },
+        { value: 'Motor aus',     label: '🔇 Motor aus',     cat: 'Manöver' },
+        { value: 'Ankern',        label: '⚓ Ankern',        cat: 'Manöver' },
+        { value: 'Anlegen',       label: '🏁 Anlegen',       cat: 'Manöver' },
+        { value: 'Wetterinfo',    label: '🌤 Wetterinfo',    cat: 'Wetterwechsel' },
+        { value: 'Sonstiges',     label: '📝 Sonstiges',     cat: 'Manöver' },
+    ];
+
+    let eventCount = 0;
+
+    function buildOptionMarkup() {
+        return MANEUVER_OPTIONS.map(o =>
+            `<option value="${o.value}" data-cat="${o.cat}">${o.label}</option>`
+        ).join('');
+    }
+
+    // ── Create one event card ──────────────────────────────────────────
+    function createEventCard(defaultTime) {
+        const idx = eventCount++;
+        const id  = `evt-${idx}`;
+        const card = document.createElement('div');
+        card.className = 'cl-card cl-card--quiet';
+        card.dataset.eventId = id;
+        card.style.cssText = 'padding: var(--cl-space-3); gap: var(--cl-space-3);';
+
+        card.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <strong style="font-size:13px; color:var(--cl-text-muted);">Ereignis ${idx + 1}</strong>
+                <button type="button" class="remove-event-btn cl-btn cl-btn--ghost-danger cl-btn--sm"
+                        data-target="${id}" aria-label="Entfernen" style="height:32px; padding:0 10px;">✕</button>
+            </div>
+            <div class="cl-grid cl-grid--2" style="gap:var(--cl-space-3);">
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline">Uhrzeit</label>
+                    <input type="time" class="cl-input evt-time" value="${defaultTime}" required>
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline">Manöver-Typ</label>
+                    <select class="cl-input cl-select evt-category">
+                        ${buildOptionMarkup()}
+                    </select>
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline">Breitengrad (opt.)</label>
+                    <input type="number" class="cl-input evt-lat" placeholder="55.1234" step="0.00001">
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline">Längengrad (opt.)</label>
+                    <input type="number" class="cl-input evt-lon" placeholder="9.5678" step="0.00001">
+                </div>
+                <div class="cl-field cl-field--full">
+                    <label class="cl-label cl-label--inline">Notiz (opt.)</label>
+                    <input type="text" class="cl-input evt-notes" placeholder="z. B. Wind NW 3, leichte See">
+                </div>
+                <div class="cl-field cl-field--full">
+                    <button type="button" class="cl-btn cl-btn--secondary cl-btn--sm gps-btn" data-target="${id}" style="width:100%;">
+                        📍 GPS-Position abrufen
+                    </button>
+                </div>
+            </div>
+        `;
+
+        return card;
+    }
+
+    // ── Current time HH:MM ─────────────────────────────────────────────
+    function nowTime() {
+        const d = new Date();
+        return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    }
+
+    // ── Collect all events from DOM ────────────────────────────────────
+    function collectEvents() {
+        const cards = document.querySelectorAll('#events-container [data-event-id]');
+        return Array.from(cards).map(card => ({
+            time:     (card.querySelector('.evt-time')?.value     || '').trim(),
+            category: (card.querySelector('.evt-category')?.value || '').trim(),
+            lat:      (card.querySelector('.evt-lat')?.value      || '').trim(),
+            lon:      (card.querySelector('.evt-lon')?.value      || '').trim(),
+            notes:    (card.querySelector('.evt-notes')?.value    || '').trim(),
+        }));
+    }
+
+    // ── Update remove button visibility ───────────────────────────────
+    function syncRemoveBtns() {
+        const btns = document.querySelectorAll('.remove-event-btn');
+        btns.forEach(btn => {
+            btn.style.visibility = btns.length <= 1 ? 'hidden' : 'visible';
+        });
+        // Re-number event labels
+        document.querySelectorAll('#events-container [data-event-id]').forEach((card, i) => {
+            const lbl = card.querySelector('strong');
+            if (lbl) lbl.textContent = `Ereignis ${i + 1}`;
+        });
+    }
+
+    // ── Add event button ───────────────────────────────────────────────
+    document.getElementById('add-event-btn').addEventListener('click', function () {
+        const container = document.getElementById('events-container');
+        const card = createEventCard(nowTime());
+        container.appendChild(card);
+        syncRemoveBtns();
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        card.querySelector('.evt-time')?.focus();
+    });
+
+    // ── Remove event (delegated) ───────────────────────────────────────
+    document.getElementById('events-container').addEventListener('click', function (e) {
+        const btn = e.target.closest('.remove-event-btn');
+        if (!btn) return;
+        const targetId = btn.dataset.target;
+        const card = document.querySelector(`[data-event-id="${targetId}"]`);
+        if (card) {
+            card.remove();
+            syncRemoveBtns();
+        }
+    });
+
+    // ── GPS (delegated) ───────────────────────────────────────────────
+    document.getElementById('events-container').addEventListener('click', function (e) {
+        const btn = e.target.closest('.gps-btn');
+        if (!btn) return;
+        if (!navigator.geolocation) {
+            alert('GPS nicht verfügbar');
+            return;
+        }
+        btn.textContent = '⏳ Abrufen…';
+        btn.disabled = true;
+        const card = btn.closest('[data-event-id]');
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                if (card) {
+                    card.querySelector('.evt-lat').value = pos.coords.latitude.toFixed(5);
+                    card.querySelector('.evt-lon').value = pos.coords.longitude.toFixed(5);
+                }
+                btn.textContent = '✅ Position gesetzt';
+                btn.disabled = false;
+            },
+            () => {
+                btn.textContent = '❌ GPS-Fehler';
+                btn.disabled = false;
+            },
+            { timeout: 10000 }
+        );
+    });
+
+    // ── Save button: serialize → hidden field → submit ─────────────────
+    document.getElementById('save-recap-btn').addEventListener('click', function () {
+        const events = collectEvents();
+        if (events.length === 0) {
+            alert('Bitte mindestens ein Ereignis hinzufügen.');
+            return;
+        }
+        const missingTime = events.some(ev => !ev.time);
+        if (missingTime) {
+            alert('Bitte bei jedem Ereignis eine Uhrzeit angeben.');
+            return;
+        }
+        document.getElementById('events_json').value = JSON.stringify(events);
+        document.getElementById('recap-form').submit();
+    });
+
+    // ── Seed two default events on load ───────────────────────────────
+    (function seedInitialEvents() {
+        const container = document.getElementById('events-container');
+        // Ablegen at current time
+        const e1 = createEventCard(nowTime());
+        e1.querySelector('.evt-category').value = 'Ablegen';
+        container.appendChild(e1);
+        // Anlegen as second
+        const e2 = createEventCard(nowTime());
+        e2.querySelector('.evt-category').value = 'Anlegen';
+        container.appendChild(e2);
+        syncRemoveBtns();
+    })();
+
+})();
+</script>
+{% endblock %}
+
+---
+
+── Step 1C: Add "Tages-Recap" hero button to templates/index.html ────────────
+
+In templates/index.html, find the existing "Schnell-Logbuch" hero link:
+
+    <a href="/logbook/new" class="cl-hero">
+        <span class="cl-hero__icon" aria-hidden="true">📓</span>
+        <div class="cl-hero__body">
+            <p class="cl-hero__title">{{ t('dashboard.quick_log') }}</p>
+            <p class="cl-hero__desc">{{ t('dashboard.quick_log_desc') }}</p>
+        </div>
+        <span class="cl-hero__chev" aria-hidden="true">›</span>
+    </a>
+
+INSERT this block immediately AFTER it (between the Schnell-Logbuch link and
+the Quick Start form):
+
+    <a href="/logbook/day-recap" class="cl-hero">
+        <span class="cl-hero__icon" aria-hidden="true">📋</span>
+        <div class="cl-hero__body">
+            <p class="cl-hero__title">Tages-Recap</p>
+            <p class="cl-hero__desc">Alle Manöver des Tages auf einmal eintragen</p>
+        </div>
+        <span class="cl-hero__chev" aria-hidden="true">›</span>
+    </a>
+
+─────────────────────────────────────────────────────────────────────────────
+FEATURE 2 — Tagesstörn: single-day trip type (no DB migration)
+─────────────────────────────────────────────────────────────────────────────
+
+── Step 2A: Add "Tagesstörn" checkbox to templates/trips.html ───────────────
+
+In templates/trips.html, find the existing solo_sailing checkbox:
+
+    <label class="cl-check-row">
+        <input type="checkbox" name="solo_sailing" id="solo_sailing" value="true">
+        <span class="cl-check-row__label">👤 {{ t('trips.solo_sailing') }}</span>
+    </label>
+
+ADD a second checkbox immediately after it:
+
+    <label class="cl-check-row">
+        <input type="checkbox" name="day_trip" id="day_trip" value="true">
+        <span class="cl-check-row__label">☀️ Tagesstörn <span style="font-weight:400; color:var(--cl-text-subtle);">— Hin- und Rückfahrt am selben Tag</span></span>
+    </label>
+
+── Step 2B: Handle day_trip in routers/trips.py create_trip ─────────────────
+
+In routers/trips.py, find the create_trip function signature:
+
+    async def create_trip(
+        request: Request,
+        name: str = Form(...),
+        start_date: date = Form(...),
+        solo_sailing: Optional[str] = Form(None),
+        db: Session = Depends(get_db)
+    ):
+
+Add the new parameter:
+
+    async def create_trip(
+        request: Request,
+        name: str = Form(...),
+        start_date: date = Form(...),
+        solo_sailing: Optional[str] = Form(None),
+        day_trip: Optional[str] = Form(None),
+        db: Session = Depends(get_db)
+    ):
+
+Then find the Trip(...) constructor call inside create_trip:
+
+    trip = Trip(
+        name=name,
+        start_date=start_date,
+        status=TripStatus.active,
+        account_id=account_id
+    )
+
+Change it to:
+
+    trip = Trip(
+        name=name,
+        start_date=start_date,
+        end_date=start_date if day_trip == "true" else None,
+        status=TripStatus.active,
+        account_id=account_id
+    )
+
+── Step 2C: Show "Tagesstörn" badge in trips table ──────────────────────────
+
+In templates/trips.html, find the table body where trip names are displayed.
+Look for the cell that shows the trip name (it will be in a <td> element).
+After the trip name text, add a conditional badge:
+
+    {% if trip.end_date and trip.end_date == trip.start_date %}
+    <span class="cl-pill cl-pill--accent" style="margin-left: 6px; font-size: 10px;">☀️ Tagesstörn</span>
+    {% endif %}
+
+── Step 2D: Show Day Recap shortcut on dashboard when trip is a day trip ────
+
+In templates/index.html, find the "Tages-Recap" hero link you added in Step 1C.
+Wrap it to show it prominently (styled differently) when the trip is a day trip:
+
+Replace the Tages-Recap link with this conditional version:
+
+    <a href="/logbook/day-recap" class="cl-hero {% if active_trip and active_trip.end_date and active_trip.end_date == active_trip.start_date %}cl-hero--featured{% endif %}">
+        <span class="cl-hero__icon" aria-hidden="true">📋</span>
+        <div class="cl-hero__body">
+            <p class="cl-hero__title">Tages-Recap</p>
+            <p class="cl-hero__desc">
+                {% if active_trip and active_trip.end_date and active_trip.end_date == active_trip.start_date %}
+                    Alle Manöver deines Tagesstörns eintragen
+                {% else %}
+                    Alle Manöver des heutigen Tages auf einmal eintragen
+                {% endif %}
+            </p>
+        </div>
+        <span class="cl-hero__chev" aria-hidden="true">›</span>
+    </a>
+
+Then add this CSS rule to static/ui_ios_prime.css (append to the file):
+
+    /* ── 17. Featured hero variant (Day Recap on single-day trip) ── */
+    .cl-hero--featured {
+        background: var(--cl-accent-soft);
+        border-color: var(--cl-accent);
+    }
+    .cl-hero--featured .cl-hero__title { color: var(--cl-accent); }
+    html[data-theme="night"] .cl-hero--featured {
+        background: rgba(29, 111, 187, .15);
+        border-color: rgba(100, 170, 255, .35);
+    }
+
+─────────────────────────────────────────────────────────────────────────────
+VERIFICATION
+─────────────────────────────────────────────────────────────────────────────
+
+1. GET /logbook/day-recap → renders the Tages-Recap form with two seeded 
+   event cards (Ablegen + Anlegen), date defaults to today.
+
+2. Filling out the form and submitting → POST /logbook/day-recap → creates 
+   one LogbookEntry per event → redirects to /logbook where entries appear.
+
+3. POST /trips/new with day_trip=true → trip.end_date == trip.start_date → 
+   trips list shows the "☀️ Tagesstörn" badge for that trip.
+
+4. Dashboard with an active day trip → Tages-Recap link has blue 
+   highlighted background (cl-hero--featured). 
+   Dashboard with a regular multi-day trip → Tages-Recap link is normal.
+
+5. python -m pytest test_regression_logbook.py -v → all previously-passing 
+   tests still pass.
+
+6. No Python model files (models.py, db.py, schemas.py) were modified.
+   No migration files were created.

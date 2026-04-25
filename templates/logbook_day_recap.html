@@ -1,0 +1,261 @@
+{% extends "layout.html" %}
+
+{% block title %}Tages-Recap – CrewLog{% endblock %}
+
+{% block content %}
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">📋 Tages-Recap</h1>
+            <p class="cl-subtitle">{{ active_trip.name }} — Alle Ereignisse des Tages auf einmal erfassen</p>
+        </div>
+        <div class="cl-pageheader__actions">
+            <a href="/logbook" class="cl-btn cl-btn--secondary cl-btn--sm">← Logbuch</a>
+        </div>
+    </header>
+
+    <form id="recap-form" method="post" action="/logbook/day-recap" class="cl-form" novalidate>
+        {{ csrf_input | safe }}
+        <input type="hidden" name="events_json" id="events_json" value="[]">
+
+        {# ── Day overview card ── #}
+        <section class="cl-card">
+            <h2 class="cl-card__title">🗓️ Tag & Übersicht</h2>
+            <div class="cl-grid cl-grid--2">
+                <div class="cl-field cl-field--full">
+                    <label class="cl-label cl-label--inline" for="recap_date">Datum</label>
+                    <input type="date" id="recap_date" name="recap_date"
+                           class="cl-input" value="{{ today }}" required>
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline" for="departure_port">Abfahrthafen</label>
+                    <input type="text" id="departure_port" name="departure_port"
+                           class="cl-input" placeholder="z. B. Fredericia">
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline" for="destination_port">Zielhafen</label>
+                    <input type="text" id="destination_port" name="destination_port"
+                           class="cl-input" placeholder="z. B. Middelfart">
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline" for="total_nm_str">Tagesstrecke (sm)</label>
+                    <input type="number" id="total_nm_str" name="total_nm_str"
+                           class="cl-input" placeholder="0.0" step="0.1" min="0">
+                </div>
+            </div>
+        </section>
+
+        {# ── Events timeline ── #}
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">⏱ Manöver-Ereignisse</h2>
+                <button type="button" id="add-event-btn" class="cl-btn cl-btn--accent cl-btn--sm">
+                    + Ereignis
+                </button>
+            </header>
+            <p class="cl-help">Füge jeden Manöverpunkt in chronologischer Reihenfolge hinzu.</p>
+
+            <div id="events-container" class="cl-stack cl-stack--sm">
+                {# Seeded by JS below #}
+            </div>
+        </section>
+
+    </form>
+</div>
+
+{# ── Fixed action bar ── #}
+<div class="cl-actionbar">
+    <a href="/logbook" class="cl-btn cl-btn--secondary">Abbrechen</a>
+    <button type="button" class="cl-btn cl-btn--primary" id="save-recap-btn">
+        💾 Alle speichern
+    </button>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ── Maneuver type options ──────────────────────────────────────────
+    const MANEUVER_OPTIONS = [
+        { value: 'Ablegen',       label: '🚢 Ablegen',       cat: 'Manöver' },
+        { value: 'Motor an',      label: '⚙️ Motor an',      cat: 'Manöver' },
+        { value: 'Segel setzen',  label: '⛵ Segel setzen',  cat: 'Manöver' },
+        { value: 'Wende/Halse',   label: '🔄 Wende / Halse', cat: 'Manöver' },
+        { value: 'Motor aus',     label: '🔇 Motor aus',     cat: 'Manöver' },
+        { value: 'Ankern',        label: '⚓ Ankern',        cat: 'Manöver' },
+        { value: 'Anlegen',       label: '🏁 Anlegen',       cat: 'Manöver' },
+        { value: 'Wetterinfo',    label: '🌤 Wetterinfo',    cat: 'Wetterwechsel' },
+        { value: 'Sonstiges',     label: '📝 Sonstiges',     cat: 'Manöver' },
+    ];
+
+    let eventCount = 0;
+
+    function buildOptionMarkup() {
+        return MANEUVER_OPTIONS.map(o =>
+            `<option value="${o.value}" data-cat="${o.cat}">${o.label}</option>`
+        ).join('');
+    }
+
+    // ── Create one event card ──────────────────────────────────────────
+    function createEventCard(defaultTime) {
+        const idx = eventCount++;
+        const id  = `evt-${idx}`;
+        const card = document.createElement('div');
+        card.className = 'cl-card cl-card--quiet';
+        card.dataset.eventId = id;
+        card.style.cssText = 'padding: var(--cl-space-3); gap: var(--cl-space-3);';
+
+        card.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <strong style="font-size:13px; color:var(--cl-text-muted);">Ereignis ${idx + 1}</strong>
+                <button type="button" class="remove-event-btn cl-btn cl-btn--ghost-danger cl-btn--sm"
+                        data-target="${id}" aria-label="Entfernen" style="height:32px; padding:0 10px;">✕</button>
+            </div>
+            <div class="cl-grid cl-grid--2" style="gap:var(--cl-space-3);">
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline">Uhrzeit</label>
+                    <input type="time" class="cl-input evt-time" value="${defaultTime}" required>
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline">Manöver-Typ</label>
+                    <select class="cl-input cl-select evt-category">
+                        ${buildOptionMarkup()}
+                    </select>
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline">Breitengrad (opt.)</label>
+                    <input type="number" class="cl-input evt-lat" placeholder="55.1234" step="0.00001">
+                </div>
+                <div class="cl-field">
+                    <label class="cl-label cl-label--inline">Längengrad (opt.)</label>
+                    <input type="number" class="cl-input evt-lon" placeholder="9.5678" step="0.00001">
+                </div>
+                <div class="cl-field cl-field--full">
+                    <label class="cl-label cl-label--inline">Notiz (opt.)</label>
+                    <input type="text" class="cl-input evt-notes" placeholder="z. B. Wind NW 3, leichte See">
+                </div>
+                <div class="cl-field cl-field--full">
+                    <button type="button" class="cl-btn cl-btn--secondary cl-btn--sm gps-btn" data-target="${id}" style="width:100%;">
+                        📍 GPS-Position abrufen
+                    </button>
+                </div>
+            </div>
+        `;
+
+        return card;
+    }
+
+    // ── Current time HH:MM ─────────────────────────────────────────────
+    function nowTime() {
+        const d = new Date();
+        return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    }
+
+    // ── Collect all events from DOM ────────────────────────────────────
+    function collectEvents() {
+        const cards = document.querySelectorAll('#events-container [data-event-id]');
+        return Array.from(cards).map(card => ({
+            time:     (card.querySelector('.evt-time')?.value     || '').trim(),
+            category: (card.querySelector('.evt-category')?.value || '').trim(),
+            lat:      (card.querySelector('.evt-lat')?.value      || '').trim(),
+            lon:      (card.querySelector('.evt-lon')?.value      || '').trim(),
+            notes:    (card.querySelector('.evt-notes')?.value    || '').trim(),
+        }));
+    }
+
+    // ── Update remove button visibility ───────────────────────────────
+    function syncRemoveBtns() {
+        const btns = document.querySelectorAll('.remove-event-btn');
+        btns.forEach(btn => {
+            btn.style.visibility = btns.length <= 1 ? 'hidden' : 'visible';
+        });
+        // Re-number event labels
+        document.querySelectorAll('#events-container [data-event-id]').forEach((card, i) => {
+            const lbl = card.querySelector('strong');
+            if (lbl) lbl.textContent = `Ereignis ${i + 1}`;
+        });
+    }
+
+    // ── Add event button ───────────────────────────────────────────────
+    document.getElementById('add-event-btn').addEventListener('click', function () {
+        const container = document.getElementById('events-container');
+        const card = createEventCard(nowTime());
+        container.appendChild(card);
+        syncRemoveBtns();
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        card.querySelector('.evt-time')?.focus();
+    });
+
+    // ── Remove event (delegated) ───────────────────────────────────────
+    document.getElementById('events-container').addEventListener('click', function (e) {
+        const btn = e.target.closest('.remove-event-btn');
+        if (!btn) return;
+        const targetId = btn.dataset.target;
+        const card = document.querySelector(`[data-event-id="${targetId}"]`);
+        if (card) {
+            card.remove();
+            syncRemoveBtns();
+        }
+    });
+
+    // ── GPS (delegated) ───────────────────────────────────────────────
+    document.getElementById('events-container').addEventListener('click', function (e) {
+        const btn = e.target.closest('.gps-btn');
+        if (!btn) return;
+        if (!navigator.geolocation) {
+            alert('GPS nicht verfügbar');
+            return;
+        }
+        btn.textContent = '⏳ Abrufen…';
+        btn.disabled = true;
+        const card = btn.closest('[data-event-id]');
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                if (card) {
+                    card.querySelector('.evt-lat').value = pos.coords.latitude.toFixed(5);
+                    card.querySelector('.evt-lon').value = pos.coords.longitude.toFixed(5);
+                }
+                btn.textContent = '✅ Position gesetzt';
+                btn.disabled = false;
+            },
+            () => {
+                btn.textContent = '❌ GPS-Fehler';
+                btn.disabled = false;
+            },
+            { timeout: 10000 }
+        );
+    });
+
+    // ── Save button: serialize → hidden field → submit ─────────────────
+    document.getElementById('save-recap-btn').addEventListener('click', function () {
+        const events = collectEvents();
+        if (events.length === 0) {
+            alert('Bitte mindestens ein Ereignis hinzufügen.');
+            return;
+        }
+        const missingTime = events.some(ev => !ev.time);
+        if (missingTime) {
+            alert('Bitte bei jedem Ereignis eine Uhrzeit angeben.');
+            return;
+        }
+        document.getElementById('events_json').value = JSON.stringify(events);
+        document.getElementById('recap-form').submit();
+    });
+
+    // ── Seed two default events on load ───────────────────────────────
+    (function seedInitialEvents() {
+        const container = document.getElementById('events-container');
+        // Ablegen at current time
+        const e1 = createEventCard(nowTime());
+        e1.querySelector('.evt-category').value = 'Ablegen';
+        container.appendChild(e1);
+        // Anlegen as second
+        const e2 = createEventCard(nowTime());
+        e2.querySelector('.evt-category').value = 'Anlegen';
+        container.appendChild(e2);
+        syncRemoveBtns();
+    })();
+
+})();
+</script>
+{% endblock %}

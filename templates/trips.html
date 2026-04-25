@@ -61,6 +61,10 @@
                     <input type="checkbox" name="solo_sailing" id="solo_sailing" value="true">
                     <span class="cl-check-row__label">👤 {{ t('trips.solo_sailing') }}</span>
                 </label>
+                <label class="cl-check-row">
+                    <input type="checkbox" name="day_trip" id="day_trip" value="true">
+                    <span class="cl-check-row__label">☀️ Tagesstörn <span style="font-weight:400; color:var(--cl-text-subtle);">— Hin- und Rückfahrt am selben Tag</span></span>
+                </label>
                 <p class="cl-help cl-help--muted">{{ t('trips.create_hint') }}</p>
             </form>
         </section>
@@ -88,6 +92,9 @@
                             <td>
                                 <div id="trip-name-display-{{ trip.id }}" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
                                     <strong>{{ trip.name }}</strong>
+                                    {% if trip.end_date and trip.end_date == trip.start_date %}
+                                    <span class="cl-pill cl-pill--accent" style="margin-left: 6px; font-size: 10px;">☀️ Tagesstörn</span>
+                                    {% endif %}
                                     {% if trip.id == active_trip.id %}
                                     <span class="cl-pill cl-pill--solid-success">{{ t('trips.status_active') }}</span>
                                     {% endif %}

@@ -13,6 +13,7 @@ from typing import List, Optional
 from pathlib import Path
 import uuid
 import io
+import json as _json
 from logbook_pdf_template import render_logbook_pdf
 from weather_service import WeatherService
 from constants.logbook_enums import (
@@ -114,6 +115,93 @@ def optional_bool(value: str = Form(None)) -> Optional[bool]:
     if value == "" or value is None:
         return None
     return value.lower() in ("true", "1", "yes", "on")
+
+@router.get("/day-recap", response_class=HTMLResponse)
+async def day_recap_form(request: Request, db: Session = Depends(get_db)):
+    """Render the Day Recap form — log multiple maneuvers for one day at once."""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips/", status_code=303)
+    crew = db.query(CrewMember).filter(
+        CrewMember.trip_id == active_trip.id
+    ).order_by(CrewMember.name).all()
+    today = date.today().isoformat()
+    return templates.TemplateResponse("logbook_day_recap.html", {
+        "request": request,
+        "active_trip": active_trip,
+        "crew": crew,
+        "today": today,
+    })
+
+
+@router.post("/day-recap")
+async def day_recap_submit(
+    request: Request,
+    recap_date: str = Form(...),
+    departure_port: str = Form(""),
+    destination_port: str = Form(""),
+    total_nm_str: str = Form(""),
+    events_json: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    """Save multiple logbook entries from a Day Recap submission."""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips/", status_code=303)
+
+    try:
+        events = _json.loads(events_json)
+    except Exception:
+        events = []
+
+    try:
+        recap_dt_date = date.fromisoformat(recap_date)
+    except ValueError:
+        recap_dt_date = date.today()
+
+    total_nm = None
+    try:
+        if total_nm_str.strip():
+            total_nm = float(total_nm_str.strip())
+    except (ValueError, TypeError):
+        pass
+
+    saved = 0
+    for i, ev in enumerate(events):
+        time_str = (ev.get("time") or "12:00").strip()
+        parts = time_str.split(":")
+        try:
+            hh = int(parts[0])
+            mm = int(parts[1]) if len(parts) > 1 else 0
+        except (ValueError, IndexError):
+            hh, mm = 12, 0
+        entry_dt = datetime(
+            recap_dt_date.year, recap_dt_date.month, recap_dt_date.day,
+            hh, mm, 0
+        )
+
+        is_last = (i == len(events) - 1)
+
+        entry = build_logbook_entry(
+            trip_id=active_trip.id,
+            entry_dt=entry_dt,
+            maneuver_type="recap",
+            event_category=ev.get("category") or None,
+            event_details=ev.get("notes") or None,
+            latitude=float(ev["lat"]) if ev.get("lat") else None,
+            longitude=float(ev["lon"]) if ev.get("lon") else None,
+            departure=departure_port if i == 0 else None,
+            destination=destination_port if is_last else None,
+            dist_day_nm=total_nm if is_last else None,
+        )
+        db.add(entry)
+        saved += 1
+
+    if saved > 0:
+        db.commit()
+
+    return RedirectResponse(url="/logbook", status_code=303)
+
 
 @router.get("", response_class=HTMLResponse)
 async def list_logbook_entries(request: Request, db: Session = Depends(get_db)):

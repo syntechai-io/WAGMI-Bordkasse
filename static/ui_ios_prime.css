@@ -346,3 +346,14 @@ html[data-theme="night"] .topbar {
         background: rgba(100, 140, 200, .12);
     }
 }
+
+/* ── 17. Featured hero variant (Day Recap on single-day trip) ── */
+.cl-hero--featured {
+    background: var(--cl-accent-soft);
+    border-color: var(--cl-accent);
+}
+.cl-hero--featured .cl-hero__title { color: var(--cl-accent); }
+html[data-theme="night"] .cl-hero--featured {
+    background: rgba(29, 111, 187, .15);
+    border-color: rgba(100, 170, 255, .35);
+}

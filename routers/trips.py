@@ -136,6 +136,7 @@ async def create_trip(
     name: str = Form(...),
     start_date: date = Form(...),
     solo_sailing: Optional[str] = Form(None),
+    day_trip: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     """Create a new trip"""
@@ -154,6 +155,7 @@ async def create_trip(
     trip = Trip(
         name=name,
         start_date=start_date,
+        end_date=start_date if day_trip == "true" else None,
         status=TripStatus.active,
         account_id=account_id
     )
