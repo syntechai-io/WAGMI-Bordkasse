@@ -54,6 +54,7 @@ def _build_branding(bp=None):
 def trip_context_processor(request: Request) -> Dict[str, Any]:
     """Add trip information and branding to all template contexts"""
     context = {
+        "app_mode": request.session.get("app_mode", "full"),
         "all_trips": [],
         "selected_trip": None,
         "boat_brand_name": None,

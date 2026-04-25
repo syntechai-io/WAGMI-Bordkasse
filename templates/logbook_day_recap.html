@@ -1,16 +1,16 @@
 {% extends "layout.html" %}
 
-{% block title %}Tages-Recap – CrewLog{% endblock %}
+{% block title %}{{ t('day_recap.title') }} – CrewLog{% endblock %}
 
 {% block content %}
 <div class="cl-page">
     <header class="cl-pageheader">
         <div class="cl-pageheader__main">
-            <h1 class="cl-title">📋 Tages-Recap</h1>
-            <p class="cl-subtitle">{{ active_trip.name }} — Alle Ereignisse des Tages auf einmal erfassen</p>
+            <h1 class="cl-title">📋 {{ t('day_recap.title') }}</h1>
+            <p class="cl-subtitle">{{ active_trip.name }} — {{ t('day_recap.subtitle') }}</p>
         </div>
         <div class="cl-pageheader__actions">
-            <a href="/logbook" class="cl-btn cl-btn--secondary cl-btn--sm">← Logbuch</a>
+            <a href="/logbook" class="cl-btn cl-btn--secondary cl-btn--sm">{{ t('day_recap.back') }}</a>
         </div>
     </header>
 
@@ -20,25 +20,25 @@
 
         {# ── Day overview card ── #}
         <section class="cl-card">
-            <h2 class="cl-card__title">🗓️ Tag & Übersicht</h2>
+            <h2 class="cl-card__title">🗓️ {{ t('day_recap.day_overview') }}</h2>
             <div class="cl-grid cl-grid--2">
                 <div class="cl-field cl-field--full">
-                    <label class="cl-label cl-label--inline" for="recap_date">Datum</label>
+                    <label class="cl-label cl-label--inline" for="recap_date">{{ t('day_recap.date') }}</label>
                     <input type="date" id="recap_date" name="recap_date"
                            class="cl-input" value="{{ today }}" required>
                 </div>
                 <div class="cl-field">
-                    <label class="cl-label cl-label--inline" for="departure_port">Abfahrthafen</label>
+                    <label class="cl-label cl-label--inline" for="departure_port">{{ t('day_recap.departure_port') }}</label>
                     <input type="text" id="departure_port" name="departure_port"
-                           class="cl-input" placeholder="z. B. Fredericia">
+                           class="cl-input" placeholder="{{ t('day_recap.placeholder_departure') }}">
                 </div>
                 <div class="cl-field">
-                    <label class="cl-label cl-label--inline" for="destination_port">Zielhafen</label>
+                    <label class="cl-label cl-label--inline" for="destination_port">{{ t('day_recap.destination_port') }}</label>
                     <input type="text" id="destination_port" name="destination_port"
-                           class="cl-input" placeholder="z. B. Middelfart">
+                           class="cl-input" placeholder="{{ t('day_recap.placeholder_destination') }}">
                 </div>
                 <div class="cl-field">
-                    <label class="cl-label cl-label--inline" for="total_nm_str">Tagesstrecke (sm)</label>
+                    <label class="cl-label cl-label--inline" for="total_nm_str">{{ t('day_recap.day_distance') }}</label>
                     <input type="number" id="total_nm_str" name="total_nm_str"
                            class="cl-input" placeholder="0.0" step="0.1" min="0">
                 </div>
@@ -48,12 +48,12 @@
         {# ── Events timeline ── #}
         <section class="cl-card">
             <header class="cl-card__head">
-                <h2 class="cl-card__title">⏱ Manöver-Ereignisse</h2>
+                <h2 class="cl-card__title">⏱ {{ t('day_recap.events_title') }}</h2>
                 <button type="button" id="add-event-btn" class="cl-btn cl-btn--accent cl-btn--sm">
-                    + Ereignis
+                    + {{ t('day_recap.event') }}
                 </button>
             </header>
-            <p class="cl-help">Füge jeden Manöverpunkt in chronologischer Reihenfolge hinzu.</p>
+            <p class="cl-help">{{ t('day_recap.help') }}</p>
 
             <div id="events-container" class="cl-stack cl-stack--sm">
                 {# Seeded by JS below #}
@@ -65,30 +65,62 @@
 
 {# ── Fixed action bar ── #}
 <div class="cl-actionbar">
-    <a href="/logbook" class="cl-btn cl-btn--secondary">Abbrechen</a>
+    <a href="/logbook" class="cl-btn cl-btn--secondary">{{ t('day_recap.cancel') }}</a>
     <button type="button" class="cl-btn cl-btn--primary" id="save-recap-btn">
-        💾 Alle speichern
+        💾 {{ t('day_recap.save_all') }}
     </button>
 </div>
+
+<script>
+window.__dayRecapI18n = {
+    event_label:        {{ t('day_recap.event_label') | tojson }},
+    remove:             {{ t('day_recap.remove') | tojson }},
+    time:               {{ t('day_recap.time') | tojson }},
+    maneuver_type:      {{ t('day_recap.maneuver_type') | tojson }},
+    lat:                {{ t('day_recap.lat') | tojson }},
+    lon:                {{ t('day_recap.lon') | tojson }},
+    notes:              {{ t('day_recap.notes') | tojson }},
+    notes_placeholder:  {{ t('day_recap.notes_placeholder') | tojson }},
+    gps_get:            {{ t('day_recap.gps_get') | tojson }},
+    gps_loading:        {{ t('day_recap.gps_loading') | tojson }},
+    gps_set:            {{ t('day_recap.gps_set') | tojson }},
+    gps_error:          {{ t('day_recap.gps_error') | tojson }},
+    gps_unavailable:    {{ t('day_recap.gps_unavailable') | tojson }},
+    saving:             {{ t('day_recap.saving') | tojson }},
+    no_events:          {{ t('day_recap.no_events') | tojson }},
+    no_time:            {{ t('day_recap.no_time') | tojson }},
+    man_depart:         {{ t('day_recap.man_depart') | tojson }},
+    man_motor_on:       {{ t('day_recap.man_motor_on') | tojson }},
+    man_set_sail:       {{ t('day_recap.man_set_sail') | tojson }},
+    man_tack_jibe:      {{ t('day_recap.man_tack_jibe') | tojson }},
+    man_motor_off:      {{ t('day_recap.man_motor_off') | tojson }},
+    man_anchor:         {{ t('day_recap.man_anchor') | tojson }},
+    man_arrive:         {{ t('day_recap.man_arrive') | tojson }},
+    man_weather:        {{ t('day_recap.man_weather') | tojson }},
+    man_other:          {{ t('day_recap.man_other') | tojson }}
+};
+</script>
 
 <script>
 (function () {
     'use strict';
 
+    const I = window.__dayRecapI18n || {};
+
     // ── Maneuver type options ──────────────────────────────────────────
-    // `value` = human label (German). `cat` = canonical event_category
+    // `value` = localized human label. `cat` = canonical event_category
     // code matching constants/logbook_enums.EVENT_CATEGORY_KEYS so the backend
     // normalize_event_category() accepts it directly.
     const MANEUVER_OPTIONS = [
-        { value: 'Ablegen',       label: '🚢 Ablegen',       cat: 'maneuver' },
-        { value: 'Motor an',      label: '⚙️ Motor an',      cat: 'maneuver' },
-        { value: 'Segel setzen',  label: '⛵ Segel setzen',  cat: 'maneuver' },
-        { value: 'Wende/Halse',   label: '🔄 Wende / Halse', cat: 'maneuver' },
-        { value: 'Motor aus',     label: '🔇 Motor aus',     cat: 'maneuver' },
-        { value: 'Ankern',        label: '⚓ Ankern',        cat: 'maneuver' },
-        { value: 'Anlegen',       label: '🏁 Anlegen',       cat: 'maneuver' },
-        { value: 'Wetterinfo',    label: '🌤 Wetterinfo',    cat: 'weather_change' },
-        { value: 'Sonstiges',     label: '📝 Sonstiges',     cat: 'other' },
+        { value: I.man_depart,    label: '🚢 ' + I.man_depart,     cat: 'maneuver' },
+        { value: I.man_motor_on,  label: '⚙️ ' + I.man_motor_on,   cat: 'maneuver' },
+        { value: I.man_set_sail,  label: '⛵ ' + I.man_set_sail,   cat: 'maneuver' },
+        { value: I.man_tack_jibe, label: '🔄 ' + I.man_tack_jibe,  cat: 'maneuver' },
+        { value: I.man_motor_off, label: '🔇 ' + I.man_motor_off,  cat: 'maneuver' },
+        { value: I.man_anchor,    label: '⚓ ' + I.man_anchor,     cat: 'maneuver' },
+        { value: I.man_arrive,    label: '🏁 ' + I.man_arrive,     cat: 'maneuver' },
+        { value: I.man_weather,   label: '🌤 ' + I.man_weather,    cat: 'weather_change' },
+        { value: I.man_other,     label: '📝 ' + I.man_other,      cat: 'other' },
     ];
 
     let eventCount = 0;
@@ -110,36 +142,36 @@
 
         card.innerHTML = `
             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                <strong style="font-size:13px; color:var(--cl-text-muted);">Ereignis ${idx + 1}</strong>
+                <strong style="font-size:13px; color:var(--cl-text-muted);">${I.event_label} ${idx + 1}</strong>
                 <button type="button" class="remove-event-btn cl-btn cl-btn--ghost-danger cl-btn--sm"
-                        data-target="${id}" aria-label="Entfernen" style="height:32px; padding:0 10px;">✕</button>
+                        data-target="${id}" aria-label="${I.remove}" style="height:32px; padding:0 10px;">✕</button>
             </div>
             <div class="cl-grid cl-grid--2" style="gap:var(--cl-space-3);">
                 <div class="cl-field">
-                    <label class="cl-label cl-label--inline">Uhrzeit</label>
+                    <label class="cl-label cl-label--inline">${I.time}</label>
                     <input type="time" class="cl-input evt-time" value="${defaultTime}" required>
                 </div>
                 <div class="cl-field">
-                    <label class="cl-label cl-label--inline">Manöver-Typ</label>
+                    <label class="cl-label cl-label--inline">${I.maneuver_type}</label>
                     <select class="cl-input cl-select evt-category">
                         ${buildOptionMarkup()}
                     </select>
                 </div>
                 <div class="cl-field">
-                    <label class="cl-label cl-label--inline">Breitengrad (opt.)</label>
+                    <label class="cl-label cl-label--inline">${I.lat}</label>
                     <input type="number" class="cl-input evt-lat" placeholder="55.1234" step="0.00001">
                 </div>
                 <div class="cl-field">
-                    <label class="cl-label cl-label--inline">Längengrad (opt.)</label>
+                    <label class="cl-label cl-label--inline">${I.lon}</label>
                     <input type="number" class="cl-input evt-lon" placeholder="9.5678" step="0.00001">
                 </div>
                 <div class="cl-field cl-field--full">
-                    <label class="cl-label cl-label--inline">Notiz (opt.)</label>
-                    <input type="text" class="cl-input evt-notes" placeholder="z. B. Wind NW 3, leichte See">
+                    <label class="cl-label cl-label--inline">${I.notes}</label>
+                    <input type="text" class="cl-input evt-notes" placeholder="${I.notes_placeholder}">
                 </div>
                 <div class="cl-field cl-field--full">
                     <button type="button" class="cl-btn cl-btn--secondary cl-btn--sm gps-btn" data-target="${id}" style="width:100%;">
-                        📍 GPS-Position abrufen
+                        ${I.gps_get}
                     </button>
                 </div>
             </div>
@@ -156,7 +188,7 @@
 
     // ── Collect all events from DOM ────────────────────────────────────
     // Sends `category` (canonical code from data-cat, e.g. "maneuver") AND
-    // `maneuver` (German label from option value, e.g. "Ablegen") so the
+    // `maneuver` (localized label from option value, e.g. "Cast off") so the
     // backend can store the category cleanly and surface the maneuver label
     // in event_details.
     function collectEvents() {
@@ -186,7 +218,7 @@
         // Re-number event labels
         document.querySelectorAll('#events-container [data-event-id]').forEach((card, i) => {
             const lbl = card.querySelector('strong');
-            if (lbl) lbl.textContent = `Ereignis ${i + 1}`;
+            if (lbl) lbl.textContent = `${I.event_label} ${i + 1}`;
         });
     }
 
@@ -217,10 +249,10 @@
         const btn = e.target.closest('.gps-btn');
         if (!btn) return;
         if (!navigator.geolocation) {
-            alert('GPS nicht verfügbar');
+            alert(I.gps_unavailable);
             return;
         }
-        btn.textContent = '⏳ Abrufen…';
+        btn.textContent = I.gps_loading;
         btn.disabled = true;
         const card = btn.closest('[data-event-id]');
         navigator.geolocation.getCurrentPosition(
@@ -229,11 +261,11 @@
                     card.querySelector('.evt-lat').value = pos.coords.latitude.toFixed(5);
                     card.querySelector('.evt-lon').value = pos.coords.longitude.toFixed(5);
                 }
-                btn.textContent = '✅ Position gesetzt';
+                btn.textContent = I.gps_set;
                 btn.disabled = false;
             },
             () => {
-                btn.textContent = '❌ GPS-Fehler';
+                btn.textContent = I.gps_error;
                 btn.disabled = false;
             },
             { timeout: 10000 }
@@ -253,18 +285,18 @@
         if (submitting) return false;
         const events = collectEvents();
         if (events.length === 0) {
-            alert('Bitte mindestens ein Ereignis hinzufügen.');
+            alert(I.no_events);
             return false;
         }
         if (events.some(ev => !ev.time)) {
-            alert('Bitte bei jedem Ereignis eine Uhrzeit angeben.');
+            alert(I.no_time);
             return false;
         }
         document.getElementById('events_json').value = JSON.stringify(events);
         submitting = true;
         if (saveBtn) {
             saveBtn.disabled = true;
-            saveBtn.textContent = '⏳ Speichern…';
+            saveBtn.textContent = I.saving;
         }
         return true;
     }
@@ -291,13 +323,13 @@
     // ── Seed two default events on load ───────────────────────────────
     (function seedInitialEvents() {
         const container = document.getElementById('events-container');
-        // Ablegen at current time
+        // Cast off / Ablegen at current time
         const e1 = createEventCard(nowTime());
-        e1.querySelector('.evt-category').value = 'Ablegen';
+        e1.querySelector('.evt-category').value = I.man_depart;
         container.appendChild(e1);
-        // Anlegen as second
+        // Arrive / Anlegen as second
         const e2 = createEventCard(nowTime());
-        e2.querySelector('.evt-category').value = 'Anlegen';
+        e2.querySelector('.evt-category').value = I.man_arrive;
         container.appendChild(e2);
         syncRemoveBtns();
     })();

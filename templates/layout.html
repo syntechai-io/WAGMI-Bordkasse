@@ -132,7 +132,7 @@
         }
     </style>
 </head>
-<body>
+<body data-app-mode="{{ app_mode }}">
     <!-- Overlay (mobile) -->
     <div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
 
@@ -156,6 +156,30 @@
             </button>
         </div>
         <div class="drawer-body">
+            {% if request.session.get('user_id') or request.session.get('saas_user_id') %}
+            <div class="drawer-mode-toggle">
+                <span class="drawer-mode-label">{{ t('mode.label') }}</span>
+                <div class="drawer-mode-pills">
+                    <form method="post" action="/set-mode" style="margin:0; display:contents;">
+                        {{ csrf_input | safe }}
+                        <input type="hidden" name="mode" value="full">
+                        <button type="submit"
+                            class="drawer-mode-pill {% if app_mode != 'logbook' %}drawer-mode-pill--active{% endif %}">
+                            {{ t('mode.full') }}
+                        </button>
+                    </form>
+                    <form method="post" action="/set-mode" style="margin:0; display:contents;">
+                        {{ csrf_input | safe }}
+                        <input type="hidden" name="mode" value="logbook">
+                        <button type="submit"
+                            class="drawer-mode-pill {% if app_mode == 'logbook' %}drawer-mode-pill--active{% endif %}">
+                            {{ t('mode.logbook') }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="drawer-divider"></div>
+            {% endif %}
             <a href="/" class="drawer-link">
                 <span class="drawer-icon">🧭</span> {{ t('nav.dashboard') }}
             </a>
@@ -192,6 +216,7 @@
 
             <div class="drawer-divider"></div>
 
+            {% if app_mode != 'logbook' %}
             <button class="drawer-section-toggle" aria-expanded="false">
                 <span class="drawer-label">
                     <span class="drawer-icon">💰</span>
@@ -218,6 +243,7 @@
                     <span class="drawer-icon">⛵</span> {{ t('nav.settlement') }}
                 </a>
             </div>
+            {% endif %}
 
             <button class="drawer-section-toggle" aria-expanded="false">
                 <span class="drawer-label">
@@ -422,7 +448,7 @@
 
     {% if request.session.get('user_id') or request.session.get('saas_user_id') %}
     <nav class="cl-tabbar" aria-label="{{ t('nav.navigation') }}">
-        <div class="cl-tabbar__inner">
+        <div class="cl-tabbar__inner {% if app_mode == 'logbook' %}cl-tabbar__inner--4{% endif %}">
             <a href="/" class="cl-tabbar__item" data-match="/">
                 <span class="cl-tabbar__icon" aria-hidden="true">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -441,6 +467,7 @@
                 </span>
                 <span>{{ t('nav.logbook') }}</span>
             </a>
+            {% if app_mode != 'logbook' %}
             <a href="/expenses" class="cl-tabbar__item" data-match="/expenses|/deposits|/balances|/settlement|/templates">
                 <span class="cl-tabbar__icon" aria-hidden="true">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -450,6 +477,7 @@
                 </span>
                 <span>{{ t('nav.finances') }}</span>
             </a>
+            {% endif %}
             <a href="/trips/" class="cl-tabbar__item" data-match="/trips">
                 <span class="cl-tabbar__icon" aria-hidden="true">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

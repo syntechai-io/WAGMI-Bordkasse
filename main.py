@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -274,6 +274,24 @@ async def set_language(request: Request):
         return response
 
     return RedirectResponse(url=next_url, status_code=303)
+
+
+@app.post("/set-mode")
+async def set_app_mode(request: Request, mode: str = Form(...)):
+    """Toggle between 'full' and 'logbook' app modes. Stored in session."""
+    if mode in ("logbook", "full"):
+        request.session["app_mode"] = mode
+    referer = request.headers.get("referer", "/")
+    if not referer.startswith("/"):
+        from urllib.parse import urlparse
+        try:
+            parsed = urlparse(referer)
+            referer = parsed.path or "/"
+            if parsed.query:
+                referer = f"{referer}?{parsed.query}"
+        except Exception:
+            referer = "/"
+    return RedirectResponse(url=referer, status_code=303)
 
 
 @app.get("/sw.js")

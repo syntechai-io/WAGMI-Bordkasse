@@ -55,12 +55,12 @@ function setCurrentLocalTime(inputId) {
         <a href="/logbook/day-recap" class="cl-hero {% if active_trip and active_trip.end_date and active_trip.end_date == active_trip.start_date %}cl-hero--featured{% endif %}">
             <span class="cl-hero__icon" aria-hidden="true">📋</span>
             <div class="cl-hero__body">
-                <p class="cl-hero__title">Tages-Recap</p>
+                <p class="cl-hero__title">{{ t('dashboard.day_recap_title') }}</p>
                 <p class="cl-hero__desc">
                     {% if active_trip and active_trip.end_date and active_trip.end_date == active_trip.start_date %}
-                        Alle Manöver deines Tagesstörns eintragen
+                        {{ t('dashboard.day_recap_desc_single') }}
                     {% else %}
-                        Alle Manöver des heutigen Tages auf einmal eintragen
+                        {{ t('dashboard.day_recap_desc') }}
                     {% endif %}
                 </p>
             </div>
@@ -81,7 +81,8 @@ function setCurrentLocalTime(inputId) {
         </form>
         {% endif %}
 
-        {# Bordkasse summary KPI #}
+        {% if app_mode != 'logbook' %}
+        {# Bordkasse summary KPI — hidden in logbook mode #}
         <div class="cl-grid cl-grid--2">
             <div class="cl-kpi">
                 <span class="cl-kpi__label">{{ t('dashboard.total_expenses') }}</span>
@@ -92,8 +93,9 @@ function setCurrentLocalTime(inputId) {
                 <span class="cl-tile__label">{{ t('dashboard.expense_action') }}</span>
             </a>
         </div>
+        {% endif %}
 
-        {# Secondary navigation tiles #}
+        {# Navigation tiles — finance tiles hidden in logbook mode #}
         <div class="cl-grid cl-grid--2">
             <a href="/logbook" class="cl-tile">
                 <span class="cl-tile__icon" aria-hidden="true">📓</span>
@@ -103,6 +105,7 @@ function setCurrentLocalTime(inputId) {
                 <span class="cl-tile__icon" aria-hidden="true">👥</span>
                 <span class="cl-tile__label">{{ t('dashboard.crew_label') }}</span>
             </a>
+            {% if app_mode != 'logbook' %}
             <a href="/balances" class="cl-tile">
                 <span class="cl-tile__icon" aria-hidden="true">📊</span>
                 <span class="cl-tile__label">{{ t('dashboard.balances_label') }}</span>
@@ -111,6 +114,7 @@ function setCurrentLocalTime(inputId) {
                 <span class="cl-tile__icon" aria-hidden="true">⛵</span>
                 <span class="cl-tile__label">{{ t('dashboard.settlement_label') }}</span>
             </a>
+            {% endif %}
         </div>
     </div>
 </div>

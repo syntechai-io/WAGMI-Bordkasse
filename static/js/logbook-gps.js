@@ -12,6 +12,7 @@ class LogbookGPSTracker {
         this.trackingStartTime = null;
         this.positionHistory = [];
         this.maxHistorySize = 10; // Keep last 10 positions for averaging
+        this.wakeLock = null;
     }
 
     /**
@@ -41,6 +42,7 @@ class LogbookGPSTracker {
         );
 
         this.isTracking = true;
+        this._requestWakeLock();
         this.trackingStartTime = new Date();
         this.positionHistory = [];
         
@@ -62,6 +64,7 @@ class LogbookGPSTracker {
         }
 
         this.isTracking = false;
+        this._releaseWakeLock();
         this.trackingStartTime = null;
         
         console.log('GPS tracking stopped');
@@ -159,26 +162,34 @@ class LogbookGPSTracker {
 
     /**
      * Get averaged position from history (reduces GPS jitter)
+     * iOS often returns null heading/speed when stationary, so those values
+     * are skipped from the average instead of being treated as zero.
      */
     getAveragedPosition() {
         if (this.positionHistory.length === 0) return null;
 
-        const sum = this.positionHistory.reduce((acc, pos) => {
-            return {
-                lat: acc.lat + pos.coords.latitude,
-                lon: acc.lon + pos.coords.longitude,
-                speed: acc.speed + (pos.coords.speed || 0),
-                heading: acc.heading + (pos.coords.heading || 0)
-            };
-        }, { lat: 0, lon: 0, speed: 0, heading: 0 });
+        let latSum = 0, lonSum = 0, speedSum = 0, speedCount = 0;
+        let headingSum = 0, headingCount = 0;
+
+        this.positionHistory.forEach(pos => {
+            latSum += pos.coords.latitude;
+            lonSum += pos.coords.longitude;
+            if (pos.coords.speed !== null && pos.coords.speed >= 0) {
+                speedSum += pos.coords.speed;
+                speedCount++;
+            }
+            if (pos.coords.heading !== null && pos.coords.heading >= 0) {
+                headingSum += pos.coords.heading;
+                headingCount++;
+            }
+        });
 
         const count = this.positionHistory.length;
-        
         return {
-            latitude: sum.lat / count,
-            longitude: sum.lon / count,
-            speed: sum.speed / count,
-            heading: sum.heading / count
+            latitude:  latSum / count,
+            longitude: lonSum / count,
+            speed:     speedCount > 0 ? speedSum / speedCount : null,
+            heading:   headingCount > 0 ? headingSum / headingCount : null,
         };
     }
 
@@ -205,6 +216,34 @@ class LogbookGPSTracker {
             bubbles: true 
         });
         document.dispatchEvent(event);
+    }
+
+    /**
+     * Request a screen wake lock so iOS does not put the screen to sleep
+     * (and kill GPS) while tracking is active. Silently no-ops on browsers
+     * without the Wake Lock API or when the OS denies the request.
+     */
+    async _requestWakeLock() {
+        if ('wakeLock' in navigator) {
+            try {
+                this.wakeLock = await navigator.wakeLock.request('screen');
+                this.wakeLock.addEventListener('release', () => {
+                    this.wakeLock = null;
+                });
+            } catch (e) {
+                // Wake lock not granted — acceptable, tracking continues
+            }
+        }
+    }
+
+    /**
+     * Release any held wake lock.
+     */
+    _releaseWakeLock() {
+        if (this.wakeLock) {
+            this.wakeLock.release().catch(() => {});
+            this.wakeLock = null;
+        }
     }
 }
 

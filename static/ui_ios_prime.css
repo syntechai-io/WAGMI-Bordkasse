@@ -357,3 +357,66 @@ html[data-theme="night"] .cl-hero--featured {
     background: rgba(29, 111, 187, .15);
     border-color: rgba(100, 170, 255, .35);
 }
+
+/* ── 18. Logbook-only mode: hide finance UI ── */
+
+/* Mode toggle widget in the drawer/sidebar */
+.drawer-mode-toggle {
+    padding: 10px 16px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.drawer-mode-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--cl-text-subtle);
+}
+.drawer-mode-pills {
+    display: flex;
+    gap: 6px;
+}
+.drawer-mode-pill {
+    flex: 1;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--cl-border);
+    background: var(--cl-surface-2);
+    color: var(--cl-text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s, color .15s, border-color .15s;
+}
+.drawer-mode-pill--active {
+    background: var(--cl-accent);
+    color: #fff;
+    border-color: transparent;
+}
+.drawer-mode-pill:not(.drawer-mode-pill--active):hover {
+    background: var(--cl-accent-soft);
+    color: var(--cl-accent);
+}
+html[data-theme="night"] .drawer-mode-pill {
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.12);
+    color: rgba(200,215,235,.6);
+}
+html[data-theme="night"] .drawer-mode-pill--active {
+    background: var(--cl-accent);
+    color: #fff;
+}
+
+/* 4-column tab bar (logbook mode) */
+.cl-tabbar__inner--4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+}
+
+/* Finance pages: optional hint banner when accessed in logbook mode */
+body[data-app-mode="logbook"] .finance-only-hint {
+    display: block !important;
+}
+.finance-only-hint { display: none; }
