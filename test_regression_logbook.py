@@ -11,44 +11,58 @@ from db import Base
 import os
 
 def test_dropdown_fields_exist_in_form():
-    """Test that hybrid select/manual fields are present in logbook form"""
+    """Test that hybrid select/manual fields are present in logbook form.
+
+    German labels were migrated to i18n keys (`{{ t('logbook.bft4') }}` etc.)
+    so we assert both the i18n reference in the template AND the German
+    string in the locale file.
+    """
     from pathlib import Path
     form_html = Path('templates/logbook_form.html').read_text()
-    
-    # Check for hybrid select dropdowns (default mode)
+    de = Path('locales/de.json').read_text()
+
+    # Hybrid select dropdowns (default mode)
     assert 'id="wind_direction_select"' in form_html
     assert 'id="wind_strength_select"' in form_html
     assert 'id="visibility_select"' in form_html
     assert 'id="sail_plan_select"' in form_html
-    
-    # Check for manual entry inputs (hidden by default)
+
+    # Manual entry inputs (hidden by default)
     assert 'id="wind_direction_manual"' in form_html
     assert 'id="wind_strength_manual"' in form_html
     assert 'id="visibility_manual"' in form_html
     assert 'id="sail_plan_manual"' in form_html
-    
-    # Check for toggle buttons
+
+    # Toggle buttons + label (now via i18n key common.manual_input)
     assert 'hybrid-toggle' in form_html
-    assert 'Eigenen Wert eingeben' in form_html
-    
-    # Check option values still exist
+    assert "t('common.manual_input')" in form_html
+    assert 'Eigenen Wert eingeben' in de
+
+    # Option values still exist
     assert 'option value="N"' in form_html
     assert 'option value="SW"' in form_html
-    assert '4 Bft (11-16 kn) - Mäßige Brise' in form_html
-    assert 'Sehr gut (>10 nm)' in form_html
-    assert 'Großsegel + Genua' in form_html
-    
-    # Check for hybrid field JavaScript logic
+
+    # Beaufort, visibility, sail plan: i18n key in template + German in locale
+    assert "t('logbook.bft4')" in form_html
+    assert '4 Bft (11-16 kn) - Mäßige Brise' in de
+    assert "t('logbook.visibility_very_good')" in form_html
+    assert 'Sehr gut (>10 nm)' in de
+    assert "t('logbook.sail_main_genoa')" in form_html
+    assert 'Großsegel + Genua' in de
+
+    # Hybrid field JavaScript logic preserved
     assert 'getHybridFieldControl' in form_html
     assert 'enableManualMode' in form_html
 
 def test_weather_button_exists():
-    """Test that weather fetch button is present"""
+    """Test that weather fetch button is present (label via i18n key)."""
     from pathlib import Path
     form_html = Path('templates/logbook_form.html').read_text()
-    
+    de = Path('locales/de.json').read_text()
+
     assert 'id="weather-button"' in form_html
-    assert '🌤️ Wetterdaten automatisch abrufen' in form_html
+    assert "t('logbook.weather_auto_fetch')" in form_html
+    assert 'Wetterdaten automatisch abrufen' in de
 
 def test_weather_endpoint_exists():
     """Test that weather API endpoint is defined"""
@@ -127,11 +141,20 @@ def test_watch_leader_preserved():
     assert 'name="watch_leader_id"' in form_html
 
 def test_default_departure_port():
-    """Test that default departure port is set"""
+    """Test that the departure port input + i18n placeholder is wired up.
+
+    The hardcoded "Fredericia DK" default value was removed when the form was
+    internationalized. We now verify the input field exists and uses the
+    `logbook.departure_placeholder` i18n key, with the German placeholder
+    text living in the locale file.
+    """
     from pathlib import Path
     form_html = Path('templates/logbook_form.html').read_text()
-    
-    assert 'Fredericia DK' in form_html
+    de = Path('locales/de.json').read_text()
+
+    assert 'name="departure"' in form_html
+    assert "t('logbook.placeholder_departure')" in form_html
+    assert '"logbook.placeholder_departure"' in de
 
 def test_sea_state_enum_dropdown():
     """Test that sea state dropdown is preserved"""
@@ -142,14 +165,24 @@ def test_sea_state_enum_dropdown():
     assert 'for state in sea_states' in form_html
 
 def test_event_category_dropdown():
-    """Test that event category dropdown is preserved"""
+    """Test that event category dropdown is preserved.
+
+    Option labels were migrated to i18n keys (`{{ t('logbook.event_maneuver') }}`
+    etc.). We assert the i18n key references in the template AND the German
+    strings in the locale file.
+    """
     from pathlib import Path
     form_html = Path('templates/logbook_form.html').read_text()
-    
+    de = Path('locales/de.json').read_text()
+
     assert 'select name="event_category"' in form_html
-    assert 'Manöver' in form_html
-    assert 'Wetterwechsel' in form_html
-    assert 'Notfall' in form_html
+    assert "t('logbook.event_maneuver')" in form_html
+    assert "t('logbook.event_weather_change')" in form_html
+    assert "t('logbook.event_emergency')" in form_html
+
+    assert '"Manöver"' in de
+    assert '"Wetterwechsel"' in de
+    assert '"Notfall"' in de
 
 def test_csrf_protection_preserved():
     """Test that CSRF protection is still in place"""

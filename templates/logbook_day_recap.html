@@ -76,16 +76,19 @@
     'use strict';
 
     // ── Maneuver type options ──────────────────────────────────────────
+    // `value` = human label (German). `cat` = canonical event_category
+    // code matching constants/logbook_enums.EVENT_CATEGORY_KEYS so the backend
+    // normalize_event_category() accepts it directly.
     const MANEUVER_OPTIONS = [
-        { value: 'Ablegen',       label: '🚢 Ablegen',       cat: 'Manöver' },
-        { value: 'Motor an',      label: '⚙️ Motor an',      cat: 'Manöver' },
-        { value: 'Segel setzen',  label: '⛵ Segel setzen',  cat: 'Manöver' },
-        { value: 'Wende/Halse',   label: '🔄 Wende / Halse', cat: 'Manöver' },
-        { value: 'Motor aus',     label: '🔇 Motor aus',     cat: 'Manöver' },
-        { value: 'Ankern',        label: '⚓ Ankern',        cat: 'Manöver' },
-        { value: 'Anlegen',       label: '🏁 Anlegen',       cat: 'Manöver' },
-        { value: 'Wetterinfo',    label: '🌤 Wetterinfo',    cat: 'Wetterwechsel' },
-        { value: 'Sonstiges',     label: '📝 Sonstiges',     cat: 'Manöver' },
+        { value: 'Ablegen',       label: '🚢 Ablegen',       cat: 'maneuver' },
+        { value: 'Motor an',      label: '⚙️ Motor an',      cat: 'maneuver' },
+        { value: 'Segel setzen',  label: '⛵ Segel setzen',  cat: 'maneuver' },
+        { value: 'Wende/Halse',   label: '🔄 Wende / Halse', cat: 'maneuver' },
+        { value: 'Motor aus',     label: '🔇 Motor aus',     cat: 'maneuver' },
+        { value: 'Ankern',        label: '⚓ Ankern',        cat: 'maneuver' },
+        { value: 'Anlegen',       label: '🏁 Anlegen',       cat: 'maneuver' },
+        { value: 'Wetterinfo',    label: '🌤 Wetterinfo',    cat: 'weather_change' },
+        { value: 'Sonstiges',     label: '📝 Sonstiges',     cat: 'other' },
     ];
 
     let eventCount = 0;
@@ -152,15 +155,26 @@
     }
 
     // ── Collect all events from DOM ────────────────────────────────────
+    // Sends `category` (canonical code from data-cat, e.g. "maneuver") AND
+    // `maneuver` (German label from option value, e.g. "Ablegen") so the
+    // backend can store the category cleanly and surface the maneuver label
+    // in event_details.
     function collectEvents() {
         const cards = document.querySelectorAll('#events-container [data-event-id]');
-        return Array.from(cards).map(card => ({
-            time:     (card.querySelector('.evt-time')?.value     || '').trim(),
-            category: (card.querySelector('.evt-category')?.value || '').trim(),
-            lat:      (card.querySelector('.evt-lat')?.value      || '').trim(),
-            lon:      (card.querySelector('.evt-lon')?.value      || '').trim(),
-            notes:    (card.querySelector('.evt-notes')?.value    || '').trim(),
-        }));
+        return Array.from(cards).map(card => {
+            const sel = card.querySelector('.evt-category');
+            const maneuverLabel = (sel?.value || '').trim();
+            const opt = sel?.options?.[sel.selectedIndex];
+            const categoryCode = (opt?.dataset?.cat || '').trim();
+            return {
+                time:     (card.querySelector('.evt-time')?.value || '').trim(),
+                category: categoryCode,
+                maneuver: maneuverLabel,
+                lat:      (card.querySelector('.evt-lat')?.value || '').trim(),
+                lon:      (card.querySelector('.evt-lon')?.value || '').trim(),
+                notes:    (card.querySelector('.evt-notes')?.value || '').trim(),
+            };
+        });
     }
 
     // ── Update remove button visibility ───────────────────────────────
@@ -226,20 +240,52 @@
         );
     });
 
-    // ── Save button: serialize → hidden field → submit ─────────────────
-    document.getElementById('save-recap-btn').addEventListener('click', function () {
+    // ── Form submit pipeline: serialize → hidden field → submit ────────
+    // A single `prepareSubmit()` function is the *only* place that validates
+    // events and writes the hidden JSON. Both the form `submit` event (for
+    // Enter-key + requestSubmit) and the legacy click fallback go through it,
+    // so older browsers without `requestSubmit` cannot bypass validation.
+    let submitting = false;
+    const recapForm = document.getElementById('recap-form');
+    const saveBtn   = document.getElementById('save-recap-btn');
+
+    function prepareSubmit() {
+        if (submitting) return false;
         const events = collectEvents();
         if (events.length === 0) {
             alert('Bitte mindestens ein Ereignis hinzufügen.');
-            return;
+            return false;
         }
-        const missingTime = events.some(ev => !ev.time);
-        if (missingTime) {
+        if (events.some(ev => !ev.time)) {
             alert('Bitte bei jedem Ereignis eine Uhrzeit angeben.');
-            return;
+            return false;
         }
         document.getElementById('events_json').value = JSON.stringify(events);
-        document.getElementById('recap-form').submit();
+        submitting = true;
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = '⏳ Speichern…';
+        }
+        return true;
+    }
+
+    recapForm.addEventListener('submit', function (e) {
+        // If the click handler already prepared the submission we are good.
+        // Otherwise (Enter key, programmatic submit, etc.) prepare here.
+        if (!submitting && !prepareSubmit()) {
+            e.preventDefault();
+        }
+    });
+
+    saveBtn.addEventListener('click', function () {
+        if (!prepareSubmit()) return;
+        if (typeof recapForm.requestSubmit === 'function') {
+            recapForm.requestSubmit();
+        } else {
+            // Legacy fallback: prepareSubmit() above has already validated and
+            // serialized, so a raw submit() is safe here.
+            recapForm.submit();
+        }
     });
 
     // ── Seed two default events on load ───────────────────────────────

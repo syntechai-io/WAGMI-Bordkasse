@@ -149,10 +149,18 @@ async def day_recap_submit(
     if not active_trip:
         return RedirectResponse(url="/trips/", status_code=303)
 
+    # Parse + validate events_json defensively
     try:
-        events = _json.loads(events_json)
+        parsed = _json.loads(events_json)
     except Exception:
-        events = []
+        parsed = []
+    if not isinstance(parsed, list):
+        parsed = []
+    events = [ev for ev in parsed if isinstance(ev, dict)]
+
+    if not events:
+        request.session["error"] = "Bitte mindestens ein gültiges Ereignis hinzufügen."
+        return RedirectResponse(url="/logbook/day-recap", status_code=303)
 
     try:
         recap_dt_date = date.fromisoformat(recap_date)
@@ -166,41 +174,143 @@ async def day_recap_submit(
     except (ValueError, TypeError):
         pass
 
-    saved = 0
-    for i, ev in enumerate(events):
-        time_str = (ev.get("time") or "12:00").strip()
+    saved_entries = []
+    skipped = 0
+    for ev in events:
+        time_str = str(ev.get("time") or "12:00").strip()
         parts = time_str.split(":")
         try:
             hh = int(parts[0])
             mm = int(parts[1]) if len(parts) > 1 else 0
+            if not (0 <= hh <= 23 and 0 <= mm <= 59):
+                raise ValueError("time out of range")
         except (ValueError, IndexError):
             hh, mm = 12, 0
-        entry_dt = datetime(
-            recap_dt_date.year, recap_dt_date.month, recap_dt_date.day,
-            hh, mm, 0
-        )
+        try:
+            entry_dt = datetime(
+                recap_dt_date.year, recap_dt_date.month, recap_dt_date.day,
+                hh, mm, 0
+            )
+        except (ValueError, TypeError):
+            skipped += 1
+            continue
 
-        is_last = (i == len(events) - 1)
+        # Defensive lat/lon parsing
+        lat_val = None
+        lon_val = None
+        try:
+            raw_lat = ev.get("lat")
+            if raw_lat not in (None, "", []):
+                lat_val = float(raw_lat)
+        except (ValueError, TypeError):
+            lat_val = None
+        try:
+            raw_lon = ev.get("lon")
+            if raw_lon not in (None, "", []):
+                lon_val = float(raw_lon)
+        except (ValueError, TypeError):
+            lon_val = None
 
-        entry = build_logbook_entry(
-            trip_id=active_trip.id,
-            entry_dt=entry_dt,
-            maneuver_type="recap",
-            event_category=ev.get("category") or None,
-            event_details=ev.get("notes") or None,
-            latitude=float(ev["lat"]) if ev.get("lat") else None,
-            longitude=float(ev["lon"]) if ev.get("lon") else None,
-            departure=departure_port if i == 0 else None,
-            destination=destination_port if is_last else None,
-            dist_day_nm=total_nm if is_last else None,
-        )
-        db.add(entry)
-        saved += 1
+        # Combine maneuver label + notes into event_details
+        maneuver_label = (ev.get("maneuver") or "").strip()
+        notes = (ev.get("notes") or "").strip()
+        if maneuver_label and notes:
+            event_details = f"{maneuver_label}: {notes}"
+        else:
+            event_details = maneuver_label or notes or None
 
+        # Category is the canonical code (e.g., "maneuver", "weather_change")
+        category_raw = (ev.get("category") or "").strip() or None
+
+        try:
+            entry = build_logbook_entry(
+                trip_id=active_trip.id,
+                entry_dt=entry_dt,
+                maneuver_type="recap",
+                event_category=category_raw,
+                event_details=event_details,
+                latitude=lat_val,
+                longitude=lon_val,
+            )
+            saved_entries.append(entry)
+        except Exception:
+            skipped += 1
+            continue
+
+    # Attach trip-level fields to the first / last successfully built entries
+    # so the values aren't lost when trailing rows are malformed.
+    if saved_entries:
+        if departure_port:
+            saved_entries[0].departure = departure_port
+        if destination_port:
+            saved_entries[-1].destination = destination_port
+        if total_nm is not None:
+            saved_entries[-1].dist_day_nm = total_nm
+        for entry in saved_entries:
+            db.add(entry)
+
+    saved = len(saved_entries)
     if saved > 0:
-        db.commit()
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            request.session["error"] = "Fehler beim Speichern der Einträge."
+            return RedirectResponse(url="/logbook/day-recap", status_code=303)
+        if skipped > 0:
+            request.session["success"] = f"{saved} Einträge gespeichert, {skipped} übersprungen."
+        else:
+            request.session["success"] = f"{saved} Logbuch-Einträge gespeichert."
+    else:
+        request.session["error"] = "Keine gültigen Einträge gefunden."
+        return RedirectResponse(url="/logbook/day-recap", status_code=303)
 
     return RedirectResponse(url="/logbook", status_code=303)
+
+
+@router.get("/weather")
+async def weather_proxy(
+    request: Request,
+    lat: float,
+    lon: float,
+    db: Session = Depends(get_db),
+):
+    """Auth-gated weather lookup for the logbook form. Calls Open-Meteo and
+    maps the response to the field shape expected by the form JS."""
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return JSONResponse({"error": "not_authenticated"}, status_code=401)
+
+    data = WeatherService.fetch_weather_data(lat, lon)
+    if not data:
+        return JSONResponse({"error": "weather_unavailable"}, status_code=502)
+
+    # Map wind speed (kn) to canonical Beaufort key (bft0..bft12) so the
+    # hybrid select in the form can pick the matching option.
+    speed = data.get("wind_speed_kn")
+    bft_key = None
+    if speed is not None:
+        try:
+            s = float(speed)
+            cutoffs = [
+                (1, "bft0"), (4, "bft1"), (7, "bft2"), (11, "bft3"),
+                (17, "bft4"), (22, "bft5"), (28, "bft6"), (34, "bft7"),
+                (41, "bft8"), (48, "bft9"), (56, "bft10"), (64, "bft11"),
+            ]
+            bft_key = "bft12"
+            for max_speed, key in cutoffs:
+                if s < max_speed:
+                    bft_key = key
+                    break
+        except (ValueError, TypeError):
+            bft_key = None
+
+    return JSONResponse({
+        "temperature": data.get("temperature"),
+        "wind_direction": data.get("wind_direction_compass"),
+        "wind_strength": bft_key,
+        "pressure_hpa": data.get("pressure_hpa"),
+    })
 
 
 @router.get("", response_class=HTMLResponse)

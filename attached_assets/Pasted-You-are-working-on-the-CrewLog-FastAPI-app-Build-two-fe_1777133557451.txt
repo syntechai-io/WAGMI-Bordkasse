@@ -1,0 +1,452 @@
+You are working on the CrewLog FastAPI app. Build two features:
+1. LOGBOOK-ONLY MODE — a global toggle that hides all finance/cost-sharing 
+   features for solo or family sailing where cost splitting isn't needed.
+2. GPS TRACKING AUDIT — verify and harden the logbook GPS tracking so it 
+   works correctly on iOS Safari with proper visual feedback.
+
+Do NOT change any model files (models.py). Do NOT run migrations.
+Match all existing code style: cl-* CSS, session-based state, etc.
+
+═════════════════════════════════════════════════════════════════════════════
+FEATURE 1 — LOGBOOK-ONLY MODE
+═════════════════════════════════════════════════════════════════════════════
+
+The app has two audiences:
+  • Full mode (default): multi-person crew, expenses tracked, costs shared
+  • Logbook mode: solo or family sailing — only the logbook matters, all 
+    finance menus, tabs, tiles, and pages are hidden
+
+The mode is stored in the user's server session (no DB column needed).
+It is exposed to every template via the existing trip_context_processor.
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1A — Add /set-mode route to main.py
+─────────────────────────────────────────────────────────────────────────────
+
+In main.py, find the section where other simple POST utility routes live
+(near /set-language or similar). Add this route:
+
+    @app.post("/set-mode")
+    async def set_app_mode(request: Request, mode: str = Form(...)):
+        """Toggle between 'full' and 'logbook' app modes. Stored in session."""
+        from fastapi.responses import RedirectResponse
+        if mode in ("logbook", "full"):
+            request.session["app_mode"] = mode
+        referer = request.headers.get("referer", "/")
+        return RedirectResponse(url=referer, status_code=303)
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1B — Expose app_mode in trip_context_processor (template_helpers.py)
+─────────────────────────────────────────────────────────────────────────────
+
+In template_helpers.py, find the trip_context_processor function.
+At the very beginning of its context dict, add:
+
+    context = {
+        "app_mode": request.session.get("app_mode", "full"),   # ← ADD THIS
+        "all_trips": [],
+        ...   # rest unchanged
+    }
+
+This makes {{ app_mode }} available in every template, including layout.html.
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1C — Set data-app-mode on <body> in templates/layout.html
+─────────────────────────────────────────────────────────────────────────────
+
+Find the <body> tag (line ~134):
+    <body>
+
+Change it to:
+    <body data-app-mode="{{ app_mode }}">
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1D — Add mode toggle to the sidebar/drawer in templates/layout.html
+─────────────────────────────────────────────────────────────────────────────
+
+Find the drawer-body div. At the very TOP of drawer-body, before the first
+<a href="/"> dashboard link, insert this mode toggle widget:
+
+    {% if request.session.get('user_id') or request.session.get('saas_user_id') %}
+    <div class="drawer-mode-toggle">
+        <span class="drawer-mode-label">Modus</span>
+        <div class="drawer-mode-pills">
+            <form method="post" action="/set-mode" style="margin:0; display:contents;">
+                {{ csrf_input | safe }}
+                <input type="hidden" name="mode" value="full">
+                <button type="submit"
+                    class="drawer-mode-pill {% if app_mode != 'logbook' %}drawer-mode-pill--active{% endif %}">
+                    💰 Vollständig
+                </button>
+            </form>
+            <form method="post" action="/set-mode" style="margin:0; display:contents;">
+                {{ csrf_input | safe }}
+                <input type="hidden" name="mode" value="logbook">
+                <button type="submit"
+                    class="drawer-mode-pill {% if app_mode == 'logbook' %}drawer-mode-pill--active{% endif %}">
+                    📓 Logbuch
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="drawer-divider"></div>
+    {% endif %}
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1E — Hide finance sections in the drawer when in logbook mode
+─────────────────────────────────────────────────────────────────────────────
+
+In the drawer-body, find the Finanzen accordion section:
+    <button class="drawer-section-toggle" aria-expanded="false">
+        <span class="drawer-label">
+            <span class="drawer-icon">💰</span>
+            {{ t('nav.finances') }}
+        </span>
+        ...
+    </button>
+    <div class="drawer-sub-links hidden">...</div>
+
+Wrap the entire Finanzen block (button + sub-links div) in:
+    {% if app_mode != 'logbook' %}
+    ... (the finances accordion)
+    {% endif %}
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1F — Hide Finances tab from the bottom tab bar in logbook mode
+─────────────────────────────────────────────────────────────────────────────
+
+Find the cl-tabbar block. The Finanzen tab item is:
+    <a href="/expenses" class="cl-tabbar__item" data-match="/expenses|...">
+        ...💳/wallet SVG...
+        <span>{{ t('nav.finances') }}</span>
+    </a>
+
+Wrap it in:
+    {% if app_mode != 'logbook' %}
+    <a href="/expenses" class="cl-tabbar__item" ...>...</a>
+    {% endif %}
+
+Also update the cl-tabbar__inner grid to switch between 4 and 5 columns.
+Change the inner div from:
+    <div class="cl-tabbar__inner">
+To:
+    <div class="cl-tabbar__inner {% if app_mode == 'logbook' %}cl-tabbar__inner--4{% endif %}">
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1G — Add CSS rules to static/ui_ios_prime.css (append to file)
+─────────────────────────────────────────────────────────────────────────────
+
+Append this block to the end of static/ui_ios_prime.css:
+
+    /* ── 18. Logbook-only mode: hide finance UI ── */
+
+    /* Mode toggle widget in the drawer/sidebar */
+    .drawer-mode-toggle {
+        padding: 10px 16px 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .drawer-mode-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--cl-text-subtle);
+    }
+    .drawer-mode-pills {
+        display: flex;
+        gap: 6px;
+    }
+    .drawer-mode-pill {
+        flex: 1;
+        height: 34px;
+        border-radius: 8px;
+        border: 1px solid var(--cl-border);
+        background: var(--cl-surface-2);
+        color: var(--cl-text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background .15s, color .15s, border-color .15s;
+    }
+    .drawer-mode-pill--active {
+        background: var(--cl-accent);
+        color: #fff;
+        border-color: transparent;
+    }
+    .drawer-mode-pill:not(.drawer-mode-pill--active):hover {
+        background: var(--cl-accent-soft);
+        color: var(--cl-accent);
+    }
+    html[data-theme="night"] .drawer-mode-pill {
+        background: rgba(255,255,255,.06);
+        border-color: rgba(255,255,255,.12);
+        color: rgba(200,215,235,.6);
+    }
+    html[data-theme="night"] .drawer-mode-pill--active {
+        background: var(--cl-accent);
+        color: #fff;
+    }
+
+    /* 4-column tab bar (logbook mode) */
+    .cl-tabbar__inner--4 {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+
+    /* Finance pages: redirect banner when accessed in logbook mode
+       (server still serves them but a gentle hint is shown) */
+    body[data-app-mode="logbook"] .finance-only-hint {
+        display: block !important;
+    }
+    .finance-only-hint { display: none; }
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1H — Adapt the dashboard (templates/index.html) for logbook mode
+─────────────────────────────────────────────────────────────────────────────
+
+In templates/index.html, find the KPI + tiles section that shows expenses:
+
+    {# Bordkasse summary KPI #}
+    <div class="cl-grid cl-grid--2">
+        <div class="cl-kpi">
+            <span class="cl-kpi__label">{{ t('dashboard.total_expenses') }}</span>
+            <span class="cl-kpi__value">{{ "%.2f"|format(total_expenses) }} €</span>
+        </div>
+        <a href="/expenses" class="cl-tile">
+            <span class="cl-tile__icon" aria-hidden="true">⚓</span>
+            <span class="cl-tile__label">{{ t('dashboard.expense_action') }}</span>
+        </a>
+    </div>
+
+    {# Secondary navigation tiles #}
+    <div class="cl-grid cl-grid--2">
+        <a href="/logbook" class="cl-tile">...</a>
+        <a href="/crew" class="cl-tile">...</a>
+        <a href="/balances" class="cl-tile">...</a>
+        <a href="/settlement" class="cl-tile">...</a>
+    </div>
+
+Replace with this conditional version:
+
+    {% if app_mode != 'logbook' %}
+    {# Bordkasse summary KPI — hidden in logbook mode #}
+    <div class="cl-grid cl-grid--2">
+        <div class="cl-kpi">
+            <span class="cl-kpi__label">{{ t('dashboard.total_expenses') }}</span>
+            <span class="cl-kpi__value">{{ "%.2f"|format(total_expenses) }} €</span>
+        </div>
+        <a href="/expenses" class="cl-tile">
+            <span class="cl-tile__icon" aria-hidden="true">⚓</span>
+            <span class="cl-tile__label">{{ t('dashboard.expense_action') }}</span>
+        </a>
+    </div>
+    {% endif %}
+
+    {# Navigation tiles — finance tiles hidden in logbook mode #}
+    <div class="cl-grid cl-grid--2">
+        <a href="/logbook" class="cl-tile">
+            <span class="cl-tile__icon" aria-hidden="true">📓</span>
+            <span class="cl-tile__label">{{ t('dashboard.all_entries') }}</span>
+        </a>
+        <a href="/crew" class="cl-tile">
+            <span class="cl-tile__icon" aria-hidden="true">👥</span>
+            <span class="cl-tile__label">{{ t('dashboard.crew_label') }}</span>
+        </a>
+        {% if app_mode != 'logbook' %}
+        <a href="/balances" class="cl-tile">
+            <span class="cl-tile__icon" aria-hidden="true">📊</span>
+            <span class="cl-tile__label">{{ t('dashboard.balances_label') }}</span>
+        </a>
+        <a href="/settlement" class="cl-tile">
+            <span class="cl-tile__icon" aria-hidden="true">⛵</span>
+            <span class="cl-tile__label">{{ t('dashboard.settlement_label') }}</span>
+        </a>
+        {% endif %}
+    </div>
+
+═════════════════════════════════════════════════════════════════════════════
+FEATURE 2 — GPS TRACKING AUDIT & HARDENING
+═════════════════════════════════════════════════════════════════════════════
+
+The GPS tracker class in static/js/logbook-gps.js is well-structured.
+The risk area is the wiring in the logbook form template and iOS edge cases.
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 2A — Read and audit templates/logbook_form.html GPS wiring
+─────────────────────────────────────────────────────────────────────────────
+
+READ templates/logbook_form.html in full. Find all JavaScript that references:
+    - window.logbookGPSTracker
+    - #gps-button
+    - #gps-tracking-toggle
+    - gps-tracking-started / gps-position-update / gps-position-error events
+
+Verify the following are correctly wired. If any are missing, add them:
+
+  A) gps-button (one-shot position grab):
+     Must call navigator.geolocation.getCurrentPosition() — NOT the tracker.
+     Must fill in latitude, longitude inputs on success.
+     Must show loading state while fetching and error state on failure.
+
+  B) gps-tracking-toggle (continuous tracking on/off):
+     Click → if not tracking: call window.logbookGPSTracker.start()
+     Click → if tracking: call window.logbookGPSTracker.stop()
+     Button text/style must reflect current state (on/off).
+
+  C) Event listeners on document for the tracker's custom events:
+     document.addEventListener('gps-tracking-started', fn)
+       → update toggle button to "active" state, show pulsing indicator
+     document.addEventListener('gps-position-update', fn)
+       → update a status line showing lat, lon, accuracy, last-fix time
+     document.addEventListener('gps-position-error', fn)
+       → show error message below the GPS button
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 2B — Add a GPS status indicator UI to the logbook form
+─────────────────────────────────────────────────────────────────────────────
+
+In templates/logbook_form.html, find the area around #gps-tracking-toggle.
+After that button, add (if not already present):
+
+    <div id="gps-status" style="display:none; margin-top:8px; padding:8px 10px;
+         border-radius:8px; background:var(--cl-accent-soft);
+         font-size:12px; color:var(--cl-accent); line-height:1.4;">
+        <span id="gps-status-dot" style="display:inline-block; width:8px; height:8px;
+              border-radius:50%; background:var(--cl-accent); margin-right:6px;
+              animation: gps-pulse 1.2s ease-in-out infinite;"></span>
+        <span id="gps-status-text">GPS aktiv…</span>
+    </div>
+    <div id="gps-error-msg" style="display:none; margin-top:8px; padding:8px 10px;
+         border-radius:8px; background:var(--cl-danger-soft);
+         font-size:12px; color:var(--cl-danger);">
+    </div>
+    <style>
+    @keyframes gps-pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .4; transform: scale(0.8); }
+    }
+    </style>
+
+Update the gps-tracking-started and gps-position-update handlers to:
+  - Show/hide #gps-status
+  - Update #gps-status-text with:
+      "GPS aktiv · {lat}° {lon}° · ±{accuracy}m · {time}"
+  - Show last fix time as HH:MM:SS local time
+  - On tracking stopped: hide #gps-status
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 2C — Add Screen Wake Lock to the GPS tracker
+─────────────────────────────────────────────────────────────────────────────
+
+In static/js/logbook-gps.js, add wake lock support to prevent iOS from
+sleeping and killing GPS tracking. Make these changes:
+
+1. In the constructor, add:
+       this.wakeLock = null;
+
+2. In the start() method, after `this.isTracking = true;`, add:
+       this._requestWakeLock();
+
+3. In the stop() method, after `this.isTracking = false;`, add:
+       this._releaseWakeLock();
+
+4. Add these two methods to the class (before the closing brace):
+
+    async _requestWakeLock() {
+        if ('wakeLock' in navigator) {
+            try {
+                this.wakeLock = await navigator.wakeLock.request('screen');
+                this.wakeLock.addEventListener('release', () => {
+                    this.wakeLock = null;
+                });
+            } catch (e) {
+                // Wake lock not granted — acceptable, tracking continues
+            }
+        }
+    }
+
+    _releaseWakeLock() {
+        if (this.wakeLock) {
+            this.wakeLock.release().catch(() => {});
+            this.wakeLock = null;
+        }
+    }
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 2D — Add iOS-specific guidance to the GPS tracking UI
+─────────────────────────────────────────────────────────────────────────────
+
+In templates/logbook_form.html, find the GPS tracking toggle area.
+Add a help text note that only appears on mobile (it's already hidden on 
+desktop by the existing media queries):
+
+After the gps-status div from Step 2B, add:
+
+    <p class="cl-help" style="margin-top:6px;">
+        📱 iOS: Bildschirm muss aktiv bleiben. Tracking stoppt bei Bildschirm-Sperre.
+        <br>🛰️ Heading und SOG werden nur während der Fahrt erfasst.
+    </p>
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 2E — Handle heading averaging correctly (fix potential null issue)
+─────────────────────────────────────────────────────────────────────────────
+
+In static/js/logbook-gps.js, find the getAveragedPosition() method.
+The heading average is wrong when some entries have heading=null (iOS often 
+returns null heading when stationary). Fix the average to skip null values:
+
+Replace the heading sum/average logic with:
+
+    getAveragedPosition() {
+        if (this.positionHistory.length === 0) return null;
+
+        let latSum = 0, lonSum = 0, speedSum = 0, speedCount = 0;
+        let headingSum = 0, headingCount = 0;
+
+        this.positionHistory.forEach(pos => {
+            latSum += pos.coords.latitude;
+            lonSum += pos.coords.longitude;
+            if (pos.coords.speed !== null && pos.coords.speed >= 0) {
+                speedSum += pos.coords.speed;
+                speedCount++;
+            }
+            if (pos.coords.heading !== null && pos.coords.heading >= 0) {
+                headingSum += pos.coords.heading;
+                headingCount++;
+            }
+        });
+
+        const count = this.positionHistory.length;
+        return {
+            latitude:  latSum / count,
+            longitude: lonSum / count,
+            speed:     speedCount > 0 ? speedSum / speedCount : null,
+            heading:   headingCount > 0 ? headingSum / headingCount : null,
+        };
+    }
+
+─────────────────────────────────────────────────────────────────────────────
+VERIFICATION
+─────────────────────────────────────────────────────────────────────────────
+
+LOGBOOK MODE:
+1. POST /set-mode (mode=logbook) → session stores 'logbook' → page reloads
+2. Sidebar: mode pills show "📓 Logbuch" highlighted, Finanzen accordion gone
+3. Bottom tabbar: 4 items (Dashboard, Logbuch, Törns, More) — Finanzen gone
+4. Dashboard: no expense KPI, no Balances/Settlement tiles
+5. POST /set-mode (mode=full) → everything returns to normal
+6. Mode persists across page navigations (stored in session)
+
+GPS TRACKING:
+7. On logbook form: tap "📍 GPS-Position abrufen" (one-shot) → fills lat/lon
+8. Tap tracking toggle → pulsing blue indicator appears, updates every fix
+9. Lat/lon/SOG/COG inputs update automatically while tracking is on
+10. Tap toggle again → indicator disappears, watch cleared
+11. If user denies GPS permission → red error message shown, no crash
+
+REGRESSION:
+12. python -m pytest test_regression_logbook.py -v → all previously-passing
+    tests still pass (no model or backend logic changed)
+13. Full mode still shows all finance features normally
