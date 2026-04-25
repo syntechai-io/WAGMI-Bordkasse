@@ -785,6 +785,14 @@ const i18n = {
     motor_off: {{ t("logbook.motor_off") | tojson }},
     motor_on_set: {{ t("logbook.motor_on_set") | tojson }},
     motor_off_set: {{ t("logbook.motor_off_set") | tojson }},
+    gps_stop_tracking: {{ t("logbook.gps_stop_tracking") | tojson }},
+    gps_start_tracking: {{ t("logbook.gps_start_tracking") | tojson }},
+    gps_waiting: {{ t("logbook.gps_waiting") | tojson }},
+    gps_accuracy: {{ t("logbook.gps_accuracy") | tojson }},
+    gps_last_update: {{ t("logbook.gps_last_update") | tojson }},
+    gps_position_prefix: {{ t("logbook.gps_position_prefix") | tojson }},
+    gps_error_prefix: {{ t("logbook.gps_error_prefix") | tojson }},
+    lang: {{ lang | tojson }},
 };
 
 // Phase A: Motor Toggle Buttons with Auto-Calculation
@@ -1238,16 +1246,16 @@ trackingToggleBtn.addEventListener('click', function() {
 
 // Handle GPS tracking events
 document.addEventListener('gps-tracking-started', () => {
-    trackingToggleBtn.textContent = '⏸️ GPS-Tracking stoppen';
+    trackingToggleBtn.textContent = `⏸️ ${i18n.gps_stop_tracking}`;
     trackingToggleBtn.style.background = 'var(--danger)';
     trackingToggleBtn.style.color = '#fff';
     trackingToggleBtn.style.borderColor = 'var(--danger)';
     trackingBanner.classList.remove('hidden');
-    statusText.textContent = 'Warte auf GPS-Signal...';
+    statusText.textContent = i18n.gps_waiting;
 });
 
 document.addEventListener('gps-tracking-stopped', () => {
-    trackingToggleBtn.textContent = '🎯 GPS-Tracking starten';
+    trackingToggleBtn.textContent = `🎯 ${i18n.gps_start_tracking}`;
     trackingToggleBtn.style.background = 'var(--surface)';
     trackingToggleBtn.style.color = 'var(--text)';
     trackingToggleBtn.style.borderColor = 'var(--border)';
@@ -1258,14 +1266,17 @@ document.addEventListener('gps-position-update', (event) => {
     const position = event.detail.position;
     const accuracy = position.coords.accuracy;
     const now = new Date();
-    
-    statusText.textContent = `Position ${position.coords.latitude.toFixed(4)}°, ${position.coords.longitude.toFixed(4)}°`;
-    accuracyText.textContent = `Genauigkeit: ${Math.round(accuracy)}m`;
-    updateTimeText.textContent = `Letztes Update: ${now.toLocaleTimeString('de-DE')}`;
+    // Use the active UI language so any future locale formats time correctly.
+    // hour12:false locks 24h format across every locale (matches DE width).
+    const timeStr = now.toLocaleTimeString(i18n.lang || undefined, { hour12: false });
+
+    statusText.textContent = `${i18n.gps_position_prefix} ${position.coords.latitude.toFixed(4)}°, ${position.coords.longitude.toFixed(4)}°`;
+    accuracyText.textContent = `${i18n.gps_accuracy}: ${Math.round(accuracy)}m`;
+    updateTimeText.textContent = `${i18n.gps_last_update}: ${timeStr}`;
 });
 
 document.addEventListener('gps-position-error', (event) => {
-    statusText.textContent = `Fehler: ${event.detail.errorMessage}`;
+    statusText.textContent = `${i18n.gps_error_prefix}: ${event.detail.errorMessage}`;
 });
 
 // CSRF Token Refresh - Prevent stale tokens on long-form sessions

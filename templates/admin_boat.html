@@ -10,23 +10,23 @@
     {% if boat_stats %}
     <section class="cl-card" style="margin-bottom: var(--cl-space-5);">
         <header class="cl-card__head">
-            <h2 class="cl-card__title">📊 {{ boat_profile.boat_name or 'Mein Boot' }} — Statistik</h2>
+            <h2 class="cl-card__title">📊 {{ boat_profile.boat_name or t('admin.boat_setup.stats_default_name') }} — {{ t('admin.boat_setup.stats_title') }}</h2>
         </header>
         <div class="cl-grid cl-grid--2">
             <div class="cl-kpi">
-                <span class="cl-kpi__label">⛵ Gesegelte Seemeilen</span>
+                <span class="cl-kpi__label">⛵ {{ t('admin.boat_setup.stats_kpi_nm') }}</span>
                 <span class="cl-kpi__value">{{ boat_stats.total_nm }} sm</span>
             </div>
             <div class="cl-kpi">
-                <span class="cl-kpi__label">⚙️ Motorstunden</span>
+                <span class="cl-kpi__label">⚙️ {{ t('admin.boat_setup.stats_kpi_motor_h') }}</span>
                 <span class="cl-kpi__value">{{ boat_stats.total_motor_h }} h</span>
             </div>
             <div class="cl-kpi">
-                <span class="cl-kpi__label">🗓️ Törns</span>
+                <span class="cl-kpi__label">🗓️ {{ t('admin.boat_setup.stats_kpi_trips') }}</span>
                 <span class="cl-kpi__value">{{ boat_stats.trip_count }}</span>
             </div>
             <div class="cl-kpi">
-                <span class="cl-kpi__label">📅 Letzter Törn</span>
+                <span class="cl-kpi__label">📅 {{ t('admin.boat_setup.stats_kpi_last_trip') }}</span>
                 <span class="cl-kpi__value" style="font-size:16px;">
                     {% if boat_stats.last_trip %}
                         {{ boat_stats.last_trip.strftime('%d.%m.%Y') }}
@@ -37,7 +37,7 @@
             </div>
         </div>
         <p class="cl-help cl-help--muted">
-            Nur Törns mit aktiviertem &quot;🚢 Törn auf meinem Boot&quot; werden gezählt.
+            {{ t('admin.boat_setup.stats_helper') }}
         </p>
     </section>
     {% endif %}
