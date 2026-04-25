@@ -376,6 +376,7 @@
                     </div>
                     {% endif %}
                     
+                    {% if app_mode != 'logbook' %}
                     <div class="relative nav-dropdown">
                         <button class="nav-item touch-action flex items-center" 
                                 aria-haspopup="true" aria-expanded="false">
@@ -393,6 +394,7 @@
                             <a href="/settlement" class="block px-4 py-2 hover:bg-sky-100 transition">⛵ {{ t('nav.settlement') }}</a>
                         </div>
                     </div>
+                    {% endif %}
                     
                     <div class="relative nav-dropdown">
                         <button class="nav-item touch-action flex items-center" 
