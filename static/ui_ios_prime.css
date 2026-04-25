@@ -136,28 +136,9 @@ main {
     }
 }
 
-/* ── 11. Night mode — replace red tones with nautical deep blue ── */
-html[data-theme="night"] .cl-tabbar {
-    background: rgba(10, 18, 35, .95) !important;
-    border-top-color: rgba(100, 140, 200, .2) !important;
-}
-html[data-theme="night"] .cl-tabbar__item {
-    color: rgba(180, 200, 230, .55) !important;
-}
-html[data-theme="night"] .cl-tabbar__item--active,
-html[data-theme="night"] .cl-tabbar__item:hover {
-    color: rgba(100, 170, 255, .95) !important;
-}
-html[data-theme="night"] .cl-tabbar__item--active .cl-tabbar__icon {
-    background: rgba(29, 111, 187, .2) !important;
-}
-html[data-theme="night"] .cl-actionbar {
-    background: rgba(10, 18, 35, .92) !important;
-    border-top-color: rgba(100, 140, 200, .2) !important;
-}
-html[data-theme="night"] .topbar {
-    background: rgba(8, 15, 28, .98) !important;
-}
+/* ── 11. Night mode rules removed — see static/ui_night_mode.css for the
+   single, authoritative red-on-black night theme. Keeping rules here that
+   conflict with that theme caused the white-card / blue-button bug. ── */
 
 /* ── 12. Overscroll background colour matches topbar on pull-down ── */
 @media (max-width: 1023px) {
@@ -346,28 +327,7 @@ html[data-theme="night"] .topbar {
     .topbar { left: 0 !important; width: 100% !important; }
 }
 
-/* Night mode: sidebar gets dark treatment on desktop too */
-@media (min-width: 1280px) {
-    html[data-theme="night"] .cl-sidebar {
-        background: rgba(10, 18, 35, .97) !important;
-        border-right-color: rgba(100, 140, 200, .15) !important;
-    }
-    html[data-theme="night"] .cl-sidebar .drawer-link,
-    html[data-theme="night"] .cl-sidebar .drawer-section-toggle {
-        color: rgba(200, 215, 235, .8);
-    }
-    html[data-theme="night"] .cl-sidebar .drawer-link:hover,
-    html[data-theme="night"] .cl-sidebar .drawer-section-toggle:hover {
-        background: rgba(29, 111, 187, .15);
-        color: rgba(100, 170, 255, .95);
-    }
-    html[data-theme="night"] .cl-sidebar .drawer-footer {
-        border-top-color: rgba(100, 140, 200, .15);
-    }
-    html[data-theme="night"] .cl-sidebar .drawer-divider {
-        background: rgba(100, 140, 200, .12);
-    }
-}
+/* Desktop sidebar night-mode rules removed — see ui_night_mode.css. */
 
 /* ── 17. Featured hero variant (Day Recap on single-day trip) ── */
 .cl-hero--featured {
@@ -375,10 +335,7 @@ html[data-theme="night"] .topbar {
     border-color: var(--cl-accent);
 }
 .cl-hero--featured .cl-hero__title { color: var(--cl-accent); }
-html[data-theme="night"] .cl-hero--featured {
-    background: rgba(29, 111, 187, .15);
-    border-color: rgba(100, 170, 255, .35);
-}
+/* .cl-hero--featured night override removed — see ui_night_mode.css. */
 
 /* ── 18. Logbook-only mode: hide finance UI ── */
 
@@ -422,15 +379,7 @@ html[data-theme="night"] .cl-hero--featured {
     background: var(--cl-accent-soft);
     color: var(--cl-accent);
 }
-html[data-theme="night"] .drawer-mode-pill {
-    background: rgba(255,255,255,.06);
-    border-color: rgba(255,255,255,.12);
-    color: rgba(200,215,235,.6);
-}
-html[data-theme="night"] .drawer-mode-pill--active {
-    background: var(--cl-accent);
-    color: #fff;
-}
+/* .drawer-mode-pill night overrides removed — see ui_night_mode.css. */
 
 /* 4-column tab bar (logbook mode) */
 .cl-tabbar__inner--4 {

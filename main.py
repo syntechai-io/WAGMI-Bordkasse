@@ -155,6 +155,23 @@ async def terms_of_service(request: Request):
 async def ios_return(request: Request):
     return templates.TemplateResponse("ios_return.html", {"request": request})
 
+@app.get("/diagnostics/theme")
+async def theme_diagnostics(request: Request, theme: str = "night"):
+    """Standalone visual smoke-test page for the active theme.
+    Loads cl_design.css + ui_night_mode.css fresh (no cookies, no auth)
+    and renders one of every primitive so the user can confirm the
+    Night Mode palette is correctly applied. ?theme=light to compare.
+    """
+    safe_theme = theme if theme in ("night", "light", "auto") else "night"
+    response = templates.TemplateResponse(
+        "theme_diagnostics.html",
+        {"request": request, "theme": safe_theme},
+    )
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 @app.get("/.well-known/apple-app-site-association")
 async def apple_app_site_association():
     from fastapi.responses import JSONResponse

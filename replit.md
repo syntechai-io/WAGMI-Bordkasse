@@ -37,7 +37,7 @@ Preferred communication style: Simple, everyday language.
 - **Day Logbook UI (mobile/tablet)**: Optimized UI for mobile and tablet with improved touch targets and layout.
 - **Trip Finalize**: Provides a summary and confirmation process to close a trip, restricting write access for crew members.
 - **iOS Home/Lock Screen Widget**: WidgetKit extension displays active trip information, with a backend API for secure token management and data snapshots.
-- **Night Mode (Auto / Day / Night)**: A pure red-on-black theme for night sailing, activated by `html[data-theme="night"]` and controlled by a UI switch, with state persisting locally and optionally server-side.
+- **Night Mode (Auto / Day / Night)**: A pure red-on-black theme for night sailing, activated by `html[data-theme="night"]` and controlled by a UI switch, with state persisting locally and optionally server-side. Critical Night CSS is inlined in the `<head>` of `layout.html` and `login.html` so the dark palette renders on first paint even before external stylesheets load. CSS link tags use `?v=28` cache-busters; `sw.js` uses a network-first strategy for `/static/*.css` so theme updates propagate on a single reload. A no-auth, no-cache `/diagnostics/theme?theme=night|light` page renders one of every UI primitive for instant visual smoke-testing.
 
 #### Data Model
 **Core Entities**: CrewMember, Deposit, Expense, ExpenseParticipant, ExpenseTemplate, CrewGroup, CrewGroupMember, Receipt, Trip, AuditLog, LogbookEntry, LogbookPhoto, UserPreferences, Subscriptions, PasswordResetToken.

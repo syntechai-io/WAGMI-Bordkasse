@@ -481,11 +481,25 @@ html[data-theme="night"] a.nav-item {
 }
 html[data-theme="night"] a:hover { color: #ff5555 !important; }
 
-/* ── SVG icons inherit red ── */
+/* ── SVG icons inherit color from parent (no !important — let
+   .cl-tabbar__item, .drawer-link, etc. control their own icon colour
+   via `color:` so inactive items render muted while active items render
+   bright). Standalone SVGs not inside a coloured container fall back to
+   currentColor of the page text, which is night red. ── */
 html[data-theme="night"] svg {
-  color: var(--night-text) !important;
   fill: currentColor;
   stroke: currentColor;
+}
+/* Force red on icons inside primary surfaces where there is no parent
+   colour signal (titles, buttons, pills, alerts, badges). */
+html[data-theme="night"] .cl-title svg,
+html[data-theme="night"] .cl-section-title svg,
+html[data-theme="night"] .cl-card__title svg,
+html[data-theme="night"] .cl-btn svg,
+html[data-theme="night"] .cl-iconbtn svg,
+html[data-theme="night"] .cl-pill svg,
+html[data-theme="night"] .cl-alert svg {
+  color: var(--night-text);
 }
 
 /* ── Photos & receipts: dim user-uploaded imagery so it doesn't blow out night vision.

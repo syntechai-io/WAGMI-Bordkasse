@@ -33,13 +33,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/ui_v1.css">
-    <link rel="stylesheet" href="/static/ui_desktop_skin.css">
-    <link rel="stylesheet" href="/static/ui_navy_contrast_fix.css">
-    <link rel="stylesheet" href="/static/ui_mobile_skin.css">
-    <link rel="stylesheet" href="/static/cl_design.css">
-    <link rel="stylesheet" href="/static/ui_ios_prime.css">
-    <link rel="stylesheet" href="/static/ui_night_mode.css">
+    <link rel="stylesheet" href="/static/ui_v1.css?v=28">
+    <link rel="stylesheet" href="/static/ui_desktop_skin.css?v=28">
+    <link rel="stylesheet" href="/static/ui_navy_contrast_fix.css?v=28">
+    <link rel="stylesheet" href="/static/ui_mobile_skin.css?v=28">
+    <link rel="stylesheet" href="/static/cl_design.css?v=28">
+    <link rel="stylesheet" href="/static/ui_ios_prime.css?v=28">
+    <link rel="stylesheet" href="/static/ui_night_mode.css?v=28">
     <script>
     (function(){
       // Early-paint theme application. Precedence:
@@ -74,6 +74,75 @@
       } catch(e) {}
     })();
     </script>
+    <style>
+    /* Critical inline Night Mode overrides — ship with the HTML so they
+       are immune to cached/stale separate-file CSS. Covers only the
+       most-visible primitives that produced the white-card / blue-button
+       bug; the linked ui_night_mode.css carries the full rule set. */
+    html[data-theme="night"] {
+      --night-bg:#000;--night-surface:#050505;--night-surface-2:#0a0000;
+      --night-text:#ff2b2b;--night-muted:#9b1c1c;--night-border:#7a0000;
+      --cl-bg:var(--night-bg);--cl-surface:var(--night-surface);
+      --cl-surface-2:var(--night-surface-2);--cl-border:var(--night-border);
+      --cl-border-strong:var(--night-border);--cl-text:var(--night-text);
+      --cl-text-muted:var(--night-muted);--cl-text-subtle:var(--night-muted);
+      --cl-navy:var(--night-text);--cl-navy-soft:var(--night-text);
+      --cl-accent:var(--night-text);--cl-accent-soft:var(--night-surface-2);
+      --cl-success:var(--night-text);--cl-success-soft:var(--night-surface-2);
+      --cl-warn:var(--night-text);--cl-warn-soft:var(--night-surface-2);
+      --cl-danger:var(--night-text);--cl-danger-soft:var(--night-surface-2);
+      color-scheme:dark;background:#000;color:var(--night-text);
+    }
+    html[data-theme="night"] body{background:#000!important;color:var(--night-text)!important;}
+    html[data-theme="night"] .cl-card,html[data-theme="night"] .cl-card--quiet,
+    html[data-theme="night"] .cl-card--flat,html[data-theme="night"] .cl-entry,
+    html[data-theme="night"] .cl-hero,html[data-theme="night"] .cl-hero--featured{
+      background:var(--night-surface)!important;border:1px solid var(--night-border)!important;
+      color:var(--night-text)!important;box-shadow:none!important;
+    }
+    html[data-theme="night"] .cl-btn,html[data-theme="night"] .cl-btn--primary,
+    html[data-theme="night"] .cl-btn--accent,html[data-theme="night"] .cl-btn--success,
+    html[data-theme="night"] .cl-btn--warn,html[data-theme="night"] .cl-btn--secondary,
+    html[data-theme="night"] .cl-btn--ghost,html[data-theme="night"] .cl-btn--ghost-danger,
+    html[data-theme="night"] .cl-iconbtn{
+      background:#000!important;background-image:none!important;
+      color:var(--night-text)!important;border:1px solid var(--night-border)!important;
+      box-shadow:none!important;
+    }
+    html[data-theme="night"] .cl-input,html[data-theme="night"] .cl-select,
+    html[data-theme="night"] .cl-input--textarea,html[data-theme="night"] input,
+    html[data-theme="night"] select,html[data-theme="night"] textarea{
+      background:#000!important;color:var(--night-text)!important;
+      border:1px solid var(--night-border)!important;caret-color:var(--night-text)!important;
+    }
+    html[data-theme="night"] input::placeholder,html[data-theme="night"] textarea::placeholder{
+      color:var(--night-muted)!important;opacity:1!important;
+    }
+    html[data-theme="night"] .cl-check-row{
+      background:var(--night-surface)!important;border:1px solid var(--night-border)!important;
+    }
+    html[data-theme="night"] input[type="checkbox"],
+    html[data-theme="night"] input[type="radio"]{
+      accent-color:var(--night-text)!important;
+    }
+    html[data-theme="night"] .cl-tabbar{
+      background:#000!important;border-top:1px solid var(--night-border)!important;
+      backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    html[data-theme="night"] .cl-tabbar__item{color:var(--night-muted)!important;}
+    html[data-theme="night"] .cl-tabbar__item--active,
+    html[data-theme="night"] .cl-tabbar__item:hover{color:var(--night-text)!important;}
+    html[data-theme="night"] .topbar{
+      background:#000!important;border-bottom:1px solid var(--night-border)!important;
+      backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    html[data-theme="night"] .cl-title,html[data-theme="night"] .cl-section-title,
+    html[data-theme="night"] .cl-card__title,html[data-theme="night"] .cl-label,
+    html[data-theme="night"] .cl-help,html[data-theme="night"] .cl-help--muted,
+    html[data-theme="night"] .cl-check-row__label,
+    html[data-theme="night"] .cl-pageheader__main{color:var(--night-text)!important;}
+    html[data-theme="night"] svg{fill:currentColor;stroke:currentColor;}
+    </style>
     {% if branding.accent_color %}
     <style>
         :root {

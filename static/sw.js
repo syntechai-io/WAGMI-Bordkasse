@@ -1,4 +1,4 @@
-const CACHE_NAME = 'crewlog-v27';
+const CACHE_NAME = 'crewlog-v28';
 
 const STATIC_ASSETS = [
   '/static/ui_v1.css',
@@ -46,7 +46,14 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (url.pathname.startsWith('/static/')) {
-    event.respondWith(cacheFirst(request));
+    // CSS uses network-first so theme changes propagate on a single
+    // reload — old cached red-on-blue CSS stuck around for too long
+    // before. Other assets (images, JS, fonts) keep cache-first.
+    if (url.pathname.endsWith('.css')) {
+      event.respondWith(networkFirstStatic(request));
+    } else {
+      event.respondWith(cacheFirst(request));
+    }
     return;
   }
 
@@ -81,5 +88,20 @@ async function networkFirstHTML(request) {
     const cached = await caches.match(request);
     if (cached) return cached;
     return caches.match('/offline');
+  }
+}
+
+async function networkFirstStatic(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    return new Response('', { status: 503 });
   }
 }
