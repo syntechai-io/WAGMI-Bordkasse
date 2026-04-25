@@ -226,205 +226,92 @@ def test_all_phase_a_fields_preserved():
         assert f'name="{field}"' in form_html, f"Field {field} is missing!"
 
 def test_night_mode_critical_css_present_in_layout():
-    """Task #40: layout.html must inline the critical Night-Mode CSS in <head>
-    so the dark palette renders on first paint, before external stylesheets
-    arrive. Asserts that the inline block exists and covers the most-visible
-    primitives (cards, buttons, inputs, checkbox accent, tabbar)."""
     from pathlib import Path
     layout = Path('templates/layout.html').read_text()
-
-    assert '?v=28' in layout, "CSS link tags must be cache-busted with ?v=28"
-
-    # Inline critical block targets data-theme="night" only — Day Mode untouched.
+    assert '?v=28' in layout
     assert 'html[data-theme="night"]' in layout
-
-    # The critical block must touch every primitive most visible on first paint.
-    for primitive in [
-        '.cl-card',
-        '.cl-btn',
-        '.cl-input',
-        '.cl-tabbar',
-        'accent-color',
-    ]:
-        assert primitive in layout, (
-            f"Critical inline night CSS in layout.html is missing rule for "
-            f"`{primitive}` — first paint will flash the wrong colour."
-        )
+    for primitive in ['.cl-card', '.cl-btn', '.cl-input', '.cl-tabbar', 'accent-color']:
+        assert primitive in layout, f"layout.html inline night CSS missing {primitive}"
 
 
 def test_night_mode_critical_css_present_in_login():
-    """Task #40: login.html (unauth, separate from layout.html) must also
-    inline the critical Night-Mode CSS so the login page itself paints
-    correctly when the user has chosen Night Mode."""
     from pathlib import Path
     login = Path('templates/login.html').read_text()
-
     assert '?v=28' in login
     assert 'html[data-theme="night"]' in login
-    assert 'Critical inline Night Mode' in login, (
-        "login.html should carry the same inline critical Night CSS block "
-        "as layout.html."
-    )
+    assert 'Critical inline Night Mode' in login
 
 
 def test_night_mode_svg_rule_no_longer_overreaches():
-    """Task #40: the universal `html[data-theme=night] svg { color:red }`
-    rule used to override .cl-tabbar__item's parent color, making every tab
-    icon look active. The fix removes !important + color from the universal
-    svg rule and only sets fill/stroke: currentColor, then targets red color
-    only inside specific surfaces. Day Mode must remain untouched."""
     from pathlib import Path
-    night_css = Path('static/ui_night_mode.css').read_text()
-
-    # The universal svg rule must NOT force `color: ... !important` anymore.
-    # We assert that no `svg` selector at the html[data-theme=night] root sets
-    # `color: ... !important`.
     import re
-    universal_svg_blocks = re.findall(
-        r'html\[data-theme="night"\]\s+svg\s*\{[^}]*\}',
-        night_css,
-    )
-    for block in universal_svg_blocks:
-        assert 'color' not in block.split(';')[0] or '!important' not in block, (
-            "Universal svg rule must not set `color: ... !important` — "
-            "that breaks tabbar inactive-vs-active icon differentiation. "
-            f"Found: {block}"
-        )
-        # currentColor inheritance is what we want.
-        assert 'currentColor' in block, (
-            "Universal svg rule should inherit fill/stroke from currentColor."
-        )
+    night_css = Path('static/ui_night_mode.css').read_text()
+    blocks = re.findall(r'html\[data-theme="night"\]\s+svg\s*\{[^}]*\}', night_css)
+    for block in blocks:
+        assert 'color' not in block.split(';')[0] or '!important' not in block, block
+        assert 'currentColor' in block
 
 
 def test_night_mode_blue_overrides_stripped_from_ios_prime():
-    """Task #40: ui_night_mode.css is the single source of truth for night.
-    ui_ios_prime.css must NOT carry conflicting nautical-blue night rules
-    that previously fought the cascade for tabbar/sidebar/topbar/etc."""
     from pathlib import Path
-    ios = Path('static/ui_ios_prime.css').read_text()
-
-    # The blue values that used to leak into night should no longer appear
-    # under any html[data-theme="night"] selector in this file.
     import re
-    night_blocks = re.findall(
-        r'html\[data-theme="night"\][^{]*\{[^}]*\}',
-        ios,
-    )
-    forbidden_blue_hexes = ['#1a2f4a', '#0d3b5e', '#0a3a5e']
-    for block in night_blocks:
-        for hex_val in forbidden_blue_hexes:
-            assert hex_val.lower() not in block.lower(), (
-                f"Found leaked nautical-blue {hex_val} inside an "
-                f"html[data-theme=night] block in ui_ios_prime.css. "
-                f"All night-mode styling must live in ui_night_mode.css. "
-                f"Block: {block[:200]}..."
-            )
+    ios = Path('static/ui_ios_prime.css').read_text()
+    blocks = re.findall(r'html\[data-theme="night"\][^{]*\{[^}]*\}', ios)
+    for block in blocks:
+        for hex_val in ('#1a2f4a', '#0d3b5e', '#0a3a5e'):
+            assert hex_val.lower() not in block.lower(), block[:200]
 
 
 def test_service_worker_v28_with_network_first_css():
-    """Task #40: PWA service worker must be on v28 and use a network-first
-    strategy for /static/*.css so theme CSS updates propagate on a single
-    reload (instead of being held by the cache-first strategy)."""
     from pathlib import Path
     sw = Path('static/sw.js').read_text()
-
-    assert "crewlog-v28" in sw, "Service worker CACHE_NAME must be bumped to v28."
-    assert "networkFirstStatic" in sw or "network-first" in sw or "networkFirst" in sw, (
-        "Service worker must use a network-first strategy for static CSS so "
-        "theme updates aren't held by stale cache."
-    )
-    # The activate handler must purge old caches.
-    assert "caches.keys" in sw and "delete" in sw, (
-        "Service worker activate handler must delete old caches."
-    )
+    assert "crewlog-v28" in sw
+    assert any(s in sw for s in ("networkFirstStatic", "network-first", "networkFirst"))
+    assert "caches.keys" in sw and "delete" in sw
 
 
 def test_diagnostics_theme_route_renders_night_with_correct_palette():
-    """Task #40 Step 6: visual smoke-test page at /diagnostics/theme?theme=night
-    must render with data-theme="night", load ui_night_mode.css?v=28, include
-    the inline critical block from layout-style head, and contain one of every
-    primitive (buttons, inputs, checkbox/radio, pills, alerts, tabbar) so the
-    user can verify the palette at a glance with no auth and no cache."""
-    import os
-    # Avoid loading the full app stack if PG isn't reachable in CI; the
-    # template + route are the contract we're testing.
     from pathlib import Path
     tpl = Path('templates/theme_diagnostics.html').read_text()
-
-    # Conditional data-theme attribute applied when ?theme=night.
     assert 'data-theme="night"' in tpl
-    # Loads versioned night CSS so cache-bust is in effect.
     assert 'ui_night_mode.css?v=28' in tpl
-    # Renders one of each primitive the user complained about.
     for primitive in [
-        'cl-btn--primary',
-        'cl-btn--accent',
-        'cl-btn--success',
-        'cl-btn--warn',
-        'cl-input',
-        'cl-check-row',
-        'cl-tabbar',
-        'cl-tabbar__item--active',
-        'cl-pill',
-        'cl-alert',
-        'cl-card',
+        'cl-btn--primary', 'cl-btn--accent', 'cl-btn--success', 'cl-btn--warn',
+        'cl-input', 'cl-check-row', 'cl-tabbar', 'cl-tabbar__item--active',
+        'cl-pill', 'cl-alert', 'cl-card',
     ]:
-        assert primitive in tpl, (
-            f"theme_diagnostics.html missing primitive `{primitive}` — "
-            f"the user can't visually verify it without it."
-        )
+        assert primitive in tpl, f"theme_diagnostics.html missing {primitive}"
 
-    # Route must be defined and whitelisted in auth middleware.
     main_py = Path('main.py').read_text()
     assert '@app.get("/diagnostics/theme")' in main_py
-    assert 'no-store' in main_py and 'no-cache' in main_py, (
-        "/diagnostics/theme must explicitly send no-store/no-cache headers."
-    )
+    assert 'no-store' in main_py and 'no-cache' in main_py
 
     auth_mw = Path('middleware/auth.py').read_text()
-    assert '/diagnostics/theme' in auth_mw, (
-        "/diagnostics/theme must be in AuthMiddleware.EXCLUDED_PATHS so the "
-        "user can hit it without logging in."
-    )
+    assert '/diagnostics/theme' in auth_mw
 
 
 def test_night_mode_diagnostics_page_live_response():
-    """Task #40 Step 6: live HTTP smoke test against the running diagnostic
-    page. Asserts the response: returns 200, sets data-theme="night" in the
-    HTML, sends explicit no-cache headers, and is reachable without auth.
-    This complements the template-content test above by proving the wiring
-    (route + middleware + headers) actually serves what we expect."""
     try:
         from fastapi.testclient import TestClient
         from main import app
     except Exception as e:
-        pytest.skip(f"FastAPI app not importable in test env: {e}")
+        pytest.skip(f"app not importable: {e}")
 
     client = TestClient(app)
-
     r = client.get("/diagnostics/theme", params={"theme": "night"})
-    assert r.status_code == 200, f"Expected 200, got {r.status_code}"
-
-    # Cache-Control must defeat both browser and SW caches.
+    assert r.status_code == 200
     cc = r.headers.get("cache-control", "").lower()
-    assert "no-store" in cc and "no-cache" in cc, (
-        f"Diagnostics page must send no-store/no-cache headers; got: {cc!r}"
-    )
+    assert "no-store" in cc and "no-cache" in cc
 
     body = r.text
     assert 'data-theme="night"' in body
     assert 'ui_night_mode.css?v=28' in body
-    # Active tab + at least one inactive tab must be present so the user can
-    # verify they look different (bright red vs muted dark red).
     assert 'cl-tabbar__item--active' in body
     assert body.count('cl-tabbar__item') >= 2
 
-    # Light-mode variant must NOT carry the data-theme attribute.
     r2 = client.get("/diagnostics/theme", params={"theme": "light"})
     assert r2.status_code == 200
-    assert 'data-theme="night"' not in r2.text, (
-        "?theme=light must not opt the page into night mode."
-    )
+    assert 'data-theme="night"' not in r2.text
 
 
 if __name__ == '__main__':
