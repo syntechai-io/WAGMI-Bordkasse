@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "cpcECZQR1UWszEwoR3ip0"
+uri = "file://exports/crewlog_source.tar.gz"
+type = "unspecified"
+title = "CrewLog source code (tar.gz, ~45 MB)"
