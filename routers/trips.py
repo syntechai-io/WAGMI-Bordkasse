@@ -204,7 +204,8 @@ async def create_trip(
         db.add(crew_member)
         db.commit()
     
-    return RedirectResponse(url="/trips/", status_code=303)
+    TripService.set_selected_trip(request, trip.id)
+    return RedirectResponse(url="/", status_code=303)
 
 @router.post("/{trip_id}/activate")
 async def activate_trip(

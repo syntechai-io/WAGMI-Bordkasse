@@ -137,7 +137,7 @@
     <div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
 
     <!-- Off-canvas drawer (mobile) -->
-    <aside id="nav-drawer" class="nav-drawer" aria-hidden="true" aria-label="{{ t('nav.navigation') }}" role="navigation">
+    <aside id="nav-drawer" class="nav-drawer cl-sidebar" aria-hidden="true" aria-label="{{ t('nav.navigation') }}" role="navigation">
         <div class="drawer-header">
             <a href="/" class="drawer-brand">
                 <img src="/static/logo-crewlog.svg" alt="CrewLog" style="width: 28px; height: 28px; border-radius: 4px;">
@@ -297,16 +297,11 @@
             <div class="flex items-center justify-between h-12">
                 <div class="flex items-center space-x-2.5">
                     <!-- Hamburger (mobile only) -->
-                    <button id="drawer-open" class="p-1.5 -ml-1.5 touch-action rounded-md" aria-label="{{ t('nav.open_menu') }}" aria-expanded="false" aria-controls="nav-drawer" style="display: none;">
+                    <button id="drawer-open" class="p-1.5 -ml-1.5 touch-action rounded-md" aria-label="{{ t('nav.open_menu') }}" aria-expanded="false" aria-controls="nav-drawer" style="">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
-                    <style>
-                        @media (max-width: 1023px) {
-                            #drawer-open { display: flex !important; }
-                        }
-                    </style>
                     <img src="/static/logo-crewlog.svg" alt="CrewLog" class="w-7 h-7 object-contain rounded-md">
                     <a href="/" class="flex flex-col min-w-0" style="line-height: 1.15;">
                         <span class="font-bold text-white" style="font-size: 1.125rem;">CrewLog</span>
@@ -317,7 +312,7 @@
                 </div>
 
                 <!-- Desktop horizontal nav -->
-                <div class="desktop-nav flex items-center space-x-1 text-sm">
+                <div class="desktop-nav flex items-center space-x-1 text-sm" style="display:none!important;">
                     <a href="/" class="nav-item touch-action">🧭 {{ t('nav.dashboard') }}</a>
                     <a href="/trips/" class="nav-item touch-action">⛵ {{ t('nav.trips') }}</a>
                     <a href="/logbook" class="nav-item touch-action">📓 {{ t('nav.logbook') }}</a>
@@ -421,7 +416,7 @@
         </div>
     </nav>
 
-    <main class="ui-container ui-section content-container">
+    <main class="ui-container ui-section content-container cl-main-content">
         {% block content %}{% endblock %}
     </main>
 

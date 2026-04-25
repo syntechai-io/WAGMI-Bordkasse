@@ -52,7 +52,7 @@ function setCurrentLocalTime(inputId) {
             <span class="cl-hero__chev" aria-hidden="true">›</span>
         </a>
 
-        {% if request.session.get('role') == 'admin' %}
+        {% if request.session.get('role') == 'admin' and not active_trip %}
         <form method="post" action="/trips/quick-start" style="margin: 0;">
             {{ csrf_input | safe }}
             <button type="submit" class="cl-hero" style="width: 100%; text-align: left; cursor: pointer; font: inherit;">

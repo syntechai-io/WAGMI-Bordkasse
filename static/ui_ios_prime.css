@@ -195,3 +195,154 @@ html[data-theme="night"] .topbar {
         padding: 12px 14px;
     }
 }
+
+/* ── 16. Desktop sidebar (≥1024px) ── */
+@media (min-width: 1024px) {
+    /* Hamburger: hide on desktop since sidebar is always visible */
+    #drawer-open { display: none !important; }
+
+    /* Sidebar: always-visible left panel on desktop */
+    .cl-sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        width: 220px !important;
+        height: 100vh !important;
+        transform: none !important;    /* cancel the mobile slide-in transform */
+        visibility: visible !important;
+        z-index: 30;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-right: 1px solid var(--cl-border, #e2e6ec);
+        border-radius: 0 !important;
+        box-shadow: 2px 0 16px rgba(15,41,66,.06);
+        /* Frosted glass on macOS/desktop Safari */
+        background: rgba(255,255,255,.97) !important;
+        backdrop-filter: saturate(180%) blur(14px);
+        -webkit-backdrop-filter: saturate(180%) blur(14px);
+    }
+
+    /* Push topbar and main content right to clear the sidebar */
+    .topbar {
+        left: 220px !important;
+        right: 0 !important;
+        width: auto !important;
+    }
+    .cl-main-content {
+        margin-left: 220px !important;
+    }
+    /* Footer (hidden on mobile, show on desktop) */
+    .footer-bar {
+        display: block !important;
+        margin-left: 220px;
+    }
+    /* Overlay: never show on desktop */
+    .nav-overlay { display: none !important; }
+
+    /* Make drawer header look like a branded sidebar header */
+    .cl-sidebar .drawer-header {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: var(--cl-navy, #0f2942);
+        color: white;
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .cl-sidebar .drawer-close-btn { display: none !important; }
+    .cl-sidebar .drawer-brand span { color: white; }
+    .cl-sidebar .drawer-brand span:last-child { color: rgba(255,255,255,.5); }
+
+    /* Drawer links: clean sidebar item style */
+    .cl-sidebar .drawer-link,
+    .cl-sidebar .drawer-section-toggle {
+        font-size: 13.5px;
+        padding: 9px 16px;
+        border-radius: 8px;
+        margin: 1px 8px;
+        width: calc(100% - 16px);
+        box-sizing: border-box;
+    }
+    .cl-sidebar .drawer-link:hover,
+    .cl-sidebar .drawer-section-toggle:hover {
+        background: var(--cl-accent-soft, #e7f0fa);
+        color: var(--cl-accent, #1d6fbb);
+    }
+    .cl-sidebar .drawer-link-active {
+        background: var(--cl-accent-soft, #e7f0fa);
+        color: var(--cl-accent, #1d6fbb);
+        font-weight: 600;
+    }
+    .cl-sidebar .drawer-body {
+        padding: 8px 0;
+    }
+    .cl-sidebar .drawer-footer {
+        border-top: 1px solid var(--cl-border, #e2e6ec);
+        padding: 12px 16px;
+        padding-bottom: 16px;
+    }
+    .cl-sidebar .drawer-divider {
+        margin: 6px 16px;
+        height: 1px;
+        background: var(--cl-border, #e2e6ec);
+    }
+    /* Sub-links indented inside sidebar */
+    .cl-sidebar .drawer-sub-links {
+        padding-left: 8px;
+    }
+    /* User info in sidebar footer */
+    .cl-sidebar .drawer-user-info {
+        font-size: 12px;
+        color: var(--cl-text-muted);
+        margin-bottom: 8px;
+        word-break: break-all;
+    }
+    .cl-sidebar .drawer-logout-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 36px;
+        border-radius: 8px;
+        background: var(--cl-surface-2, #f1f4f8);
+        border: 1px solid var(--cl-border);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--cl-text);
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+    }
+    .cl-sidebar .drawer-logout-btn:hover {
+        background: var(--cl-danger-soft);
+        color: var(--cl-danger);
+        border-color: transparent;
+    }
+
+    /* Topbar on desktop: simplified — just logo + brand, no nav items needed */
+    .topbar .container { max-width: 100%; padding-left: 20px; padding-right: 20px; }
+}
+
+/* Night mode: sidebar gets dark treatment on desktop too */
+@media (min-width: 1024px) {
+    html[data-theme="night"] .cl-sidebar {
+        background: rgba(10, 18, 35, .97) !important;
+        border-right-color: rgba(100, 140, 200, .15) !important;
+    }
+    html[data-theme="night"] .cl-sidebar .drawer-link,
+    html[data-theme="night"] .cl-sidebar .drawer-section-toggle {
+        color: rgba(200, 215, 235, .8);
+    }
+    html[data-theme="night"] .cl-sidebar .drawer-link:hover,
+    html[data-theme="night"] .cl-sidebar .drawer-section-toggle:hover {
+        background: rgba(29, 111, 187, .15);
+        color: rgba(100, 170, 255, .95);
+    }
+    html[data-theme="night"] .cl-sidebar .drawer-footer {
+        border-top-color: rgba(100, 140, 200, .15);
+    }
+    html[data-theme="night"] .cl-sidebar .drawer-divider {
+        background: rgba(100, 140, 200, .12);
+    }
+}

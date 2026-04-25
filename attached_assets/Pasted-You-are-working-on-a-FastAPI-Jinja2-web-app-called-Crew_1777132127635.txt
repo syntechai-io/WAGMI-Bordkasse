@@ -1,0 +1,308 @@
+You are working on a FastAPI/Jinja2 web app called CrewLog. Fix the three 
+issues below exactly. Do not change any other files.
+
+─────────────────────────────────────────────────────────────────────────────
+FIX 1 — Quick Start only shows when NO active trip exists
+File: templates/index.html
+─────────────────────────────────────────────────────────────────────────────
+
+Find this block (around line 55):
+
+    {% if request.session.get('role') == 'admin' %}
+    <form method="post" action="/trips/quick-start" style="margin: 0;">
+        {{ csrf_input | safe }}
+        <button type="submit" class="cl-hero" style="width: 100%; text-align: left; cursor: pointer; font: inherit;">
+            <span class="cl-hero__icon" aria-hidden="true">⚡</span>
+            <span class="cl-hero__body">
+                <span class="cl-hero__title" style="display:block;">{{ t('dashboard.quick_start') }} {{ branding.brand_name }}</span>
+                <span class="cl-hero__desc" style="display:block;">{{ t('dashboard.quick_start_desc') }}</span>
+            </span>
+            <span class="cl-hero__chev" aria-hidden="true">›</span>
+        </button>
+    </form>
+    {% endif %}
+
+Change the opening condition from:
+    {% if request.session.get('role') == 'admin' %}
+
+To:
+    {% if request.session.get('role') == 'admin' and not active_trip %}
+
+This hides the Quick Start button whenever an active trip is already selected.
+When inside an existing trip the dashboard should only offer actions for that 
+trip — not a shortcut to archive it and create a brand-new one.
+
+─────────────────────────────────────────────────────────────────────────────
+FIX 2 — After creating a trip, go to dashboard (not the trip list)
+File: routers/trips.py
+─────────────────────────────────────────────────────────────────────────────
+
+Find the `create_trip` function. Near the end of it (around line 206), after 
+the solo crew member is committed but before the final return, the function 
+returns:
+
+    return RedirectResponse(url="/trips/", status_code=303)
+
+Replace those last two lines (the solo_sailing crew block + the return) so
+the full end of the function reads:
+
+    if solo_sailing == "true":
+        crew_code = (prefs.skipper_code if prefs and prefs.skipper_code else "SK")
+        crew_name = (prefs.skipper_name if prefs and prefs.skipper_name else "Skipper")
+        
+        crew_member = CrewMember(
+            trip_id=trip.id,
+            code=crew_code,
+            name=crew_name,
+            is_trip_admin=1
+        )
+        db.add(crew_member)
+        db.commit()
+    
+    TripService.set_selected_trip(request, trip.id)
+    return RedirectResponse(url="/", status_code=303)
+
+This makes the trip immediately active and selected, landing the user on the 
+dashboard for that trip — exactly the same behaviour that `/trips/quick-start`
+already uses (see lines 129–131 of the same file). 
+Import TripService is already at the top of the file.
+
+─────────────────────────────────────────────────────────────────────────────
+FIX 3 — Desktop navigation: replace crowded horizontal bar with sidebar
+─────────────────────────────────────────────────────────────────────────────
+
+The current horizontal top-bar nav is visually cluttered on desktop. The 
+off-canvas mobile drawer already has the correct structure and all links.
+The fix: on desktop (≥1024px), convert the drawer into a persistent left 
+sidebar; hide the horizontal desktop nav entirely. Mobile keeps the current 
+bottom-tab-bar + hamburger drawer pattern unchanged.
+
+── Step 3A: Edit `templates/layout.html` ────────────────────────────────────
+
+1. Find the <aside id="nav-drawer"> element (around line 139). Change:
+       <aside id="nav-drawer" class="nav-drawer" ...>
+   to:
+       <aside id="nav-drawer" class="nav-drawer cl-sidebar" ...>
+
+2. Find the <main> element:
+       <main class="ui-container ui-section content-container">
+   Change it to:
+       <main class="ui-container ui-section content-container cl-main-content">
+
+3. Find the desktop-nav div (around line 319):
+       <div class="desktop-nav flex items-center space-x-1 text-sm">
+   Add a `hidden` class so the old horizontal nav no longer renders. Change to:
+       <div class="desktop-nav flex items-center space-x-1 text-sm" style="display:none!important;">
+
+   (We're disabling the old inline horizontal nav entirely — all desktop 
+    navigation now lives in the sidebar.)
+
+4. Find the hamburger button (around line 299):
+       <button id="drawer-open" class="p-1.5 -ml-1.5 touch-action rounded-md" ... style="display: none;">
+   Change its style to only show on MOBILE, not desktop. The CSS in 
+   Step 3B will handle this, but also update the inline style to:
+       style=""
+   And remove the <style> block directly below it that reads:
+       <style>
+           @media (max-width: 1023px) {
+               #drawer-open { display: flex !important; }
+           }
+       </style>
+   (This block will be replaced by the sidebar CSS in Step 3B.)
+
+── Step 3B: Add sidebar CSS to `static/ui_ios_prime.css` ────────────────────
+
+Append the following block to the END of `static/ui_ios_prime.css`:
+
+/* ── 16. Desktop sidebar (≥1024px) ── */
+@media (min-width: 1024px) {
+    /* Hamburger: hide on desktop since sidebar is always visible */
+    #drawer-open { display: none !important; }
+
+    /* Sidebar: always-visible left panel on desktop */
+    .cl-sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        width: 220px !important;
+        height: 100vh !important;
+        transform: none !important;    /* cancel the mobile slide-in transform */
+        visibility: visible !important;
+        z-index: 30;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-right: 1px solid var(--cl-border, #e2e6ec);
+        border-radius: 0 !important;
+        box-shadow: 2px 0 16px rgba(15,41,66,.06);
+        /* Frosted glass on macOS/desktop Safari */
+        background: rgba(255,255,255,.97) !important;
+        backdrop-filter: saturate(180%) blur(14px);
+        -webkit-backdrop-filter: saturate(180%) blur(14px);
+    }
+
+    /* Push topbar and main content right to clear the sidebar */
+    .topbar {
+        left: 220px !important;
+        right: 0 !important;
+        width: auto !important;
+    }
+    .cl-main-content {
+        margin-left: 220px !important;
+    }
+    /* Footer (hidden on mobile, show on desktop) */
+    .footer-bar {
+        display: block !important;
+        margin-left: 220px;
+    }
+    /* Overlay: never show on desktop */
+    .nav-overlay { display: none !important; }
+
+    /* Make drawer header look like a branded sidebar header */
+    .cl-sidebar .drawer-header {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: var(--cl-navy, #0f2942);
+        color: white;
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .cl-sidebar .drawer-close-btn { display: none !important; }
+    .cl-sidebar .drawer-brand span { color: white; }
+    .cl-sidebar .drawer-brand span:last-child { color: rgba(255,255,255,.5); }
+
+    /* Drawer links: clean sidebar item style */
+    .cl-sidebar .drawer-link,
+    .cl-sidebar .drawer-section-toggle {
+        font-size: 13.5px;
+        padding: 9px 16px;
+        border-radius: 8px;
+        margin: 1px 8px;
+        width: calc(100% - 16px);
+        box-sizing: border-box;
+    }
+    .cl-sidebar .drawer-link:hover,
+    .cl-sidebar .drawer-section-toggle:hover {
+        background: var(--cl-accent-soft, #e7f0fa);
+        color: var(--cl-accent, #1d6fbb);
+    }
+    .cl-sidebar .drawer-link-active {
+        background: var(--cl-accent-soft, #e7f0fa);
+        color: var(--cl-accent, #1d6fbb);
+        font-weight: 600;
+    }
+    .cl-sidebar .drawer-body {
+        padding: 8px 0;
+    }
+    .cl-sidebar .drawer-footer {
+        border-top: 1px solid var(--cl-border, #e2e6ec);
+        padding: 12px 16px;
+        padding-bottom: 16px;
+    }
+    .cl-sidebar .drawer-divider {
+        margin: 6px 16px;
+        height: 1px;
+        background: var(--cl-border, #e2e6ec);
+    }
+    /* Sub-links indented inside sidebar */
+    .cl-sidebar .drawer-sub-links {
+        padding-left: 8px;
+    }
+    /* User info in sidebar footer */
+    .cl-sidebar .drawer-user-info {
+        font-size: 12px;
+        color: var(--cl-text-muted);
+        margin-bottom: 8px;
+        word-break: break-all;
+    }
+    .cl-sidebar .drawer-logout-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 36px;
+        border-radius: 8px;
+        background: var(--cl-surface-2, #f1f4f8);
+        border: 1px solid var(--cl-border);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--cl-text);
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+    }
+    .cl-sidebar .drawer-logout-btn:hover {
+        background: var(--cl-danger-soft);
+        color: var(--cl-danger);
+        border-color: transparent;
+    }
+
+    /* Topbar on desktop: simplified — just logo + brand, no nav items needed */
+    .topbar .container { max-width: 100%; padding-left: 20px; padding-right: 20px; }
+}
+
+/* Night mode: sidebar gets dark treatment on desktop too */
+@media (min-width: 1024px) {
+    html[data-theme="night"] .cl-sidebar {
+        background: rgba(10, 18, 35, .97) !important;
+        border-right-color: rgba(100, 140, 200, .15) !important;
+    }
+    html[data-theme="night"] .cl-sidebar .drawer-link,
+    html[data-theme="night"] .cl-sidebar .drawer-section-toggle {
+        color: rgba(200, 215, 235, .8);
+    }
+    html[data-theme="night"] .cl-sidebar .drawer-link:hover,
+    html[data-theme="night"] .cl-sidebar .drawer-section-toggle:hover {
+        background: rgba(29, 111, 187, .15);
+        color: rgba(100, 170, 255, .95);
+    }
+    html[data-theme="night"] .cl-sidebar .drawer-footer {
+        border-top-color: rgba(100, 140, 200, .15);
+    }
+    html[data-theme="night"] .cl-sidebar .drawer-divider {
+        background: rgba(100, 140, 200, .12);
+    }
+}
+
+── Step 3C: Ensure `ui_nav.js` does NOT slide-close the sidebar on desktop ──
+
+Open `static/ui_nav.js`. Find the code that handles the overlay click or any 
+code that calls `closeDrawer()` / hides the nav-drawer when clicking outside.
+
+Wrap any close-drawer logic in a mobile-only guard:
+
+    if (window.innerWidth < 1024) {
+        closeDrawer();   // (or whatever the existing function call is)
+    }
+
+Do the same for any `keydown Escape` handler that closes the drawer.
+This ensures clicking the overlay or pressing Escape on mobile still closes 
+the drawer, but on desktop the sidebar stays open permanently.
+
+─────────────────────────────────────────────────────────────────────────────
+VERIFICATION
+─────────────────────────────────────────────────────────────────────────────
+
+After all changes:
+
+1. Mobile (< 1024px):
+   - Hamburger icon appears in topbar ✓
+   - Tapping hamburger slides in the off-canvas drawer ✓
+   - Bottom tab bar visible with 5 SVG icons ✓
+   - Quick Start NOT shown on dashboard when a trip is active ✓
+
+2. Desktop (≥ 1024px):
+   - Left sidebar always visible, 220px wide, with dark header and full nav ✓
+   - Topbar pushed 220px right, no horizontal nav items ✓
+   - Main content pushed 220px right ✓
+   - Old horizontal nav items gone (display:none) ✓
+   - Bottom tab bar NOT visible ✓
+
+3. Trip creation:
+   - POST /trips/new → selects the new trip → redirects to / (dashboard) ✓
+   - Dashboard shows the new trip name immediately ✓
+   - Quick Start button NOT visible (trip now exists) ✓
+
+4. Run: python -m pytest test_regression_logbook.py -v
+   — all previously-passing tests must still pass ✓

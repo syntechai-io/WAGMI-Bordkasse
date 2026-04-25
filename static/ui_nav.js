@@ -15,11 +15,15 @@
     if (!drawer || !openBtn) return;
 
     openBtn.addEventListener('click', open);
-    if (closeBtn) closeBtn.addEventListener('click', close);
-    if (overlay) overlay.addEventListener('click', close);
+    if (closeBtn) closeBtn.addEventListener('click', function() {
+      if (window.innerWidth < 1024) close();
+    });
+    if (overlay) overlay.addEventListener('click', function() {
+      if (window.innerWidth < 1024) close();
+    });
 
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isOpen && window.innerWidth < 1024) {
         close();
         return;
       }
@@ -31,14 +35,14 @@
     var links = drawer.querySelectorAll('a[href]');
     links.forEach(function(link) {
       link.addEventListener('click', function() {
-        close();
+        if (window.innerWidth < 1024) close();
       });
     });
 
     var formButtons = drawer.querySelectorAll('form button[type="submit"]');
     formButtons.forEach(function(btn) {
       btn.addEventListener('click', function() {
-        close();
+        if (window.innerWidth < 1024) close();
       });
     });
 
