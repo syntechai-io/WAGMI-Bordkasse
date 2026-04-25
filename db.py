@@ -54,3 +54,7 @@ def init_db():
             "ON user_preferences(saas_user_id) "
             "WHERE saas_user_id IS NOT NULL"
         ))
+        conn.execute(text(
+            "ALTER TABLE trips "
+            "ADD COLUMN IF NOT EXISTS use_main_boat BOOLEAN NOT NULL DEFAULT TRUE"
+        ))

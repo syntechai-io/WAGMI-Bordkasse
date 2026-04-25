@@ -65,6 +65,19 @@
                     <input type="checkbox" name="day_trip" id="day_trip" value="true">
                     <span class="cl-check-row__label">☀️ Tagesstörn <span style="font-weight:400; color:var(--cl-text-subtle);">— Hin- und Rückfahrt am selben Tag</span></span>
                 </label>
+                <label class="cl-check-row">
+                    {# Hidden 'false' before the checkbox: when the box is checked the
+                       form sends both, MultiDict returns the LAST value ('true').
+                       When unchecked only the hidden 'false' is sent. Backend logic
+                       is `use_main_boat != "false"`. #}
+                    <input type="hidden" name="use_main_boat" value="false">
+                    <input type="checkbox" name="use_main_boat" id="use_main_boat" value="true" checked
+                           style="position:relative; z-index:1;">
+                    <span class="cl-check-row__label">
+                        🚢 Törn auf meinem Boot
+                        <span style="font-weight:400; color:var(--cl-text-subtle);">— zählt für Motor- &amp; Seemeilen-Statistik</span>
+                    </span>
+                </label>
                 <p class="cl-help cl-help--muted">{{ t('trips.create_hint') }}</p>
             </form>
         </section>

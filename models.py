@@ -77,6 +77,13 @@ class Trip(Base):
     imo_mmsi = Column(String(50), nullable=True)  # Vessel IMO/MMSI number for logbook PDFs
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    use_main_boat = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default='true',
+        comment="True = this trip counts toward the primary boat's stats",
+    )
     
     account = relationship("Account", backref="trips")
     crew_members = relationship("CrewMember", back_populates="trip", cascade="all, delete-orphan")

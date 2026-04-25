@@ -1,0 +1,429 @@
+You are working on the CrewLog FastAPI app. Fix two remaining UI bugs and 
+build one new feature (Boat Profile stats for "WAGMI"). Follow existing 
+patterns exactly.
+
+══════════════════════════════════════════════════════════════════════════════
+BUG 1 — iPad navigation still broken in Chrome and Safari
+══════════════════════════════════════════════════════════════════════════════
+
+The sidebar CSS approach via transform:none is unreliable because:
+  a) The drawer's base CSS may use display:none (not just transform)
+  b) aria-hidden="true" is set on the drawer in its initial HTML state and
+     ui_nav.js never removes it on desktop — assistive trees hide the element
+  c) iPad Pro 12.9" in landscape has viewport 1366px which exceeds the
+     1280px sidebar threshold, triggering the sidebar — but that sidebar
+     is invisible because of (a) and (b)
+
+The correct fix is a media-query-aware JavaScript init, not CSS overrides.
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1A — Replace the sidebar CSS approach with a JS-driven desktop init
+─────────────────────────────────────────────────────────────────────────────
+
+In static/ui_nav.js, find the init() function. At the very START of init(),
+before any event listeners are added, insert this desktop sidebar bootstrap:
+
+    function init() {
+        drawer = document.getElementById('nav-drawer');
+        overlay = document.getElementById('nav-overlay');
+        openBtn = document.getElementById('drawer-open');
+        closeBtn = document.getElementById('drawer-close');
+        body = document.body;
+
+        if (!drawer) return;
+
+        // ── Desktop sidebar: permanently open above 1279px ──────────────
+        function applyLayout() {
+            if (window.innerWidth >= 1280) {
+                // Force sidebar visible regardless of drawer state
+                drawer.style.removeProperty('display');
+                drawer.setAttribute('aria-hidden', 'false');
+                drawer.classList.add('drawer-open');
+                body.classList.remove('drawer-scroll-lock');
+                if (overlay) overlay.classList.remove('overlay-visible');
+                isOpen = false;  // not in "modal open" mode on desktop
+            } else {
+                // Mobile/tablet: ensure sidebar is in correct closed state
+                // unless it was explicitly opened by the user
+                if (!isOpen) {
+                    drawer.setAttribute('aria-hidden', 'true');
+                    drawer.classList.remove('drawer-open');
+                }
+            }
+        }
+
+        applyLayout();
+
+        // Re-apply on resize (handles orientation changes and DevTools resize)
+        var resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(applyLayout, 100);
+        });
+
+        if (!openBtn) { highlightActive(); return; }
+        // ... (rest of init unchanged) ...
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1B — Update the close() guard in ui_nav.js
+─────────────────────────────────────────────────────────────────────────────
+
+Find the close() function. Make sure it starts with:
+
+    function close() {
+        if (window.innerWidth >= 1280) return;
+        isOpen = false;
+        drawer.classList.remove('drawer-open');
+        if (overlay) overlay.classList.remove('overlay-visible');
+        body.classList.remove('drawer-scroll-lock');
+        if (openBtn) {
+            openBtn.setAttribute('aria-expanded', 'false');
+            openBtn.focus();
+        }
+        drawer.setAttribute('aria-hidden', 'true');
+    }
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1C — Fix the sidebar CSS in static/ui_ios_prime.css
+─────────────────────────────────────────────────────────────────────────────
+
+In the sidebar section (section 16), find and replace the entire 
+@media (min-width: 1280px) block with:
+
+    @media (min-width: 1280px) {
+        /* Hamburger hidden on desktop — sidebar is always open */
+        #drawer-open { display: none !important; }
+
+        /* Sidebar: JS adds drawer-open class; CSS makes it look like sidebar */
+        .cl-sidebar.drawer-open {
+            display: block !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            width: 220px !important;
+            height: 100dvh !important;
+            transform: none !important;
+            visibility: visible !important;
+            z-index: 30;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            border-right: 1px solid var(--cl-border, #e2e6ec);
+            border-radius: 0 !important;
+            box-shadow: 2px 0 16px rgba(15,41,66,.06);
+            background: rgba(255,255,255,.97) !important;
+            backdrop-filter: saturate(180%) blur(14px);
+            -webkit-backdrop-filter: saturate(180%) blur(14px);
+        }
+        /* Shift content right of sidebar */
+        .topbar    { left: 220px !important; right: 0 !important; width: auto !important; }
+        .cl-main-content  { margin-left: 220px !important; }
+        .footer-bar { display: block !important; margin-left: 220px; }
+        .nav-overlay { display: none !important; }
+        /* Hide the bottom tab bar on desktop */
+        .cl-tabbar { display: none !important; }
+        body { padding-bottom: 0 !important; }
+    }
+
+    /* Tablet 1024-1279px: mobile-drawer pattern (hamburger + tabbar, no sidebar) */
+    @media (min-width: 1024px) and (max-width: 1279px) {
+        .cl-tabbar { display: block !important; }
+        body { padding-bottom: var(--cl-tabbar-h, 56px) !important; }
+        body[data-has-actionbar="1"] .cl-tabbar { display: none !important; }
+        body[data-has-actionbar="1"] { padding-bottom: 0 !important; }
+        .footer-bar { display: none !important; }
+        .cl-main-content { margin-left: 0 !important; }
+        .topbar { left: 0 !important; width: 100% !important; }
+    }
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 1D — Hamburger button: restore mobile visibility in layout.html
+─────────────────────────────────────────────────────────────────────────────
+
+In templates/layout.html, find the <head> <style> block or find where the 
+hamburger button's visibility is controlled. Ensure the following CSS rule 
+exists (add it inside the existing <style> block in <head> if it's not there):
+
+    @media (max-width: 1279px) {
+        #drawer-open { display: flex !important; align-items: center; }
+    }
+    @media (min-width: 1280px) {
+        #drawer-open { display: none !important; }
+    }
+
+══════════════════════════════════════════════════════════════════════════════
+BUG 2 — Logbook page: three stacked full-width buttons, poor visual hierarchy
+══════════════════════════════════════════════════════════════════════════════
+
+Screenshot shows three full-width stacked buttons on the logbook list page.
+The primary action (Neuer Eintrag) should be prominent; secondary actions
+(Tages-Logbuch, Törn-Karte) should be smaller and side by side.
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 2A — Fix templates/logbook.html pageheader
+─────────────────────────────────────────────────────────────────────────────
+
+Find the pageheader actions div in templates/logbook.html and replace it with:
+
+    <div class="cl-pageheader__actions" style="flex-direction: column; align-items: stretch; gap: var(--cl-space-2); width: 100%;">
+        <a href="/logbook/new" class="cl-btn cl-btn--primary cl-btn--block">
+            ➕ {{ t('logbook.new_entry') }}
+        </a>
+        <div style="display: flex; gap: var(--cl-space-2);">
+            <a href="/logbook/day-new" class="cl-btn cl-btn--secondary cl-btn--sm" style="flex: 1; justify-content: center;">
+                📅 {{ t('logbook.day_logbook_title') }}
+            </a>
+            {% if active_trip %}
+            <a href="/trips/{{ active_trip.id }}/track" class="cl-btn cl-btn--secondary cl-btn--sm" style="flex: 1; justify-content: center;">
+                🗺️ {{ t('track.title') }}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+And update the pageheader itself to stack on mobile:
+
+    <header class="cl-pageheader" style="flex-direction: column; align-items: stretch; gap: var(--cl-space-3);">
+
+──────────────────────────────────────────────────────────────────────────────
+══════════════════════════════════════════════════════════════════════════════
+NEW FEATURE — WAGMI Boat Profile: track motor hours & miles per boat
+══════════════════════════════════════════════════════════════════════════════
+
+The user's primary boat is "WAGMI" (Bavaria 32C). Motor hours and sailed 
+miles should accumulate for WAGMI specifically. Trips on other boats can be 
+excluded with a checkbox. No Alembic — use the existing init_db() pattern.
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 3A — Add use_main_boat column to trips table
+─────────────────────────────────────────────────────────────────────────────
+
+In models.py, find the Trip class. After the `created_at` column, add:
+
+    use_main_boat = Column(Boolean, nullable=False, default=True,
+                           server_default='true',
+                           comment="True = this trip counts toward the primary boat's stats")
+
+In db.py, find the init_db() function and the block of 
+`conn.execute(text(...))` calls for idempotent column adds. Add this new 
+call at the end of that block:
+
+    conn.execute(text(
+        "ALTER TABLE trips "
+        "ADD COLUMN IF NOT EXISTS use_main_boat BOOLEAN NOT NULL DEFAULT TRUE"
+    ))
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 3B — Accept use_main_boat on trip creation (routers/trips.py)
+─────────────────────────────────────────────────────────────────────────────
+
+In routers/trips.py, find the create_trip function signature and add:
+
+    use_main_boat: Optional[str] = Form(None),
+
+Then in the Trip(...) constructor call, add:
+
+    use_main_boat=(use_main_boat != "false"),
+
+So the full Trip constructor reads:
+    trip = Trip(
+        name=name,
+        start_date=start_date,
+        end_date=start_date if day_trip == "true" else None,
+        use_main_boat=(use_main_boat != "false"),
+        status=TripStatus.active,
+        account_id=account_id
+    )
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 3C — Add boat toggle checkbox to trip creation form (templates/trips.html)
+─────────────────────────────────────────────────────────────────────────────
+
+In templates/trips.html, find the existing checkboxes (solo_sailing, day_trip).
+Add a third checkbox immediately after day_trip:
+
+    <label class="cl-check-row">
+        <input type="checkbox" name="use_main_boat" id="use_main_boat" value="true" checked>
+        <span class="cl-check-row__label">
+            🚢 Törn auf meinem Boot
+            <span id="boat-name-label" style="font-weight:400; color:var(--cl-text-subtle);">
+                — zählt für Motor- & Seemeilen-Statistik
+            </span>
+        </span>
+    </label>
+
+Note: because a unchecked checkbox sends nothing, the backend check 
+`use_main_boat != "false"` will correctly default to True when checked and
+be False only when explicitly deselected (we pass "false" as the unchecked 
+value using a hidden input trick). Update the checkbox markup to:
+
+    <label class="cl-check-row">
+        <input type="hidden" name="use_main_boat" value="false">
+        <input type="checkbox" name="use_main_boat" value="true" checked
+               style="position:relative; z-index:1;">
+        <span class="cl-check-row__label">
+            🚢 Törn auf meinem Boot
+            <span style="font-weight:400; color:var(--cl-text-subtle);">— zählt für Statistik</span>
+        </span>
+    </label>
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 3D — Add boat stats computation to routes_boat.py
+─────────────────────────────────────────────────────────────────────────────
+
+In routes_boat.py, find the boat_setup_page GET handler. Add stats 
+computation before the TemplateResponse call:
+
+    from sqlalchemy import func
+    from models import LogbookEntry, Trip as TripModel
+
+    account_id = get_active_account_id(request)
+    bp = get_or_create_boat_profile(db, account_id)
+
+    # Compute cumulative boat stats for trips flagged use_main_boat=True
+    wagmi_trips = db.query(TripModel).filter(
+        TripModel.account_id == account_id,
+        TripModel.use_main_boat == True
+    ).all()
+    wagmi_trip_ids = [t.id for t in wagmi_trips]
+
+    # Total miles: sum of dist_day_nm across all WAGMI logbook entries
+    total_nm = 0.0
+    if wagmi_trip_ids:
+        total_nm = float(
+            db.query(func.coalesce(func.sum(LogbookEntry.dist_day_nm), 0))
+            .filter(LogbookEntry.trip_id.in_(wagmi_trip_ids))
+            .scalar() or 0
+        )
+
+    # Motor hours: per trip, take (max - min) eng_hours_total, sum across trips
+    total_motor_h = 0.0
+    for tid in wagmi_trip_ids:
+        readings = db.query(LogbookEntry.eng_hours_total).filter(
+            LogbookEntry.trip_id == tid,
+            LogbookEntry.eng_hours_total.isnot(None)
+        ).all()
+        vals = [r[0] for r in readings if r[0] is not None]
+        if len(vals) >= 2:
+            total_motor_h += max(vals) - min(vals)
+
+    boat_stats = {
+        "total_nm":      round(total_nm, 1),
+        "total_motor_h": round(total_motor_h, 1),
+        "trip_count":    len(wagmi_trip_ids),
+        "last_trip":     wagmi_trips[0].start_date if wagmi_trips else None,
+    }
+
+    return templates.TemplateResponse("admin_boat.html", {
+        "request": request,
+        "boat_profile": bp,
+        "sail_profile": sp,
+        "is_owner": user.is_owner,
+        "boat_stats": boat_stats,          # ← add this
+    })
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 3E — Add stats panel to templates/admin_boat.html
+─────────────────────────────────────────────────────────────────────────────
+
+READ templates/admin_boat.html first to find the right insertion point.
+Then add the following stats card at the TOP of the page content 
+(immediately after the cl-pageheader), before the boat name form card:
+
+    {% if boat_stats %}
+    <section class="cl-card">
+        <header class="cl-card__head">
+            <h2 class="cl-card__title">📊 {{ boat_profile.boat_name or 'Mein Boot' }} — Statistik</h2>
+        </header>
+        <div class="cl-grid cl-grid--2">
+            <div class="cl-kpi">
+                <span class="cl-kpi__label">⛵ Gesegelte Seemeilen</span>
+                <span class="cl-kpi__value">{{ boat_stats.total_nm }} sm</span>
+            </div>
+            <div class="cl-kpi">
+                <span class="cl-kpi__label">⚙️ Motorstunden</span>
+                <span class="cl-kpi__value">{{ boat_stats.total_motor_h }} h</span>
+            </div>
+            <div class="cl-kpi">
+                <span class="cl-kpi__label">🗓️ Törns</span>
+                <span class="cl-kpi__value">{{ boat_stats.trip_count }}</span>
+            </div>
+            <div class="cl-kpi">
+                <span class="cl-kpi__label">📅 Letzter Törn</span>
+                <span class="cl-kpi__value" style="font-size:16px;">
+                    {% if boat_stats.last_trip %}
+                        {{ boat_stats.last_trip.strftime('%d.%m.%Y') }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        <p class="cl-help cl-help--muted">
+            Nur Törns mit aktiviertem "🚢 Törn auf meinem Boot" werden gezählt.
+        </p>
+    </section>
+    {% endif %}
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 3F — Add boat stats mini-widget to dashboard (templates/index.html)
+─────────────────────────────────────────────────────────────────────────────
+
+The dashboard already receives branding context (boat_profile data is in 
+branding). To show WAGMI stats on the dashboard, add a quick-access hero 
+link that takes the user to the full boat stats page.
+
+In templates/index.html, find the cl-stack div. After the Tages-Recap hero 
+link and before the expense KPI grid, add:
+
+    {% if branding and not branding.is_default %}
+    <a href="/admin/boat" class="cl-hero" style="background: var(--cl-surface-2);">
+        <span class="cl-hero__icon" aria-hidden="true">⚓</span>
+        <div class="cl-hero__body">
+            <p class="cl-hero__title" style="font-size:15px;">{{ branding.brand_name }}</p>
+            <p class="cl-hero__desc">Motor- & Seemeilen-Statistik ansehen</p>
+        </div>
+        <span class="cl-hero__chev" aria-hidden="true">›</span>
+    </a>
+    {% endif %}
+
+─────────────────────────────────────────────────────────────────────────────
+STEP 3G — Set up WAGMI in the boat profile (data setup instruction)
+─────────────────────────────────────────────────────────────────────────────
+
+After the code changes are deployed, navigate to /admin/boat and enter:
+    Bootsname:  WAGMI
+    Hersteller: Bavaria
+    Modell:     32C
+    Bootstyp:   Segelboot
+    Heimathafen: (your home port)
+
+Save. From this point, "WAGMI" appears in the topbar branding, the 
+dashboard shows the boat stats link, and all future trips default to 
+counting toward WAGMI's stats.
+
+══════════════════════════════════════════════════════════════════════════════
+VERIFICATION
+══════════════════════════════════════════════════════════════════════════════
+
+NAVIGATION:
+1. iPhone 375px: hamburger visible, tapping opens drawer, tapping a link 
+   closes it, bottom tab bar visible ✓
+2. iPad 1024px (landscape or portrait in Chrome): hamburger visible, 
+   drawer slides in/out, bottom tab bar visible, no 220px content shift ✓
+3. Desktop 1440px: sidebar permanently visible at 220px, content shifted 
+   right, no hamburger, no tab bar ✓
+4. Resize browser from 1400px to 900px: sidebar disappears, hamburger 
+   appears, tab bar appears — no layout jump ✓
+
+BOAT FEATURE:
+5. GET /trips/ → trip creation form shows "🚢 Törn auf meinem Boot" 
+   checkbox, checked by default ✓
+6. Create trip with checkbox unchecked → trip.use_main_boat = False ✓
+7. GET /admin/boat → stats card shows total nm, motor hours, trip count ✓
+8. Dashboard with boat profile set → WAGMI hero link appears ✓
+
+REGRESSION:
+9. python -m pytest test_regression_logbook.py -v → all previously-passing 
+   tests still pass ✓
+10. Server starts cleanly after init_db() runs the new ALTER TABLE ✓

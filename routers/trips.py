@@ -137,6 +137,7 @@ async def create_trip(
     start_date: date = Form(...),
     solo_sailing: Optional[str] = Form(None),
     day_trip: Optional[str] = Form(None),
+    use_main_boat: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     """Create a new trip"""
@@ -156,6 +157,10 @@ async def create_trip(
         name=name,
         start_date=start_date,
         end_date=start_date if day_trip == "true" else None,
+        # Hidden "false" + checkbox "true" pattern: when checked the
+        # form posts both, Starlette MultiDict returns the LAST value
+        # ("true"), so the trip counts toward main-boat stats by default.
+        use_main_boat=(use_main_boat != "false"),
         status=TripStatus.active,
         account_id=account_id
     )

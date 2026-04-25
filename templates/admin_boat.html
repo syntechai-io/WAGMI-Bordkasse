@@ -7,6 +7,41 @@
         ⛵ {{ t('admin.boat_setup.title') }}
     </h1>
 
+    {% if boat_stats %}
+    <section class="cl-card" style="margin-bottom: var(--cl-space-5);">
+        <header class="cl-card__head">
+            <h2 class="cl-card__title">📊 {{ boat_profile.boat_name or 'Mein Boot' }} — Statistik</h2>
+        </header>
+        <div class="cl-grid cl-grid--2">
+            <div class="cl-kpi">
+                <span class="cl-kpi__label">⛵ Gesegelte Seemeilen</span>
+                <span class="cl-kpi__value">{{ boat_stats.total_nm }} sm</span>
+            </div>
+            <div class="cl-kpi">
+                <span class="cl-kpi__label">⚙️ Motorstunden</span>
+                <span class="cl-kpi__value">{{ boat_stats.total_motor_h }} h</span>
+            </div>
+            <div class="cl-kpi">
+                <span class="cl-kpi__label">🗓️ Törns</span>
+                <span class="cl-kpi__value">{{ boat_stats.trip_count }}</span>
+            </div>
+            <div class="cl-kpi">
+                <span class="cl-kpi__label">📅 Letzter Törn</span>
+                <span class="cl-kpi__value" style="font-size:16px;">
+                    {% if boat_stats.last_trip %}
+                        {{ boat_stats.last_trip.strftime('%d.%m.%Y') }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        <p class="cl-help cl-help--muted">
+            Nur Törns mit aktiviertem &quot;🚢 Törn auf meinem Boot&quot; werden gezählt.
+        </p>
+    </section>
+    {% endif %}
+
     {% if request.session.pop('success', None) == 'boat_saved' %}
     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
         {{ t('common.saved_successfully') }}

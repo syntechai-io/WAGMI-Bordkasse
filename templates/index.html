@@ -52,6 +52,18 @@ function setCurrentLocalTime(inputId) {
             <span class="cl-hero__chev" aria-hidden="true">›</span>
         </a>
 
+        {% if branding and not branding.is_default %}
+        {# Boat profile is set up — quick link to the boat's accumulated stats. #}
+        <a href="/admin/boat" class="cl-hero" style="background: var(--cl-surface-2);">
+            <span class="cl-hero__icon" aria-hidden="true">⚓</span>
+            <div class="cl-hero__body">
+                <p class="cl-hero__title" style="font-size:15px;">{{ branding.brand_name }}</p>
+                <p class="cl-hero__desc">Motor- &amp; Seemeilen-Statistik ansehen</p>
+            </div>
+            <span class="cl-hero__chev" aria-hidden="true">›</span>
+        </a>
+        {% endif %}
+
         <a href="/logbook/day-recap" class="cl-hero {% if active_trip and active_trip.end_date and active_trip.end_date == active_trip.start_date %}cl-hero--featured{% endif %}">
             <span class="cl-hero__icon" aria-hidden="true">📋</span>
             <div class="cl-hero__body">

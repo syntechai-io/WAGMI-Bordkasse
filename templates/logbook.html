@@ -2,22 +2,24 @@
 
 {% block content %}
 <div class="cl-page">
-    <header class="cl-pageheader">
+    <header class="cl-pageheader" style="flex-direction: column; align-items: stretch; gap: var(--cl-space-3);">
         <div class="cl-pageheader__main">
             <h1 class="cl-title">📓 {{ t('logbook.title') }}</h1>
         </div>
-        <div class="cl-pageheader__actions">
-            <a href="/logbook/day-new" class="cl-btn cl-btn--success">
-                📅 {{ t('logbook.day_logbook_title') }}
-            </a>
-            {% if active_trip %}
-            <a href="/trips/{{ active_trip.id }}/track" class="cl-btn cl-btn--accent">
-                🗺️ {{ t('track.title') }}
-            </a>
-            {% endif %}
-            <a href="/logbook/new" class="cl-btn cl-btn--primary">
+        <div class="cl-pageheader__actions" style="flex-direction: column; align-items: stretch; gap: var(--cl-space-2); width: 100%;">
+            <a href="/logbook/new" class="cl-btn cl-btn--primary cl-btn--block">
                 ➕ {{ t('logbook.new_entry') }}
             </a>
+            <div style="display: flex; gap: var(--cl-space-2);">
+                <a href="/logbook/day-new" class="cl-btn cl-btn--secondary cl-btn--sm" style="flex: 1; justify-content: center;">
+                    📅 {{ t('logbook.day_logbook_title') }}
+                </a>
+                {% if active_trip %}
+                <a href="/trips/{{ active_trip.id }}/track" class="cl-btn cl-btn--secondary cl-btn--sm" style="flex: 1; justify-content: center;">
+                    🗺️ {{ t('track.title') }}
+                </a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
