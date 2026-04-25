@@ -10,6 +10,10 @@
 <link rel="stylesheet" href="/static/ui_night_mode.css?v=28">
 <style>
   body { margin: 0; padding: 24px; font-family: Inter, system-ui, sans-serif; }
+  /* Force tabbar visible on desktop too — diagnostic page must show
+     every primitive regardless of viewport. cl_design.css and
+     ui_ios_prime.css both ship `display: none !important` on desktop. */
+  .cl-tabbar { display: block !important; position: relative !important; }
   .grid { display: grid; gap: 16px; max-width: 900px; margin: 0 auto; }
   .row { display: flex; gap: 12px; flex-wrap: wrap; }
   .swatch {
@@ -113,7 +117,7 @@
   <header class="cl-card__head">
     <h2 class="cl-card__title">Mock Tab Bar</h2>
   </header>
-  <nav class="cl-tabbar" style="position:relative; padding:8px 0;">
+  <nav class="cl-tabbar" style="position:relative; padding:8px 0; display:block;">
     <div class="cl-tabbar__inner">
       <a href="#" class="cl-tabbar__item">
         <span class="cl-tabbar__icon">

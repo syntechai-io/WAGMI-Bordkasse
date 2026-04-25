@@ -5,7 +5,7 @@ integrations = ["python_database:1.0.0", "python_anthropic:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["cacert", "cairo", "cargo", "freefont_ttf", "freetype", "gdk-pixbuf", "glib", "glibcLocales", "gobject-introspection", "imagemagick", "lcms2", "libffi", "libiconv", "libimagequant", "libjpeg", "libtiff", "libuv", "libwebp", "libxcrypt", "openjpeg", "pkg-config", "rustc", "tcl", "tk", "zlib"]
+packages = ["cacert", "cairo", "cargo", "freefont_ttf", "freetype", "gdk-pixbuf", "gitFull", "glib", "glibcLocales", "gobject-introspection", "imagemagick", "lcms2", "libffi", "libiconv", "libimagequant", "libjpeg", "libtiff", "libuv", "libwebp", "libxcrypt", "openjpeg", "pkg-config", "playwright-driver", "rustc", "tcl", "tk", "zlib"]
 
 [workflows]
 runButton = "Project"
