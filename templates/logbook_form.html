@@ -1262,13 +1262,18 @@ document.addEventListener('gps-tracking-stopped', () => {
     trackingBanner.classList.add('hidden');
 });
 
+// Map UI language to a BCP47 region-tagged locale for consistent time-format
+// width across browsers. Unknown locales fall back to the raw lang code, then
+// to the browser default, so adding a new language stays a JSON-only change.
+const TIME_LOCALES = { en: 'en-GB', de: 'de-DE' };
+
 document.addEventListener('gps-position-update', (event) => {
     const position = event.detail.position;
     const accuracy = position.coords.accuracy;
     const now = new Date();
-    // Use the active UI language so any future locale formats time correctly.
-    // hour12:false locks 24h format across every locale (matches DE width).
-    const timeStr = now.toLocaleTimeString(i18n.lang || undefined, { hour12: false });
+    const timeLocale = TIME_LOCALES[i18n.lang] || i18n.lang || undefined;
+    // hour12:false locks 24h format on every locale (matches DE width).
+    const timeStr = now.toLocaleTimeString(timeLocale, { hour12: false });
 
     statusText.textContent = `${i18n.gps_position_prefix} ${position.coords.latitude.toFixed(4)}°, ${position.coords.longitude.toFixed(4)}°`;
     accuracyText.textContent = `${i18n.gps_accuracy}: ${Math.round(accuracy)}m`;
