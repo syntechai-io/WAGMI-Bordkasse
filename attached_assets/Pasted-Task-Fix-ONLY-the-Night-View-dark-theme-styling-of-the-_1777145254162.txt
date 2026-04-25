@@ -1,0 +1,65 @@
+Task: Fix ONLY the Night View / dark theme styling of the CrewLog app. Do not change layout, routes, data logic, components, navigation structure, labels, icons, forms, buttons, or business logic.
+
+Current issue:
+The night view still contains large white cards, blue buttons, green buttons, mixed colors, and low-contrast elements. For true night use on a boat, the UI must be almost entirely black with red text and red outlines only.
+
+Scope:
+Only update theme/CSS styling for the existing night/dark mode. Do not refactor components unless absolutely necessary to apply theme classes. Do not rename files, routes, components, or props.
+
+Required Night View design:
+- Page background: pure black `#000000`
+- Cards/panels/forms: black or near-black only, preferably `#000000` or `#050505`
+- Text: red only, preferably `#ff2b2b`
+- Secondary text/placeholders: darker red, e.g. `#9b1c1c`
+- Borders: dark red, e.g. `#7a0000`
+- Inputs: black background, red text, red border
+- Buttons: black or very dark red background, red text, red border
+- Active navigation item: subtle dark red background, red icon/text
+- Inactive navigation items: muted dark red, not grey/blue
+- Checkboxes: black background, red border, red checkmark
+- Icons: red only
+- Remove white backgrounds from all cards, modals, panels, sheets, dropdowns, and form containers in night mode
+- Remove blue, green, orange, grey, and white highlight colors from night mode
+- Keep spacing, alignment, responsive behavior, and all existing functionality unchanged
+
+Implementation instructions:
+1. Find the global theme file(s), Tailwind config, CSS variables, or dark mode class logic currently used by the app.
+2. Implement a dedicated night theme token set, for example:
+   - `--night-bg: #000000`
+   - `--night-surface: #050505`
+   - `--night-surface-2: #0a0000`
+   - `--night-text: #ff2b2b`
+   - `--night-muted: #9b1c1c`
+   - `--night-border: #7a0000`
+   - `--night-accent: #ff3333`
+3. Apply these tokens only when night/dark mode is active.
+4. Override all common elements in night mode:
+   - `body`
+   - main app container
+   - cards
+   - panels
+   - buttons
+   - inputs
+   - selects
+   - textareas
+   - labels
+   - placeholders
+   - bottom navigation
+   - top header
+   - modals/dialogs/sheets/dropdowns
+5. Do not touch light mode.
+6. Do not touch existing German copy.
+7. Do not change component hierarchy.
+8. Do not remove icons.
+
+Acceptance criteria:
+- In night mode, there are no white cards or white sections anywhere.
+- In night mode, there are no blue, green, orange, or grey primary UI colors.
+- The entire app is readable with black backgrounds and red typography.
+- The screenshot screen “Törns verwalten” must become black/red only.
+- Inputs, buttons, checkboxes, cards, header, bottom navigation, and active tab must all follow the black/red night palette.
+- Existing layout and functionality remain unchanged.
+- Light mode remains unchanged.
+
+Important:
+Make the smallest possible styling-only patch. After implementation, provide a concise summary of changed files and confirm that no routes, state logic, API calls, or data models were changed.

@@ -1,169 +1,508 @@
-/* CrewLog Night Mode — red on black for night sailing.
+/* CrewLog Night Mode — pure red on black for night sailing on a boat.
    Activated by setting `data-theme="night"` on <html>.
-   Goal: preserve dark adaptation. Everything is a shade of red on near-black. */
+   Goal: preserve dark adaptation. Black backgrounds, red text/borders only.
+   No blue, green, orange, grey, or white anywhere.
+   Loaded LAST so it overrides cl_design.css and ui_ios_prime.css. */
 
 html[data-theme="night"] {
   color-scheme: dark;
 
-  --night-red: #ff2a2a;
-  --night-red-dim: #cc2020;
-  --night-red-faint: #8a1010;
-  --night-red-muted: #b01818;
+  /* Night palette — black + red only */
+  --night-bg:        #000000;
+  --night-surface:   #050505;
+  --night-surface-2: #0a0000;
+  --night-text:      #ff2b2b;
+  --night-muted:     #9b1c1c;
+  --night-border:    #7a0000;
+  --night-accent:    #ff3333;
 
-  --bg: #000000;
-  --surface: #0a0000;
-  --surface-2: #140404;
-  --border: #4a0a0a;
-  --border-light: #2a0606;
-  --text: var(--night-red);
-  --text-secondary: var(--night-red-dim);
-  --muted: var(--night-red-faint);
+  /* Override the legacy ui_v1 design tokens */
+  --bg:              var(--night-bg);
+  --surface:         var(--night-surface);
+  --surface-2:       var(--night-surface-2);
+  --border:          var(--night-border);
+  --border-light:    var(--night-border);
+  --text:            var(--night-text);
+  --text-secondary:  var(--night-muted);
+  --muted:           var(--night-muted);
 
-  --accent: var(--night-red);
-  --accent-light: #2a0606;
-  --accent-2: var(--night-red-dim);
+  --accent:          var(--night-accent);
+  --accent-light:    var(--night-surface-2);
+  --accent-2:        var(--night-text);
 
-  --warning: var(--night-red);
-  --success: var(--night-red);
-  --success-light: #1a0303;
-  --warn: var(--night-red);
-  --warn-light: #1a0303;
-  --danger: var(--night-red);
-  --danger-light: #1a0303;
-  --coral: var(--night-red);
+  --warning:         var(--night-text);
+  --success:         var(--night-text);
+  --success-light:   var(--night-surface-2);
+  --warn:            var(--night-text);
+  --warn-light:      var(--night-surface-2);
+  --danger:          var(--night-text);
+  --danger-light:    var(--night-surface-2);
+  --coral:           var(--night-text);
 
-  --navy-deep: #0a0000;
-  --shadow-sm: 0 1px 2px rgba(255, 42, 42, 0.10);
-  --shadow: 0 4px 12px rgba(255, 42, 42, 0.10);
-  --shadow-lg: 0 8px 24px rgba(255, 42, 42, 0.15);
+  --navy-deep:       var(--night-bg);
+  --shadow-sm:       0 1px 2px rgba(255, 43, 43, 0.10);
+  --shadow:          0 4px 12px rgba(255, 43, 43, 0.10);
+  --shadow-lg:       0 8px 24px rgba(255, 43, 43, 0.15);
+
+  /* Override the cl-* design tokens used by every page (cl_design.css). */
+  --cl-bg:            var(--night-bg);
+  --cl-surface:       var(--night-surface);
+  --cl-surface-2:     var(--night-surface-2);
+  --cl-border:        var(--night-border);
+  --cl-border-strong: var(--night-border);
+  --cl-text:          var(--night-text);
+  --cl-text-muted:    var(--night-muted);
+  --cl-text-subtle:   var(--night-muted);
+  --cl-navy:          var(--night-text);
+  --cl-navy-soft:     var(--night-text);
+  --cl-accent:        var(--night-accent);
+  --cl-accent-soft:   var(--night-surface-2);
+  --cl-success:       var(--night-text);
+  --cl-success-soft:  var(--night-surface-2);
+  --cl-warn:          var(--night-text);
+  --cl-warn-soft:     var(--night-surface-2);
+  --cl-danger:        var(--night-text);
+  --cl-danger-soft:   var(--night-surface-2);
+  --cl-shadow:        0 1px 2px rgba(255, 43, 43, 0.10), 0 4px 12px rgba(255, 43, 43, 0.10);
 }
 
+/* ── Page-level black background ── */
 html[data-theme="night"],
 html[data-theme="night"] body {
-  background: #000 !important;
-  color: var(--night-red) !important;
+  background: var(--night-bg) !important;
+  color: var(--night-text) !important;
 }
 
-/* Tame whites/grays from Tailwind utility classes everywhere */
+/* Mobile rubber-band & overscroll backgrounds (set by ui_ios_prime.css) */
+@media (max-width: 1023px) {
+  html[data-theme="night"],
+  html[data-theme="night"] body {
+    background-color: var(--night-bg) !important;
+  }
+}
+
+/* ── Tame all Tailwind utility colors site-wide ── */
 html[data-theme="night"] *,
 html[data-theme="night"] *::before,
 html[data-theme="night"] *::after {
-  border-color: var(--border) !important;
+  border-color: var(--night-border) !important;
   text-shadow: none !important;
 }
 
+/* Backgrounds: collapse every Tailwind palette to surface */
 html[data-theme="night"] .bg-white,
 html[data-theme="night"] [class*="bg-gray-"],
 html[data-theme="night"] [class*="bg-slate-"],
+html[data-theme="night"] [class*="bg-zinc-"],
+html[data-theme="night"] [class*="bg-neutral-"],
+html[data-theme="night"] [class*="bg-stone-"],
 html[data-theme="night"] [class*="bg-sky-"],
 html[data-theme="night"] [class*="bg-blue-"],
+html[data-theme="night"] [class*="bg-cyan-"],
+html[data-theme="night"] [class*="bg-teal-"],
 html[data-theme="night"] [class*="bg-indigo-"],
+html[data-theme="night"] [class*="bg-violet-"],
+html[data-theme="night"] [class*="bg-purple-"],
 html[data-theme="night"] [class*="bg-emerald-"],
 html[data-theme="night"] [class*="bg-green-"],
+html[data-theme="night"] [class*="bg-lime-"],
 html[data-theme="night"] [class*="bg-amber-"],
 html[data-theme="night"] [class*="bg-yellow-"],
 html[data-theme="night"] [class*="bg-red-"],
 html[data-theme="night"] [class*="bg-rose-"],
+html[data-theme="night"] [class*="bg-pink-"],
+html[data-theme="night"] [class*="bg-fuchsia-"],
 html[data-theme="night"] [class*="bg-orange-"] {
-  background-color: var(--surface) !important;
+  background-color: var(--night-surface) !important;
   background-image: none !important;
 }
 
-html[data-theme="night"] [class*="text-white"],
+/* Gradients: kill them */
+html[data-theme="night"] [class*="bg-gradient-"],
+html[data-theme="night"] .ocean-gradient,
+html[data-theme="night"] .navy-shell {
+  background-image: none !important;
+  background: var(--night-surface) !important;
+}
+
+/* Text: collapse every Tailwind palette to red */
+html[data-theme="night"] .text-white,
 html[data-theme="night"] [class*="text-gray-"],
 html[data-theme="night"] [class*="text-slate-"],
+html[data-theme="night"] [class*="text-zinc-"],
+html[data-theme="night"] [class*="text-neutral-"],
+html[data-theme="night"] [class*="text-stone-"],
 html[data-theme="night"] [class*="text-sky-"],
 html[data-theme="night"] [class*="text-blue-"],
+html[data-theme="night"] [class*="text-cyan-"],
+html[data-theme="night"] [class*="text-teal-"],
 html[data-theme="night"] [class*="text-indigo-"],
+html[data-theme="night"] [class*="text-violet-"],
+html[data-theme="night"] [class*="text-purple-"],
 html[data-theme="night"] [class*="text-emerald-"],
 html[data-theme="night"] [class*="text-green-"],
+html[data-theme="night"] [class*="text-lime-"],
 html[data-theme="night"] [class*="text-amber-"],
 html[data-theme="night"] [class*="text-yellow-"],
 html[data-theme="night"] [class*="text-red-"],
 html[data-theme="night"] [class*="text-rose-"],
+html[data-theme="night"] [class*="text-pink-"],
+html[data-theme="night"] [class*="text-fuchsia-"],
 html[data-theme="night"] [class*="text-orange-"],
 html[data-theme="night"] .ui-muted,
 html[data-theme="night"] .maritime-header {
-  color: var(--night-red) !important;
+  color: var(--night-text) !important;
 }
 
-html[data-theme="night"] [class*="border-"] {
-  border-color: var(--border) !important;
+/* Borders */
+html[data-theme="night"] [class*="border-"],
+html[data-theme="night"] [class*="divide-"] > * + * {
+  border-color: var(--night-border) !important;
 }
 
-/* Cards / surfaces */
+/* Hover backgrounds: keep dark */
+html[data-theme="night"] [class*="hover:bg-"]:hover {
+  background-color: var(--night-surface-2) !important;
+}
+
+/* ── Legacy cards / surfaces (ui_v1.css) ── */
 html[data-theme="night"] .porthole-card,
 html[data-theme="night"] .ui-card,
 html[data-theme="night"] .navy-shell,
 html[data-theme="night"] .topbar,
 html[data-theme="night"] .footer-bar,
 html[data-theme="night"] .nav-drawer,
-html[data-theme="night"] .dropdown-content,
-html[data-theme="night"] .ocean-gradient {
-  background: var(--surface) !important;
+html[data-theme="night"] .dropdown-content {
+  background: var(--night-surface) !important;
   background-image: none !important;
-  color: var(--night-red) !important;
-  border: 1px solid var(--border) !important;
+  color: var(--night-text) !important;
+  border: 1px solid var(--night-border) !important;
   box-shadow: var(--shadow) !important;
 }
 
-/* Inputs */
+/* ── cl-* design system primitives (cl_design.css) ── */
+html[data-theme="night"] .cl-page,
+html[data-theme="night"] .cl-main-content,
+html[data-theme="night"] main {
+  background: var(--night-bg) !important;
+  color: var(--night-text) !important;
+}
+
+html[data-theme="night"] .cl-title,
+html[data-theme="night"] .cl-section-title,
+html[data-theme="night"] .cl-card__title,
+html[data-theme="night"] .cl-subtitle,
+html[data-theme="night"] .cl-help,
+html[data-theme="night"] .cl-help--muted,
+html[data-theme="night"] .cl-help--success,
+html[data-theme="night"] .cl-help--warn,
+html[data-theme="night"] .cl-muted,
+html[data-theme="night"] .cl-subtle,
+html[data-theme="night"] .cl-label,
+html[data-theme="night"] .cl-check-row__label,
+html[data-theme="night"] .cl-pageheader__main {
+  color: var(--night-text) !important;
+}
+
+html[data-theme="night"] .cl-card,
+html[data-theme="night"] .cl-card--quiet,
+html[data-theme="night"] .cl-card--flat,
+html[data-theme="night"] .cl-entry,
+html[data-theme="night"] .cl-hero,
+html[data-theme="night"] .cl-hero--featured {
+  background: var(--night-surface) !important;
+  border: 1px solid var(--night-border) !important;
+  color: var(--night-text) !important;
+  box-shadow: var(--shadow) !important;
+}
+html[data-theme="night"] .cl-entry--error {
+  background: var(--night-surface-2) !important;
+  border-color: var(--night-text) !important;
+}
+
+/* Inputs: black bg, red text, red border */
+html[data-theme="night"] .cl-input,
+html[data-theme="night"] .cl-select,
+html[data-theme="night"] .cl-input--textarea,
 html[data-theme="night"] input,
 html[data-theme="night"] select,
 html[data-theme="night"] textarea {
-  background-color: #000 !important;
-  color: var(--night-red) !important;
-  border: 1px solid var(--border) !important;
-  caret-color: var(--night-red) !important;
+  background-color: var(--night-bg) !important;
+  color: var(--night-text) !important;
+  border: 1px solid var(--night-border) !important;
+  caret-color: var(--night-text) !important;
+}
+html[data-theme="night"] .cl-input--file {
+  background-color: var(--night-surface-2) !important;
+}
+html[data-theme="night"] .cl-input--error {
+  border-color: var(--night-text) !important;
+  background-color: var(--night-surface-2) !important;
 }
 html[data-theme="night"] input::placeholder,
 html[data-theme="night"] textarea::placeholder {
-  color: var(--night-red-muted) !important;
+  color: var(--night-muted) !important;
   opacity: 1 !important;
 }
+html[data-theme="night"] .cl-input:focus,
+html[data-theme="night"] .cl-select:focus,
 html[data-theme="night"] input:focus,
 html[data-theme="night"] select:focus,
 html[data-theme="night"] textarea:focus {
-  outline: 1px solid var(--night-red) !important;
-  outline-offset: 1px !important;
-  box-shadow: 0 0 0 2px rgba(255, 42, 42, 0.25) !important;
+  outline: none !important;
+  border-color: var(--night-text) !important;
+  box-shadow: 0 0 0 3px rgba(255, 43, 43, 0.20) !important;
 }
 
-/* Buttons */
+/* Selects: rewrite the embedded chevron SVG to red */
+html[data-theme="night"] .cl-select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%23ff2b2b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+}
+
+/* Checkbox / radio rows */
+html[data-theme="night"] .cl-check-row {
+  background: var(--night-surface) !important;
+  border: 1px solid var(--night-border) !important;
+}
+html[data-theme="night"] .cl-check-row:hover {
+  background: var(--night-surface-2) !important;
+}
+html[data-theme="night"] input[type="checkbox"],
+html[data-theme="night"] input[type="radio"],
+html[data-theme="night"] .cl-check-row input[type="checkbox"],
+html[data-theme="night"] .cl-check-row input[type="radio"] {
+  accent-color: var(--night-text) !important;
+  background-color: var(--night-bg) !important;
+  border: 1px solid var(--night-border) !important;
+}
+
+/* ── Buttons: every variant becomes black + red border + red text ── */
+html[data-theme="night"] .cl-btn,
+html[data-theme="night"] .cl-btn--primary,
+html[data-theme="night"] .cl-btn--accent,
+html[data-theme="night"] .cl-btn--success,
+html[data-theme="night"] .cl-btn--warn,
+html[data-theme="night"] .cl-btn--secondary,
+html[data-theme="night"] .cl-btn--ghost,
+html[data-theme="night"] .cl-btn--ghost-danger,
+html[data-theme="night"] .cl-iconbtn,
 html[data-theme="night"] button,
-html[data-theme="night"] .ocean-gradient,
-html[data-theme="night"] a.nav-item {
-  color: var(--night-red) !important;
+html[data-theme="night"] .btn {
+  background: var(--night-bg) !important;
+  background-image: none !important;
+  color: var(--night-text) !important;
+  border: 1px solid var(--night-border) !important;
+  box-shadow: none !important;
 }
-html[data-theme="night"] button:not([disabled]):hover,
-html[data-theme="night"] a:hover {
+html[data-theme="night"] .cl-btn:hover,
+html[data-theme="night"] .cl-btn--primary:hover,
+html[data-theme="night"] .cl-btn--accent:hover,
+html[data-theme="night"] .cl-btn--success:hover,
+html[data-theme="night"] .cl-btn--warn:hover,
+html[data-theme="night"] .cl-btn--secondary:hover,
+html[data-theme="night"] .cl-btn--ghost:hover,
+html[data-theme="night"] .cl-btn--ghost-danger:hover,
+html[data-theme="night"] .cl-iconbtn:hover,
+html[data-theme="night"] button:not([disabled]):hover {
+  background: var(--night-surface-2) !important;
   color: #ff5555 !important;
+  border-color: var(--night-text) !important;
 }
-
-/* Visible focus on all interactive elements for accessibility */
-html[data-theme="night"] a:focus-visible,
+html[data-theme="night"] .cl-btn:focus-visible,
 html[data-theme="night"] button:focus-visible,
-html[data-theme="night"] [role="button"]:focus-visible {
-  outline: 2px solid var(--night-red) !important;
+html[data-theme="night"] [role="button"]:focus-visible,
+html[data-theme="night"] a:focus-visible {
+  outline: 2px solid var(--night-text) !important;
   outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(255, 43, 43, 0.25) !important;
 }
 
-/* Links */
-html[data-theme="night"] a { color: var(--night-red) !important; }
+/* ── Pills / badges ── */
+html[data-theme="night"] .cl-pill,
+html[data-theme="night"] .cl-pill--accent,
+html[data-theme="night"] .cl-pill--success,
+html[data-theme="night"] .cl-pill--warn,
+html[data-theme="night"] .cl-pill--danger,
+html[data-theme="night"] .cl-pill--solid-success,
+html[data-theme="night"] .cl-pill--solid-danger,
+html[data-theme="night"] .cl-pill--solid-accent {
+  background: var(--night-surface-2) !important;
+  color: var(--night-text) !important;
+  border: 1px solid var(--night-border) !important;
+}
+
+/* ── Alerts ── */
+html[data-theme="night"] .cl-alert,
+html[data-theme="night"] .cl-alert--danger,
+html[data-theme="night"] .cl-alert--warn,
+html[data-theme="night"] .cl-alert--success,
+html[data-theme="night"] .cl-alert--info {
+  background: var(--night-surface-2) !important;
+  color: var(--night-text) !important;
+  border: 1px solid var(--night-border) !important;
+}
+
+/* ── Tab bar (mobile bottom nav) — red on black, no blue ── */
+html[data-theme="night"] .cl-tabbar {
+  background: var(--night-bg) !important;
+  border-top: 1px solid var(--night-border) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html[data-theme="night"] .cl-tabbar__item {
+  color: var(--night-muted) !important;
+  background: transparent !important;
+}
+html[data-theme="night"] .cl-tabbar__item--active,
+html[data-theme="night"] .cl-tabbar__item:hover {
+  color: var(--night-text) !important;
+}
+html[data-theme="night"] .cl-tabbar__item--active .cl-tabbar__icon {
+  background: var(--night-surface-2) !important;
+  border: 1px solid var(--night-border) !important;
+}
+
+/* ── Action bar (sticky footer for forms) ── */
+html[data-theme="night"] .cl-actionbar {
+  background: var(--night-bg) !important;
+  border-top: 1px solid var(--night-border) !important;
+}
+
+/* ── Topbar (mobile + desktop) ── */
+html[data-theme="night"] .topbar {
+  background: var(--night-bg) !important;
+  border-bottom: 1px solid var(--night-border) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ── Drawer / sidebar (mobile and desktop variants) ── */
+html[data-theme="night"] .nav-drawer,
+html[data-theme="night"] .cl-sidebar,
+html[data-theme="night"] .cl-sidebar.drawer-open {
+  background: var(--night-bg) !important;
+  border-right: 1px solid var(--night-border) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html[data-theme="night"] .drawer-header,
+html[data-theme="night"] .cl-sidebar .drawer-header {
+  background: var(--night-surface) !important;
+  color: var(--night-text) !important;
+  border-bottom: 1px solid var(--night-border) !important;
+}
+html[data-theme="night"] .drawer-brand span,
+html[data-theme="night"] .cl-sidebar .drawer-brand span,
+html[data-theme="night"] .cl-sidebar .drawer-brand span:last-child {
+  color: var(--night-text) !important;
+}
+html[data-theme="night"] .drawer-link,
+html[data-theme="night"] .drawer-section-toggle,
+html[data-theme="night"] .cl-sidebar .drawer-link,
+html[data-theme="night"] .cl-sidebar .drawer-section-toggle {
+  color: var(--night-muted) !important;
+  background: transparent !important;
+}
+html[data-theme="night"] .drawer-link:hover,
+html[data-theme="night"] .drawer-section-toggle:hover,
+html[data-theme="night"] .cl-sidebar .drawer-link:hover,
+html[data-theme="night"] .cl-sidebar .drawer-section-toggle:hover {
+  background: var(--night-surface-2) !important;
+  color: var(--night-text) !important;
+}
+html[data-theme="night"] .drawer-link-active,
+html[data-theme="night"] .cl-sidebar .drawer-link-active {
+  background: var(--night-surface-2) !important;
+  color: var(--night-text) !important;
+  border-left: 2px solid var(--night-text) !important;
+}
+html[data-theme="night"] .drawer-divider,
+html[data-theme="night"] .cl-sidebar .drawer-divider {
+  background: var(--night-border) !important;
+}
+html[data-theme="night"] .drawer-footer,
+html[data-theme="night"] .cl-sidebar .drawer-footer {
+  border-top: 1px solid var(--night-border) !important;
+  background: var(--night-bg) !important;
+}
+html[data-theme="night"] .drawer-user-info,
+html[data-theme="night"] .cl-sidebar .drawer-user-info {
+  color: var(--night-muted) !important;
+}
+html[data-theme="night"] .drawer-logout-btn,
+html[data-theme="night"] .cl-sidebar .drawer-logout-btn {
+  background: var(--night-bg) !important;
+  color: var(--night-text) !important;
+  border: 1px solid var(--night-border) !important;
+}
+html[data-theme="night"] .drawer-logout-btn:hover,
+html[data-theme="night"] .cl-sidebar .drawer-logout-btn:hover {
+  background: var(--night-surface-2) !important;
+  color: #ff5555 !important;
+  border-color: var(--night-text) !important;
+}
+
+/* Mode toggle pills inside drawer (logbook/full mode switch) */
+html[data-theme="night"] .drawer-mode-pill {
+  background: var(--night-bg) !important;
+  border: 1px solid var(--night-border) !important;
+  color: var(--night-muted) !important;
+}
+html[data-theme="night"] .drawer-mode-pill--active {
+  background: var(--night-surface-2) !important;
+  color: var(--night-text) !important;
+  border-color: var(--night-text) !important;
+}
+html[data-theme="night"] .drawer-mode-label {
+  color: var(--night-muted) !important;
+}
+
+/* Modals / dialogs / sheets / dropdowns */
+html[data-theme="night"] dialog,
+html[data-theme="night"] .modal,
+html[data-theme="night"] .modal-content,
+html[data-theme="night"] .sheet,
+html[data-theme="night"] .dropdown,
+html[data-theme="night"] .dropdown-content,
+html[data-theme="night"] [role="dialog"],
+html[data-theme="night"] [role="menu"],
+html[data-theme="night"] [role="listbox"] {
+  background: var(--night-surface) !important;
+  color: var(--night-text) !important;
+  border: 1px solid var(--night-border) !important;
+}
+
+/* ── Links ── */
+html[data-theme="night"] a,
+html[data-theme="night"] a.nav-item {
+  color: var(--night-text) !important;
+}
 html[data-theme="night"] a:hover { color: #ff5555 !important; }
 
-/* Photos & receipts: dim user-uploaded imagery so it doesn't blow out night vision.
-   Scope kept narrow — does NOT touch icons, logos, or charts. */
+/* ── SVG icons inherit red ── */
+html[data-theme="night"] svg {
+  color: var(--night-text) !important;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+/* ── Photos & receipts: dim user-uploaded imagery so it doesn't blow out night vision.
+   Scope kept narrow — does NOT touch icons, logos, or charts. ── */
 html[data-theme="night"] .photo-thumb img,
 html[data-theme="night"] .receipt-thumb img,
 html[data-theme="night"] img[src*="/uploads/"] {
   filter: brightness(0.5) sepia(0.6) hue-rotate(-50deg) saturate(3) !important;
 }
 
-/* SVG icons inherit color */
-html[data-theme="night"] svg { color: var(--night-red) !important; fill: currentColor; stroke: currentColor; }
+/* Brand logos in nav: dim slightly but keep recognizable */
+html[data-theme="night"] .drawer-brand img,
+html[data-theme="night"] .topbar img {
+  filter: brightness(0.6) sepia(0.5) hue-rotate(-40deg) saturate(2.5) !important;
+}
 
-/* Toggle button visual (legacy 2-way pill, kept for backward compat) */
+/* ── Toggle button visual (legacy 2-way pill, kept for backward compat) ── */
 .night-toggle {
   display: inline-flex;
   align-items: center;
@@ -180,12 +519,12 @@ html[data-theme="night"] svg { color: var(--night-red) !important; fill: current
   line-height: 1;
 }
 html[data-theme="night"] .night-toggle {
-  background: var(--night-red-faint) !important;
-  color: var(--night-red) !important;
-  border: 1px solid var(--night-red-dim) !important;
+  background: var(--night-surface-2) !important;
+  color: var(--night-text) !important;
+  border: 1px solid var(--night-border) !important;
 }
 
-/* 3-segment Auto / Day / Night switch (topbar + drawer) */
+/* ── 3-segment Auto / Day / Night switch (topbar + drawer) ── */
 .theme-switch {
   display: inline-flex;
   align-items: stretch;
@@ -221,50 +560,40 @@ html[data-theme="night"] .night-toggle {
   color: #1a2f4a;
 }
 html[data-theme="night"] .theme-switch {
-  background: var(--surface-2) !important;
-  border: 1px solid var(--border) !important;
+  background: var(--night-surface-2) !important;
+  border: 1px solid var(--night-border) !important;
 }
 html[data-theme="night"] .theme-switch__btn {
-  color: var(--night-red-dim) !important;
+  color: var(--night-muted) !important;
+  background: transparent !important;
 }
 html[data-theme="night"] .theme-switch__btn.is-active {
-  background: var(--night-red-faint) !important;
-  color: var(--night-red) !important;
-  border: 1px solid var(--night-red-dim) !important;
+  background: var(--night-surface-2) !important;
+  color: var(--night-text) !important;
+  border: 1px solid var(--night-text) !important;
 }
 
-/* Leaflet basemap dimming for Night — no blinding white tiles. */
+/* ── Leaflet basemap dimming for Night — no blinding white tiles. ── */
 html[data-theme="night"] .leaflet-tile,
 html[data-theme="night"] .leaflet-tile-pane {
-  filter: brightness(0.45) contrast(1.1) hue-rotate(-25deg) saturate(0.6) !important;
+  filter: brightness(0.40) contrast(1.1) hue-rotate(-25deg) saturate(0.5) !important;
 }
 html[data-theme="night"] .leaflet-container {
-  background: #000 !important;
+  background: var(--night-bg) !important;
 }
 html[data-theme="night"] .leaflet-control-attribution,
 html[data-theme="night"] .leaflet-control-zoom a {
-  background: var(--surface) !important;
-  color: var(--night-red) !important;
-  border-color: var(--border) !important;
+  background: var(--night-surface) !important;
+  color: var(--night-text) !important;
+  border-color: var(--night-border) !important;
 }
 
-/* Scrollbar */
-html[data-theme="night"] ::-webkit-scrollbar { background: #000; }
-html[data-theme="night"] ::-webkit-scrollbar-thumb { background: var(--night-red-faint); }
+/* ── Scrollbar ── */
+html[data-theme="night"] ::-webkit-scrollbar { background: var(--night-bg); }
+html[data-theme="night"] ::-webkit-scrollbar-thumb { background: var(--night-border); }
 
-/* Selection */
+/* ── Selection ── */
 html[data-theme="night"] ::selection {
-  background: var(--night-red-dim);
-  color: #000;
-}
-
-/* Brand logos in nav: dim slightly but keep recognizable */
-html[data-theme="night"] .drawer-brand img,
-html[data-theme="night"] .topbar img {
-  filter: brightness(0.6) sepia(0.5) hue-rotate(-40deg) saturate(2.5) !important;
-}
-
-/* Hide theme color flash by setting body bg early via inline JS */
-html[data-theme="night"] [class*="hover:bg-"]:hover {
-  background-color: var(--surface-2) !important;
+  background: var(--night-text);
+  color: var(--night-bg);
 }
