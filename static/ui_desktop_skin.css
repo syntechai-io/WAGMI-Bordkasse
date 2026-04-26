@@ -19,6 +19,12 @@
   --danger-text: #991B1B;
 }
 
+/* The 1024px literal in this file's single top-level @media block MUST
+   equal `--cl-tablet-min` declared in static/ui_breakpoints.css (the
+   single source of truth). The matching mobile skin lives in
+   static/ui_mobile_skin.css and the regression test
+   tests/test_desktop_sidebar_breakpoint_single_source.py enforces they
+   stay paired. */
 @media (min-width: 1024px) {
 
   /* ══════════════════════════════════════════

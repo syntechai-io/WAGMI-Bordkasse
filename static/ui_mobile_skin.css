@@ -1,3 +1,9 @@
+/* The 1023px literal in this file's single top-level @media block MUST
+   equal `--cl-tablet-min - 1px` declared in static/ui_breakpoints.css
+   (the single source of truth). The matching desktop skin lives in
+   static/ui_desktop_skin.css and the regression test
+   tests/test_desktop_sidebar_breakpoint_single_source.py enforces
+   they stay paired. */
 @media (max-width: 1023px) {
 
   /* ══════════════════════════════════════════

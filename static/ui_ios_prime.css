@@ -2,6 +2,14 @@
    CrewLog — iOS Premium Mobile Overrides
    Loaded LAST, after all other CSS files.
    All rules scoped to max-width: 1279px (mobile + tablet).
+
+   The 1279px / 1280px literals throughout this file MUST equal
+   `--cl-desktop-min - 1px` / `--cl-desktop-min` declared in
+   static/ui_breakpoints.css. The 768px literal in §20 must equal
+   `--cl-tablet-small-min`. The 374px literal in §14 is intentionally
+   one-off (narrow phones) and not centralized. The regression test
+   tests/test_desktop_sidebar_breakpoint_single_source.py enforces
+   the centralized values.
    ========================================================================== */
 
 /* ── 1. Topbar: account for Dynamic Island / notch safe-area ── */
@@ -271,7 +279,10 @@ main {
     }
 }
 
-/* ── 14. Hero/KPI grids — single column on narrow phones ── */
+/* ── 14. Hero/KPI grids — single column on narrow phones ──
+   374px is intentionally one-off (iPhone SE 1st-gen and below) and not
+   centralized in static/ui_breakpoints.css — only thresholds that recur
+   across multiple files live there. */
 @media (max-width: 374px) {
     .cl-grid--2,
     .cl-grid--3,
@@ -585,6 +596,8 @@ input[type="time"] {
 .recap-event-card .recap-time-maneuver-row {
     grid-column: 1 / -1;
 }
+/* The 768px literal here MUST equal `--cl-tablet-small-min` declared in
+   static/ui_breakpoints.css. */
 @media (min-width: 768px) {
     .recap-event-card {
         padding: 22px 20px !important;

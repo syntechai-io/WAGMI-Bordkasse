@@ -1,3 +1,10 @@
+/* All `@media` literals in this file (768px / 1023px / 1024px / 640px /
+   1280px) are duplicates of the canonical breakpoints declared in
+   static/ui_breakpoints.css. Each block carries its own header comment
+   pointing back to the matching token; the regression test
+   tests/test_desktop_sidebar_breakpoint_single_source.py verifies they
+   never drift. If you change one literal, update every place. */
+
 :root {
   /* ── Topbar height + safe-area helper for Dynamic Island offsets ── */
   --topbar-h: 48px;
@@ -120,6 +127,8 @@ label {
   padding-right: var(--space-4);
 }
 
+/* The 768px literal here MUST equal `--cl-tablet-small-min` declared in
+   static/ui_breakpoints.css. */
 @media (min-width: 768px) {
   .ui-container {
     padding-left: var(--space-6);
@@ -132,6 +141,8 @@ label {
   padding-bottom: var(--space-6);
 }
 
+/* The 768px literal here MUST equal `--cl-tablet-small-min` declared in
+   static/ui_breakpoints.css. */
 @media (min-width: 768px) {
   .ui-section {
     padding-top: var(--space-8);
@@ -156,6 +167,8 @@ label {
   margin-bottom: var(--space-4);
 }
 
+/* The 768px literal here MUST equal `--cl-tablet-small-min` declared in
+   static/ui_breakpoints.css. */
 @media (min-width: 768px) {
   .ui-title {
     font-size: var(--text-3xl);
@@ -386,6 +399,8 @@ a:hover {
   line-height: 1.3;
 }
 
+/* The 768px literal here MUST equal `--cl-tablet-small-min` declared in
+   static/ui_breakpoints.css. */
 @media (min-width: 768px) {
   .page-title {
     font-size: 2rem;
@@ -466,6 +481,9 @@ a:hover {
   vertical-align: middle;
 }
 
+/* The 1024px literal here MUST equal `--cl-tablet-min` declared in
+   static/ui_breakpoints.css (the single source of truth). See
+   tests/test_desktop_sidebar_breakpoint_single_source.py. */
 @media (min-width: 1024px) {
   .user-email-truncate {
     max-width: 180px;
@@ -1017,14 +1035,19 @@ div[style*="linear-gradient"]:not(.login-surface) {
   }
 }
 
-/* ── Mobile: hide desktop horizontal nav ── */
+/* ── Mobile: hide desktop horizontal nav ──
+   The 1023px literal here MUST equal `--cl-tablet-min - 1px` declared in
+   static/ui_breakpoints.css (the single source of truth). See
+   tests/test_desktop_sidebar_breakpoint_single_source.py. */
 @media (max-width: 1023px) {
   .desktop-nav {
     display: none !important;
   }
 }
 
-/* ── Responsive ── */
+/* ── Responsive ──
+   The 640px literal here MUST equal `--cl-phone-max` declared in
+   static/ui_breakpoints.css. */
 @media (max-width: 640px) {
   .page-title {
     font-size: 1.25rem;
@@ -1041,6 +1064,8 @@ div[style*="linear-gradient"]:not(.login-surface) {
 
 /* ══════════════════════════════════════════
    MOBILE TOUCH ERGONOMICS (<1024px)
+   The 1023px literal MUST equal `--cl-tablet-min - 1px` declared in
+   static/ui_breakpoints.css.
    ══════════════════════════════════════════ */
 @media (max-width: 1023px) {
 
@@ -1212,6 +1237,8 @@ div[style*="linear-gradient"]:not(.login-surface) {
   display: none;
 }
 
+/* The 1023px literal here MUST equal `--cl-tablet-min - 1px` declared in
+   static/ui_breakpoints.css. */
 @media (max-width: 1023px) {
   .logbook-sticky-bar {
     display: flex;
@@ -1265,6 +1292,8 @@ div[style*="linear-gradient"]:not(.login-surface) {
 /* ══════════════════════════════════════════
    DESKTOP UI REFINEMENT (>=1024px)
    Pure visual pass — no layout/logic changes
+   The 1024px literal MUST equal `--cl-tablet-min` declared in
+   static/ui_breakpoints.css.
    ══════════════════════════════════════════ */
 @media (min-width: 1024px) {
 

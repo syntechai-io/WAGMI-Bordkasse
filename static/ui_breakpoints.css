@@ -1,36 +1,71 @@
 /* ==========================================================================
    CrewLog — Layout breakpoints (single source of truth)
 
-   This file is the ONLY place where the desktop-sidebar threshold is
-   declared. If you need to change when the permanent left sidebar
-   appears (vs. the mobile drawer + bottom tab bar pattern), change the
-   value here AND update the matching @media literals listed below.
+   This file is the ONLY place where the responsive layout thresholds are
+   declared. Every other stylesheet that hardcodes one of these values in
+   an `@media` rule carries a header comment pointing back here, and
+   `tests/test_desktop_sidebar_breakpoint_single_source.py` enforces that
+   every call site agrees with the values declared below.
 
    Why does the literal still live in @media queries?
    --------------------------------------------------
    CSS Media Queries Level 4 / 5 do not let `@media` rules consume
-   `var(...)` — a literal `1280px` must appear in each block. To keep
-   the duplication honest, every site that hardcodes the value carries
-   a comment pointing back here, and
-   `tests/test_desktop_sidebar_breakpoint_single_source.py` enforces
-   that all four call sites agree with the value below.
+   `var(...)` — a literal `<N>px` must appear in each block. To keep the
+   duplication honest we carry header comments + an automated test.
 
-   Files that must stay in sync with --cl-desktop-min:
-     * static/ui_ios_prime.css
-         — `@media (max-width: 1279px)` blocks (mobile/tablet scope)
-         — `@media (min-width: 1280px)` desktop sidebar block
-     * static/ui_v1.css
-         — `@media (min-width: 1280px)` `#drawer-open` hide rule
-     * static/ui_nav.js
-         — reads `--cl-desktop-min-px` at runtime instead of hardcoding
+   ── Tokens ──────────────────────────────────────────────────────────────
+   --cl-desktop-min        1280px  Permanent left sidebar appears (vs. the
+                                   mobile drawer + bottom tab bar pattern).
+                                   Pair: `(max-width: 1279px)` for the
+                                   mobile/tablet scope (the value minus 1).
+   --cl-desktop-min-px     1280    Unitless integer form, read by
+                                   `static/ui_nav.js` at runtime via
+                                   `parseInt(getComputedStyle(...))`.
+   --cl-tablet-min         1024px  Tablet-and-up layout: turns the desktop
+                                   visual skin on and turns mobile-only
+                                   touch ergonomics (44px tap targets,
+                                   sticky bottom bar, mobile skin) off.
+                                   Pair: `(max-width: 1023px)` for the
+                                   mobile-touch scope (the value minus 1).
+   --cl-tablet-small-min    768px  Small-tablet / iPad-portrait scaling
+                                   for typography, container padding, and
+                                   recap-card layout.
+   --cl-phone-max           640px  Large-phone scope: collapses the
+                                   page-title size and is also used as the
+                                   `(min-width: 640px)` flip for the
+                                   `.cl-grid--*` two-column layout.
 
-   `--cl-desktop-min`     — value with `px` unit, for documentation /
-                            potential future custom-media support.
-   `--cl-desktop-min-px`  — unitless integer, the form `ui_nav.js` reads
-                            via `parseInt(getComputedStyle(...).getPropertyValue(...))`.
+   ── Files that must stay in sync with each token ───────────────────────
+   --cl-desktop-min:
+     * static/ui_ios_prime.css       (max-width: 1279px) and (min-width: 1280px)
+     * static/ui_v1.css              (min-width: 1280px) #drawer-open hide rule
+     * static/cl_design.css          (max-width: 1279px) tab bar
+     * static/ui_nav.js              reads --cl-desktop-min-px at runtime
+
+   --cl-tablet-min:
+     * static/ui_v1.css              (min-width: 1024px) and (max-width: 1023px)
+     * static/ui_desktop_skin.css    (min-width: 1024px)
+     * static/ui_mobile_skin.css     (max-width: 1023px)
+     * static/ui_night_mode.css      (max-width: 1023px)
+     * static/cl_design.css          (min-width: 1024px) cl-grid--3 / --4
+
+   --cl-tablet-small-min:
+     * static/ui_v1.css              (min-width: 768px)
+     * static/cl_design.css          (min-width: 768px)
+     * static/ui_ios_prime.css       (min-width: 768px) recap-event-card
+
+   --cl-phone-max:
+     * static/ui_v1.css              (max-width: 640px) page-title
+     * static/cl_design.css          (min-width: 640px) cl-grid--*
+
+   See `tests/test_desktop_sidebar_breakpoint_single_source.py` for the
+   automated enforcement that catches drift.
    ========================================================================== */
 
 :root {
     --cl-desktop-min: 1280px;
     --cl-desktop-min-px: 1280;
+    --cl-tablet-min: 1024px;
+    --cl-tablet-small-min: 768px;
+    --cl-phone-max: 640px;
 }

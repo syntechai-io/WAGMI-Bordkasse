@@ -79,7 +79,9 @@ html[data-theme="night"] body {
   color: var(--night-text) !important;
 }
 
-/* Mobile rubber-band & overscroll backgrounds (set by ui_ios_prime.css) */
+/* Mobile rubber-band & overscroll backgrounds (set by ui_ios_prime.css).
+   The 1023px literal here MUST equal `--cl-tablet-min - 1px` declared in
+   static/ui_breakpoints.css (the single source of truth). */
 @media (max-width: 1023px) {
   html[data-theme="night"],
   html[data-theme="night"] body {

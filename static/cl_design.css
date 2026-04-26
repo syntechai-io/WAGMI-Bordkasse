@@ -51,6 +51,8 @@
     font-size: 15px;
     line-height: 1.45;
 }
+/* The 768px literal here MUST equal `--cl-tablet-small-min` declared in
+   static/ui_breakpoints.css. */
 @media (min-width: 768px) {
     .cl-page { padding: var(--cl-space-7) var(--cl-space-5) 0; }
 }
@@ -79,6 +81,7 @@
     margin: 0 0 var(--cl-space-2);
     line-height: 1.2;
 }
+/* 768px == `--cl-tablet-small-min` (static/ui_breakpoints.css). */
 @media (min-width: 768px) { .cl-title { font-size: 30px; } }
 .cl-subtitle {
     font-size: 14px;
@@ -121,6 +124,8 @@
     flex-direction: column;
     gap: var(--cl-space-4);
 }
+/* The 768px literal here MUST equal `--cl-tablet-small-min` declared in
+   static/ui_breakpoints.css. */
 @media (min-width: 768px) {
     .cl-card { padding: var(--cl-space-6); gap: var(--cl-space-5); }
 }
@@ -165,11 +170,15 @@
     grid-template-columns: 1fr;
     gap: var(--cl-space-4);
 }
+/* The 640px literal here MUST equal `--cl-phone-max` (used as the
+   `min-width` flip from 1-col to 2-col) declared in static/ui_breakpoints.css. */
 @media (min-width: 640px) {
     .cl-grid--2,
     .cl-grid--3,
     .cl-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+/* The 1024px literal here MUST equal `--cl-tablet-min` declared in
+   static/ui_breakpoints.css. */
 @media (min-width: 1024px) {
     .cl-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .cl-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -427,6 +436,7 @@
     flex-direction: column;
     gap: var(--cl-space-5);
 }
+/* 768px == `--cl-tablet-small-min` (static/ui_breakpoints.css). */
 @media (min-width: 768px) { .cl-entry { padding: var(--cl-space-5); } }
 .cl-entry--error { background: var(--cl-danger-soft); border-color: var(--cl-danger); }
 .cl-entry__head {
@@ -540,6 +550,7 @@
 }
 .cl-kpi__label { font-size: 12px; color: var(--cl-text-muted); font-weight: 500; }
 .cl-kpi__value { font-size: 22px; font-weight: 700; color: var(--cl-navy); font-variant-numeric: tabular-nums; }
+/* 768px == `--cl-tablet-small-min` (static/ui_breakpoints.css). */
 @media (min-width: 768px) { .cl-kpi__value { font-size: 28px; } }
 .cl-kpi__delta { font-size: 12px; color: var(--cl-text-subtle); }
 
@@ -608,6 +619,9 @@
     box-shadow: 0 -6px 20px rgba(15,41,66,.06);
 }
 .cl-actionbar > * { flex: 0 0 auto; }
+/* 480px is intentionally one-off (narrow actionbar tightening) and not
+   centralized in static/ui_breakpoints.css — only thresholds that recur
+   across multiple files live there. */
 @media (max-width: 480px) {
     .cl-actionbar { gap: var(--cl-space-2); padding-left: var(--cl-space-3); padding-right: var(--cl-space-3); }
     .cl-actionbar .cl-btn { flex: 1 1 auto; min-width: 0; }
@@ -674,6 +688,9 @@
 .cl-tabbar__item--active { color: var(--cl-accent); }
 .cl-tabbar__item--active .cl-tabbar__icon { opacity: 1; }
 
+/* The 1279px literal here MUST equal `--cl-desktop-min - 1px` declared in
+   static/ui_breakpoints.css. Pairs with the (min-width: 1280px) sidebar
+   block in static/ui_ios_prime.css. */
 @media (max-width: 1279px) {
     .cl-tabbar { display: block; }
     /* --cl-tabbar-h already includes safe-area-inset-bottom (the tab bar's own
