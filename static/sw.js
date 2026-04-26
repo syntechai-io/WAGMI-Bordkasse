@@ -1,12 +1,11 @@
-const CACHE_NAME = 'crewlog-v28';
+const CACHE_NAME = 'crewlog-v29';
 
+// CSS files are intentionally excluded from precaching: the page templates
+// request them with a `?v=28` cache-buster, so the unversioned URLs we used
+// to precache here were never actually served to the page. The runtime
+// network-first handler below populates the cache with the versioned URLs
+// the templates actually request.
 const STATIC_ASSETS = [
-  '/static/ui_v1.css',
-  '/static/ui_desktop_skin.css',
-  '/static/ui_navy_contrast_fix.css',
-  '/static/ui_mobile_skin.css',
-  '/static/ui_night_mode.css',
-  '/static/cl_design.css',
   '/static/ui_nav.js',
   '/static/js/cl_shell.js',
   '/static/js/night-mode.js',
