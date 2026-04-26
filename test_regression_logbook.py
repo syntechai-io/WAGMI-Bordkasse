@@ -228,7 +228,10 @@ def test_all_phase_a_fields_preserved():
 def test_night_mode_critical_css_present_in_layout():
     from pathlib import Path
     layout = Path('templates/layout.html').read_text()
-    assert '?v=28' in layout
+    # CSS link tags must carry the dynamic content-hash cache-buster — not
+    # a hand-edited number — so a stylesheet deploy invalidates browsers
+    # automatically. See asset_version.py.
+    assert '?v={{ asset_version }}' in layout
     assert 'html[data-theme="night"]' in layout
     for primitive in ['.cl-card', '.cl-btn', '.cl-input', '.cl-tabbar', 'accent-color']:
         assert primitive in layout, f"layout.html inline night CSS missing {primitive}"
@@ -237,7 +240,7 @@ def test_night_mode_critical_css_present_in_layout():
 def test_night_mode_critical_css_present_in_login():
     from pathlib import Path
     login = Path('templates/login.html').read_text()
-    assert '?v=28' in login
+    assert '?v={{ asset_version }}' in login
     assert 'html[data-theme="night"]' in login
     assert 'Critical inline Night Mode' in login
 
@@ -262,19 +265,39 @@ def test_night_mode_blue_overrides_stripped_from_ios_prime():
             assert hex_val.lower() not in block.lower(), block[:200]
 
 
-def test_service_worker_v28_with_network_first_css():
+def test_service_worker_cache_name_derived_from_asset_version():
+    """sw.js holds a placeholder; the /sw.js route binds CACHE_NAME to the
+    same content hash that drives the templates' ?v= cache-buster."""
     from pathlib import Path
+    from asset_version import CACHE_NAME_PLACEHOLDER, cache_name
+
     sw = Path('static/sw.js').read_text()
-    assert "crewlog-v28" in sw
+    # Raw file uses the placeholder, never a hand-rolled crewlog-vNN string.
+    assert CACHE_NAME_PLACEHOLDER in sw
+    assert "crewlog-v28" not in sw and "crewlog-v29" not in sw
     assert any(s in sw for s in ("networkFirstStatic", "network-first", "networkFirst"))
     assert "caches.keys" in sw and "delete" in sw
+
+    try:
+        from fastapi.testclient import TestClient
+        from main import app
+    except Exception as e:
+        pytest.skip(f"app not importable: {e}")
+
+    client = TestClient(app)
+    r = client.get("/sw.js")
+    assert r.status_code == 200
+    body = r.text
+    expected = cache_name()
+    assert expected in body, f"served sw.js missing {expected}"
+    assert CACHE_NAME_PLACEHOLDER not in body, "placeholder was not substituted"
 
 
 def test_diagnostics_theme_route_renders_night_with_correct_palette():
     from pathlib import Path
     tpl = Path('templates/theme_diagnostics.html').read_text()
     assert 'data-theme="night"' in tpl
-    assert 'ui_night_mode.css?v=28' in tpl
+    assert 'ui_night_mode.css?v={{ asset_version }}' in tpl
     for primitive in [
         'cl-btn--primary', 'cl-btn--accent', 'cl-btn--success', 'cl-btn--warn',
         'cl-input', 'cl-check-row', 'cl-tabbar', 'cl-tabbar__item--active',
@@ -296,6 +319,7 @@ def test_night_mode_diagnostics_page_live_response():
         from main import app
     except Exception as e:
         pytest.skip(f"app not importable: {e}")
+    from asset_version import asset_version
 
     client = TestClient(app)
     r = client.get("/diagnostics/theme", params={"theme": "night"})
@@ -305,7 +329,7 @@ def test_night_mode_diagnostics_page_live_response():
 
     body = r.text
     assert 'data-theme="night"' in body
-    assert 'ui_night_mode.css?v=28' in body
+    assert f'ui_night_mode.css?v={asset_version()}' in body
     assert 'cl-tabbar__item--active' in body
     assert body.count('cl-tabbar__item') >= 2
 

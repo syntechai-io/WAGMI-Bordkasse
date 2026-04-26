@@ -3,6 +3,7 @@ from fastapi_csrf_jinja.jinja_processor import csrf_token_processor
 from fastapi import Request
 from typing import Dict, Any
 from sqlalchemy.orm import Session
+from asset_version import asset_version
 from db import get_db
 from models import Trip, BoatProfile
 from services.trip import TripService
@@ -184,6 +185,16 @@ def i18n_context_processor(request: Request) -> Dict[str, Any]:
     }
 
 
+def asset_version_context_processor(request: Request) -> Dict[str, Any]:
+    """Expose the content-derived CSS cache-buster to every template.
+
+    Templates render `?v={{ asset_version }}` on `<link>` tags so a CSS
+    deploy automatically invalidates the browser cache. The same value
+    drives the service-worker cache name (see `/sw.js` in `main.py`).
+    """
+    return {"asset_version": asset_version()}
+
+
 def create_templates() -> Jinja2Templates:
     """Create Jinja2Templates instance with CSRF token processor and trip context"""
     templates = Jinja2Templates(
@@ -192,6 +203,7 @@ def create_templates() -> Jinja2Templates:
             csrf_token_processor("csrftoken", "x-csrftoken"),
             trip_context_processor,
             i18n_context_processor,
+            asset_version_context_processor,
         ]
     )
     return templates

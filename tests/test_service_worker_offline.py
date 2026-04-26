@@ -5,9 +5,10 @@ in static/sw.js.
 Two behaviors are checked:
 
 1. The runtime network-first CSS handler populates the cache with the
-   actual versioned URLs the templates request (e.g. /static/ui_v1.css?v=28),
-   so that CSS is reachable from cache after the first network fetch even
-   though it is no longer in STATIC_ASSETS.
+   actual versioned URLs the templates request (e.g.
+   /static/ui_v1.css?v=<asset_version>), so that CSS is reachable from
+   cache after the first network fetch even though it is no longer in
+   STATIC_ASSETS.
 2. When the browser is offline, the network-first HTML handler falls back
    to the cached /offline page (which IS in STATIC_ASSETS).
 

@@ -313,8 +313,16 @@ async def set_app_mode(request: Request, mode: str = Form(...)):
 
 @app.get("/sw.js")
 async def service_worker():
-    return FileResponse(
-        "static/sw.js",
+    """Serve the service worker with its CACHE_NAME bound to the current
+    asset version. Substituting at request time means a CSS deploy
+    rotates the SW cache without anyone editing static/sw.js."""
+    from fastapi.responses import Response
+    from pathlib import Path
+    from asset_version import CACHE_NAME_PLACEHOLDER, cache_name
+    sw_text = Path("static/sw.js").read_text(encoding="utf-8")
+    sw_text = sw_text.replace(CACHE_NAME_PLACEHOLDER, cache_name())
+    return Response(
+        content=sw_text,
         media_type="application/javascript",
         headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"}
     )
