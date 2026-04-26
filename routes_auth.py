@@ -6,10 +6,12 @@ from datetime import datetime
 
 from db import get_db
 from models import SaaSUser, Trip, TripMember, TripRole
+from limiter_config import limiter
 
 router = APIRouter()
 
 @router.post("/login-saas")
+@limiter.limit("5/minute")
 def login_saas(
     request: Request,
     email: str = Form(...),

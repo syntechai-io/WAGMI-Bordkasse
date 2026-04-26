@@ -272,7 +272,11 @@
         if (res.ok && data.ok) {
             return { ok: true };
         }
-        return { ok: false, detail: data.detail || '{{ t("auth.login_failed") }}' };
+        return {
+            ok: false,
+            status: res.status,
+            detail: data.detail || data.message || '{{ t("auth.login_failed") }}'
+        };
     }
     function showSaasError(msg) {
         const errBox = document.getElementById('saas-error');
@@ -340,8 +344,12 @@
                     const result = await submitSaasCredentials(creds.email, creds.password);
                     if (result.ok) {
                         window.location.href = '/trips/';
+                    } else if (result.status === 429) {
+                        // Rate-limited: credentials may still be valid. Keep them
+                        // in the Keychain and just surface the error.
+                        showSaasError(result.detail);
                     } else {
-                        // Stale credentials -> clear and let the user log in manually
+                        // Stale credentials (401/4xx) -> clear and let the user log in manually
                         await window.CrewlogBiometric.clear();
                         block.classList.add('hidden');
                         showSaasError(result.detail);

@@ -237,17 +237,25 @@
     var p = _bioPlugin();
     var s = _securePlugin();
     if (!p || !s) throw new Error('plugin_missing');
+    // Check Keychain BEFORE prompting for biometrics — if creds were wiped
+    // between init and the click, don't subject the user to a Face ID prompt
+    // that can only end in a 'no_credentials' error.
+    var emailRes, pwRes;
+    try {
+      emailRes = await s.get({ key: BIO_KEY_EMAIL });
+      pwRes = await s.get({ key: BIO_KEY_PASSWORD });
+    } catch (e) {
+      throw new Error('no_credentials');
+    }
+    if (!emailRes || !emailRes.value || !pwRes || !pwRes.value) {
+      throw new Error('no_credentials');
+    }
     await p.authenticate({
       reason: reason || 'Sign in to CrewLog',
       cancelTitle: 'Cancel',
       allowDeviceCredential: false,
       iosFallbackTitle: ''
     });
-    var emailRes = await s.get({ key: BIO_KEY_EMAIL });
-    var pwRes = await s.get({ key: BIO_KEY_PASSWORD });
-    if (!emailRes || !emailRes.value || !pwRes || !pwRes.value) {
-      throw new Error('no_credentials');
-    }
     return { email: emailRes.value, password: pwRes.value };
   }
 
