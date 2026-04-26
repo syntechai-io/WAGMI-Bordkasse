@@ -17,6 +17,62 @@
     }
 }
 
+/* ── 1b. Mobile/iPad topbar actions (theme switch + account chip) ──
+   Markup: templates/layout.html (.topbar-mobile-actions). The 1280px
+   literal must equal `--cl-desktop-min` in static/ui_breakpoints.css. */
+.topbar-mobile-actions {
+    display: none;
+}
+@media (max-width: 1279px) {
+    .topbar-mobile-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+    /* Compact the 3-segment switch when shown in the mobile topbar */
+    .topbar-mobile-actions .theme-switch {
+        margin-right: 0;
+        padding: 1px;
+    }
+    .topbar-mobile-actions .theme-switch__btn {
+        padding: 0.18rem 0.42rem;
+        min-height: 26px;
+        font-size: 0.78rem;
+    }
+}
+.topbar-account-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    /* override the global "all buttons min-height: 44px" in this file
+       so the chip stays compact inside the 48px topbar row */
+    min-height: 32px !important;
+    -webkit-tap-highlight-color: transparent;
+}
+.topbar-account-chip:hover,
+.topbar-account-chip:focus-visible {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.35);
+    outline: none;
+}
+.topbar-account-chip:active {
+    transform: scale(0.96);
+}
+
 /* ── 2. Hide footer on mobile — tabbar replaces it ── */
 @media (max-width: 1279px) {
     .footer-bar { display: none !important; }
@@ -60,6 +116,61 @@
         box-shadow: 0 1px 3px rgba(15,41,66,.06), 0 4px 14px rgba(15,41,66,.05);
         margin-bottom: 12px;
     }
+}
+
+/* ── 5b. Day-mode card hierarchy on mobile + iPad ──
+   Without this, cards on the soft `--cl-bg` background dissolve into the
+   page (very faint border, almost no shadow). Bumping the border to
+   `--cl-border-strong` and adding a slightly heavier shadow gives the
+   same crisp separation that night mode achieves with high-contrast
+   red borders on black. Scoped to <1280px so the desktop sidebar
+   layout — which already reads well on the wider canvas — is unchanged.
+   Night mode overrides land in static/ui_night_mode.css and win because
+   that file is loaded last. */
+@media (max-width: 1279px) {
+    html:not([data-theme="night"]) .cl-card,
+    html:not([data-theme="night"]) .cl-card--quiet,
+    html:not([data-theme="night"]) .cl-card--flat {
+        border: 1.5px solid var(--cl-border-strong, #cdd3db);
+        box-shadow:
+            0 1px 2px rgba(15,41,66,.06),
+            0 4px 14px rgba(15,41,66,.07);
+    }
+    /* Quiet variant keeps its tinted surface but inherits the stronger
+       outline so adjacent cards in a stack don't blur together. */
+    html:not([data-theme="night"]) .cl-card--quiet {
+        background: var(--cl-surface-2);
+    }
+    /* Page subtitle gets a touch more contrast so the header reads
+       as a deliberate band above the card stack. */
+    html:not([data-theme="night"]) .cl-subtitle {
+        color: var(--cl-text);
+        opacity: 0.78;
+    }
+    /* Card section titles already use --cl-navy. Slightly increase
+       the weight on mobile so the title line is unmistakably the top
+       of a card, even when scrolled past the page header. */
+    html:not([data-theme="night"]) .cl-card__title {
+        font-weight: 700;
+    }
+    /* Recap event cards — these sit nested inside an outer .cl-card and
+       previously used `--cl-border` which is barely visible on white.
+       Re-point the existing rule (in section 20 below) at the strong
+       border via `--cl-border-strong`. */
+    html:not([data-theme="night"]) .recap-event-card {
+        border-color: var(--cl-border-strong, #cdd3db) !important;
+    }
+}
+
+/* ── 5c. Form breathing room on mobile + iPad ──
+   The day-recap form packs many fields into 2-column grids inside cards.
+   The default `--cl-space-4` (16px) gap can feel cramped on a portrait
+   iPhone. Bump the field grid gap to 18px and add a touch more bottom
+   padding under the last card so the sticky `.cl-actionbar` never crowds
+   the final input on viewports where the safe-area inset is small. */
+@media (max-width: 1279px) {
+    .cl-form .cl-grid { gap: 18px; }
+    .cl-form > .cl-card:last-child { margin-bottom: 12px; }
 }
 
 /* ── 6. List rows — minimum tap target 44px ── */

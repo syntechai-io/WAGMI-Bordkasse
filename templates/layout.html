@@ -409,6 +409,27 @@
                     </div>
                     {% endif %}
                 </div>
+
+                <!-- Mobile/iPad topbar actions (theme switch + account chip).
+                     Visible only at <1280px (mobile + iPad). Above 1280px the
+                     `.desktop-nav` block above renders the same controls in
+                     the horizontal nav, so we hide this to avoid duplicates.
+                     CSS gates: see static/ui_ios_prime.css. -->
+                <div class="topbar-mobile-actions" aria-label="{{ t('nav.account') if t('nav.account') != 'nav.account' else 'Account' }}">
+                    <!-- night-mode.js mounts the 3-segment theme switch here -->
+                    <div id="topbar-mobile-theme-slot"></div>
+
+                    {% if request.session.get('user_id') or request.session.get('saas_user_id') %}
+                    {% set _acct_label = request.session.get('username') or request.session.get('saas_email') or 'U' %}
+                    <button type="button" id="topbar-account-chip" class="topbar-account-chip"
+                            aria-label="{{ _acct_label }}"
+                            aria-controls="nav-drawer"
+                            aria-expanded="false"
+                            title="{{ _acct_label }}">
+                        <span aria-hidden="true">{{ (_acct_label[:1] | upper) }}</span>
+                    </button>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </nav>

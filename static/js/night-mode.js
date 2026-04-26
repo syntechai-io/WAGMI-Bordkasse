@@ -118,6 +118,19 @@
     langPill.parentNode.insertBefore(sw, langPill);
   }
 
+  // Mounts the 3-segment switch into the mobile/iPad topbar slot so it is
+  // visible at <1280px viewports where `.desktop-nav` is hidden. The slot
+  // markup lives in templates/layout.html (.topbar-mobile-actions).
+  function ensureMobileTopbarSwitch() {
+    if (document.getElementById('theme-switch-topbar-mobile-wrap')) return;
+    var slot = document.getElementById('topbar-mobile-theme-slot');
+    if (!slot) return;
+    var sw = buildSwitch('theme-switch-topbar-mobile');
+    sw.id = 'theme-switch-topbar-mobile-wrap';
+    sw.classList.add('theme-switch--topbar-mobile');
+    slot.appendChild(sw);
+  }
+
   function ensureDrawerSwitch() {
     var drawerBody = document.querySelector('#nav-drawer .drawer-body');
     if (!drawerBody || document.getElementById('theme-switch-drawer-wrap')) return;
@@ -147,9 +160,27 @@
   // Apply on script eval (no-flash backup; head script already did this for night).
   apply(getPref());
 
+  // Account chip in the mobile topbar opens the navigation drawer (where
+  // the user info + Logout button live). Avoids adding a new route while
+  // giving users a visible account affordance at <1280px.
+  function wireMobileAccountChip() {
+    var chip = document.getElementById('topbar-account-chip');
+    if (!chip || chip.__crewlogWired) return;
+    chip.__crewlogWired = true;
+    chip.addEventListener('click', function (e) {
+      e.preventDefault();
+      var hamburger = document.getElementById('drawer-open');
+      if (hamburger && typeof hamburger.click === 'function') {
+        hamburger.click();
+      }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     ensureTopbarSwitch();
+    ensureMobileTopbarSwitch();
     ensureDrawerSwitch();
+    wireMobileAccountChip();
     refreshSwitches();
   });
 
