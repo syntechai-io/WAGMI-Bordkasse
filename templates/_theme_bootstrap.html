@@ -1,0 +1,55 @@
+{#
+  Early-paint theme bootstrap script.
+
+  THIS IS THE SINGLE SOURCE OF TRUTH for the inline <script> block that runs
+  at the top of every <head> to apply the saved theme on first paint, so the
+  page doesn't flash light then go dark. The full theme controller lives in
+  the regular page JS and takes over once it has loaded; this partial only
+  carries the minimum logic needed to set data-theme="night" on <html>
+  before any CSS paints.
+
+  Included by templates/layout.html and templates/login.html. If you add a
+  new top-level template that ships its own <head>, include this partial too
+  (before any <link rel="stylesheet">).
+
+  Precedence:
+    - For ANY signed-in session, server-seeded value WINS over localStorage.
+      This keeps per-user isolation strict on shared devices: a prior user's
+      localStorage cannot bleed into the next account's first paint, even
+      before the new user has explicitly toggled. The seeded value is the
+      user's stored DB preference if present, otherwise the system default
+      ('auto').
+    - Anonymous (login/unauth) pages fall back to localStorage, then seeded.
+    - 'auto' resolves to 'night' iff prefers-color-scheme: dark, else 'light'.
+
+  The auth-flow flags (saved_theme, theme_signed_in, theme_authoritative) are
+  computed in template_helpers.py and injected into every template context.
+  Tweaking how 'auto' resolves, or how localStorage and the server-seeded
+  value interact, only requires editing this file.
+#}
+<script>
+(function(){
+  try {
+    var seeded = {{ (saved_theme or "auto")|tojson }};
+    var signedIn = {{ (theme_signed_in or false)|tojson }};
+    var authoritative = {{ (theme_authoritative or false)|tojson }};
+    var stored = null;
+    try { stored = localStorage.getItem('crewlog-theme'); } catch(e) {}
+    var validStored = (stored === 'auto' || stored === 'light' || stored === 'night') ? stored : null;
+    var pref = signedIn ? seeded : (validStored || seeded);
+    if (signedIn && validStored !== seeded) {
+      try { localStorage.setItem('crewlog-theme', seeded); } catch(e) {}
+    }
+    window.__crewlogThemePref = pref;
+    window.__crewlogThemeAuthoritative = authoritative;
+    var resolved = pref;
+    if (pref === 'auto') {
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      resolved = prefersDark ? 'night' : 'light';
+    }
+    if (resolved === 'night') {
+      document.documentElement.setAttribute('data-theme', 'night');
+    }
+  } catch(e) {}
+})();
+</script>
