@@ -5,6 +5,23 @@
   var focusableSelector = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
   var isOpen = false;
 
+  // ── Desktop-sidebar threshold (single source of truth) ─────────────────
+  // Read the canonical breakpoint from `--cl-desktop-min-px`, declared in
+  // static/ui_breakpoints.css. The hardcoded `1280` below is ONLY a
+  // defensive fallback for the (extremely unlikely) case that the CSS
+  // variable was not parsed yet — the regression test
+  // tests/test_desktop_sidebar_breakpoint_single_source.py asserts the
+  // fallback equals the canonical value, so the two cannot drift.
+  var DESKTOP_MIN = (function() {
+    try {
+      var raw = getComputedStyle(document.documentElement)
+        .getPropertyValue('--cl-desktop-min-px');
+      var n = parseInt(raw, 10);
+      if (n > 0) return n;
+    } catch (e) { /* ignore — fall through to default */ }
+    return 1280;
+  })();
+
   function init() {
     drawer = document.getElementById('nav-drawer');
     overlay = document.getElementById('nav-overlay');
@@ -15,14 +32,16 @@
     if (!drawer) return;
 
     // ── Desktop sidebar bootstrap ───────────────────────────────────────
-    // At 1280px and wider the drawer must always be visible as a permanent
-    // left sidebar (display + aria + .drawer-open class). Below 1280px it
-    // returns to mobile drawer behaviour and is closed by default unless
-    // the user has explicitly opened it via the hamburger. The 1280px
-    // threshold ensures iPad Pro (1024px landscape) gets the mobile drawer
-    // pattern, which works reliably on both Safari and Chrome.
+    // At >=DESKTOP_MIN px the drawer must always be visible as a
+    // permanent left sidebar (display + aria + .drawer-open class).
+    // Below the threshold it returns to mobile drawer behaviour and is
+    // closed by default unless the user has explicitly opened it via the
+    // hamburger. The threshold (currently 1280px) ensures iPad Pro at
+    // 1024px landscape gets the mobile drawer pattern, which works
+    // reliably on both Safari and Chrome. See static/ui_breakpoints.css
+    // for the canonical declaration.
     function applyLayout() {
-      if (window.innerWidth >= 1280) {
+      if (window.innerWidth >= DESKTOP_MIN) {
         drawer.style.removeProperty('display');
         drawer.setAttribute('aria-hidden', 'false');
         drawer.classList.add('drawer-open');
@@ -46,14 +65,14 @@
 
     openBtn.addEventListener('click', open);
     if (closeBtn) closeBtn.addEventListener('click', function() {
-      if (window.innerWidth < 1280) close();
+      if (window.innerWidth < DESKTOP_MIN) close();
     });
     if (overlay) overlay.addEventListener('click', function() {
-      if (window.innerWidth < 1280) close();
+      if (window.innerWidth < DESKTOP_MIN) close();
     });
 
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && isOpen && window.innerWidth < 1280) {
+      if (e.key === 'Escape' && isOpen && window.innerWidth < DESKTOP_MIN) {
         close();
         return;
       }
@@ -65,14 +84,14 @@
     var links = drawer.querySelectorAll('a[href]');
     links.forEach(function(link) {
       link.addEventListener('click', function() {
-        if (window.innerWidth < 1280) close();
+        if (window.innerWidth < DESKTOP_MIN) close();
       });
     });
 
     var formButtons = drawer.querySelectorAll('form button[type="submit"]');
     formButtons.forEach(function(btn) {
       btn.addEventListener('click', function() {
-        if (window.innerWidth < 1280) close();
+        if (window.innerWidth < DESKTOP_MIN) close();
       });
     });
 
@@ -108,7 +127,7 @@
 
   function close() {
     // On desktop the sidebar is permanently open — never tear it down
-    if (window.innerWidth >= 1280) return;
+    if (window.innerWidth >= DESKTOP_MIN) return;
     isOpen = false;
     drawer.classList.remove('drawer-open');
     if (overlay) overlay.classList.remove('overlay-visible');

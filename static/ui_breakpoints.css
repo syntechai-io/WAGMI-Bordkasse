@@ -1,0 +1,36 @@
+/* ==========================================================================
+   CrewLog — Layout breakpoints (single source of truth)
+
+   This file is the ONLY place where the desktop-sidebar threshold is
+   declared. If you need to change when the permanent left sidebar
+   appears (vs. the mobile drawer + bottom tab bar pattern), change the
+   value here AND update the matching @media literals listed below.
+
+   Why does the literal still live in @media queries?
+   --------------------------------------------------
+   CSS Media Queries Level 4 / 5 do not let `@media` rules consume
+   `var(...)` — a literal `1280px` must appear in each block. To keep
+   the duplication honest, every site that hardcodes the value carries
+   a comment pointing back here, and
+   `tests/test_desktop_sidebar_breakpoint_single_source.py` enforces
+   that all four call sites agree with the value below.
+
+   Files that must stay in sync with --cl-desktop-min:
+     * static/ui_ios_prime.css
+         — `@media (max-width: 1279px)` blocks (mobile/tablet scope)
+         — `@media (min-width: 1280px)` desktop sidebar block
+     * static/ui_v1.css
+         — `@media (min-width: 1280px)` `#drawer-open` hide rule
+     * static/ui_nav.js
+         — reads `--cl-desktop-min-px` at runtime instead of hardcoding
+
+   `--cl-desktop-min`     — value with `px` unit, for documentation /
+                            potential future custom-media support.
+   `--cl-desktop-min-px`  — unitless integer, the form `ui_nav.js` reads
+                            via `parseInt(getComputedStyle(...).getPropertyValue(...))`.
+   ========================================================================== */
+
+:root {
+    --cl-desktop-min: 1280px;
+    --cl-desktop-min-px: 1280;
+}

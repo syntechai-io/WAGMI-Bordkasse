@@ -1001,10 +1001,14 @@ div[style*="linear-gradient"]:not(.login-surface) {
 }
 
 /* ── Desktop: hide drawer, show horizontal nav ──
-   Threshold must match the desktop-sidebar @media block in
-   static/ui_ios_prime.css (currently 1280px). If they drift, the
-   1024–1279px range loses both the hamburger AND the permanent
-   sidebar — see tests/test_desktop_sidebar_breakpoint_e2e.py. */
+   The 1280px literal here MUST equal `--cl-desktop-min` declared in
+   static/ui_breakpoints.css (the single source of truth). The same
+   value also appears in the desktop-sidebar @media block in
+   static/ui_ios_prime.css and is read at runtime by static/ui_nav.js.
+   If any of them drift, the 1024–1279px range loses both the
+   hamburger AND the permanent sidebar — see
+   tests/test_desktop_sidebar_breakpoint_e2e.py and
+   tests/test_desktop_sidebar_breakpoint_single_source.py. */
 @media (min-width: 1280px) {
   .nav-drawer,
   .nav-overlay,

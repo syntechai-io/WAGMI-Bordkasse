@@ -177,7 +177,13 @@ main {
     }
 }
 
-/* ── 16. Desktop sidebar (≥1280px) ── */
+/* ── 16. Desktop sidebar (≥1280px) ──
+   The 1280px literal below MUST equal `--cl-desktop-min` declared in
+   static/ui_breakpoints.css (the single source of truth). The same
+   value gates `#drawer-open` in static/ui_v1.css and is read at runtime
+   by static/ui_nav.js. The matching `(max-width: 1279px)` mobile blocks
+   above use `--cl-desktop-min - 1px`; keep them all in sync. See
+   tests/test_desktop_sidebar_breakpoint_single_source.py. */
 @media (min-width: 1280px) {
     /* Hamburger hidden — sidebar is always visible on desktop */
     #drawer-open { display: none !important; }

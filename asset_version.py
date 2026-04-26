@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, Iterable, Tuple
 
 TRACKED_CSS: Tuple[str, ...] = (
+    "static/ui_breakpoints.css",
     "static/ui_v1.css",
     "static/ui_desktop_skin.css",
     "static/ui_navy_contrast_fix.css",
