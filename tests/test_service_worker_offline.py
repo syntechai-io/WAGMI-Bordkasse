@@ -166,15 +166,19 @@ def test_offline_fallback_serves_offline_page(fresh_page):
     _register_and_activate_sw(page)
 
     # Confirm the precache holds /offline before we kill the network — the
-    # SW install handler put it there as part of STATIC_ASSETS.
+    # SW install handler put it there as part of STATIC_ASSETS. Reuse the
+    # dynamic-cache helper so a routine SW version bump can't break this.
+    cache_name = page.evaluate(_FIND_ACTIVE_CACHE_JS)
+    assert cache_name, "no crewlog-* cache found — SW activate did not run?"
     offline_in_cache = page.evaluate(
-        """async () => {
-            const cache = await caches.open('crewlog-v29');
+        """async (name) => {
+            const cache = await caches.open(name);
             const hit = await cache.match('/offline');
             return hit ? { ok: hit.ok, status: hit.status } : null;
-        }"""
+        }""",
+        cache_name,
     )
-    assert offline_in_cache is not None, "/offline missing from precache"
+    assert offline_in_cache is not None, f"/offline missing from precache {cache_name!r}"
     assert offline_in_cache["ok"] is True
 
     # Take the context offline. Playwright's set_offline gates fetch() and
