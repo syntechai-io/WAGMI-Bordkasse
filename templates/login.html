@@ -34,33 +34,7 @@
       } catch(e) {}
     })();
     </script>
-    <style>
-    /* Critical inline Night Mode overrides — see layout.html for rationale. */
-    html[data-theme="night"]{
-      --night-bg:#000;--night-surface:#050505;--night-text:#ff2b2b;
-      --night-muted:#9b1c1c;--night-border:#7a0000;
-      color-scheme:dark;background:#000;color:var(--night-text);
-    }
-    html[data-theme="night"] body{
-      background:#000!important;color:var(--night-text)!important;
-    }
-    html[data-theme="night"] .login-card{
-      background:var(--night-surface)!important;border:1px solid var(--night-border)!important;
-      color:var(--night-text)!important;box-shadow:none!important;
-    }
-    html[data-theme="night"] input,html[data-theme="night"] select,
-    html[data-theme="night"] textarea{
-      background:#000!important;color:var(--night-text)!important;
-      border:1px solid var(--night-border)!important;caret-color:var(--night-text)!important;
-    }
-    html[data-theme="night"] button,html[data-theme="night"] .cl-btn,
-    html[data-theme="night"] [type="submit"]{
-      background:#000!important;background-image:none!important;
-      color:var(--night-text)!important;border:1px solid var(--night-border)!important;
-    }
-    html[data-theme="night"] a{color:var(--night-text)!important;}
-    html[data-theme="night"] input::placeholder{color:var(--night-muted)!important;}
-    </style>
+    {% include "_night_critical.html" %}
     <style>
         body {
             background: linear-gradient(180deg, #1a2f4a 0%, #0d3b5e 100%);

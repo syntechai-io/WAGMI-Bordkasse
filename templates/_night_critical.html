@@ -1,0 +1,71 @@
+{#
+  Critical first-paint Night Mode CSS.
+
+  THIS IS THE SINGLE SOURCE OF TRUTH for the inline <style> block that ships in
+  the <head> of every page so the dark palette renders before external
+  stylesheets load. The full rule set lives in static/ui_night_mode.css and
+  takes over once it has loaded; this partial only carries the minimum rules
+  needed to avoid a bright-flash on first paint.
+
+  Included by templates/layout.html and templates/login.html. If you add a new
+  top-level template that ships its own <head>, include this partial too.
+
+  When you tweak the night palette tokens (--night-bg / --night-text / etc.)
+  or add a new high-traffic component that flashes the wrong colour on first
+  paint, update this file AND the corresponding rule in
+  static/ui_night_mode.css so the two stay in sync.
+
+  Selectors that don't match on a given page (e.g. .login-card on the app
+  shell, .cl-tabbar on the login page) are harmless — the browser just
+  ignores them.
+#}
+<style>
+/* Critical first-paint Night Mode rules. Full set in static/ui_night_mode.css.
+   Single source: templates/_night_critical.html */
+html[data-theme="night"]{
+  --night-bg:#000;--night-surface:#050505;--night-text:#ff2b2b;
+  --night-muted:#9b1c1c;--night-border:#7a0000;
+  --cl-bg:#000;--cl-surface:#050505;--cl-surface-2:#0a0000;
+  --cl-border:#7a0000;--cl-border-strong:#7a0000;
+  --cl-text:#ff2b2b;--cl-text-muted:#9b1c1c;--cl-text-subtle:#9b1c1c;
+  --cl-navy:#ff2b2b;--cl-accent:#ff2b2b;--cl-success:#ff2b2b;
+  --cl-warn:#ff2b2b;--cl-danger:#ff2b2b;
+  color-scheme:dark;background:#000;color:#ff2b2b;
+}
+html[data-theme="night"] body{background:#000!important;color:#ff2b2b!important;}
+html[data-theme="night"] .cl-card,html[data-theme="night"] .cl-card--quiet,
+html[data-theme="night"] .cl-card--flat,html[data-theme="night"] .cl-entry,
+html[data-theme="night"] .cl-hero{
+  background:#050505!important;border:1px solid #7a0000!important;
+  color:#ff2b2b!important;box-shadow:none!important;
+}
+html[data-theme="night"] .login-card{
+  background:#050505!important;border:1px solid #7a0000!important;
+  color:#ff2b2b!important;box-shadow:none!important;
+}
+html[data-theme="night"] .cl-btn,html[data-theme="night"] [class*="cl-btn--"],
+html[data-theme="night"] .cl-iconbtn,
+html[data-theme="night"] button,html[data-theme="night"] [type="submit"]{
+  background:#000!important;background-image:none!important;
+  color:#ff2b2b!important;border:1px solid #7a0000!important;box-shadow:none!important;
+}
+html[data-theme="night"] .cl-input,html[data-theme="night"] .cl-select,
+html[data-theme="night"] input,html[data-theme="night"] select,html[data-theme="night"] textarea{
+  background:#000!important;color:#ff2b2b!important;
+  border:1px solid #7a0000!important;caret-color:#ff2b2b!important;
+}
+html[data-theme="night"] input::placeholder{color:#9b1c1c!important;}
+html[data-theme="night"] a{color:#ff2b2b!important;}
+html[data-theme="night"] .cl-check-row{
+  background:#050505!important;border:1px solid #7a0000!important;
+}
+html[data-theme="night"] input[type="checkbox"],
+html[data-theme="night"] input[type="radio"]{accent-color:#ff2b2b!important;}
+html[data-theme="night"] .cl-tabbar{
+  background:#000!important;border-top:1px solid #7a0000!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+html[data-theme="night"] .cl-tabbar__item{color:#9b1c1c!important;}
+html[data-theme="night"] .cl-tabbar__item--active,
+html[data-theme="night"] .cl-tabbar__item:hover{color:#ff2b2b!important;}
+</style>

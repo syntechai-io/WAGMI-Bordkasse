@@ -2,7 +2,13 @@
    Activated by setting `data-theme="night"` on <html>.
    Goal: preserve dark adaptation. Black backgrounds, red text/borders only.
    No blue, green, orange, grey, or white anywhere.
-   Loaded LAST so it overrides cl_design.css and ui_ios_prime.css. */
+   Loaded LAST so it overrides cl_design.css and ui_ios_prime.css.
+
+   IMPORTANT: A small subset of these rules is also inlined in the <head> via
+   templates/_night_critical.html so the dark palette renders on first paint
+   before this stylesheet loads. When you change a high-traffic rule here
+   (palette tokens, body, .cl-card, .cl-btn, inputs, .cl-tabbar, .login-card,
+   etc.), also update templates/_night_critical.html so the two never drift. */
 
 html[data-theme="night"] {
   color-scheme: dark;

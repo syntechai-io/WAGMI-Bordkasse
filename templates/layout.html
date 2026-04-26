@@ -74,48 +74,7 @@
       } catch(e) {}
     })();
     </script>
-    <style>
-    /* Critical first-paint Night Mode rules. Full set in ui_night_mode.css. */
-    html[data-theme="night"]{
-      --night-bg:#000;--night-surface:#050505;--night-text:#ff2b2b;
-      --night-muted:#9b1c1c;--night-border:#7a0000;
-      --cl-bg:#000;--cl-surface:#050505;--cl-surface-2:#0a0000;
-      --cl-border:#7a0000;--cl-border-strong:#7a0000;
-      --cl-text:#ff2b2b;--cl-text-muted:#9b1c1c;--cl-text-subtle:#9b1c1c;
-      --cl-navy:#ff2b2b;--cl-accent:#ff2b2b;--cl-success:#ff2b2b;
-      --cl-warn:#ff2b2b;--cl-danger:#ff2b2b;
-      color-scheme:dark;background:#000;color:#ff2b2b;
-    }
-    html[data-theme="night"] body{background:#000!important;color:#ff2b2b!important;}
-    html[data-theme="night"] .cl-card,html[data-theme="night"] .cl-card--quiet,
-    html[data-theme="night"] .cl-card--flat,html[data-theme="night"] .cl-entry,
-    html[data-theme="night"] .cl-hero{
-      background:#050505!important;border:1px solid #7a0000!important;
-      color:#ff2b2b!important;box-shadow:none!important;
-    }
-    html[data-theme="night"] .cl-btn,html[data-theme="night"] [class*="cl-btn--"],
-    html[data-theme="night"] .cl-iconbtn{
-      background:#000!important;background-image:none!important;
-      color:#ff2b2b!important;border:1px solid #7a0000!important;box-shadow:none!important;
-    }
-    html[data-theme="night"] .cl-input,html[data-theme="night"] .cl-select,
-    html[data-theme="night"] input,html[data-theme="night"] select,html[data-theme="night"] textarea{
-      background:#000!important;color:#ff2b2b!important;
-      border:1px solid #7a0000!important;caret-color:#ff2b2b!important;
-    }
-    html[data-theme="night"] .cl-check-row{
-      background:#050505!important;border:1px solid #7a0000!important;
-    }
-    html[data-theme="night"] input[type="checkbox"],
-    html[data-theme="night"] input[type="radio"]{accent-color:#ff2b2b!important;}
-    html[data-theme="night"] .cl-tabbar{
-      background:#000!important;border-top:1px solid #7a0000!important;
-      backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
-    }
-    html[data-theme="night"] .cl-tabbar__item{color:#9b1c1c!important;}
-    html[data-theme="night"] .cl-tabbar__item--active,
-    html[data-theme="night"] .cl-tabbar__item:hover{color:#ff2b2b!important;}
-    </style>
+    {% include "_night_critical.html" %}
     {% if branding.accent_color %}
     <style>
         :root {
