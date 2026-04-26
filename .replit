@@ -49,3 +49,7 @@ APP_BASE_URL = "https://4ab24e3a-e318-4ff7-8dab-80d71ab1b725-00-19fomh9w0v1z9.ri
 
 [userenv.production]
 ENVIRONMENT = "production"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 120000
