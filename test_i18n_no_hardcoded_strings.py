@@ -8,7 +8,13 @@ so that German and English users see their own language. Hardcoded German
 tokens like "Törn" or "Statistik" in templates have repeatedly slipped past
 review. This test scans every ``templates/*.html`` file and fails if it finds
 German-only characters or known German words outside translation calls,
-template comments, ``<script>``/``<style>`` blocks, and an explicit allowlist.
+template comments, ``<style>`` blocks, and an explicit allowlist.
+
+Inline ``<script>`` blocks are scanned too: the JS layer ships a per-page
+``i18n`` lookup object (built from ``{{ t('...') | tojson }}`` values), so
+any user-facing copy in JS should reach the DOM via ``i18n.some_key`` /
+``i18n["some_key"]`` rather than as a hardcoded German literal like
+``alert("Törn …")``. JS comments are ignored (developer-only).
 
 It also cross-checks that every ``t('foo.bar')`` referenced in the templates
 has a matching key in both ``locales/de.json`` and ``locales/en.json``.
@@ -75,10 +81,24 @@ _VIOLATION_RE = re.compile(
 _JINJA_COMMENT_RE = re.compile(r"\{#.*?#\}", re.DOTALL)
 # Strip HTML comments <!-- ... --> (multiline)
 _HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
-# Strip <script>...</script> blocks (developer-facing strings, separate task)
-_SCRIPT_RE = re.compile(r"<script\b[^>]*>.*?</script>", re.DOTALL | re.IGNORECASE)
+# Match an inline <script>...</script> block so we can scrub it (rather than
+# strip it entirely) — JS-side hardcoded German must be caught too.
+_SCRIPT_BLOCK_RE = re.compile(
+    r"(<script\b[^>]*>)(.*?)(</script>)", re.DOTALL | re.IGNORECASE
+)
 # Strip <style>...</style> blocks (no user-facing copy lives here)
 _STYLE_RE = re.compile(r"<style\b[^>]*>.*?</style>", re.DOTALL | re.IGNORECASE)
+
+# --- Inline-JS scrubbing helpers ----------------------------------------
+# JS block comments /* ... */ — developer-only, German is fine here.
+_JS_BLOCK_COMMENT_RE = re.compile(r"/\*.*?\*/", re.DOTALL)
+# JS line comments // ... to end of line. The negative lookbehind avoids
+# eating the "//" inside URL string literals like "https://example.com".
+_JS_LINE_COMMENT_RE = re.compile(r"(?<![:/])//[^\n]*")
+# Translated JS lookup via dot access, e.g. i18n.gps_alert
+_JS_I18N_DOT_RE = re.compile(r"\bi18n\.[A-Za-z_$][\w$]*")
+# Translated JS lookup via bracket access, e.g. i18n["gps_alert"]
+_JS_I18N_BRACKET_RE = re.compile(r"\bi18n\[\s*(['\"])[^'\"]*\1\s*\]")
 # Strip any {{ ... }} expression that contains a t( translation call.
 # Uses a lazy, dot-all match so it can span newlines if a t() argument list wraps.
 _T_CALL_RE = re.compile(r"\{\{[^{}]*?\bt\s*\([^{}]*?\}\}", re.DOTALL)
@@ -107,17 +127,38 @@ ALLOWLIST: tuple[tuple[str, str], ...] = (
 MISSING_KEY_ALLOWLIST: frozenset[str] = frozenset()
 
 
+def _scrub_script_block(match: "re.Match[str]") -> str:
+    """Strip translated/developer-only constructs from one inline script.
+
+    What's removed (so the *remaining* JS body can still be scanned):
+      * JS block and line comments (developer-only),
+      * ``i18n.foo`` and ``i18n["foo"]`` lookups (translated at the call site).
+
+    The opening/closing ``<script>`` tags and surrounding line numbers are
+    preserved so the line-based reporter still points at the right line.
+    """
+    open_tag, body, close_tag = match.group(1), match.group(2), match.group(3)
+    # Block comments first so a "/*" doesn't escape into a "//" line scan.
+    body = _JS_BLOCK_COMMENT_RE.sub("", body)
+    body = _JS_LINE_COMMENT_RE.sub("", body)
+    body = _JS_I18N_DOT_RE.sub("", body)
+    body = _JS_I18N_BRACKET_RE.sub("", body)
+    return open_tag + body + close_tag
+
+
 def _strip_safe_regions(text: str) -> str:
     """Remove regions of the template where German text is OK or out of scope.
 
-    Order matters: comments first (they may contain ``{{ ... }}``-shaped
-    text), then ``<script>``/``<style>`` blocks, finally the translation
-    calls themselves.
+    Order matters: Jinja/HTML comments first (they may contain ``{{ ... }}``-
+    shaped text), then ``<style>`` blocks, then inline ``<script>`` blocks
+    are scrubbed (not removed) so we can still flag hardcoded German JS
+    literals while ignoring translated ``i18n.foo`` lookups, and finally
+    the Jinja translation calls themselves.
     """
     text = _JINJA_COMMENT_RE.sub("", text)
     text = _HTML_COMMENT_RE.sub("", text)
-    text = _SCRIPT_RE.sub("", text)
     text = _STYLE_RE.sub("", text)
+    text = _SCRIPT_BLOCK_RE.sub(_scrub_script_block, text)
     text = _T_CALL_RE.sub("", text)
     text = _T_STATEMENT_RE.sub("", text)
     return text
