@@ -15,12 +15,12 @@
     if (!drawer) return;
 
     // ── Desktop sidebar bootstrap ───────────────────────────────────────
-    // Above 1279px the drawer must always be visible as a permanent left
-    // sidebar (display + aria + .drawer-open class). Below 1280px it
-    // returns to mobile/tablet drawer behaviour and is closed by default
-    // unless the user has explicitly opened it via the hamburger.
+    // At 1024px and wider the drawer must always be visible as a permanent
+    // left sidebar (display + aria + .drawer-open class). Below 1024px it
+    // returns to mobile drawer behaviour and is closed by default unless
+    // the user has explicitly opened it via the hamburger.
     function applyLayout() {
-      if (window.innerWidth >= 1280) {
+      if (window.innerWidth >= 1024) {
         drawer.style.removeProperty('display');
         drawer.setAttribute('aria-hidden', 'false');
         drawer.classList.add('drawer-open');
@@ -44,14 +44,14 @@
 
     openBtn.addEventListener('click', open);
     if (closeBtn) closeBtn.addEventListener('click', function() {
-      if (window.innerWidth < 1280) close();
+      if (window.innerWidth < 1024) close();
     });
     if (overlay) overlay.addEventListener('click', function() {
-      if (window.innerWidth < 1280) close();
+      if (window.innerWidth < 1024) close();
     });
 
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && isOpen && window.innerWidth < 1280) {
+      if (e.key === 'Escape' && isOpen && window.innerWidth < 1024) {
         close();
         return;
       }
@@ -63,14 +63,14 @@
     var links = drawer.querySelectorAll('a[href]');
     links.forEach(function(link) {
       link.addEventListener('click', function() {
-        if (window.innerWidth < 1280) close();
+        if (window.innerWidth < 1024) close();
       });
     });
 
     var formButtons = drawer.querySelectorAll('form button[type="submit"]');
     formButtons.forEach(function(btn) {
       btn.addEventListener('click', function() {
-        if (window.innerWidth < 1280) close();
+        if (window.innerWidth < 1024) close();
       });
     });
 
@@ -106,7 +106,7 @@
 
   function close() {
     // On desktop the sidebar is permanently open — never tear it down
-    if (window.innerWidth >= 1280) return;
+    if (window.innerWidth >= 1024) return;
     isOpen = false;
     drawer.classList.remove('drawer-open');
     if (overlay) overlay.classList.remove('overlay-visible');

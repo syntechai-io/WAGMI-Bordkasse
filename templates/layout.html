@@ -131,15 +131,6 @@
         .nav-dropdown.active .dropdown-content {
             display: block;
         }
-
-        /* Hamburger visibility — explicit so it overrides any legacy
-           framework rule that might have hidden it on tablet widths. */
-        @media (max-width: 1279px) {
-            #drawer-open { display: flex !important; align-items: center; }
-        }
-        @media (min-width: 1280px) {
-            #drawer-open { display: none !important; }
-        }
     </style>
 </head>
 <body data-app-mode="{{ app_mode }}">

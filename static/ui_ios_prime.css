@@ -178,7 +178,7 @@ main {
 }
 
 /* ── 16. Desktop sidebar (≥1024px) ── */
-@media (min-width: 1280px) {
+@media (min-width: 1024px) {
     /* Hamburger hidden — sidebar is always visible on desktop */
     #drawer-open { display: none !important; }
 
@@ -212,18 +212,24 @@ main {
         -webkit-backdrop-filter: saturate(180%) blur(14px);
     }
 
-    /* Push topbar and main content right to clear the sidebar */
-    .topbar {
+    /* Push topbar and main content right to clear the sidebar.
+       Gated on `.cl-sidebar.drawer-open ~ ...` so that if ui_nav.js fails to
+       bootstrap the sidebar, the push doesn't fire and we don't leave an
+       empty 220px gap on the left of every page. */
+    .cl-sidebar.drawer-open ~ .topbar {
         left: 220px !important;
         right: 0 !important;
         width: auto !important;
     }
-    .cl-main-content {
+    .cl-sidebar.drawer-open ~ main.cl-main-content,
+    .cl-sidebar.drawer-open ~ .cl-main-content {
         margin-left: 220px !important;
     }
     /* Footer (hidden on mobile, show on desktop) */
     .footer-bar {
         display: block !important;
+    }
+    .cl-sidebar.drawer-open ~ .footer-bar {
         margin-left: 220px;
     }
     /* Overlay: never show on desktop */
@@ -311,20 +317,6 @@ main {
 
     /* Topbar on desktop: simplified — just logo + brand, no nav items needed */
     .topbar .container { max-width: 100%; padding-left: 20px; padding-right: 20px; }
-}
-
-/* Tablet 1024–1279px: keep the mobile-drawer pattern (hamburger + tabbar,
-   no permanent sidebar). Fixes the iPad Pro landscape (1366px-ish) and
-   1024px portrait viewports where the sidebar was being inserted but
-   was invisible/empty due to legacy aria/display state. */
-@media (min-width: 1024px) and (max-width: 1279px) {
-    .cl-tabbar { display: block !important; }
-    body { padding-bottom: var(--cl-tabbar-h, 56px) !important; }
-    body[data-has-actionbar="1"] .cl-tabbar { display: none !important; }
-    body[data-has-actionbar="1"] { padding-bottom: 0 !important; }
-    .footer-bar { display: none !important; }
-    .cl-main-content { margin-left: 0 !important; }
-    .topbar { left: 0 !important; width: 100% !important; }
 }
 
 /* Desktop sidebar night-mode rules removed — see ui_night_mode.css. */
