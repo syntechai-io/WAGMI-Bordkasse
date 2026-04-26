@@ -358,7 +358,7 @@
     (function () {
         if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) return;
         var s = document.createElement('script');
-        s.src = '/static/capacitor-bridge.js';
+        s.src = '/static/capacitor-bridge.js?v={{ asset_version }}';
         s.onload = function () {
             // Bridge defines window.CrewlogBiometric synchronously; init now.
             try { initBiometricLogin(); } catch (e) {}

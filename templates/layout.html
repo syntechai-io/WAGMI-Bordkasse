@@ -482,8 +482,8 @@
         </div>
     </footer>
 
-    <script src="/static/ui_nav.js"></script>
-    <script src="/static/js/cl_shell.js"></script>
+    <script src="/static/ui_nav.js?v={{ asset_version }}"></script>
+    <script src="/static/js/cl_shell.js?v={{ asset_version }}"></script>
     <script>
       // Wire bottom-bar "More" button to open the existing off-canvas drawer.
       (function () {
@@ -503,7 +503,7 @@
         label: {{ t('theme.label') | tojson }}
       };
     </script>
-    <script src="/static/js/night-mode.js"></script>
+    <script src="/static/js/night-mode.js?v={{ asset_version }}"></script>
     <script>
         // Dropdown navigation for touch/click devices (desktop)
         document.addEventListener('DOMContentLoaded', function() {
@@ -553,7 +553,7 @@
     <script>
     if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
         var s = document.createElement('script');
-        s.src = '/static/capacitor-bridge.js';
+        s.src = '/static/capacitor-bridge.js?v={{ asset_version }}';
         document.body.appendChild(s);
     }
     </script>

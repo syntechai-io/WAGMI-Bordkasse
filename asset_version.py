@@ -1,10 +1,11 @@
 """Single source of truth for the static asset cache-buster.
 
-Both the `?v=` query string on CSS link tags (rendered by the page
-templates) and the service worker's `CACHE_NAME` (served by the
-`/sw.js` route) are derived from a content hash of the bundled
-stylesheets. A CSS deploy therefore automatically invalidates both
-layers — no hand-edited version constants to forget.
+Both the `?v=` query string on CSS link tags and JS script tags
+(rendered by the page templates) and the service worker's
+`CACHE_NAME` (served by the `/sw.js` route) are derived from a
+content hash of the bundled stylesheets *and* JavaScript bundles.
+A CSS-only or JS-only deploy therefore automatically invalidates
+both layers — no hand-edited version constants to forget.
 """
 from __future__ import annotations
 
@@ -22,6 +23,20 @@ TRACKED_CSS: Tuple[str, ...] = (
     "static/ui_ios_prime.css",
     "static/ui_night_mode.css",
 )
+
+TRACKED_JS: Tuple[str, ...] = (
+    "static/ui_nav.js",
+    "static/ui_mobile.js",
+    "static/capacitor-bridge.js",
+    "static/js/cl_shell.js",
+    "static/js/night-mode.js",
+    "static/js/logbook-gps.js",
+    "static/js/logbook-quick-entry.js",
+    "static/js/logbook-quick-fill.js",
+    "static/js/logbook-day-entry.js",
+)
+
+TRACKED_ASSETS: Tuple[str, ...] = TRACKED_CSS + TRACKED_JS
 
 CACHE_NAME_PLACEHOLDER = "__CREWLOG_CACHE_NAME__"
 
@@ -42,12 +57,12 @@ def _signature(paths: Iterable[Path]) -> Tuple[Tuple[str, float, int], ...]:
 def asset_version() -> str:
     """Short content-derived version string used for `?v=` cache busting.
 
-    Recomputed when any tracked file's mtime/size changes; otherwise
-    served from a module-level cache so template rendering stays cheap.
-    The hash is over file contents, so identical bytes produce identical
-    versions across machines (deploys are reproducible).
+    Recomputed when any tracked CSS or JS file's mtime/size changes;
+    otherwise served from a module-level cache so template rendering
+    stays cheap. The hash is over file contents, so identical bytes
+    produce identical versions across machines (deploys are reproducible).
     """
-    paths = [Path(p) for p in TRACKED_CSS]
+    paths = [Path(p) for p in TRACKED_ASSETS]
     sig = _signature(paths)
     if _cache["sig"] == sig and _cache["version"]:
         return _cache["version"]  # type: ignore[return-value]

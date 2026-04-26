@@ -1,18 +1,18 @@
 // CACHE_NAME is rewritten by the /sw.js route in main.py to `crewlog-v<hash>`,
-// where <hash> is derived from the bundled stylesheet contents (see
-// asset_version.py). A CSS deploy therefore rotates the cache name and the
-// `?v=` query string on the templates' <link> tags in lockstep.
+// where <hash> is derived from the bundled stylesheet AND JavaScript contents
+// (see asset_version.py). A CSS- or JS-only deploy therefore rotates the cache
+// name and the `?v=` query string on the templates' <link>/<script> tags in
+// lockstep.
 const CACHE_NAME = '__CREWLOG_CACHE_NAME__';
 
-// CSS files are intentionally excluded from precaching: the page templates
-// request them with a `?v=<asset_version>` cache-buster, so the unversioned
-// URLs we used to precache here were never actually served to the page. The
-// runtime network-first handler below populates the cache with the versioned
-// URLs the templates actually request.
+// CSS and JS files are intentionally excluded from precaching: the page
+// templates request them with a `?v=<asset_version>` cache-buster, so the
+// unversioned URLs we used to precache here were never actually served to
+// the page. The runtime handlers below populate the cache with the
+// versioned URLs the templates actually request, and CACHE_NAME rotates
+// in lockstep with `asset_version()` so a CSS- or JS-only deploy wipes
+// stale entries automatically.
 const STATIC_ASSETS = [
-  '/static/ui_nav.js',
-  '/static/js/cl_shell.js',
-  '/static/js/night-mode.js',
   '/static/manifest.json',
   '/static/logo-crewlog.svg',
   '/static/logo-crewlog-192.png',
