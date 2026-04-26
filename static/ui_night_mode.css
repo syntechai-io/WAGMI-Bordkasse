@@ -544,6 +544,25 @@ html[data-theme="night"] .night-toggle {
   border: 1px solid var(--night-border) !important;
 }
 
+/* ── Mobile/iPad topbar account chip ── */
+/* The chip lives in templates/layout.html (#topbar-account-chip); its
+   day-mode visuals (white-on-navy semi-transparent fill + border) are
+   defined in static/ui_ios_prime.css. In night mode the surrounding
+   topbar is pure black, so the day-mode rgba(255,...) values would
+   leave a glowing white circle against a red-on-black palette. Force
+   the chip onto the night palette. */
+html[data-theme="night"] .topbar-account-chip {
+  background: var(--night-bg) !important;
+  color: var(--night-text) !important;
+  border: 1px solid var(--night-border) !important;
+}
+html[data-theme="night"] .topbar-account-chip:hover,
+html[data-theme="night"] .topbar-account-chip:focus-visible {
+  background: var(--night-surface-2) !important;
+  color: #ff5555 !important;
+  border-color: var(--night-text) !important;
+}
+
 /* ── 3-segment Auto / Day / Night switch (topbar + drawer) ── */
 .theme-switch {
   display: inline-flex;
