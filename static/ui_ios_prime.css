@@ -1,7 +1,7 @@
 /* ==========================================================================
    CrewLog — iOS Premium Mobile Overrides
    Loaded LAST, after all other CSS files.
-   All rules scoped to max-width: 1023px (mobile + tablet).
+   All rules scoped to max-width: 1279px (mobile + tablet).
    ========================================================================== */
 
 /* ── 1. Topbar: account for Dynamic Island / notch safe-area ── */
@@ -10,7 +10,7 @@
 }
 /* Compensate: the inner flex row already has h-12 (48px). Adding safe-area
    padding above it extends the bar correctly without re-sizing the flex row. */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     .topbar .container > .flex {
         /* Keep the 48px inner row height; top padding is on the .topbar itself */
         height: 48px;
@@ -18,12 +18,12 @@
 }
 
 /* ── 2. Hide footer on mobile — tabbar replaces it ── */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     .footer-bar { display: none !important; }
 }
 
 /* ── 3. Main content container — consistent padding on mobile ── */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     main.ui-container,
     main.content-container {
         padding-left: 16px;
@@ -33,7 +33,7 @@
 }
 
 /* ── 4. Tab bar active state — pill indicator (iOS-style) ── */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     .cl-tabbar__item--active .cl-tabbar__icon {
         background: var(--cl-accent-soft, #e7f0fa);
         border-radius: 10px;
@@ -52,7 +52,7 @@
 
 /* ── 5. Global card upgrades for legacy pages ── */
 /* Apply card-like styling to any .ui-card or .card that is NOT already cl-card */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     .ui-card:not(.cl-card),
     .card:not(.cl-card) {
         border-radius: 14px;
@@ -63,7 +63,7 @@
 }
 
 /* ── 6. List rows — minimum tap target 44px ── */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     /* Expense, deposit, crew list rows */
     .expense-row,
     .deposit-row,
@@ -119,7 +119,7 @@ main {
 }
 
 /* ── 10. Drawer refinements ── */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     .nav-drawer {
         /* Wider drawer on larger phones */
         --drawer-width: min(84vw, 320px);
@@ -141,7 +141,7 @@ main {
    conflict with that theme caused the white-card / blue-button bug. ── */
 
 /* ── 12. Overscroll background colour matches topbar on pull-down ── */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     html {
         background-color: #0f2942;  /* matches --cl-navy; shows on rubber-band */
         overscroll-behavior-y: none;
@@ -153,7 +153,7 @@ main {
 }
 
 /* ── 13. Pill/badge sizing on mobile ── */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     .cl-pill {
         font-size: 11px;
         padding: 2px 8px;
@@ -170,15 +170,15 @@ main {
 }
 
 /* ── 15. Flash/alert messages — full width on mobile ── */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     .cl-alert {
         border-radius: 10px;
         padding: 12px 14px;
     }
 }
 
-/* ── 16. Desktop sidebar (≥1024px) ── */
-@media (min-width: 1024px) {
+/* ── 16. Desktop sidebar (≥1280px) ── */
+@media (min-width: 1280px) {
     /* Hamburger hidden — sidebar is always visible on desktop */
     #drawer-open { display: none !important; }
 
@@ -268,6 +268,37 @@ main {
         background: var(--cl-accent-soft, #e7f0fa);
         color: var(--cl-accent, #1d6fbb);
         font-weight: 600;
+    }
+
+    /* Force readable text on ALL sidebar link types in light mode.
+       The sidebar header is navy, but body links sit on a white frosted
+       background — keep the existing accent-on-white treatment for hover/
+       active and use a dark navy/text colour for the resting state so
+       sub-items (Törn wählen, Finanzen, Verwaltung, Trips list, etc.)
+       remain readable on every iPad/desktop layout. */
+    .cl-sidebar .drawer-link,
+    .cl-sidebar .drawer-section-toggle,
+    .cl-sidebar .drawer-sub-link,
+    .cl-sidebar .drawer-link span,
+    .cl-sidebar .drawer-section-toggle span {
+        color: var(--cl-text, #0f2942) !important;
+    }
+    .cl-sidebar .drawer-link:hover,
+    .cl-sidebar .drawer-section-toggle:hover,
+    .cl-sidebar .drawer-sub-link:hover {
+        color: var(--cl-accent, #1d6fbb) !important;
+        background: var(--cl-accent-soft, #e7f0fa) !important;
+    }
+    .cl-sidebar .drawer-link-active,
+    .cl-sidebar .drawer-link.drawer-link-active {
+        color: var(--cl-accent, #1d6fbb) !important;
+        background: var(--cl-accent-soft, #e7f0fa) !important;
+        font-weight: 600;
+    }
+    /* Sidebar header sits on the navy band — keep brand text white */
+    .cl-sidebar .drawer-header,
+    .cl-sidebar .drawer-header * {
+        color: #ffffff !important;
     }
     .cl-sidebar .drawer-body {
         padding: 8px 0;
@@ -383,3 +414,68 @@ body[data-app-mode="logbook"] .finance-only-hint {
     display: block !important;
 }
 .finance-only-hint { display: none; }
+
+/* ── 19. Time input height — cap native iOS picker so it stays ~48px ── */
+input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
+    max-height: 52px;
+}
+@media (max-width: 1279px) {
+    input[type="time"] {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 48px !important;
+        max-height: 48px !important;
+        min-height: 48px !important;
+        padding: 0 14px !important;
+        line-height: 48px !important;
+        font-size: 16px !important;
+        border-radius: var(--cl-radius-sm, 10px) !important;
+        border: 1.5px solid var(--cl-border) !important;
+        background: var(--cl-surface) !important;
+        color: var(--cl-text) !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+
+/* ══ 20. Tages-Recap event card separation ══ */
+.recap-event-card {
+    border: 2px solid var(--cl-border) !important;
+    border-radius: 14px !important;
+    margin-bottom: 20px !important;
+    padding: 18px 16px !important;
+    background: var(--cl-surface, #fff) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07) !important;
+    position: relative;
+}
+.recap-event-card > *:first-child {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--cl-text-muted);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--cl-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+/* The time + maneuver wrapper spans the full grid row in the parent
+   .cl-grid--2, then becomes a 2-col subgrid on iPad+ for clean alignment. */
+.recap-event-card .recap-time-maneuver-row {
+    grid-column: 1 / -1;
+}
+@media (min-width: 768px) {
+    .recap-event-card {
+        padding: 22px 20px !important;
+        margin-bottom: 28px !important;
+    }
+    .recap-event-card .recap-time-maneuver-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 16px !important;
+    }
+}

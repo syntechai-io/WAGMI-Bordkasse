@@ -149,6 +149,10 @@
             </div>
 
             {# Face ID / biometric login (iOS only, when credentials saved) #}
+            {# TODO Sprint: WebAuthn/Passkey login (Face ID for web)
+                 Requires: pip install webauthn, new passkey_credentials table,
+                 POST /auth/passkey/register + /auth/passkey/authenticate,
+                 frontend: navigator.credentials.create() / .get() #}
             <div id="biometric-login-block" class="hidden mb-5">
                 <button type="button" id="biometric-login-btn"
                         class="btn btn-primary w-full py-3 text-base flex items-center justify-center gap-2">

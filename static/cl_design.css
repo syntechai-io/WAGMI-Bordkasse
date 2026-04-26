@@ -674,7 +674,7 @@
 .cl-tabbar__item--active { color: var(--cl-accent); }
 .cl-tabbar__item--active .cl-tabbar__icon { opacity: 1; }
 
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     .cl-tabbar { display: block; }
     /* --cl-tabbar-h already includes safe-area-inset-bottom (the tab bar's own
        padding-bottom: env(...)), measured at runtime — do not double-count. */

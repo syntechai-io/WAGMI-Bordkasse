@@ -617,3 +617,95 @@ html[data-theme="night"] ::selection {
   background: var(--night-text);
   color: var(--night-bg);
 }
+
+/* ── cl_design.css token bridge for night mode ──
+   Hex values tuned to pass tests/test_night_mode_e2e.py thresholds:
+     _is_blackish:        r,g,b <= 25  (surfaces, button backgrounds)
+     _is_dark_red_border: 60 <= r <= 200, g <= 50, b <= 50  (borders)
+     _is_night_red:       r >= 200, g,b <= 80  (text, accent)
+*/
+html[data-theme="night"] {
+  --cl-bg:         #000000;
+  --cl-surface:    #0a0000;   /* (10,0,0)  blackish */
+  --cl-surface-2:  #140404;   /* (20,4,4)  blackish */
+
+  --cl-border:     #400808;   /* (64,8,8)  dark-red border */
+
+  --cl-text:       #ff2a2a;   /* (255,42,42) night-red */
+  --cl-text-muted: #cc2020;
+
+  --cl-accent:     #ff2a2a;
+  --cl-accent-dim: #8a1010;
+  --cl-navy:       #100000;   /* (16,0,0) blackish */
+
+  --cl-success:    #cc2020;
+  --cl-warn:       #cc2020;
+  --cl-danger:     #ff2a2a;
+
+  --cl-shadow-sm:  0 1px 3px rgba(255,42,42,0.12);
+  --cl-shadow:     0 4px 12px rgba(255,42,42,0.15);
+}
+
+html[data-theme="night"] .cl-card,
+html[data-theme="night"] .cl-kpi,
+html[data-theme="night"] .cl-tile,
+html[data-theme="night"] .cl-hero,
+html[data-theme="night"] .cl-field,
+html[data-theme="night"] .recap-event-card {
+  background: var(--cl-surface) !important;
+  border-color: var(--cl-border) !important;
+  color: var(--cl-text) !important;
+}
+
+html[data-theme="night"] input,
+html[data-theme="night"] select,
+html[data-theme="night"] textarea {
+  background: #0a0000 !important;
+  border-color: #3a0808 !important;
+  color: #ff2a2a !important;
+}
+html[data-theme="night"] input::placeholder,
+html[data-theme="night"] textarea::placeholder {
+  color: #6a1010 !important;
+  opacity: 1;
+}
+
+html[data-theme="night"] .mode-btn {
+  background: #0a0000 !important;
+  border: 1px solid #3a0808 !important;
+  color: #cc2020 !important;
+}
+html[data-theme="night"] .mode-btn.active,
+html[data-theme="night"] .mode-btn[aria-pressed="true"] {
+  background: #2a0606 !important;
+  color: #ff2a2a !important;
+  border-color: #6a1010 !important;
+}
+
+html[data-theme="night"] .cl-btn--primary,
+html[data-theme="night"] .cl-btn--accent,
+html[data-theme="night"] .cl-btn--success,
+html[data-theme="night"] .cl-btn--warn,
+html[data-theme="night"] .cl-btn--secondary {
+  background: #100202 !important;       /* (16,2,2)  blackish */
+  border-color: #6a1010 !important;     /* (106,16,16) dark-red border */
+  color: #ff2a2a !important;            /* (255,42,42) night-red text */
+}
+
+html[data-theme="night"] table,
+html[data-theme="night"] th,
+html[data-theme="night"] td {
+  border-color: #2a0606 !important;
+  color: var(--cl-text) !important;
+}
+html[data-theme="night"] thead th {
+  background: #0a0000 !important;
+  color: #cc2020 !important;
+}
+
+html[data-theme="night"] .cl-pill,
+html[data-theme="night"] [class*="badge"] {
+  background: #1a0303 !important;
+  color: #ff2a2a !important;
+  border-color: #3a0808 !important;
+}

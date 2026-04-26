@@ -136,9 +136,9 @@ window.__dayRecapI18n = {
         const idx = eventCount++;
         const id  = `evt-${idx}`;
         const card = document.createElement('div');
-        card.className = 'cl-card cl-card--quiet';
+        card.className = 'cl-card cl-card--quiet recap-event-card';
         card.dataset.eventId = id;
-        card.style.cssText = 'padding: var(--cl-space-3); gap: var(--cl-space-3);';
+        card.style.cssText = 'gap: var(--cl-space-3);';
 
         card.innerHTML = `
             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
@@ -147,15 +147,17 @@ window.__dayRecapI18n = {
                         data-target="${id}" aria-label="${I.remove}" style="height:32px; padding:0 10px;">✕</button>
             </div>
             <div class="cl-grid cl-grid--2" style="gap:var(--cl-space-3);">
-                <div class="cl-field">
-                    <label class="cl-label cl-label--inline">${I.time}</label>
-                    <input type="time" class="cl-input evt-time" value="${defaultTime}" required>
-                </div>
-                <div class="cl-field">
-                    <label class="cl-label cl-label--inline">${I.maneuver_type}</label>
-                    <select class="cl-input cl-select evt-category">
-                        ${buildOptionMarkup()}
-                    </select>
+                <div class="recap-time-maneuver-row">
+                    <div class="cl-field">
+                        <label class="cl-label cl-label--inline">${I.time}</label>
+                        <input type="time" class="cl-input evt-time" value="${defaultTime}" required>
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label cl-label--inline">${I.maneuver_type}</label>
+                        <select class="cl-input cl-select evt-category">
+                            ${buildOptionMarkup()}
+                        </select>
+                    </div>
                 </div>
                 <div class="cl-field">
                     <label class="cl-label cl-label--inline">${I.lat}</label>

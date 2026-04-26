@@ -1,0 +1,322 @@
+Now I have everything I need. Let me write both the test script recommendation and the Replit prompt.
+
+---
+
+## Pre-publish Test Script
+
+Run this single command in Replit Shell before every deploy:
+
+```bash
+python -m pytest tests/ test_regression_logbook.py test_crud_operations.py test_settlement_kykladen.py test_weather_service.py -v --tb=short 2>&1 | tee test_report.txt; echo "---SUMMARY---"; grep -E "passed|failed|error" test_report.txt | tail -5
+```
+
+This covers the `tests/` subfolder (balances, core, day-logbook, permissions, timezone) plus the root regression, CRUD, settlement and weather suites — the full backend. The `tee` writes a log you can attach to the deploy PR. **5 pre-existing failures in `test_regression_logbook.py` are known and unrelated to UI work** — anything beyond those is a regression.
+
+---
+
+## Replit Prompt — Fix Visual Issues (iPad/iPhone Chrome, Night Mode, Time Field, Face ID Clarification)
+
+---
+
+```
+CONTEXT
+App: CrewLog (wagmicrewlog.com) — FastAPI / Jinja2 / Tailwind CSS.
+Do NOT touch Python backend, models, migrations, or routes.
+Only edit: static/ui_night_mode.css, static/ui_ios_prime.css, static/cl_design.css,
+           templates/logbook_day_recap.html (CSS only, no logic changes).
+```
+
+---
+
+### FIX 1 — Night mode: add `--cl-*` token bridge so all cl_design.css components respect the nautical red palette
+
+**Root cause**: `ui_night_mode.css` correctly defines `--bg`, `--surface`, `--border` etc. in the old token set, but `cl_design.css` uses `--cl-bg`, `--cl-surface`, `--cl-border` etc. In night mode these `--cl-*` tokens are never overridden, so cards/inputs/tables render with their day-mode styles on top of a dark body — causing the jarring red-border-on-white-card look.
+
+**Note to Replit**: The red-on-black night mode is INTENTIONAL for nautical use (preserves dark-adapted vision at sea). Do NOT change it to blue/navy. Just ensure the `--cl-*` tokens map to the same palette.
+
+**Edit `static/ui_night_mode.css`** — append this block at the very end of the file (after all existing rules):
+
+```css
+/* ── cl_design.css token bridge for night mode ── */
+html[data-theme="night"] {
+  /* Surface layers — deep black/near-black, no white */
+  --cl-bg:         #000000;
+  --cl-surface:    #0a0000;
+  --cl-surface-2:  #160404;
+
+  /* Borders — dark red, subtle (was missing, causing white card borders) */
+  --cl-border:     #3a0808;
+
+  /* Typography */
+  --cl-text:       #ff2a2a;
+  --cl-text-muted: #cc2020;
+
+  /* Accent / interactive */
+  --cl-accent:     #ff2a2a;
+  --cl-accent-dim: #8a1010;
+  --cl-navy:       #1a0000;
+
+  /* Status — all map to red in night mode */
+  --cl-success:    #cc2020;
+  --cl-warn:       #cc2020;
+  --cl-danger:     #ff2a2a;
+
+  /* Shadows */
+  --cl-shadow-sm:  0 1px 3px rgba(255,42,42,0.12);
+  --cl-shadow:     0 4px 12px rgba(255,42,42,0.15);
+}
+
+/* Cards, panels, dropdowns — force night surfaces */
+html[data-theme="night"] .cl-card,
+html[data-theme="night"] .cl-kpi,
+html[data-theme="night"] .cl-tile,
+html[data-theme="night"] .cl-hero,
+html[data-theme="night"] .cl-field,
+html[data-theme="night"] .recap-event-card {
+  background: var(--cl-surface) !important;
+  border-color: var(--cl-border) !important;
+  color: var(--cl-text) !important;
+}
+
+/* Inputs & selects — dark background, red border, red text */
+html[data-theme="night"] input,
+html[data-theme="night"] select,
+html[data-theme="night"] textarea {
+  background: #0a0000 !important;
+  border-color: #3a0808 !important;
+  color: #ff2a2a !important;
+}
+html[data-theme="night"] input::placeholder,
+html[data-theme="night"] textarea::placeholder {
+  color: #6a1010 !important;
+  opacity: 1;
+}
+
+/* Mode switcher buttons (Vollständig / Logbuch) in sidebar */
+html[data-theme="night"] .mode-btn {
+  background: #0a0000 !important;
+  border: 1px solid #3a0808 !important;
+  color: #cc2020 !important;
+}
+html[data-theme="night"] .mode-btn.active,
+html[data-theme="night"] .mode-btn[aria-pressed="true"] {
+  background: #2a0606 !important;
+  color: #ff2a2a !important;
+  border-color: #6a1010 !important;
+}
+
+/* Buttons — night variants */
+html[data-theme="night"] .cl-btn--primary,
+html[data-theme="night"] .cl-btn--accent {
+  background: #2a0606 !important;
+  border-color: #6a1010 !important;
+  color: #ff2a2a !important;
+}
+html[data-theme="night"] .cl-btn--success {
+  background: #1a0303 !important;
+  border-color: #4a0808 !important;
+  color: #cc2020 !important;
+}
+
+/* Table cells */
+html[data-theme="night"] table,
+html[data-theme="night"] th,
+html[data-theme="night"] td {
+  border-color: #2a0606 !important;
+  color: var(--cl-text) !important;
+}
+html[data-theme="night"] thead th {
+  background: #0a0000 !important;
+  color: #cc2020 !important;
+}
+
+/* Pill/badge — avoid jarring white */
+html[data-theme="night"] .cl-pill,
+html[data-theme="night"] [class*="badge"] {
+  background: #1a0303 !important;
+  color: #ff2a2a !important;
+  border-color: #3a0808 !important;
+}
+```
+
+---
+
+### FIX 2 — Time input too tall on iPhone (Day Recap form)
+
+**Root cause**: `<input type="time">` on iOS Safari and Chrome uses the native time picker chrome, rendering ~72–88px tall by default. The current `.cl-input` style sets `min-height: 44px` but does not override `max-height` or suppress the webkit default height expansion.
+
+**Edit `static/ui_ios_prime.css`** — inside the existing `@media (max-width: 1023px)` block, add:
+
+```css
+/* ── time input: cap native iOS height ── */
+input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 48px !important;
+  max-height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 14px !important;
+  line-height: 48px !important;
+  font-size: 16px !important;
+  border-radius: var(--cl-radius-sm, 10px) !important;
+  border: 1.5px solid var(--cl-border) !important;
+  background: var(--cl-surface) !important;
+  color: var(--cl-text) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+```
+
+Also add **globally** (outside any media query) in the same file:
+
+```css
+/* Prevent native picker from blowing up on any device */
+input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  max-height: 52px;
+}
+```
+
+---
+
+### FIX 3 — Recap event cards: clear separation on iPad and iPhone
+
+**Root cause**: The event cards in `templates/logbook_day_recap.html` currently rely on a light background-color and a single border to separate them. On iPad this isn't enough visual weight — cards look merged.
+
+**Edit `static/ui_ios_prime.css`** — add this new section (safe to add at the end of the file):
+
+```css
+/* ══ Tages-Recap event card separation ══ */
+.recap-event-card {
+  border: 2px solid var(--cl-border) !important;
+  border-radius: 14px !important;
+  margin-bottom: 20px !important;
+  padding: 18px 16px !important;
+  background: var(--cl-surface, #fff) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07) !important;
+  position: relative;
+}
+
+/* Event card header row */
+.recap-event-card > *:first-child {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cl-text-muted);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--cl-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Gap between time + maneuver on iPad */
+@media (min-width: 768px) {
+  .recap-event-card {
+    padding: 22px 20px !important;
+    margin-bottom: 28px !important;
+  }
+  /* Two-column layout: time left, maneuver right */
+  .recap-event-card .recap-time-maneuver-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+  }
+}
+```
+
+**Also edit `templates/logbook_day_recap.html`**: wrap the time and maneuver-type fields in:
+```html
+<div class="recap-time-maneuver-row">
+  <!-- existing time input -->
+  <!-- existing maneuver select -->
+</div>
+```
+(Find the time + maneuver section in each event card and wrap those two fields in this div.)
+
+---
+
+### FIX 4 — Sidebar nav labels invisible in light mode on iPad/desktop
+
+**Root cause**: The sidebar CSS sets `color` on `.drawer-link` in the `@media (min-width: 1280px)` block, but the legacy sidebar uses `color: var(--cl-navy)` which is `#1e3a5f` — however the sidebar background was also set to a similar navy shade in a recent `ui_ios_prime.css` edit. Some sub-items (Törn wählen, Finanzen, Verwaltung which are `.drawer-section-toggle` + sub-links) may be inheriting the wrong color.
+
+**Edit `static/ui_ios_prime.css`** — inside the `@media (min-width: 1280px)` block (the sidebar section), add/replace:
+
+```css
+/* Force readable text on ALL sidebar link types in light mode */
+.cl-sidebar .drawer-link,
+.cl-sidebar .drawer-section-toggle,
+.cl-sidebar .drawer-sub-link,
+.cl-sidebar .drawer-link span,
+.cl-sidebar .drawer-section-toggle span {
+  color: rgba(255, 255, 255, 0.90) !important; /* sidebar is navy, so white text */
+}
+.cl-sidebar .drawer-link:hover,
+.cl-sidebar .drawer-section-toggle:hover,
+.cl-sidebar .drawer-sub-link:hover {
+  color: #ffffff !important;
+  background: rgba(255,255,255,0.10) !important;
+}
+.cl-sidebar .drawer-link-active,
+.cl-sidebar .drawer-link.drawer-link-active {
+  color: #ffffff !important;
+  background: rgba(255,255,255,0.18) !important;
+  font-weight: 600;
+}
+/* Ensure sub-menu items (hidden/collapsed) are not display:none by default */
+.cl-sidebar .drawer-sub-menu {
+  display: block !important; /* sidebar is always expanded on desktop */
+}
+```
+
+---
+
+### FIX 5 — iPad breakpoint refinement for Chrome (navigation regression)
+
+**Root cause**: Chrome on iPad Pro (1024px viewport width in landscape) sits exactly on the `min-width: 1024px` breakpoint that was used for the sidebar. Because Chrome doesn't report `hover: hover` pointer capability the same way Safari does, the sidebar sometimes doesn't initialise. Moving the sidebar threshold to `1280px` ensures iPads always get the mobile drawer pattern.
+
+**Edit `static/ui_ios_prime.css`** — find ALL occurrences of `@media (min-width: 1024px)` in the sidebar section (the block added in a previous task for the desktop sidebar) and change them to `@media (min-width: 1280px)`.
+
+**Edit `static/ui_ios_prime.css`** — find ALL `@media (max-width: 1023px)` used for the mobile tabbar, hamburger button, and footer hiding, and change them to `@media (max-width: 1279px)`.
+
+**Also edit `static/cl_design.css`** — find `.cl-tabbar { display: none }` or any media query that hides the tabbar, and ensure it hides at `min-width: 1280px` (not 1024px).
+
+**Verify in `static/ui_nav.js`**: find the lines that check `window.innerWidth < 1024` and change them to `window.innerWidth < 1280` so the auto-close behaviour matches the CSS breakpoint.
+
+---
+
+### FIX 6 — Face ID clarification (no code change needed)
+
+Face ID in a **web browser** (Safari or Chrome on iOS) is delivered via the **Web Authentication API (WebAuthn / Passkeys)**, which is a separate feature sprint requiring:
+- New DB table, backend library (`py_webauthn`), 2 API endpoints, frontend JS using `navigator.credentials`
+
+The native Face ID you may have seen is from a **Capacitor/iOS wrapper build** — it works differently from the browser web app. For the current web app version, **do not implement this now**. Add the following comment to `templates/login.html` for the future sprint:
+
+```html
+<!-- TODO Sprint: WebAuthn/Passkey login (Face ID for web)
+     Requires: pip install webauthn, new passkey_credentials table,
+     POST /auth/passkey/register + /auth/passkey/authenticate,
+     frontend: navigator.credentials.create() / .get() -->
+```
+
+---
+
+### Verification steps after all changes
+
+```bash
+# 1. Restart server — confirm /login → 200
+# 2. Toggle night mode → ALL borders must be dark red (#3a0808), no white cards visible
+# 3. Open /logbook/day-new on iPhone → time field must be ~48px tall, not 80px+
+# 4. Open /logbook/day-new on iPad → event cards must show clear 2px border + shadow separation
+# 5. Open /trips/ on iPad in light mode → sidebar text (Törn wählen, Finanzen, Verwaltung) must be white/readable
+# 6. Open /trips/ on iPad → hamburger icon must be visible (sidebar only appears on ≥1280px screens)
+# 7. Run: python -m pytest tests/ test_regression_logbook.py test_crud_operations.py -v --tb=short
+#    → expect same pass/fail ratio as before (5 pre-existing failures in test_regression_logbook.py are OK)
+```
+
+---
+
+**On cost-efficiency**: All 5 CSS fixes touch only static files — zero DB queries, zero migration, zero Python changes. Fix 4 (sidebar text) + Fix 5 (breakpoint) are the highest-impact per line-of-code since they restore navigation for the iPad user-base entirely.
