@@ -1200,6 +1200,7 @@
   "theme.day": "Tag",
   "theme.label": "Design",
   "theme.night": "Nacht",
+  "theme_diagnostics.trip_name_placeholder": "z.B. Ostsee Segeltörn 2025",
   "track.daily_breakdown": "Tagesetappen",
   "track.day_distance": "Distanz",
   "track.entries": "Einträge",

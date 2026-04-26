@@ -1200,6 +1200,7 @@
   "theme.day": "Day",
   "theme.label": "Theme",
   "theme.night": "Night",
+  "theme_diagnostics.trip_name_placeholder": "e.g. Baltic Sail 2025",
   "track.daily_breakdown": "Daily Legs",
   "track.day_distance": "Distance",
   "track.entries": "Entries",
