@@ -42,7 +42,7 @@ async def forgot_password_form(request: Request):
 
 
 @router.post("/forgot-password")
-@limiter.limit("5/hour")
+@limiter.limit("5/minute")
 async def forgot_password_submit(
     request: Request,
     email: str = Form(...),
@@ -149,7 +149,7 @@ async def reset_password_form(request: Request, token: str = "", db: Session = D
 
 
 @router.post("/reset-password")
-@limiter.limit("10/hour")
+@limiter.limit("5/minute")
 async def reset_password_submit(
     request: Request,
     token: str = Form(...),
