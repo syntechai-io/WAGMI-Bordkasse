@@ -163,17 +163,37 @@
   // Account chip in the mobile topbar opens the navigation drawer (where
   // the user info + Logout button live). Avoids adding a new route while
   // giving users a visible account affordance at <1280px.
+  // Mirrors aria-expanded from the hamburger so a screen reader sees both
+  // controls reflect the same drawer state.
   function wireMobileAccountChip() {
     var chip = document.getElementById('topbar-account-chip');
     if (!chip || chip.__crewlogWired) return;
     chip.__crewlogWired = true;
+    var hamburger = document.getElementById('drawer-open');
     chip.addEventListener('click', function (e) {
       e.preventDefault();
-      var hamburger = document.getElementById('drawer-open');
       if (hamburger && typeof hamburger.click === 'function') {
         hamburger.click();
       }
     });
+    // Mirror the hamburger's aria-expanded onto the chip so both buttons
+    // advertise the same drawer state. ui_nav.js (drawer controller)
+    // already updates aria-expanded on #drawer-open whenever the drawer
+    // opens or closes, so a MutationObserver on that attribute is the
+    // cheapest way to stay in sync without coupling the two files.
+    if (hamburger && 'MutationObserver' in window) {
+      var sync = function () {
+        chip.setAttribute(
+          'aria-expanded',
+          hamburger.getAttribute('aria-expanded') || 'false'
+        );
+      };
+      sync();
+      new MutationObserver(sync).observe(hamburger, {
+        attributes: true,
+        attributeFilter: ['aria-expanded']
+      });
+    }
   }
 
   document.addEventListener('DOMContentLoaded', function () {
