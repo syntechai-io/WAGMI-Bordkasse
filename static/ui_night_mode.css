@@ -730,3 +730,32 @@ html[data-theme="night"] [class*="badge"] {
   color: #ff2a2a !important;
   border-color: #3a0808 !important;
 }
+
+/* ── Less-common Tailwind utilities: sweep results (ring-*, divide-*, fill-*, stroke-*) ──
+   Sweep performed 2026-08-16. Findings per rg across templates/ and static/:
+     ring-*  : focus:ring-amber-500 on a checkbox (crew_form.html).
+               The input:focus box-shadow !important rule above already wins,
+               but overriding --tw-ring-color here ensures no amber glow
+               appears on any focusable element that gains a ring-* class.
+     divide-*: divide-sky-100 / divide-sky-200 on <tbody> in 7 templates
+               (trip_track, wagmi_report, yearly_report, templates, admin_billing,
+               admin_billing_account, crew_list). The existing
+               [class*="divide-"] > * + * rule covers this; the alias below
+               additionally matches the Tailwind v3 form of the selector.
+     fill-*  : no Tailwind fill-<color>-<shade> classes found.
+     stroke-*: no Tailwind stroke-<color>-<shade> classes found; all SVG
+               stroke attributes use currentColor, which inherits night-red.
+     accent-*: only CSS variable references (var(--accent), var(--cl-accent-soft));
+               controlled by the token bridge above — no Tailwind utility classes. */
+
+/* Ring color — override Tailwind's --tw-ring-color custom property so no
+   non-red focus ring can bleed through, regardless of which shade was named. */
+html[data-theme="night"] [class*="ring-"] {
+  --tw-ring-color: rgba(255, 43, 43, 0.35) !important;
+}
+
+/* Divide color — belt-and-suspenders alias using the Tailwind v3 selector form.
+   Catches divide-sky-100, divide-sky-200, and any future divide-<color> classes. */
+html[data-theme="night"] [class*="divide-"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--night-border) !important;
+}
