@@ -87,8 +87,8 @@
             <div style="padding: var(--cl-space-4) var(--cl-space-5); background: var(--cl-surface-2); border-bottom: 1px solid var(--cl-border);">
                 <h2 class="cl-section-title" style="margin: 0;">📋 {{ t('trips.all_trips') }}</h2>
             </div>
-            <div class="cl-table-scroll">
-                <table class="cl-table">
+            <div class="cl-table-scroll cl-trips-table-scroll">
+                <table class="cl-table cl-trips-table">
                     <thead>
                         <tr>
                             <th>{{ t('trips.col_name') }}</th>
@@ -126,10 +126,27 @@
                                     <button type="button" onclick="toggleRename({{ trip.id }})" class="cl-btn cl-btn--secondary cl-btn--sm">✖</button>
                                 </form>
                                 {% endif %}
+                                {# Mobile-only meta line: dates + distance + status shown inside the name cell #}
+                                <div class="cl-trip-meta">
+                                    <span>{{ trip.start_date }}</span>
+                                    <span class="cl-help cl-help--muted">→</span>
+                                    <span>{{ trip.end_date or '…' }}</span>
+                                    {% set total_nm = trip_totals.get(trip.id) %}
+                                    {% if total_nm %}
+                                    <span class="cl-trip-meta__sep">·</span>
+                                    <span class="cl-num">{{ "%.1f"|format(total_nm) }} <span class="cl-help cl-help--muted">nm</span></span>
+                                    {% endif %}
+                                    <span class="cl-trip-meta__sep">·</span>
+                                    {% if trip.status.value == 'active' %}
+                                    <span class="cl-pill cl-pill--solid-success" style="font-size:10px;">{{ t('trips.status_active') }}</span>
+                                    {% else %}
+                                    <span class="cl-pill" style="font-size:10px;">{{ t('trips.status_archived') }}</span>
+                                    {% endif %}
+                                </div>
                             </td>
-                            <td>{{ trip.start_date }}</td>
-                            <td>{{ trip.end_date or '-' }}</td>
-                            <td class="cl-num">
+                            <td class="cl-td-desktop">{{ trip.start_date }}</td>
+                            <td class="cl-td-desktop">{{ trip.end_date or '-' }}</td>
+                            <td class="cl-td-desktop cl-num">
                                 {% set total_nm = trip_totals.get(trip.id) %}
                                 {% if total_nm %}
                                     {{ "%.1f"|format(total_nm) }} <span class="cl-help cl-help--muted">nm</span>
@@ -137,7 +154,7 @@
                                     <span class="cl-help cl-help--muted">—</span>
                                 {% endif %}
                             </td>
-                            <td>
+                            <td class="cl-td-desktop">
                                 {% if trip.status.value == 'active' %}
                                 <span class="cl-pill cl-pill--solid-success">{{ t('trips.status_active') }}</span>
                                 {% else %}

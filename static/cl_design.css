@@ -537,6 +537,84 @@
     align-items: center;
 }
 
+/* Mobile meta line inside the name cell (hidden on desktop) */
+.cl-trip-meta {
+    display: none;
+}
+
+/* --- Phone card layout for trip table (≤640 px) -------------------------- */
+/* Scoped to .cl-trips-table so other .cl-table instances are unaffected.   */
+@media (max-width: 640px) {
+    /* Kill horizontal scroll on the trips scroll-wrapper only */
+    .cl-trips-table-scroll { overflow-x: visible; }
+
+    /* Hide table header — card layout is self-labelled */
+    .cl-trips-table thead { display: none; }
+
+    /* Collapse table structure to block flow */
+    .cl-trips-table,
+    .cl-trips-table tbody,
+    .cl-trips-table tr,
+    .cl-trips-table td { display: block; }
+
+    /* Each row becomes a card */
+    .cl-trips-table tbody tr {
+        margin: var(--cl-space-3) var(--cl-space-3);
+        padding: var(--cl-space-3) var(--cl-space-4);
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius);
+        background: var(--cl-surface);
+        box-shadow: var(--cl-shadow);
+    }
+    .cl-trips-table tbody tr:hover { background: var(--cl-surface); }
+
+    /* Strip per-cell borders and padding — card provides spacing */
+    .cl-trips-table tbody td {
+        padding: 0;
+        border-bottom: none;
+    }
+
+    /* Hide standalone date / distance / status columns on trips table only */
+    .cl-trips-table .cl-td-desktop { display: none !important; }
+
+    /* Show the mobile meta line */
+    .cl-trip-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: var(--cl-space-1);
+        font-size: 12px;
+        color: var(--cl-text-subtle);
+    }
+    .cl-trip-meta .cl-num {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--cl-text);
+    }
+    .cl-trip-meta__sep {
+        color: var(--cl-text-subtle);
+    }
+
+    /* Actions row: full width, decent tap targets, divider above */
+    .cl-trips-table td:last-child {
+        margin-top: var(--cl-space-2);
+        padding-top: var(--cl-space-2);
+        border-top: 1px solid var(--cl-border);
+    }
+    .cl-trips-table .cl-actions {
+        gap: var(--cl-space-2);
+        flex-wrap: wrap;
+    }
+    .cl-trips-table .cl-actions .cl-btn,
+    .cl-trips-table .cl-actions a.cl-btn {
+        min-height: 36px;
+        flex: 1 1 auto;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
 /* --- KPI tiles (Apple-style soft surfaces) ------------------------------- */
 .cl-kpi {
     background: var(--cl-surface);
