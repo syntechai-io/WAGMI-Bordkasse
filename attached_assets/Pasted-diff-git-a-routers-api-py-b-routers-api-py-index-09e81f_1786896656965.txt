@@ -1,0 +1,437 @@
+diff --git a/routers/api.py b/routers/api.py
+index 09e81f2..acddf46 100644
+--- a/routers/api.py
++++ b/routers/api.py
+@@ -3,9 +3,12 @@ from fastapi.responses import JSONResponse
+ from weather_service import WeatherService
+ from services.currency import CurrencyService
+ from datetime import datetime
++import logging
+ import os
+ from db import SessionLocal
+ 
++logger = logging.getLogger(__name__)
++
+ router = APIRouter()
+ 
+ @router.get("/weather")
+@@ -61,10 +64,11 @@ async def health_check():
+             "status": "healthy",
+             "message": "Database connection successful"
+         }
+-    except Exception as e:
++    except Exception:
++        logger.exception("Health check: database connection failed")
+         health_status["services"]["database"] = {
+             "status": "unhealthy",
+-            "message": f"Database connection failed: {str(e)}"
++            "message": "Database connection failed"
+         }
+         health_status["overall_status"] = "unhealthy"
+     finally:
+@@ -87,12 +91,10 @@ async def health_check():
+     
+     try:
+         rates = CurrencyService.get_rates()
+-        if rates and 'DKK' in rates and rates['DKK'] > 0:
+-            dkk_to_eur = 1.0 / rates['DKK']
++        if rates and 'DKK' in rates and rates['DKK'] > 0 and not CurrencyService.using_fallback:
+             health_status["services"]["ecb_currency_api"] = {
+                 "status": "healthy",
+                 "message": "ECB currency API responding correctly",
+-                "sample_rate": f"1 DKK = {dkk_to_eur:.4f} EUR",
+                 "cache_age_hours": (datetime.utcnow() - CurrencyService._cache_timestamp).total_seconds() / 3600 if CurrencyService._cache_timestamp else None
+             }
+         else:
+@@ -100,10 +102,11 @@ async def health_check():
+                 "status": "degraded",
+                 "message": "ECB API using fallback rates (may be outdated)"
+             }
+-    except Exception as e:
++    except Exception:
++        logger.exception("Health check: currency API error")
+         health_status["services"]["ecb_currency_api"] = {
+             "status": "unhealthy",
+-            "message": f"Currency API error: {str(e)}"
++            "message": "Currency API error"
+         }
+         health_status["overall_status"] = "unhealthy"
+     
+@@ -111,12 +114,14 @@ async def health_check():
+     if session_secret and len(session_secret) >= 32:
+         health_status["services"]["session_secret"] = {
+             "status": "healthy",
+-            "message": "SESSION_SECRET is configured and meets minimum length requirement"
++            "message": "SESSION_SECRET is configured"
+         }
+     elif session_secret:
++        # Configured but weak. Log the detail server-side; do not expose length.
++        logger.warning("SESSION_SECRET is shorter than the recommended 32 characters")
+         health_status["services"]["session_secret"] = {
+             "status": "warning",
+-            "message": f"SESSION_SECRET is too short ({len(session_secret)} chars, recommended: 32+)"
++            "message": "SESSION_SECRET is configured but weaker than recommended"
+         }
+     else:
+         health_status["services"]["session_secret"] = {
+diff --git a/routers/crew.py b/routers/crew.py
+index 84ce5a5..046223b 100644
+--- a/routers/crew.py
++++ b/routers/crew.py
+@@ -130,6 +130,11 @@ async def edit_crew_form(
+         CrewMember.id == member_id,
+         CrewMember.trip_id == active_trip.id
+     ).first()
++
++    if not member:
++        request.session["error"] = "Crew-Mitglied nicht gefunden."
++        return RedirectResponse(url="/crew", status_code=303)
++
+     return templates.TemplateResponse("crew_form.html", {
+         "request": request,
+         "member": member
+@@ -164,7 +169,10 @@ async def update_crew(
+         CrewMember.id == member_id,
+         CrewMember.trip_id == active_trip.id
+     ).first()
+-    
++
++    if not member:
++        return RedirectResponse(url="/crew", status_code=303)
++
+     # Only global admin (not trip admin) can modify trip admin status
+     if user_role != "admin" or request.session.get("trip_admin_trip_id"):
+         is_trip_admin = member.is_trip_admin
+diff --git a/routers/deposits.py b/routers/deposits.py
+index 5ce98f2..90655f1 100644
+--- a/routers/deposits.py
++++ b/routers/deposits.py
+@@ -13,6 +13,23 @@ from typing import Optional
+ router = APIRouter(prefix="/deposits", tags=["deposits"])
+ templates = create_templates()
+ 
++
++def _deposits_error(db: Session, request: Request, trip_id: int, message: str, status: int = 400):
++    deposits = db.query(Deposit).filter(Deposit.trip_id == trip_id).order_by(Deposit.date.desc()).all()
++    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == trip_id).order_by(CrewMember.code).all()
++    return templates.TemplateResponse("deposits.html", {
++        "request": request,
++        "deposits": deposits,
++        "crew_members": crew_members,
++        "error": message,
++    }, status_code=status)
++
++
++def _member_in_trip(db: Session, trip_id: int, member_id) -> bool:
++    return db.query(CrewMember.id).filter(
++        CrewMember.id == member_id, CrewMember.trip_id == trip_id
++    ).first() is not None
++
+ @router.get("", response_class=HTMLResponse)
+ async def list_deposits(request: Request, db: Session = Depends(get_db)):
+     active_trip = TripService.get_selected_trip(request, db)
+@@ -66,7 +83,10 @@ async def create_deposit(
+             "crew_members": crew_members,
+             "error": "Der Betrag muss positiv sein."
+         }, status_code=400)
+-    
++
++    if not _member_in_trip(db, active_trip.id, member_id):
++        return _deposits_error(db, request, active_trip.id, "Das gewählte Crew-Mitglied gehört nicht zu diesem Törn.")
++
+     try:
+         currency_enum = Currency(currency)
+         amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
+@@ -160,7 +180,10 @@ async def update_deposit(
+             "crew_members": crew_members,
+             "error": "Der Betrag muss positiv sein."
+         }, status_code=400)
+-    
++
++    if not _member_in_trip(db, active_trip.id, member_id):
++        return _deposits_error(db, request, active_trip.id, "Das gewählte Crew-Mitglied gehört nicht zu diesem Törn.")
++
+     try:
+         deposit = db.query(Deposit).filter(
+             Deposit.id == deposit_id,
+diff --git a/routers/expenses.py b/routers/expenses.py
+index 5b6a21e..d786196 100644
+--- a/routers/expenses.py
++++ b/routers/expenses.py
+@@ -50,6 +50,43 @@ def get_active_crew_at_datetime(db: Session, trip_id: int, expense_datetime: dat
+ router = APIRouter(prefix="/expenses", tags=["expenses"])
+ templates = create_templates()
+ 
++
++def _expenses_error(db: Session, request: Request, trip_id: int, message: str, status: int = 400):
++    """Re-render the expenses list page with an error message."""
++    expenses = db.query(Expense).filter(Expense.trip_id == trip_id).order_by(Expense.date.desc()).all()
++    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == trip_id).order_by(CrewMember.code).all()
++    return templates.TemplateResponse("expenses.html", {
++        "request": request,
++        "expenses": expenses,
++        "crew_members": crew_members,
++        "categories": CATEGORIES,
++        "error": message,
++    }, status_code=status)
++
++
++def _validate_expense_members(db: Session, trip_id: int, split_mode: str, payer_id: str, participant_ids):
++    """Return an error string if payer/participants are invalid for this trip.
++
++    Guards two real bugs: (a) a member id from another trip/account being
++    attached to this expense, and (b) a 'participants' split with nobody
++    selected, which would create an un-split expense that silently unbalances
++    the Bordkasse. Returns None when everything is valid.
++    """
++    valid_ids = {row[0] for row in db.query(CrewMember.id).filter(CrewMember.trip_id == trip_id).all()}
++    if payer_id not in ("", None):
++        try:
++            pid = int(payer_id)
++        except (TypeError, ValueError):
++            return "Ungültiger Zahler."
++        if pid not in valid_ids:
++            return "Der Zahler gehört nicht zu diesem Törn."
++    if split_mode == "participants" and not participant_ids:
++        return "Mindestens ein Teilnehmer muss für die Aufteilung ausgewählt werden."
++    for pid in (participant_ids or []):
++        if pid not in valid_ids:
++            return "Ein ausgewählter Teilnehmer gehört nicht zu diesem Törn."
++    return None
++
+ CATEGORIES = EXPENSE_CATEGORY_KEYS
+ 
+ ALLOWED_CONTENT_TYPES = {"application/pdf", "image/jpeg", "image/png"}
+@@ -193,7 +230,11 @@ async def create_expense(
+             "categories": CATEGORIES,
+             "error": "Der Betrag muss positiv sein."
+         }, status_code=400)
+-    
++
++    member_error = _validate_expense_members(db, active_trip.id, split_mode, payer_id, participant_ids)
++    if member_error:
++        return _expenses_error(db, request, active_trip.id, member_error)
++
+     try:
+         currency_enum = Currency(currency)
+         amount_eur = CurrencyService.convert_to_eur(amount, currency_enum)
+@@ -447,7 +488,11 @@ async def update_expense(
+             "participant_ids": participant_ids,
+             "error": "Der Betrag muss positiv sein."
+         }, status_code=400)
+-    
++
++    member_error = _validate_expense_members(db, active_trip.id, split_mode, payer_id, participant_ids)
++    if member_error:
++        return _expenses_error(db, request, active_trip.id, member_error)
++
+     try:
+         expense = db.query(Expense).filter(
+             Expense.id == expense_id,
+diff --git a/seed_data.py b/seed_data.py
+index 9fa5a3b..bb6fed8 100644
+--- a/seed_data.py
++++ b/seed_data.py
+@@ -1,9 +1,36 @@
+ from sqlalchemy.orm import Session
++from sqlalchemy import text
+ from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum, User, UserRole, Trip, TripStatus, Currency, ExpenseTemplate
+ from datetime import date, timedelta
++import logging
+ import os
+ 
++logger = logging.getLogger(__name__)
++
++# Arbitrary constant used as a PostgreSQL advisory-lock key so that, on an
++# autoscale deployment where several instances may boot against a fresh
++# database simultaneously, only one runs the seeding logic. Without it, two
++# instances can both pass the "no users yet" check and race to insert
++# username="Sven"; the loser then crashes on the unique-username constraint.
++_SEED_ADVISORY_LOCK_KEY = 4820241
++
++
+ def seed_database(db: Session):
++    is_postgres = db.bind.dialect.name == "postgresql"
++    if is_postgres:
++        # Session-level advisory lock serialises concurrent seeders across
++        # instances; it persists across the commits below (same connection)
++        # and is released in the finally block.
++        db.execute(text("SELECT pg_advisory_lock(:k)"), {"k": _SEED_ADVISORY_LOCK_KEY})
++    try:
++        _seed_database_locked(db)
++    finally:
++        if is_postgres:
++            db.execute(text("SELECT pg_advisory_unlock(:k)"), {"k": _SEED_ADVISORY_LOCK_KEY})
++            db.commit()
++
++
++def _seed_database_locked(db: Session):
+     existing_user = db.query(User).first()
+     if not existing_user:
+         admin_password = os.getenv("ADMIN_PASSWORD")
+diff --git a/services/currency.py b/services/currency.py
+index df04603..6cb6321 100644
+--- a/services/currency.py
++++ b/services/currency.py
+@@ -1,86 +1,121 @@
++import logging
+ import requests
+ import defusedxml.ElementTree as ET
+ from datetime import datetime, timedelta
+ from typing import Dict, Optional
+ from models import Currency
+ 
++logger = logging.getLogger(__name__)
++
++# Last-resort static rates, only used if the ECB is unreachable AND we have
++# never successfully fetched real rates in this process. Approximate; flagged
++# as fallback via `using_fallback` so the UI/health check can warn.
++_STATIC_FALLBACK = {"EUR": 1.0, "DKK": 7.46, "SEK": 11.50, "GBP": 0.86}
++
++
+ class CurrencyService:
+     ECB_URL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
+-    
++
+     _cache: Dict[str, float] = {}
+     _cache_timestamp: Optional[datetime] = None
+     _cache_duration = timedelta(hours=24)
+-    
++    # Last rates we successfully fetched from the ECB (survives fetch failures
++    # for the lifetime of the process). Preferred over the static fallback.
++    _last_good: Dict[str, float] = {}
++    # True when the currently served rates are NOT fresh ECB data.
++    using_fallback: bool = False
++
+     @classmethod
+-    def _fetch_ecb_rates(cls) -> Dict[str, float]:
+-        """Fetch latest exchange rates from ECB"""
++    def _fetch_ecb_rates(cls) -> Optional[Dict[str, float]]:
++        """Fetch latest exchange rates from ECB. Returns None on failure."""
+         try:
+             response = requests.get(cls.ECB_URL, timeout=10)
+             response.raise_for_status()
+-            
+             root = ET.fromstring(response.content)
+-            
+             ns = {
+                 'gesmes': 'http://www.gesmes.org/xml/2002-08-01',
+-                'eurofxref': 'http://www.ecb.int/vocabulary/2002-08-01/eurofxref'
++                'eurofxref': 'http://www.ecb.int/vocabulary/2002-08-01/eurofxref',
+             }
+-            
+             rates = {'EUR': 1.0}
+-            
+             for cube in root.findall('.//eurofxref:Cube[@currency]', ns):
+                 currency = cube.get('currency')
+                 rate_str = cube.get('rate')
+-                if currency and rate_str and currency in ['DKK', 'SEK', 'GBP']:
++                if currency and rate_str and currency in ('DKK', 'SEK', 'GBP'):
+                     rates[currency] = float(rate_str)
+-            
++            # Sanity check: we expect EUR plus the three tracked currencies.
++            if len(rates) < 2:
++                logger.warning("ECB response parsed but contained no tracked rates")
++                return None
+             return rates
+-            
+-        except Exception as e:
+-            print(f"Error fetching ECB rates: {e}")
+-            return {
+-                'EUR': 1.0,
+-                'DKK': 7.46,
+-                'SEK': 11.50,
+-                'GBP': 0.86
+-            }
+-    
++        except Exception:
++            logger.exception("Failed to fetch ECB exchange rates")
++            return None
++
+     @classmethod
+     def get_rates(cls) -> Dict[str, float]:
+-        """Get exchange rates with caching"""
++        """Get exchange rates with caching and graceful degradation.
++
++        Priority on a cache miss/expiry: fresh ECB -> last successful ECB
++        fetch this process -> static fallback. `using_fallback` reflects
++        whether the served rates are fresh ECB data.
++        """
+         now = datetime.now()
+-        
+-        if not cls._cache or not cls._cache_timestamp or (now - cls._cache_timestamp) > cls._cache_duration:
+-            cls._cache = cls._fetch_ecb_rates()
++        cache_valid = (
++            cls._cache
++            and cls._cache_timestamp
++            and (now - cls._cache_timestamp) <= cls._cache_duration
++        )
++        if cache_valid:
++            return cls._cache
++
++        fresh = cls._fetch_ecb_rates()
++        if fresh is not None:
++            cls._cache = fresh
++            cls._last_good = dict(fresh)
+             cls._cache_timestamp = now
+-        
++            cls.using_fallback = False
++            return cls._cache
++
++        # Fetch failed: prefer last-good rates, else static fallback.
++        if cls._last_good:
++            logger.warning("Using last successful ECB rates (ECB currently unreachable)")
++            cls._cache = dict(cls._last_good)
++        else:
++            logger.warning("Using STATIC fallback rates (ECB never reached this process)")
++            cls._cache = dict(_STATIC_FALLBACK)
++        cls._cache_timestamp = now
++        cls.using_fallback = True
+         return cls._cache
+-    
++
+     @classmethod
+     def convert_to_eur(cls, amount: float, currency: Currency) -> float:
+-        """Convert amount from given currency to EUR"""
++        """Convert amount from given currency to EUR."""
+         if currency == Currency.EUR:
+             return amount
+-        
+         rates = cls.get_rates()
+-        rate = rates.get(currency.value, 1.0)
+-        
++        rate = rates.get(currency.value)
++        if not rate:
++            # Unknown/missing rate: do NOT silently treat as 1:1. Log and
++            # fall back to 1.0 only as an absolute last resort.
++            logger.error("No exchange rate for %s; treating as 1:1 with EUR", currency.value)
++            rate = 1.0
+         return amount / rate
+-    
++
+     @classmethod
+     def convert_from_eur(cls, amount_eur: float, currency: Currency) -> float:
+-        """Convert amount from EUR to given currency"""
++        """Convert amount from EUR to given currency."""
+         if currency == Currency.EUR:
+             return amount_eur
+-        
+         rates = cls.get_rates()
+-        rate = rates.get(currency.value, 1.0)
+-        
++        rate = rates.get(currency.value)
++        if not rate:
++            logger.error("No exchange rate for %s; treating as 1:1 with EUR", currency.value)
++            rate = 1.0
+         return amount_eur * rate
+-    
++
+     @classmethod
+     def format_amount(cls, amount: float, currency: Currency, amount_eur: float) -> str:
+-        """Format amount showing original currency and EUR conversion"""
++        """Format amount showing original currency and EUR conversion."""
+         if currency == Currency.EUR:
+             return f"{amount:.2f} €"
+-        else:
+-            return f"{amount:.2f} {currency.value} ({amount_eur:.2f} €)"
++        return f"{amount:.2f} {currency.value} ({amount_eur:.2f} €)"
