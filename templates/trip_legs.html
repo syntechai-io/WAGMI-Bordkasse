@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">🧭 {{ t('legs.title') }}</h1>
+            <p class="cl-subtitle">{{ active_trip.name }}</p>
+        </div>
+    </header>
+
+    {% if request.session.get('success') %}
+    <div class="cl-alert cl-alert--success" role="alert">{{ request.session.pop('success') }}</div>
+    {% endif %}
+    {% if request.session.get('error') %}
+    <div class="cl-alert cl-alert--danger" role="alert">{{ request.session.pop('error') }}</div>
+    {% endif %}
+
+    <div class="cl-stack">
+        {% if is_editable %}
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">➕ {{ t('legs.create_title') }}</h2>
+            </header>
+            <p class="cl-help cl-help--muted">{{ t('legs.create_hint') }}</p>
+            <form method="post" action="/legs/create" class="cl-stack cl-stack--sm">
+                {{ csrf_input | safe }}
+                <div class="cl-grid cl-grid--3">
+                    <div class="cl-field">
+                        <label class="cl-label">🏷️ {{ t('legs.name_label') }}</label>
+                        <input type="text" name="name" class="cl-input" placeholder="{{ t('legs.name_placeholder') }}">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">🚢 {{ t('legs.departure_port') }}</label>
+                        <input type="text" name="departure_port" class="cl-input" placeholder="{{ t('legs.departure_port_placeholder') }}">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">🏁 {{ t('legs.destination_port') }}</label>
+                        <input type="text" name="destination_port" class="cl-input" placeholder="{{ t('legs.destination_port_placeholder') }}">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">📅 {{ t('legs.planned_start') }}</label>
+                        <input type="date" name="planned_start" class="cl-input">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">📅 {{ t('legs.planned_end') }}</label>
+                        <input type="date" name="planned_end" class="cl-input">
+                    </div>
+                    <div class="cl-field cl-field--full">
+                        <label class="cl-label">📝 {{ t('common.notes') }}</label>
+                        <input type="text" name="notes" class="cl-input">
+                    </div>
+                </div>
+                <div class="cl-card__footer">
+                    <button type="submit" class="cl-btn cl-btn--success">
+                        ✅ {{ t('legs.add_leg') }}
+                    </button>
+                </div>
+            </form>
+        </section>
+        {% endif %}
+
+        <section class="cl-table-wrap">
+            <div style="padding: var(--cl-space-4) var(--cl-space-5); background: var(--cl-surface-2); border-bottom: 1px solid var(--cl-border);">
+                <h2 class="cl-section-title" style="margin: 0;">📋 {{ t('legs.all_legs') }}</h2>
+            </div>
+
+            {% if legs %}
+            <div class="cl-table-scroll">
+                <table class="cl-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t('legs.col_name') }}</th>
+                            <th>{{ t('legs.col_route') }}</th>
+                            <th>{{ t('legs.col_planned') }}</th>
+                            <th>{{ t('legs.col_distance') }}</th>
+                            <th>{{ t('legs.col_actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leg in legs %}
+                        <tr>
+                            <td>
+                                <div id="leg-display-{{ leg.id }}">
+                                    <strong>{{ leg.display_name }}</strong>
+                                </div>
+                                {% if is_editable %}
+                                <form id="leg-edit-form-{{ leg.id }}" action="/legs/{{ leg.id }}/edit" method="post" class="hidden cl-stack cl-stack--sm" style="margin-top: 8px;">
+                                    {{ csrf_input | safe }}
+                                    <div class="cl-grid cl-grid--2">
+                                        <input type="text" name="name" value="{{ leg.name or '' }}" placeholder="{{ t('legs.name_placeholder') }}" class="cl-input">
+                                        <input type="text" name="departure_port" value="{{ leg.departure_port or '' }}" placeholder="{{ t('legs.departure_port_placeholder') }}" class="cl-input">
+                                        <input type="text" name="destination_port" value="{{ leg.destination_port or '' }}" placeholder="{{ t('legs.destination_port_placeholder') }}" class="cl-input">
+                                        <input type="date" name="planned_start" value="{{ leg.planned_start or '' }}" class="cl-input">
+                                        <input type="date" name="planned_end" value="{{ leg.planned_end or '' }}" class="cl-input">
+                                        <input type="text" name="notes" value="{{ leg.notes or '' }}" placeholder="{{ t('common.notes') }}" class="cl-input">
+                                    </div>
+                                    <div class="cl-actions">
+                                        <button type="submit" class="cl-btn cl-btn--success cl-btn--sm">✔ {{ t('common.save') }}</button>
+                                        <button type="button" onclick="toggleLegEdit({{ leg.id }})" class="cl-btn cl-btn--secondary cl-btn--sm">✖ {{ t('common.cancel') }}</button>
+                                    </div>
+                                </form>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if leg.departure_port or leg.destination_port %}
+                                    {{ leg.departure_port or '…' }} → {{ leg.destination_port or '…' }}
+                                {% else %}
+                                    <span class="cl-help cl-help--muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if leg.planned_start or leg.planned_end %}
+                                    {{ leg.planned_start or '…' }} → {{ leg.planned_end or '…' }}
+                                {% else %}
+                                    <span class="cl-help cl-help--muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="cl-num">
+                                {% if leg.distance_actual_nm %}
+                                    {{ "%.1f"|format(leg.distance_actual_nm) }} <span class="cl-help cl-help--muted">nm</span>
+                                {% elif leg.distance_planned_nm %}
+                                    <span class="cl-help cl-help--muted">~{{ "%.1f"|format(leg.distance_planned_nm) }} nm</span>
+                                {% else %}
+                                    <span class="cl-help cl-help--muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_editable %}
+                                <div class="cl-actions">
+                                    <button type="button" onclick="toggleLegEdit({{ leg.id }})" class="cl-btn cl-btn--ghost cl-btn--sm">✏️ {{ t('common.edit') }}</button>
+                                    <form action="/legs/{{ leg.id }}/delete" method="post" style="margin:0;" onsubmit="return confirm('{{ t('legs.confirm_delete') }}')">
+                                        {{ csrf_input | safe }}
+                                        <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️</button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="padding: var(--cl-space-6) var(--cl-space-5); text-align: center;">
+                <p class="cl-muted">📭 {{ t('legs.no_legs_yet') }}</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <div class="cl-alert cl-alert--info">
+            <strong>💡 {{ t('legs.about_title') }}</strong>
+            <div>{{ t('legs.about_desc') }}</div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleLegEdit(legId) {
+    var display = document.getElementById('leg-display-' + legId);
+    var form = document.getElementById('leg-edit-form-' + legId);
+    if (display) display.classList.toggle('hidden');
+    if (form) form.classList.toggle('hidden');
+}
+</script>
+{% endblock %}

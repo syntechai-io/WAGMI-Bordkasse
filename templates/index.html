@@ -128,6 +128,88 @@ function setCurrentLocalTime(inputId) {
             </a>
             {% endif %}
         </div>
+
+        {# ── Törn hub: trip stats, legs/route, recent activity — one place
+             that shows this trip right now instead of splitting it across
+             several pages. ── #}
+        <section class="cl-card">
+            <h2 class="cl-card__title">🧭 {{ t('dashboard.stats_title') }}</h2>
+            <div class="cl-grid cl-grid--2">
+                <div class="cl-kpi">
+                    <span class="cl-kpi__label">{{ t('dashboard.stat_distance') }}</span>
+                    <span class="cl-kpi__value">{% if trip_total_nm %}{{ "%.1f"|format(trip_total_nm) }} nm{% else %}—{% endif %}</span>
+                </div>
+                <div class="cl-kpi">
+                    <span class="cl-kpi__label">{{ t('dashboard.stat_days') }}</span>
+                    <span class="cl-kpi__value">{{ trip_day_count or 0 }}</span>
+                </div>
+                <div class="cl-kpi">
+                    <span class="cl-kpi__label">{{ t('dashboard.stat_crew') }}</span>
+                    <span class="cl-kpi__value">{{ crew_count or 0 }}</span>
+                </div>
+                <div class="cl-kpi">
+                    <span class="cl-kpi__label">{{ t('dashboard.stat_entries') }}</span>
+                    <span class="cl-kpi__value">{{ trip_entry_count or 0 }}</span>
+                </div>
+            </div>
+        </section>
+
+        {% if trip_legs %}
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">🧭 {{ t('legs.title') }}</h2>
+                <a href="/legs" class="cl-btn cl-btn--ghost cl-btn--sm">{{ t('dashboard.legs_manage') }} →</a>
+            </header>
+            <div class="cl-stack cl-stack--sm">
+                {% for leg in trip_legs %}
+                <div class="cl-help" style="display:flex; align-items:center; justify-content:space-between; gap: var(--cl-space-2);">
+                    <span>🧭 {{ leg.display_name }}</span>
+                    {% if leg.distance_actual_nm %}
+                    <span class="cl-num cl-help--muted">{{ "%.1f"|format(leg.distance_actual_nm) }} nm</span>
+                    {% elif leg.distance_planned_nm %}
+                    <span class="cl-num cl-help--muted">~{{ "%.1f"|format(leg.distance_planned_nm) }} nm</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% else %}
+        <a href="/legs" class="cl-hero" style="background: var(--cl-surface-2);">
+            <span class="cl-hero__icon" aria-hidden="true">🧭</span>
+            <div class="cl-hero__body">
+                <p class="cl-hero__title">{{ t('dashboard.legs_cta_title') }}</p>
+                <p class="cl-hero__desc">{{ t('dashboard.legs_cta_desc') }}</p>
+            </div>
+            <span class="cl-hero__chev" aria-hidden="true">›</span>
+        </a>
+        {% endif %}
+
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">📓 {{ t('dashboard.recent_activity_title') }}</h2>
+                <a href="/logbook" class="cl-btn cl-btn--ghost cl-btn--sm">{{ t('dashboard.view_all_entries') }} →</a>
+            </header>
+            {% if recent_entries %}
+            <div class="cl-stack cl-stack--sm">
+                {% for entry in recent_entries %}
+                <a href="/logbook/{{ entry.id }}" class="cl-entry-collapse" style="display: flex; align-items: center; gap: var(--cl-space-2); padding: var(--cl-space-3) var(--cl-space-4); text-decoration: none; color: inherit;">
+                    <span class="cl-entry-collapse__time">⏱️ {{ entry.entry_date.strftime('%d.%m. %H:%M') }}</span>
+                    {% if entry.leg %}
+                    <span class="cl-entry-collapse__route">🧭 {{ entry.leg.display_name }}</span>
+                    {% elif entry.departure or entry.destination %}
+                    <span class="cl-entry-collapse__route">
+                        {% if entry.departure %}{{ entry.departure }}{% endif %}{% if entry.departure and entry.destination %} → {% endif %}{% if entry.destination %}{{ entry.destination }}{% endif %}
+                    </span>
+                    {% elif entry.notes %}
+                    <span class="cl-entry-collapse__preview">{{ entry.notes[:50] }}{% if entry.notes|length > 50 %}…{% endif %}</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="cl-help cl-help--muted">{{ t('dashboard.recent_activity_none') }}</p>
+            {% endif %}
+        </section>
     </div>
 </div>
 {% endblock %}

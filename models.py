@@ -91,6 +91,7 @@ class Trip(Base):
     expenses = relationship("Expense", back_populates="trip", cascade="all, delete-orphan")
     logbook_entries = relationship("LogbookEntry", back_populates="trip", cascade="all, delete-orphan")
     trip_members = relationship("TripMember", backref="trip", cascade="all, delete-orphan")
+    legs = relationship("TripLeg", back_populates="trip", cascade="all, delete-orphan", order_by="TripLeg.sort_order")
     
     def set_trip_admin_password(self, password: str):
         """Hash and set trip admin password"""
@@ -117,6 +118,38 @@ class Trip(Base):
         if self.crew_password_hash is None or not password:
             return False
         return check_password_hash(str(self.crew_password_hash), password)
+
+class TripLeg(Base):
+    """A named passage within a trip (e.g. the outbound and return legs of a
+    roundtrip). Logbook entries optionally link to one via LogbookEntry.leg_id."""
+    __tablename__ = "trip_legs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    trip_id = Column(Integer, ForeignKey("trips.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(150), nullable=True)
+    departure_port = Column(String(100), nullable=True)
+    destination_port = Column(String(100), nullable=True)
+    planned_start = Column(Date, nullable=True)
+    planned_end = Column(Date, nullable=True)
+    actual_start = Column(DateTime, nullable=True)
+    actual_end = Column(DateTime, nullable=True)
+    distance_planned_nm = Column(Float, nullable=True)
+    distance_actual_nm = Column(Float, nullable=True)
+    sort_order = Column(Integer, nullable=False, default=0)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    trip = relationship("Trip", back_populates="legs")
+    entries = relationship("LogbookEntry", back_populates="leg")
+
+    @property
+    def display_name(self) -> str:
+        if self.name:
+            return self.name
+        if self.departure_port and self.destination_port:
+            return f"{self.departure_port} → {self.destination_port}"
+        return self.departure_port or self.destination_port or f"Leg {self.id}"
 
 class CrewMember(Base):
     __tablename__ = "crew_members"
@@ -277,6 +310,7 @@ class LogbookEntry(Base):
     trip_id = Column(Integer, ForeignKey("trips.id"), nullable=False, index=True)
     client_temp_id = Column(String(100), nullable=True, index=True, unique=True)
     watch_leader_id = Column(Integer, ForeignKey("crew_members.id"), nullable=True, index=True)
+    leg_id = Column(Integer, ForeignKey("trip_legs.id"), nullable=True, index=True)
     entry_date = Column(DateTime, nullable=False, index=True)
     entry_date_utc = Column(DateTime, nullable=False)
     latitude = Column(Float, nullable=True)
@@ -341,6 +375,7 @@ class LogbookEntry(Base):
     photos = relationship("LogbookPhoto", back_populates="entry", cascade="all, delete-orphan")
     crew_on_watch = relationship("CrewOnWatch", back_populates="entry", cascade="all, delete-orphan")
     watch_leader = relationship("CrewMember", foreign_keys=[watch_leader_id])
+    leg = relationship("TripLeg", back_populates="entries")
     
     # Self-referential relationship for addendums
     parent = relationship("LogbookEntry", remote_side=[id], foreign_keys=[parent_id], backref="addendums")

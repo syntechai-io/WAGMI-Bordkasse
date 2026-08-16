@@ -795,3 +795,66 @@ html[data-theme="night"] .cl-tabbar {
 html[data-theme="night"] .cl-tabbar__item { color: rgba(255, 80, 80, .55); }
 html[data-theme="night"] .cl-tabbar__item--active,
 html[data-theme="night"] .cl-tabbar__item:hover { color: rgba(255, 80, 80, .95); }
+
+/* --- Collapsible logbook entry row (compact list, Phase 2) --------------- */
+.cl-entry-collapse {
+    background: var(--cl-surface-2);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+}
+.cl-entry-collapse__summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-2);
+    padding: var(--cl-space-3) var(--cl-space-4);
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--cl-text);
+}
+.cl-entry-collapse__summary::-webkit-details-marker { display: none; }
+.cl-entry-collapse__chevron {
+    display: inline-block;
+    transition: transform .15s ease;
+    color: var(--cl-text-subtle);
+    flex-shrink: 0;
+}
+.cl-entry-collapse[open] > .cl-entry-collapse__summary .cl-entry-collapse__chevron {
+    transform: rotate(90deg);
+}
+.cl-entry-collapse__time { font-weight: 700; color: var(--cl-navy); flex-shrink: 0; }
+.cl-entry-collapse__icon { flex-shrink: 0; }
+.cl-entry-collapse__route {
+    color: var(--cl-accent);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+.cl-entry-collapse__preview {
+    color: var(--cl-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+.cl-entry-collapse__badge { margin-left: auto; flex-shrink: 0; }
+.cl-entry-collapse__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-4);
+    padding: 0 var(--cl-space-4) var(--cl-space-4);
+    border-top: 1px solid var(--cl-border);
+    padding-top: var(--cl-space-4);
+}
+
+/* --- Leg group header within the day-grouped logbook list ---------------- */
+.cl-leg-header {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--cl-accent);
+    padding: var(--cl-space-2) var(--cl-space-1) 0;
+}
+.cl-leg-header--muted { color: var(--cl-text-subtle); }

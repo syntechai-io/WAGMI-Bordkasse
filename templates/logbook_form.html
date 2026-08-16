@@ -510,16 +510,28 @@
             
             <div>
                 <label class="block font-medium mb-2">🏁 {{ t('logbook.destination') }}</label>
-                <input type="text" name="destination" 
-                       value="{% if entry and entry.destination %}{{ entry.destination }}{% endif %}" 
-                       placeholder="{{ t('logbook.placeholder_destination') }}" 
-                       class="w-full px-4 py-3 border rounded-lg text-lg" 
+                <input type="text" name="destination"
+                       value="{% if entry and entry.destination %}{{ entry.destination }}{% endif %}"
+                       placeholder="{{ t('logbook.placeholder_destination') }}"
+                       class="w-full px-4 py-3 border rounded-lg text-lg"
                        style="border-color: var(--border);">
             </div>
+
+            {% if legs %}
+            <div>
+                <label class="block font-medium mb-2">🧭 {{ t('logbook.leg_select_label') }}</label>
+                <select name="leg_id" class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: var(--border);">
+                    <option value="">{{ t('logbook.leg_select_none') }}</option>
+                    {% for leg in legs %}
+                    <option value="{{ leg.id }}" {% if entry and entry.leg_id == leg.id %}selected{% endif %}>{{ leg.display_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
         </div>
-        
+
         <div class="rope-divider"></div>
-        
+
         <!-- Phase A: Sails Section - sail-profile-aware -->
         <details class="porthole-card p-4 mb-4 cursor-pointer">
             <summary class="text-lg font-bold maritime-header cursor-pointer">

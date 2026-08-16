@@ -82,7 +82,18 @@
     
     <!-- Entries Timeline -->
     <div class="space-y-4">
+        {% set ns = namespace(current_leg_id='__unset__') %}
         {% for entry in entries %}
+            {% if entry.leg_id and entry.leg_id != ns.current_leg_id %}
+            <div class="cl-leg-header">
+                🧭 {{ entry.leg.display_name if entry.leg else t('logbook.leg_select_label') }}
+            </div>
+            {% elif (not entry.leg_id) and ns.current_leg_id != none and ns.current_leg_id != '__unset__' %}
+            <div class="cl-leg-header cl-leg-header--muted">
+                {{ t('logbook.no_leg_entries') }}
+            </div>
+            {% endif %}
+            {% set ns.current_leg_id = entry.leg_id %}
         <div class="bg-white porthole-card p-6 hover:shadow-xl transition">
             <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <!-- Time and Maneuver Icon -->

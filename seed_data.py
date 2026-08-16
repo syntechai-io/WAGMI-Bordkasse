@@ -17,11 +17,14 @@ _SEED_ADVISORY_LOCK_KEY = 4820241
 
 def seed_database(db: Session):
     is_postgres = db.bind.dialect.name == "postgresql"
-    connection = db.connection() if is_postgres else None
     if is_postgres:
         # Session-level advisory lock serialises concurrent seeders across
         # instances. It is released explicitly after the seed transaction.
-        connection.execute(
+        # Issued via db.execute() (not a raw Connection captured up front)
+        # because _seed_database_locked() commits in stages — each commit()
+        # returns the session's checked-out connection to the pool, which
+        # would invalidate a Connection object held from before those commits.
+        db.execute(
             text("SELECT pg_advisory_lock(:k)"),
             {"k": _SEED_ADVISORY_LOCK_KEY},
         )
@@ -34,7 +37,7 @@ def seed_database(db: Session):
         raise
     finally:
         if is_postgres:
-            connection.execute(
+            db.execute(
                 text("SELECT pg_advisory_unlock(:k)"),
                 {"k": _SEED_ADVISORY_LOCK_KEY},
             )

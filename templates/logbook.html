@@ -41,105 +41,122 @@
                 <span class="cl-pill cl-pill--accent">📖 {{ t('logbook.daily_view') }} →</span>
             </a>
 
+            {% set ns = namespace(current_leg_id='__unset__') %}
             {% for entry in day_entries %}
-            <article class="cl-card" style="padding: var(--cl-space-4);">
-                <div class="cl-card__head" style="align-items: flex-start;">
-                    <div style="display: flex; gap: var(--cl-space-3); align-items: flex-start; flex: 1 1 auto; min-width: 0;">
-                        {% if entry.photos %}
-                        <img src="/logbook/photos/{{ entry.photos[0].id }}/view" alt=""
-                             style="width: 64px; height: 64px; object-fit: cover; border-radius: var(--cl-radius-sm); cursor: pointer; flex-shrink: 0;"
-                             onclick="window.location='/logbook/{{ entry.id }}'">
-                        {% endif %}
-                        <div style="flex: 1 1 auto; min-width: 0;">
-                            <p class="cl-card__title" style="display: flex; align-items: center; gap: 6px;">
-                                ⏱️ {{ entry.entry_date.strftime('%H:%M') }}
-                                {% if entry.maneuver_type %}
-                                    <span style="font-weight: 400;">{% if entry.maneuver_type == 'departure' %}🚢
-                                    {% elif entry.maneuver_type == 'sail_change' %}⛵
-                                    {% elif entry.maneuver_type == 'motor' %}🔧
-                                    {% elif entry.maneuver_type == 'anchor' %}⚓
-                                    {% elif entry.maneuver_type == 'weather' %}🌤️
-                                    {% elif entry.maneuver_type == 'arrival' %}🏁
-                                    {% elif entry.maneuver_type == 'full' %}📝
-                                    {% endif %}</span>
-                                {% endif %}
-                            </p>
-                            {% if entry.departure or entry.destination %}
-                            <p class="cl-help cl-help--muted" style="margin-top: 4px; color: var(--cl-accent);">
-                                {% if entry.departure %}🏁 {{ entry.departure }}{% endif %}
-                                {% if entry.departure and entry.destination %} → {% endif %}
-                                {% if entry.destination %}🏁 {{ entry.destination }}{% endif %}
-                            </p>
+                {% if entry.leg_id and entry.leg_id != ns.current_leg_id %}
+                <div class="cl-leg-header">
+                    🧭 {{ entry.leg.display_name if entry.leg else t('logbook.leg_select_label') }}
+                </div>
+                {% elif (not entry.leg_id) and ns.current_leg_id != none and ns.current_leg_id != '__unset__' %}
+                <div class="cl-leg-header cl-leg-header--muted">
+                    {{ t('logbook.no_leg_entries') }}
+                </div>
+                {% endif %}
+                {% set ns.current_leg_id = entry.leg_id %}
+
+            <details class="cl-entry-collapse">
+                <summary class="cl-entry-collapse__summary">
+                    <span class="cl-entry-collapse__chevron" aria-hidden="true">▸</span>
+                    <span class="cl-entry-collapse__time">⏱️ {{ entry.entry_date.strftime('%H:%M') }}</span>
+                    {% if entry.maneuver_type %}
+                    <span class="cl-entry-collapse__icon">{% if entry.maneuver_type == 'departure' %}🚢
+                        {% elif entry.maneuver_type == 'sail_change' %}⛵
+                        {% elif entry.maneuver_type == 'motor' %}🔧
+                        {% elif entry.maneuver_type == 'anchor' %}⚓
+                        {% elif entry.maneuver_type == 'weather' %}🌤️
+                        {% elif entry.maneuver_type == 'arrival' %}🏁
+                        {% elif entry.maneuver_type == 'full' %}📝
+                        {% endif %}</span>
+                    {% endif %}
+                    {% if entry.departure or entry.destination %}
+                    <span class="cl-entry-collapse__route">
+                        {% if entry.departure %}{{ entry.departure }}{% endif %}
+                        {% if entry.departure and entry.destination %} → {% endif %}
+                        {% if entry.destination %}{{ entry.destination }}{% endif %}
+                    </span>
+                    {% elif entry.notes %}
+                    <span class="cl-entry-collapse__preview">{{ entry.notes[:60] }}{% if entry.notes|length > 60 %}…{% endif %}</span>
+                    {% endif %}
+                    {% if entry.photos %}<span class="cl-entry-collapse__badge" aria-hidden="true">📷</span>{% endif %}
+                </summary>
+
+                <div class="cl-entry-collapse__body">
+                    <div class="cl-card__head" style="align-items: flex-start;">
+                        <div style="display: flex; gap: var(--cl-space-3); align-items: flex-start; flex: 1 1 auto; min-width: 0;">
+                            {% if entry.photos %}
+                            <img src="/logbook/photos/{{ entry.photos[0].id }}/view" alt=""
+                                 style="width: 64px; height: 64px; object-fit: cover; border-radius: var(--cl-radius-sm); cursor: pointer; flex-shrink: 0;"
+                                 onclick="window.location='/logbook/{{ entry.id }}'">
                             {% endif %}
                         </div>
+                        <div class="cl-actions">
+                            <a href="/logbook/{{ entry.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm">
+                                ✏️ {{ t('common.edit') }}
+                            </a>
+                            <form action="/logbook/{{ entry.id }}/delete" method="post" style="margin: 0;" onsubmit="return confirm('{{ t('common.confirm_delete_entry') }}')">
+                                {{ csrf_input | safe }}
+                                <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️</button>
+                            </form>
+                        </div>
                     </div>
-                    <div class="cl-actions">
-                        <a href="/logbook/{{ entry.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm">
-                            ✏️ {{ t('common.edit') }}
-                        </a>
-                        <form action="/logbook/{{ entry.id }}/delete" method="post" style="margin: 0;" onsubmit="return confirm('{{ t('common.confirm_delete_entry') }}')">
-                            {{ csrf_input | safe }}
-                            <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️</button>
-                        </form>
+
+                    <div class="cl-grid cl-grid--3" style="gap: var(--cl-space-3);">
+                        {% if entry.latitude and entry.longitude %}
+                        <div class="cl-help cl-help--muted">
+                            <span class="cl-subtle">📍 {{ t('logbook.position') }}:</span>
+                            <strong style="color: var(--cl-text);">{{ "%.4f"|format(entry.latitude) }}°, {{ "%.4f"|format(entry.longitude) }}°</strong>
+                        </div>
+                        {% endif %}
+                        {% if entry.wind_direction or entry.wind_strength %}
+                        <div class="cl-help cl-help--muted">
+                            <span class="cl-subtle">💨 {{ t('logbook.wind') }}:</span>
+                            <strong style="color: var(--cl-text);">
+                                {% if entry.wind_direction %}{{ entry.wind_direction }}{% endif %}
+                                {% if entry.wind_strength %}{{ display_wind(entry.wind_strength) }}{% endif %}
+                            </strong>
+                        </div>
+                        {% endif %}
+                        {% if entry.sea_state %}
+                        <div class="cl-help cl-help--muted">
+                            <span class="cl-subtle">🌊 {{ t('logbook.sea_state') }}:</span>
+                            <strong style="color: var(--cl-text);">{{ display_sea_state(entry.sea_state) }}</strong>
+                        </div>
+                        {% endif %}
+                        {% if entry.temperature %}
+                        <div class="cl-help cl-help--muted">
+                            <span class="cl-subtle">🌡️ {{ t('logbook.temperature') }}:</span>
+                            <strong style="color: var(--cl-text);">{{ entry.temperature }}°C</strong>
+                        </div>
+                        {% endif %}
+                        {% set leg_nm = entry_legs.get(entry.id) if entry_legs else None %}
+                        {% if leg_nm is not none %}
+                        <div class="cl-help cl-help--muted">
+                            <span class="cl-subtle">📏 {{ t('track.leg') }}:</span>
+                            <strong style="color: var(--cl-text);">{{ "%.2f"|format(leg_nm) }} nm</strong>
+                        </div>
+                        {% endif %}
                     </div>
+
+                    {% if entry.crew_on_watch %}
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                        <span class="cl-help cl-help--muted">👥 {{ t('logbook.watch') }}:</span>
+                        {% for watch in entry.crew_on_watch %}
+                        <span class="cl-pill cl-pill--solid-accent">{{ watch.member.code }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if entry.notes %}
+                    <p style="background: var(--cl-surface-2); padding: var(--cl-space-3); border-radius: var(--cl-radius-sm); font-size: 14px; color: var(--cl-text); margin: 0;">
+                        {{ entry.notes }}
+                    </p>
+                    {% endif %}
+
+                    <a href="/logbook/{{ entry.id }}" class="cl-btn cl-btn--ghost cl-btn--sm" style="align-self: flex-start;">
+                        👁️ {{ t('logbook.show_details') }} →
+                    </a>
                 </div>
-
-                <div class="cl-grid cl-grid--3" style="gap: var(--cl-space-3);">
-                    {% if entry.latitude and entry.longitude %}
-                    <div class="cl-help cl-help--muted">
-                        <span class="cl-subtle">📍 {{ t('logbook.position') }}:</span>
-                        <strong style="color: var(--cl-text);">{{ "%.4f"|format(entry.latitude) }}°, {{ "%.4f"|format(entry.longitude) }}°</strong>
-                    </div>
-                    {% endif %}
-                    {% if entry.wind_direction or entry.wind_strength %}
-                    <div class="cl-help cl-help--muted">
-                        <span class="cl-subtle">💨 {{ t('logbook.wind') }}:</span>
-                        <strong style="color: var(--cl-text);">
-                            {% if entry.wind_direction %}{{ entry.wind_direction }}{% endif %}
-                            {% if entry.wind_strength %}{{ display_wind(entry.wind_strength) }}{% endif %}
-                        </strong>
-                    </div>
-                    {% endif %}
-                    {% if entry.sea_state %}
-                    <div class="cl-help cl-help--muted">
-                        <span class="cl-subtle">🌊 {{ t('logbook.sea_state') }}:</span>
-                        <strong style="color: var(--cl-text);">{{ display_sea_state(entry.sea_state) }}</strong>
-                    </div>
-                    {% endif %}
-                    {% if entry.temperature %}
-                    <div class="cl-help cl-help--muted">
-                        <span class="cl-subtle">🌡️ {{ t('logbook.temperature') }}:</span>
-                        <strong style="color: var(--cl-text);">{{ entry.temperature }}°C</strong>
-                    </div>
-                    {% endif %}
-                    {% set leg_nm = entry_legs.get(entry.id) if entry_legs else None %}
-                    {% if leg_nm is not none %}
-                    <div class="cl-help cl-help--muted">
-                        <span class="cl-subtle">📏 {{ t('track.leg') }}:</span>
-                        <strong style="color: var(--cl-text);">{{ "%.2f"|format(leg_nm) }} nm</strong>
-                    </div>
-                    {% endif %}
-                </div>
-
-                {% if entry.crew_on_watch %}
-                <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
-                    <span class="cl-help cl-help--muted">👥 {{ t('logbook.watch') }}:</span>
-                    {% for watch in entry.crew_on_watch %}
-                    <span class="cl-pill cl-pill--solid-accent">{{ watch.member.code }}</span>
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-                {% if entry.notes %}
-                <p style="background: var(--cl-surface-2); padding: var(--cl-space-3); border-radius: var(--cl-radius-sm); font-size: 14px; color: var(--cl-text); margin: 0;">
-                    {{ entry.notes }}
-                </p>
-                {% endif %}
-
-                <a href="/logbook/{{ entry.id }}" class="cl-btn cl-btn--ghost cl-btn--sm" style="align-self: flex-start;">
-                    👁️ {{ t('logbook.show_details') }} →
-                </a>
-            </article>
+            </details>
             {% endfor %}
         </section>
         {% endfor %}

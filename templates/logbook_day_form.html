@@ -240,6 +240,17 @@
                     {{ lbl(t('logbook.destination')) }}
                     <input type="text" name="destination" placeholder="{{ t('logbook.destination_placeholder') }}" value="{{ header.get('destination', '') }}" class="cl-input">
                 </div>
+                {% if legs %}
+                <div class="cl-field">
+                    {{ lbl(t('logbook.leg_select_label')) }}
+                    <select name="leg_id" class="cl-input cl-select">
+                        <option value="">{{ t('logbook.leg_select_none') }}</option>
+                        {% for leg in legs %}
+                        <option value="{{ leg.id }}" {% if header.get('leg_id')|string == leg.id|string %}selected{% endif %}>{{ leg.display_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
             </div>
             <div class="cl-field cl-field--full">
                 {{ lbl(t('common.notes')) }}

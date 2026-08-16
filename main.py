@@ -6,10 +6,12 @@ from starlette.middleware.sessions import SessionMiddleware
 from middleware.csrf import BootstrapFastAPICSRFJinjaMiddleware
 from sqlalchemy import func
 from db import init_db, get_db
-from sqlalchemy.orm import Session
-from models import Deposit, Expense, PaidFromEnum, Trip
+from sqlalchemy.orm import Session, joinedload
+from models import Deposit, Expense, PaidFromEnum, Trip, CrewMember, LogbookEntry
 from seed_data import seed_database
 from services.trip import TripService
+from services.track import compute_track_summary
+from services import legs as LegService
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from limiter_config import limiter
@@ -26,6 +28,7 @@ from routers.trips import router as trips_router
 from routers.logbook import router as logbook_router
 from routers.templates import router as templates_router
 from routers.groups import router as groups_router
+from routers.legs import router as legs_router
 from routers.api import router as api_router
 from routers.widget import router as widget_router
 from routes_auth import router as saas_auth_router
@@ -133,6 +136,7 @@ app.include_router(export_router)
 app.include_router(logbook_router)
 app.include_router(templates_router)
 app.include_router(groups_router)
+app.include_router(legs_router)
 app.include_router(saas_auth_router)
 app.include_router(billing_router)
 app.include_router(billing_ui_router)
@@ -367,7 +371,21 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
     ).filter(Expense.trip_id == trip_id).group_by(Expense.category).order_by(func.sum(Expense.amount_eur).desc()).limit(5).all()
     
     expense_count = db.query(Expense).filter(Expense.trip_id == trip_id).count()
-    
+
+    # Törn hub summary: trip stats, legs/route, and recent logbook activity —
+    # composed here so "/" is a single place showing this trip right now,
+    # instead of splitting it across the dashboard/trips-list/logbook pages.
+    track_summary = compute_track_summary(db, trip_id)
+    crew_count = db.query(CrewMember).filter(
+        CrewMember.trip_id == trip_id, CrewMember.departed_at.is_(None)
+    ).count()
+    trip_legs = LegService.list_legs_for_trip(db, trip_id)
+    recent_entries = db.query(LogbookEntry).options(
+        joinedload(LogbookEntry.leg)
+    ).filter(
+        LogbookEntry.trip_id == trip_id, LogbookEntry.is_superseded.is_(False)
+    ).order_by(LogbookEntry.entry_date.desc()).limit(5).all()
+
     return templates.TemplateResponse("index.html", {
         "request": request,
         "active_trip": selected_trip,
@@ -378,5 +396,11 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
         "wallet_expenses": round(wallet_expenses, 2),
         "private_expenses": round(private_expenses, 2),
         "top_categories": top_categories,
-        "expense_count": expense_count
+        "expense_count": expense_count,
+        "trip_total_nm": track_summary.get("total_nm"),
+        "trip_day_count": len(track_summary.get("days") or []),
+        "trip_entry_count": track_summary.get("entry_count"),
+        "crew_count": crew_count,
+        "trip_legs": trip_legs,
+        "recent_entries": recent_entries,
     })

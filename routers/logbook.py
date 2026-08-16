@@ -8,6 +8,7 @@ from models import LogbookEntry, LogbookPhoto, CrewOnWatch, CrewMember, SeaState
 from services.trip import TripService
 from services.audit import AuditService
 from services.boat import get_or_create_boat_profile, get_boat_profile_for_account
+from services import legs as LegService
 from datetime import datetime, date
 from typing import List, Optional
 from pathlib import Path
@@ -52,6 +53,7 @@ def build_logbook_entry(*, trip_id: int, entry_dt: datetime, **fields) -> Logboo
         trip_id=trip_id,
         client_temp_id=fields.get("client_temp_id"),
         watch_leader_id=fields.get("watch_leader_id"),
+        leg_id=fields.get("leg_id"),
         entry_date=entry_dt,
         entry_date_utc=entry_dt,
         latitude=fields.get("latitude"),
@@ -91,30 +93,42 @@ def build_logbook_entry(*, trip_id: int, entry_dt: datetime, **fields) -> Logboo
         maneuver_type=fields.get("maneuver_type") or "full",
     )
 
-# Helper functions to convert empty strings to None for optional fields
-def optional_float(value: str = Form(None)) -> Optional[float]:
-    """Convert empty string to None, otherwise parse as float"""
-    if value == "" or value is None:
-        return None
-    try:
-        return float(value)
-    except (ValueError, TypeError):
-        return None
+# Factories for optional form fields that need type coercion.
+#
+# IMPORTANT: these must be factories, not bare functions passed to Depends().
+# A shared `def optional_int(value: str = Form(None))` reused across many
+# `Depends(optional_int)` call sites always reads the form field literally
+# named "value" (FastAPI resolves a sub-dependency's own Form() parameters by
+# that sub-dependency's own parameter name, not by the outer parameter name
+# it's injected into) — every field using that pattern silently stayed None
+# regardless of what was submitted. Building a per-field dependency with an
+# explicit alias is what actually binds it to the right form field.
+def optional_float_field(field_name: str):
+    def _dep(value: Optional[str] = Form(None, alias=field_name)) -> Optional[float]:
+        if value in (None, ""):
+            return None
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return None
+    return _dep
 
-def optional_int(value: str = Form(None)) -> Optional[int]:
-    """Convert empty string to None, otherwise parse as int"""
-    if value == "" or value is None:
-        return None
-    try:
-        return int(value)
-    except (ValueError, TypeError):
-        return None
+def optional_int_field(field_name: str):
+    def _dep(value: Optional[str] = Form(None, alias=field_name)) -> Optional[int]:
+        if value in (None, ""):
+            return None
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            return None
+    return _dep
 
-def optional_bool(value: str = Form(None)) -> Optional[bool]:
-    """Convert string to bool"""
-    if value == "" or value is None:
-        return None
-    return value.lower() in ("true", "1", "yes", "on")
+def optional_bool_field(field_name: str):
+    def _dep(value: Optional[str] = Form(None, alias=field_name)) -> Optional[bool]:
+        if value in (None, ""):
+            return None
+        return value.lower() in ("true", "1", "yes", "on")
+    return _dep
 
 @router.get("/day-recap", response_class=HTMLResponse)
 async def day_recap_form(request: Request, db: Session = Depends(get_db)):
@@ -131,6 +145,7 @@ async def day_recap_form(request: Request, db: Session = Depends(get_db)):
         "active_trip": active_trip,
         "crew": crew,
         "today": today,
+        "legs": LegService.list_legs_for_trip(db, active_trip.id),
     })
 
 
@@ -142,12 +157,17 @@ async def day_recap_submit(
     destination_port: str = Form(""),
     total_nm_str: str = Form(""),
     events_json: str = Form(...),
+    leg_id: Optional[int] = Depends(optional_int_field("leg_id")),
     db: Session = Depends(get_db),
 ):
     """Save multiple logbook entries from a Day Recap submission."""
     active_trip = TripService.get_selected_trip(request, db)
     if not active_trip:
         return RedirectResponse(url="/trips/", status_code=303)
+
+    # leg_id is client-supplied and must belong to this trip's legs
+    if leg_id is not None and LegService.get_leg_or_none(db, active_trip.id, leg_id) is None:
+        leg_id = None
 
     # Parse + validate events_json defensively
     try:
@@ -231,6 +251,7 @@ async def day_recap_submit(
                 event_details=event_details,
                 latitude=lat_val,
                 longitude=lon_val,
+                leg_id=leg_id,
             )
             saved_entries.append(entry)
         except Exception:
@@ -321,7 +342,8 @@ async def list_logbook_entries(request: Request, db: Session = Depends(get_db)):
     
     entries = db.query(LogbookEntry).options(
         joinedload(LogbookEntry.photos),
-        joinedload(LogbookEntry.crew_on_watch).joinedload(CrewOnWatch.member)
+        joinedload(LogbookEntry.crew_on_watch).joinedload(CrewOnWatch.member),
+        joinedload(LogbookEntry.leg),
     ).filter(LogbookEntry.trip_id == active_trip.id).order_by(LogbookEntry.entry_date.desc()).all()
 
     from services.track import compute_entry_legs
@@ -360,7 +382,8 @@ async def daily_logbook_view(request: Request, date: Optional[str] = None, db: S
     end_datetime = datetime.combine(selected_date, datetime.max.time())
     
     entries = db.query(LogbookEntry).options(
-        joinedload(LogbookEntry.watch_leader)
+        joinedload(LogbookEntry.watch_leader),
+        joinedload(LogbookEntry.leg),
     ).filter(
         LogbookEntry.trip_id == active_trip.id,
         LogbookEntry.entry_date >= start_datetime,
@@ -462,6 +485,7 @@ def _render_day_form(
             "submitted_rows": submitted_rows or [],
             "row_errors": row_errors or [],
             "general_errors": general_errors or [],
+            "legs": LegService.list_legs_for_trip(db, active_trip.id),
         },
         status_code=status_code,
     )
@@ -520,12 +544,24 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
     header_departure_raw = (form.get("departure") or "").strip()
     header_destination_raw = (form.get("destination") or "").strip()
     header_notes_raw = (form.get("summary_notes") or "").strip()
+    header_leg_id_raw = (form.get("leg_id") or "").strip()
     header = {
         "entry_date": entry_date_str,
         "departure": header_departure_raw,
         "destination": header_destination_raw,
         "summary_notes": header_notes_raw,
+        "leg_id": header_leg_id_raw,
     }
+
+    # leg_id is client-supplied and must belong to this trip's legs
+    leg_id = None
+    if header_leg_id_raw:
+        try:
+            candidate_leg_id = int(header_leg_id_raw)
+        except ValueError:
+            candidate_leg_id = None
+        if candidate_leg_id is not None and LegService.get_leg_or_none(db, active_trip.id, candidate_leg_id):
+            leg_id = candidate_leg_id
 
     general_errors = []
     row_errors = [{} for _ in range(row_count)]
@@ -706,6 +742,7 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
                 departure=(header_departure if is_first else None),
                 destination=(header_destination if is_last else None),
                 maneuver_type=r["maneuver_type"],
+                leg_id=leg_id,
             )
             db.add(entry)
             db.flush()
@@ -787,6 +824,7 @@ async def new_entry_form(request: Request, db: Session = Depends(get_db)):
         "sail_profile": sail_profile,
         "default_date": now.strftime("%Y-%m-%d"),
         "default_time": now.strftime("%H:%M"),
+        "legs": LegService.list_legs_for_trip(db, active_trip.id),
     })
 
 @router.post("/new")
@@ -794,45 +832,46 @@ async def create_entry(
     request: Request,
     entry_date: str = Form(...),
     entry_time: str = Form("12:00"),
-    latitude: Optional[float] = Depends(optional_float),
-    longitude: Optional[float] = Depends(optional_float),
+    latitude: Optional[float] = Depends(optional_float_field("latitude")),
+    longitude: Optional[float] = Depends(optional_float_field("longitude")),
     wind_direction: Optional[str] = Form(None),
     wind_strength: Optional[str] = Form(None),
     sea_state: Optional[str] = Form(None),
     visibility: Optional[str] = Form(None),
-    temperature: Optional[float] = Depends(optional_float),
+    temperature: Optional[float] = Depends(optional_float_field("temperature")),
     sail_plan: Optional[str] = Form(None),
-    engine_hours: Optional[float] = Depends(optional_float),
+    engine_hours: Optional[float] = Depends(optional_float_field("engine_hours")),
     departure: Optional[str] = Form(None),
     destination: Optional[str] = Form(None),
     notes: Optional[str] = Form(None),
     safety_checks: Optional[str] = Form(None),
     crew_on_watch_ids: List[int] = Form([]),
-    watch_leader_id: Optional[int] = Depends(optional_int),
+    watch_leader_id: Optional[int] = Depends(optional_int_field("watch_leader_id")),
+    leg_id: Optional[int] = Depends(optional_int_field("leg_id")),
     clientTempId: Optional[str] = Form(None),
     # Phase A: Navigation fields
-    cog_deg: Optional[int] = Depends(optional_int),
-    sog_kn: Optional[float] = Depends(optional_float),
-    log_kn: Optional[float] = Depends(optional_float),
-    dist_day_nm: Optional[float] = Depends(optional_float),
+    cog_deg: Optional[int] = Depends(optional_int_field("cog_deg")),
+    sog_kn: Optional[float] = Depends(optional_float_field("sog_kn")),
+    log_kn: Optional[float] = Depends(optional_float_field("log_kn")),
+    dist_day_nm: Optional[float] = Depends(optional_float_field("dist_day_nm")),
     # Phase A: Weather fields
-    pressure_hpa: Optional[int] = Depends(optional_int),
+    pressure_hpa: Optional[int] = Depends(optional_int_field("pressure_hpa")),
     pressure_trend: Optional[str] = Form(None),
     weather_source: Optional[str] = Form(None),
     # Phase A: Engine fields
-    engine_on: Optional[bool] = Depends(optional_bool),
+    engine_on: Optional[bool] = Depends(optional_bool_field("engine_on")),
     engine_on_time: Optional[str] = Form(None),
     engine_off_time: Optional[str] = Form(None),
-    eng_hours_total: Optional[float] = Depends(optional_float),
-    fuel_level_l: Optional[float] = Depends(optional_float),
+    eng_hours_total: Optional[float] = Depends(optional_float_field("eng_hours_total")),
+    fuel_level_l: Optional[float] = Depends(optional_float_field("fuel_level_l")),
     # Phase A: Sails fields (in-mast furling)
-    main_furl_pct: Optional[int] = Depends(optional_int),
+    main_furl_pct: Optional[int] = Depends(optional_int_field("main_furl_pct")),
     headsail: Optional[str] = Form(None),
     sail_action: Optional[str] = Form(None),
     # Sail Change structured fields
-    main_reef_level: Optional[int] = Depends(optional_int),
+    main_reef_level: Optional[int] = Depends(optional_int_field("main_reef_level")),
     headsail_type: Optional[str] = Form(None),
-    headsail_furl_percent: Optional[int] = Depends(optional_int),
+    headsail_furl_percent: Optional[int] = Depends(optional_int_field("headsail_furl_percent")),
     extra_sail: Optional[str] = Form(None),
     # Phase A: Events fields
     event_category: Optional[str] = Form(None),
@@ -880,10 +919,15 @@ async def create_entry(
         if watch_leader_id not in valid_member_ids:
             watch_leader_id = None
 
+        # leg_id is client-supplied and must belong to this trip's legs
+        if leg_id is not None and LegService.get_leg_or_none(db, active_trip.id, leg_id) is None:
+            leg_id = None
+
         entry = LogbookEntry(
             trip_id=active_trip.id,
             client_temp_id=clientTempId,
             watch_leader_id=watch_leader_id,
+            leg_id=leg_id,
             entry_date=entry_datetime,
             entry_date_utc=entry_datetime_utc,
             latitude=latitude,
@@ -1035,6 +1079,7 @@ async def edit_entry_form(request: Request, entry_id: int, db: Session = Depends
         "active_trip": active_trip,
         "entry": entry,
         "sail_profile": sail_profile,
+        "legs": LegService.list_legs_for_trip(db, active_trip.id),
     })
 
 @router.post("/{entry_id}/edit")
@@ -1043,43 +1088,44 @@ async def update_entry(
     entry_id: int,
     entry_date: str = Form(...),
     entry_time: str = Form("12:00"),
-    latitude: Optional[float] = Depends(optional_float),
-    longitude: Optional[float] = Depends(optional_float),
+    latitude: Optional[float] = Depends(optional_float_field("latitude")),
+    longitude: Optional[float] = Depends(optional_float_field("longitude")),
     wind_direction: Optional[str] = Form(None),
     wind_strength: Optional[str] = Form(None),
     sea_state: Optional[str] = Form(None),
     visibility: Optional[str] = Form(None),
-    temperature: Optional[float] = Depends(optional_float),
+    temperature: Optional[float] = Depends(optional_float_field("temperature")),
     sail_plan: Optional[str] = Form(None),
-    engine_hours: Optional[float] = Depends(optional_float),
+    engine_hours: Optional[float] = Depends(optional_float_field("engine_hours")),
     departure: Optional[str] = Form(None),
     destination: Optional[str] = Form(None),
     notes: Optional[str] = Form(None),
     safety_checks: Optional[str] = Form(None),
     crew_on_watch_ids: List[int] = Form([]),
+    leg_id: Optional[int] = Depends(optional_int_field("leg_id")),
     # Phase A: Navigation fields
-    cog_deg: Optional[int] = Depends(optional_int),
-    sog_kn: Optional[float] = Depends(optional_float),
-    log_kn: Optional[float] = Depends(optional_float),
-    dist_day_nm: Optional[float] = Depends(optional_float),
+    cog_deg: Optional[int] = Depends(optional_int_field("cog_deg")),
+    sog_kn: Optional[float] = Depends(optional_float_field("sog_kn")),
+    log_kn: Optional[float] = Depends(optional_float_field("log_kn")),
+    dist_day_nm: Optional[float] = Depends(optional_float_field("dist_day_nm")),
     # Phase A: Weather fields
-    pressure_hpa: Optional[int] = Depends(optional_int),
+    pressure_hpa: Optional[int] = Depends(optional_int_field("pressure_hpa")),
     pressure_trend: Optional[str] = Form(None),
     weather_source: Optional[str] = Form(None),
     # Phase A: Engine fields
-    engine_on: Optional[bool] = Depends(optional_bool),
+    engine_on: Optional[bool] = Depends(optional_bool_field("engine_on")),
     engine_on_time: Optional[str] = Form(None),
     engine_off_time: Optional[str] = Form(None),
-    eng_hours_total: Optional[float] = Depends(optional_float),
-    fuel_level_l: Optional[float] = Depends(optional_float),
+    eng_hours_total: Optional[float] = Depends(optional_float_field("eng_hours_total")),
+    fuel_level_l: Optional[float] = Depends(optional_float_field("fuel_level_l")),
     # Phase A: Sails fields (in-mast furling)
-    main_furl_pct: Optional[int] = Depends(optional_int),
+    main_furl_pct: Optional[int] = Depends(optional_int_field("main_furl_pct")),
     headsail: Optional[str] = Form(None),
     sail_action: Optional[str] = Form(None),
     # Sail Change structured fields
-    main_reef_level: Optional[int] = Depends(optional_int),
+    main_reef_level: Optional[int] = Depends(optional_int_field("main_reef_level")),
     headsail_type: Optional[str] = Form(None),
-    headsail_furl_percent: Optional[int] = Depends(optional_int),
+    headsail_furl_percent: Optional[int] = Depends(optional_int_field("headsail_furl_percent")),
     extra_sail: Optional[str] = Form(None),
     # Phase A: Events fields
     event_category: Optional[str] = Form(None),
@@ -1140,6 +1186,8 @@ async def update_entry(
         entry.destination = destination
         entry.notes = notes
         entry.safety_checks_completed = safety_checks
+        # leg_id is client-supplied and must belong to this trip's legs
+        entry.leg_id = leg_id if (leg_id is None or LegService.get_leg_or_none(db, active_trip.id, leg_id)) else None
         # Phase A: Navigation
         entry.cog_deg = cog_deg
         entry.sog_kn = sog_kn
