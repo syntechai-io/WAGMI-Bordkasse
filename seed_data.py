@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum, User, UserRole, Trip, TripStatus, Currency, ExpenseTemplate
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from sqlalchemy import text
 import logging
 import os
@@ -164,6 +164,7 @@ def _seed_database_locked(db: Session):
         trip_id=trip.id,
         payer_id=crew_members[0].id,
         date=today - timedelta(days=5),
+        occurred_at=datetime.combine(today - timedelta(days=5), datetime.min.time()),
         category="Proviant",
         description="Groceries for the week",
         amount=180.00,
@@ -183,6 +184,7 @@ def _seed_database_locked(db: Session):
         trip_id=trip.id,
         payer_id=crew_members[1].id,
         date=today - timedelta(days=3),
+        occurred_at=datetime.combine(today - timedelta(days=3), datetime.min.time()),
         category="Mooring",
         description="Marina overnight fee",
         amount=48.00,
@@ -202,6 +204,7 @@ def _seed_database_locked(db: Session):
         trip_id=trip.id,
         payer_id=crew_members[2].id,
         date=today - timedelta(days=1),
+        occurred_at=datetime.combine(today - timedelta(days=1), datetime.min.time()),
         category="Restaurant",
         description="Dinner at harbor restaurant",
         amount=160.00,
