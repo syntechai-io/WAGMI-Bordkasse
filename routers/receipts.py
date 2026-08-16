@@ -4,6 +4,7 @@ from template_helpers import create_templates
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Receipt, Expense
+from services.trip import TripService
 from pathlib import Path
 import uuid
 import logging
@@ -24,7 +25,16 @@ async def upload_receipt(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    
+    active_trip = TripService.get_selected_trip(request, db)
+    if not active_trip:
+        return RedirectResponse(url="/trips", status_code=303)
+
+    expense = db.query(Expense).filter(
+        Expense.id == expense_id, Expense.trip_id == active_trip.id
+    ).first()
+    if not expense:
+        raise HTTPException(status_code=404, detail="Expense not found")
+
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise HTTPException(status_code=415, detail="Only PDF, JPG, and PNG files are allowed")
     

@@ -123,14 +123,20 @@ async def update_group(
     user_role = request.session.get("role", "crew")
     if not TripService.is_trip_editable(active_trip, user_role, request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
-    
+
+    # Ensure the group actually belongs to the caller's active trip, not
+    # some other trip's group_id (trip-admin access is per-trip, not global)
+    group = GroupService.get_group_by_id(db, group_id)
+    if not group or group.trip_id != active_trip.id:
+        return RedirectResponse(url="/groups?error=not_found", status_code=303)
+
     try:
         # Parse member IDs
         if member_ids:
             member_id_list = [int(id.strip()) for id in member_ids.split(",") if id.strip()]
         else:
             member_id_list = []
-        
+
         # Update the group
         GroupService.update_group_members(
             db=db,
@@ -162,7 +168,13 @@ async def change_representative(
     user_role = request.session.get("role", "crew")
     if not TripService.is_trip_editable(active_trip, user_role, request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
-    
+
+    # Ensure the group actually belongs to the caller's active trip, not
+    # some other trip's group_id (trip-admin access is per-trip, not global)
+    group = GroupService.get_group_by_id(db, group_id)
+    if not group or group.trip_id != active_trip.id:
+        return RedirectResponse(url="/groups?error=not_found", status_code=303)
+
     try:
         GroupService.change_representative(
             db=db,
@@ -193,7 +205,13 @@ async def delete_group(
     user_role = request.session.get("role", "crew")
     if not TripService.is_trip_editable(active_trip, user_role, request):
         return RedirectResponse(url="/groups?error=trip_closed", status_code=303)
-    
+
+    # Ensure the group actually belongs to the caller's active trip, not
+    # some other trip's group_id (trip-admin access is per-trip, not global)
+    group = GroupService.get_group_by_id(db, group_id)
+    if not group or group.trip_id != active_trip.id:
+        return RedirectResponse(url="/groups?error=not_found", status_code=303)
+
     try:
         GroupService.delete_group(db=db, group_id=group_id)
         return RedirectResponse(url="/groups?success=deleted", status_code=303)

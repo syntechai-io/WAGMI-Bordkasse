@@ -872,7 +872,14 @@ async def create_entry(
         # Parse engine timestamps
         engine_on_dt = datetime.fromisoformat(engine_on_time) if engine_on_time else None
         engine_off_dt = datetime.fromisoformat(engine_off_time) if engine_off_time else None
-        
+
+        # watch_leader_id is client-supplied and must belong to this trip's crew
+        valid_member_ids = {
+            row[0] for row in db.query(CrewMember.id).filter(CrewMember.trip_id == active_trip.id).all()
+        }
+        if watch_leader_id not in valid_member_ids:
+            watch_leader_id = None
+
         entry = LogbookEntry(
             trip_id=active_trip.id,
             client_temp_id=clientTempId,
@@ -924,9 +931,13 @@ async def create_entry(
         )
         db.add(entry)
         db.flush()
-        
-        # Add crew on watch
+
+        # Add crew on watch (only members that actually belong to this trip —
+        # crew_on_watch_ids is client-supplied and must not be trusted to
+        # reference this trip's own crew).
         for crew_id in crew_on_watch_ids:
+            if crew_id not in valid_member_ids:
+                continue
             crew_watch = CrewOnWatch(entry_id=entry.id, member_id=crew_id)
             db.add(crew_watch)
         
@@ -1158,9 +1169,16 @@ async def update_entry(
         entry.event_details = event_details
         entry.updated_at = datetime.utcnow()
         
-        # Update crew on watch
+        # Update crew on watch (only members that actually belong to this trip —
+        # crew_on_watch_ids is client-supplied and must not be trusted to
+        # reference this trip's own crew).
+        valid_member_ids = {
+            row[0] for row in db.query(CrewMember.id).filter(CrewMember.trip_id == active_trip.id).all()
+        }
         db.query(CrewOnWatch).filter(CrewOnWatch.entry_id == entry_id).delete()
         for crew_id in crew_on_watch_ids:
+            if crew_id not in valid_member_ids:
+                continue
             crew_watch = CrewOnWatch(entry_id=entry.id, member_id=crew_id)
             db.add(crew_watch)
         
