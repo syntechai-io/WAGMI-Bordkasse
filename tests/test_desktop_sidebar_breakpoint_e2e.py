@@ -65,12 +65,23 @@ LAYOUT_CASES = [
 # LAYOUT_CASES — iPad portrait (mobile regime) and laptop (sidebar
 # regime) — applied to every authenticated page that shares layout.html.
 ROUTE_CASES = [
-    ("/trips/",  1024, False, "trips_ipad_portrait"),
-    ("/trips/",  1280, True,  "trips_laptop"),
-    ("/logbook", 1024, False, "logbook_ipad_portrait"),
-    ("/logbook", 1280, True,  "logbook_laptop"),
-    ("/expenses", 1024, False, "expenses_ipad_portrait"),
-    ("/expenses", 1280, True,  "expenses_laptop"),
+    ("/trips/",     1024, False, "trips_ipad_portrait"),
+    ("/trips/",     1280, True,  "trips_laptop"),
+    ("/logbook",    1024, False, "logbook_ipad_portrait"),
+    ("/logbook",    1280, True,  "logbook_laptop"),
+    ("/expenses",   1024, False, "expenses_ipad_portrait"),
+    ("/expenses",   1280, True,  "expenses_laptop"),
+    # Task #63: secondary pages that share layout.html
+    ("/balances",   1024, False, "balances_ipad_portrait"),
+    ("/balances",   1280, True,  "balances_laptop"),
+    ("/deposits",   1024, False, "deposits_ipad_portrait"),
+    ("/deposits",   1280, True,  "deposits_laptop"),
+    ("/settlement", 1024, False, "settlement_ipad_portrait"),
+    ("/settlement", 1280, True,  "settlement_laptop"),
+    ("/templates",  1024, False, "templates_ipad_portrait"),
+    ("/templates",  1280, True,  "templates_laptop"),
+    ("/groups",     1024, False, "groups_ipad_portrait"),
+    ("/groups",     1280, True,  "groups_laptop"),
 ]
 
 
