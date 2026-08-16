@@ -13,6 +13,24 @@ from typing import Optional
 router = APIRouter(prefix="/deposits", tags=["deposits"])
 templates = create_templates()
 
+
+def _deposits_error(db: Session, request: Request, trip_id: int, message: str, status: int = 400):
+    deposits = db.query(Deposit).filter(Deposit.trip_id == trip_id).order_by(Deposit.date.desc()).all()
+    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == trip_id).order_by(CrewMember.code).all()
+    return templates.TemplateResponse("deposits.html", {
+        "request": request,
+        "deposits": deposits,
+        "crew_members": crew_members,
+        "error": message,
+    }, status_code=status)
+
+
+def _member_in_trip(db: Session, trip_id: int, member_id: int) -> bool:
+    return db.query(CrewMember.id).filter(
+        CrewMember.id == member_id, CrewMember.trip_id == trip_id
+    ).first() is not None
+
+
 @router.get("", response_class=HTMLResponse)
 async def list_deposits(request: Request, db: Session = Depends(get_db)):
     active_trip = TripService.get_selected_trip(request, db)
@@ -66,6 +84,9 @@ async def create_deposit(
             "crew_members": crew_members,
             "error": "Der Betrag muss positiv sein."
         }, status_code=400)
+
+    if not _member_in_trip(db, active_trip.id, member_id):
+        return _deposits_error(db, request, active_trip.id, "Das gewählte Crew-Mitglied gehört nicht zu diesem Törn.")
     
     try:
         currency_enum = Currency(currency)
@@ -160,6 +181,9 @@ async def update_deposit(
             "crew_members": crew_members,
             "error": "Der Betrag muss positiv sein."
         }, status_code=400)
+
+    if not _member_in_trip(db, active_trip.id, member_id):
+        return _deposits_error(db, request, active_trip.id, "Das gewählte Crew-Mitglied gehört nicht zu diesem Törn.")
     
     try:
         deposit = db.query(Deposit).filter(

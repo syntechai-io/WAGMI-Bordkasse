@@ -1,9 +1,46 @@
 from sqlalchemy.orm import Session
 from models import CrewMember, Deposit, Expense, ExpenseParticipant, PaidFromEnum, SplitModeEnum, User, UserRole, Trip, TripStatus, Currency, ExpenseTemplate
 from datetime import date, timedelta
+from sqlalchemy import text
+import logging
 import os
 
+logger = logging.getLogger(__name__)
+
+# Arbitrary constant used as a PostgreSQL advisory-lock key so that, on an
+# autoscale deployment where several instances may boot against a fresh
+# database simultaneously, only one runs the seeding logic. Without it, two
+# instances can both pass the "no users yet" check and race to insert
+# username="Sven"; the loser then crashes on the unique-username constraint.
+_SEED_ADVISORY_LOCK_KEY = 4820241
+
+
 def seed_database(db: Session):
+    is_postgres = db.bind.dialect.name == "postgresql"
+    connection = db.connection() if is_postgres else None
+    if is_postgres:
+        # Session-level advisory lock serialises concurrent seeders across
+        # instances. It is released explicitly after the seed transaction.
+        connection.execute(
+            text("SELECT pg_advisory_lock(:k)"),
+            {"k": _SEED_ADVISORY_LOCK_KEY},
+        )
+    try:
+        _seed_database_locked(db)
+    except Exception:
+        # The seeder currently commits in stages. Roll back any uncommitted
+        # work and never commit from the cleanup path after a failed seed.
+        db.rollback()
+        raise
+    finally:
+        if is_postgres:
+            connection.execute(
+                text("SELECT pg_advisory_unlock(:k)"),
+                {"k": _SEED_ADVISORY_LOCK_KEY},
+            )
+
+
+def _seed_database_locked(db: Session):
     existing_user = db.query(User).first()
     if not existing_user:
         admin_password = os.getenv("ADMIN_PASSWORD")
@@ -21,7 +58,7 @@ def seed_database(db: Session):
         db.add(admin_user)
         db.add(crew_user)
         db.commit()
-        print("Users seeded: Admin 'Sven' and Crew 'crew'")
+        logger.info("Users seeded")
     
     # Seed default expense templates (global, not trip-specific)
     existing_template = db.query(ExpenseTemplate).first()
@@ -80,11 +117,11 @@ def seed_database(db: Session):
         for template in default_templates:
             db.add(template)
         db.commit()
-        print("Default expense templates seeded (6 templates)")
+        logger.info("Default expense templates seeded")
     
     existing_trip = db.query(Trip).first()
     if existing_trip:
-        print("Database already seeded, skipping...")
+        logger.info("Database already seeded, skipping")
         return
     
     today = date.today()
@@ -181,4 +218,4 @@ def seed_database(db: Session):
         db.add(ExpenseParticipant(expense_id=expense3.id, member_id=crew_members[i].id))
     
     db.commit()
-    print(f"Database seeded: Trip '{trip.name}', 4 crew members, 4 deposits, 3 expenses!")
+    logger.info("Database seeded: 4 crew members, 4 deposits, 3 expenses")

@@ -130,6 +130,11 @@ async def edit_crew_form(
         CrewMember.id == member_id,
         CrewMember.trip_id == active_trip.id
     ).first()
+
+    if not member:
+        request.session["error"] = "Crew-Mitglied nicht gefunden."
+        return RedirectResponse(url="/crew", status_code=303)
+
     return templates.TemplateResponse("crew_form.html", {
         "request": request,
         "member": member
@@ -164,6 +169,9 @@ async def update_crew(
         CrewMember.id == member_id,
         CrewMember.trip_id == active_trip.id
     ).first()
+
+    if not member:
+        return RedirectResponse(url="/crew", status_code=303)
     
     # Only global admin (not trip admin) can modify trip admin status
     if user_role != "admin" or request.session.get("trip_admin_trip_id"):

@@ -3,8 +3,11 @@ from fastapi.responses import JSONResponse
 from weather_service import WeatherService
 from services.currency import CurrencyService
 from datetime import datetime
+import logging
 import os
 from db import SessionLocal
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -61,10 +64,11 @@ async def health_check():
             "status": "healthy",
             "message": "Database connection successful"
         }
-    except Exception as e:
+    except Exception:
+        logger.exception("Health check: database connection failed")
         health_status["services"]["database"] = {
             "status": "unhealthy",
-            "message": f"Database connection failed: {str(e)}"
+            "message": "Database connection failed"
         }
         health_status["overall_status"] = "unhealthy"
     finally:
@@ -87,12 +91,10 @@ async def health_check():
     
     try:
         rates = CurrencyService.get_rates()
-        if rates and 'DKK' in rates and rates['DKK'] > 0:
-            dkk_to_eur = 1.0 / rates['DKK']
+        if rates and 'DKK' in rates and rates['DKK'] > 0 and not CurrencyService.using_fallback:
             health_status["services"]["ecb_currency_api"] = {
                 "status": "healthy",
                 "message": "ECB currency API responding correctly",
-                "sample_rate": f"1 DKK = {dkk_to_eur:.4f} EUR",
                 "cache_age_hours": (datetime.utcnow() - CurrencyService._cache_timestamp).total_seconds() / 3600 if CurrencyService._cache_timestamp else None
             }
         else:
@@ -100,10 +102,11 @@ async def health_check():
                 "status": "degraded",
                 "message": "ECB API using fallback rates (may be outdated)"
             }
-    except Exception as e:
+    except Exception:
+        logger.exception("Health check: currency API error")
         health_status["services"]["ecb_currency_api"] = {
             "status": "unhealthy",
-            "message": f"Currency API error: {str(e)}"
+            "message": "Currency API error"
         }
         health_status["overall_status"] = "unhealthy"
     
@@ -111,12 +114,14 @@ async def health_check():
     if session_secret and len(session_secret) >= 32:
         health_status["services"]["session_secret"] = {
             "status": "healthy",
-            "message": "SESSION_SECRET is configured and meets minimum length requirement"
+            "message": "SESSION_SECRET is configured"
         }
     elif session_secret:
+        # Configured but weak. Log the detail server-side; do not expose length.
+        logger.warning("SESSION_SECRET is shorter than the recommended 32 characters")
         health_status["services"]["session_secret"] = {
             "status": "warning",
-            "message": f"SESSION_SECRET is too short ({len(session_secret)} chars, recommended: 32+)"
+            "message": "SESSION_SECRET is configured but weaker than recommended"
         }
     else:
         health_status["services"]["session_secret"] = {

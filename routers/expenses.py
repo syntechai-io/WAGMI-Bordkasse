@@ -50,6 +50,44 @@ def get_active_crew_at_datetime(db: Session, trip_id: int, expense_datetime: dat
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 templates = create_templates()
 
+
+def _expenses_error(db: Session, request: Request, trip_id: int, message: str, status: int = 400):
+    """Re-render the expenses list page with an error message."""
+    expenses = db.query(Expense).filter(Expense.trip_id == trip_id).order_by(Expense.date.desc()).all()
+    crew_members = db.query(CrewMember).filter(CrewMember.trip_id == trip_id).order_by(CrewMember.code).all()
+    return templates.TemplateResponse("expenses.html", {
+        "request": request,
+        "expenses": expenses,
+        "crew_members": crew_members,
+        "categories": CATEGORIES,
+        "error": message,
+    }, status_code=status)
+
+
+def _validate_expense_members(db: Session, trip_id: int, split_mode: str, payer_id: str, participant_ids):
+    """Return an error string if payer/participants are invalid for this trip.
+
+    Guards two real bugs: (a) a member id from another trip/account being
+    attached to this expense, and (b) a 'participants' split with nobody
+    selected, which would create an un-split expense that silently unbalances
+    the Bordkasse. Returns None when everything is valid.
+    """
+    valid_ids = {row[0] for row in db.query(CrewMember.id).filter(CrewMember.trip_id == trip_id).all()}
+    if payer_id not in ("", None):
+        try:
+            pid = int(payer_id)
+        except (TypeError, ValueError):
+            return "Ungültiger Zahler."
+        if pid not in valid_ids:
+            return "Der Zahler gehört nicht zu diesem Törn."
+    if split_mode == "participants" and not participant_ids:
+        return "Mindestens ein Teilnehmer muss für die Aufteilung ausgewählt werden."
+    for pid in (participant_ids or []):
+        if pid not in valid_ids:
+            return "Ein ausgewählter Teilnehmer gehört nicht zu diesem Törn."
+    return None
+
+
 CATEGORIES = EXPENSE_CATEGORY_KEYS
 
 ALLOWED_CONTENT_TYPES = {"application/pdf", "image/jpeg", "image/png"}
@@ -193,6 +231,10 @@ async def create_expense(
             "categories": CATEGORIES,
             "error": "Der Betrag muss positiv sein."
         }, status_code=400)
+
+    member_error = _validate_expense_members(db, active_trip.id, split_mode, payer_id, participant_ids)
+    if member_error:
+        return _expenses_error(db, request, active_trip.id, member_error)
     
     try:
         currency_enum = Currency(currency)
@@ -447,6 +489,10 @@ async def update_expense(
             "participant_ids": participant_ids,
             "error": "Der Betrag muss positiv sein."
         }, status_code=400)
+
+    member_error = _validate_expense_members(db, active_trip.id, split_mode, payer_id, participant_ids)
+    if member_error:
+        return _expenses_error(db, request, active_trip.id, member_error)
     
     try:
         expense = db.query(Expense).filter(
