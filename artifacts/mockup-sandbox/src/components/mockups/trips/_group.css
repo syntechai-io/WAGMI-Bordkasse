@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.harbor-deck {
+  --hd-bg: #fafbfc;
+  --hd-surface: #ffffff;
+  --hd-surface-soft: #f1f5f9;
+  --hd-ink: #0a1628;
+  --hd-muted: #617084;
+  --hd-line: #e4eaf1;
+  --hd-accent: #2563eb;
+  --hd-accent-soft: #e8f0ff;
+  --hd-shadow: 0 18px 42px rgba(10, 22, 40, .12);
+  min-height: 100dvh;
+  background: var(--hd-bg);
+  color: var(--hd-ink);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  transition: background-color .3s ease, color .3s ease;
+}
+
+.harbor-deck[data-theme="night"] {
+  --hd-bg: #050e1a;
+  --hd-surface: #0c1929;
+  --hd-surface-soft: #132234;
+  --hd-ink: #e7edf5;
+  --hd-muted: #8c9aad;
+  --hd-line: #213248;
+  --hd-accent: #f59e0b;
+  --hd-accent-soft: #322712;
+  --hd-shadow: 0 18px 42px rgba(0, 0, 0, .35);
+}
+
+.harbor-deck::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+.hd-feature {
+  background: linear-gradient(152deg, #123354 0%, #0a1c31 55%, #071321 100%);
+  box-shadow: var(--hd-shadow);
+}
+
+.harbor-deck[data-theme="night"] .hd-feature {
+  background: linear-gradient(152deg, #172b3b 0%, #0a1828 55%, #06101c 100%);
+}
+
+.hd-tab-active { color: var(--hd-accent); }
+.hd-focus:focus-visible { outline: 3px solid color-mix(in srgb, var(--hd-accent) 45%, transparent); outline-offset: 3px; }
+@media (min-width: 640px) {
+  .harbor-deck { max-width: 430px; margin: 0 auto; min-height: 100dvh; }
+}
