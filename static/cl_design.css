@@ -1474,16 +1474,40 @@ html[data-theme="night"] .cl-tabbar__item:hover { color: rgba(255, 80, 80, .95);
     border-color: transparent;
     color: #071929;
 }
-/* Secondary / ghost / accent buttons are no longer placed inside .cl-pageheader —
-   they live in .cl-page-nav below the wave. Styles below are kept as a safety net
-   only; prefer moving any secondary action to .cl-page-nav instead. */
+/* ── Hero button variants (inside .cl-pageheader wave gradient) ──────────── */
+/* Primary: solid white chip — maximum contrast, unmissable CTA              */
+.cl-hero-btn--primary {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1.5px solid transparent !important;
+    color: #071929 !important;
+    font-weight: 700 !important;
+}
+.cl-hero-btn--primary:hover {
+    background: #ffffff !important;
+    color: #071929 !important;
+}
+/* Secondary: dark navy overlay — sits below the gradient, white text forced  */
+.cl-hero-btn--secondary {
+    background: rgba(5, 18, 35, 0.60) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+.cl-hero-btn--secondary:hover {
+    background: rgba(5, 18, 35, 0.80) !important;
+    border-color: rgba(255, 255, 255, 0.55) !important;
+    color: #ffffff !important;
+}
+
+/* Legacy fallback — keep secondary/ghost in pageheader readable if used elsewhere */
 .cl-pageheader .cl-btn--secondary,
 .cl-pageheader .cl-btn--ghost,
 .cl-pageheader .cl-btn--accent {
-    background: rgba(255,255,255,0.92);
-    border-color: transparent;
-    color: #071929;
-    font-weight: 600;
+    background: rgba(5, 18, 35, 0.60);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff !important;
 }
 
 /* ── Row cards (replaces tables) ─────────────────────────────────────────── */
