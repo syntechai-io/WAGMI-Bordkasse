@@ -615,6 +615,81 @@
     }
 }
 
+/* --- Phone card layout for expenses table (≤640 px) ---------------------- */
+/* Scoped to .cl-expenses-table so other .cl-table instances are unaffected. */
+@media (max-width: 640px) {
+    .cl-expenses-table-scroll { overflow-x: visible; }
+    .cl-expenses-table thead { display: none; }
+    .cl-expenses-table,
+    .cl-expenses-table tbody,
+    .cl-expenses-table tr,
+    .cl-expenses-table td { display: block; }
+    .cl-expenses-table tbody tr {
+        margin: var(--cl-space-3) var(--cl-space-3);
+        padding: var(--cl-space-3) var(--cl-space-4);
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius);
+        background: var(--cl-surface);
+        box-shadow: var(--cl-shadow);
+    }
+    .cl-expenses-table tbody tr:hover { background: var(--cl-surface); }
+    .cl-expenses-table tbody td { padding: 0; border-bottom: none; }
+    .cl-expenses-table .cl-td-desktop { display: none !important; }
+    /* Amount cell: a touch of top spacing to separate from description */
+    .cl-expenses-table td.cl-num { margin-top: var(--cl-space-2); }
+    /* Actions row */
+    .cl-expenses-table td:last-child {
+        margin-top: var(--cl-space-2);
+        padding-top: var(--cl-space-2);
+        border-top: 1px solid var(--cl-border);
+    }
+    .cl-expenses-table .cl-actions { gap: var(--cl-space-2); flex-wrap: wrap; }
+    .cl-expenses-table .cl-actions .cl-btn,
+    .cl-expenses-table .cl-actions a.cl-btn {
+        min-height: 36px;
+        flex: 1 1 auto;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+/* --- Phone card layout for crew table (≤640 px) -------------------------- */
+/* Scoped to .cl-crew-table so other .cl-table instances are unaffected.    */
+@media (max-width: 640px) {
+    .cl-crew-table-scroll { overflow-x: visible; }
+    .cl-crew-table thead { display: none; }
+    .cl-crew-table,
+    .cl-crew-table tbody,
+    .cl-crew-table tr,
+    .cl-crew-table td { display: block; }
+    .cl-crew-table tbody tr {
+        margin: var(--cl-space-3) var(--cl-space-3);
+        padding: var(--cl-space-3) var(--cl-space-4);
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius);
+        background: var(--cl-surface);
+        box-shadow: var(--cl-shadow);
+    }
+    .cl-crew-table tbody tr:hover { background: var(--cl-surface); }
+    .cl-crew-table tbody td { padding: 0; border-bottom: none; }
+    .cl-crew-table .cl-td-desktop { display: none !important; }
+    /* Actions row */
+    .cl-crew-table td:last-child {
+        margin-top: var(--cl-space-2);
+        padding-top: var(--cl-space-2);
+        border-top: 1px solid var(--cl-border);
+    }
+    .cl-crew-table .cl-actions { gap: var(--cl-space-2); flex-wrap: wrap; }
+    .cl-crew-table .cl-actions .cl-btn,
+    .cl-crew-table .cl-actions a.cl-btn,
+    .cl-crew-table .cl-actions button.cl-btn {
+        min-height: 36px;
+        flex: 1 1 auto;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
 /* --- KPI tiles (Apple-style soft surfaces) ------------------------------- */
 .cl-kpi {
     background: var(--cl-surface);

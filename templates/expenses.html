@@ -157,8 +157,8 @@
         {% endif %}
 
         <section class="cl-table-wrap">
-            <div class="cl-table-scroll">
-                <table class="cl-table">
+            <div class="cl-table-scroll cl-expenses-table-scroll">
+                <table class="cl-table cl-expenses-table">
                     <thead>
                         <tr>
                             <th>{{ t('expense.col_date') }}</th>
@@ -173,13 +173,28 @@
                     <tbody id="expensesTableBody">
                         {% for expense in expenses %}
                         <tr>
-                            <td onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;">{{ expense.date }}</td>
-                            <td onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;">
+                            <td class="cl-td-desktop" onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;">{{ expense.date }}</td>
+                            <td class="cl-td-desktop" onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;">
                                 {% if expense.payer %}{{ expense.payer.code }}{% else %}🌐 External{% endif %}
                             </td>
-                            <td onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;">{{ display_expense_cat(expense.category) }}</td>
-                            <td onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;">{{ expense.description }}</td>
-                            <td onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;" class="cl-num" >
+                            <td class="cl-td-desktop" onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;">{{ display_expense_cat(expense.category) }}</td>
+                            <td onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;">
+                                <span style="font-weight: 600; color: var(--cl-text);">{{ expense.description }}</span>
+                                <div class="cl-trip-meta">
+                                    <span>{{ expense.date }}</span>
+                                    <span class="cl-trip-meta__sep">·</span>
+                                    <span>{% if expense.payer %}{{ expense.payer.code }}{% else %}🌐{% endif %}</span>
+                                    <span class="cl-trip-meta__sep">·</span>
+                                    <span>{{ display_expense_cat(expense.category) }}</span>
+                                    <span class="cl-trip-meta__sep">·</span>
+                                    {% if expense.paid_from.value == 'wallet' %}
+                                    <span class="cl-pill cl-pill--solid-success" style="font-size: 10px; padding: 1px 6px;">{{ t('common.wallet') }}</span>
+                                    {% else %}
+                                    <span class="cl-pill cl-pill--solid-accent" style="font-size: 10px; padding: 1px 6px;">{{ t('common.private') }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;" class="cl-num">
                                 {% if expense.currency.value != 'EUR' %}
                                     <span style="color: var(--cl-danger);">{{ "%.2f"|format(expense.amount) }} {{ expense.currency.value }}</span>
                                     <span class="cl-help cl-help--muted">(≈ {{ "%.2f"|format(expense.amount_eur) }} €)</span>
@@ -187,7 +202,7 @@
                                     <span style="color: var(--cl-danger);">{{ "%.2f"|format(expense.amount_eur) }} €</span>
                                 {% endif %}
                             </td>
-                            <td onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;">
+                            <td class="cl-td-desktop" onclick="window.location='/expenses/{{ expense.id }}'" style="cursor: pointer;">
                                 {% if expense.paid_from.value == 'wallet' %}
                                 <span class="cl-pill cl-pill--solid-success">{{ t('common.wallet') }}</span>
                                 {% else %}
@@ -196,10 +211,10 @@
                             </td>
                             <td>
                                 <div class="cl-actions">
-                                    <a href="/expenses/{{ expense.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm" onclick="event.stopPropagation()">✏️</a>
+                                    <a href="/expenses/{{ expense.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm" onclick="event.stopPropagation()">✏️ {{ t('common.edit') }}</a>
                                     <form action="/expenses/{{ expense.id }}/delete" method="post" style="margin:0;" onsubmit="event.stopPropagation(); return confirm('{{ t('common.confirm_delete_expense') }}')">
                                         {{ csrf_input | safe }}
-                                        <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️</button>
+                                        <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️ {{ t('common.delete') }}</button>
                                     </form>
                                 </div>
                             </td>

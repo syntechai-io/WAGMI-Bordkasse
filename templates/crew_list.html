@@ -1,98 +1,98 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold maritime-header">👥 {{ t('crew.title') }}</h1>
-        <a href="/crew/new" class="ocean-gradient text-white px-6 py-2 rounded-lg transition touch-action font-semibold">
-            ➕ {{ t('common.new') }}
-        </a>
-    </div>
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">👥 {{ t('crew.title') }}</h1>
+        </div>
+        <div class="cl-pageheader__actions">
+            <a href="/crew/new" class="cl-btn cl-btn--primary">➕ {{ t('common.new') }}</a>
+        </div>
+    </header>
 
     {% if error %}
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg porthole-card" role="alert">
-        <strong class="font-bold">⚠️ {{ t('common.error_alert') }}</strong>
-        <span class="block sm:inline">{{ error }}</span>
+    <div class="cl-alert cl-alert--danger" role="alert">
+        <strong>⚠️ {{ t('common.error_alert') }}</strong>
+        <div>{{ error }}</div>
     </div>
     {% endif %}
 
-    <div class="bg-white porthole-card overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full">
-                <thead style="background: var(--surface-2);">
+    <section class="cl-table-wrap">
+        <div class="cl-table-scroll cl-crew-table-scroll">
+            <table class="cl-table cl-crew-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('crew.username') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('common.name') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('crew.role') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('common.status') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('crew.iban_handle') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('common.actions') }}</th>
+                        <th>{{ t('crew.username') }}</th>
+                        <th>{{ t('common.name') }}</th>
+                        <th>{{ t('crew.role') }}</th>
+                        <th>{{ t('common.status') }}</th>
+                        <th>{{ t('crew.iban_handle') }}</th>
+                        <th>{{ t('common.actions') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sky-200">
+                <tbody>
                     {% for member in crew_members %}
-                    <tr style="{% if member.departed_at %}opacity: 0.6; background-color: rgba(200, 200, 200, 0.1);{% endif %}">
-                        <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--accent);">{{ member.code }}</td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span>{{ member.name }}</span>
+                    <tr{% if member.departed_at %} style="opacity: 0.7;"{% endif %}>
+                        <td class="cl-td-desktop" style="font-weight: 600; color: var(--cl-accent);">{{ member.code }}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: var(--cl-space-2); flex-wrap: wrap;">
+                                <span style="font-weight: 600; color: var(--cl-text);">{{ member.name }}</span>
                                 {% if member.id in member_groups %}
-                                    <span class="px-2 py-1 text-xs rounded-full text-white font-semibold" 
-                                          style="background: var(--success);">
-                                        👥 {{ member_groups[member.id].name }}
-                                    </span>
-                                    {% if member_groups[member.id].is_representative %}
-                                    <span class="px-2 py-1 text-xs rounded-full text-white font-semibold" 
-                                          style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
-                                        👑 {{ t('crew.representative') }}
-                                    </span>
-                                    {% endif %}
+                                <span class="cl-pill cl-pill--solid-success" style="font-size: 11px;">👥 {{ member_groups[member.id].name }}</span>
+                                {% if member_groups[member.id].is_representative %}
+                                <span class="cl-pill" style="background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff; border-color: transparent; font-size: 11px;">👑 {{ t('crew.representative') }}</span>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="cl-trip-meta">
+                                <span style="font-weight: 600; color: var(--cl-accent);">{{ member.code }}</span>
+                                <span class="cl-trip-meta__sep">·</span>
+                                {% if member.is_trip_admin %}
+                                <span class="cl-pill" style="background: linear-gradient(135deg, #8b4513, #d2691e); color: #fff; border-color: transparent; font-size: 10px; padding: 1px 6px;">⚓ {{ t('crew.trip_admin') }}</span>
+                                {% else %}
+                                <span>Crew</span>
+                                {% endif %}
+                                <span class="cl-trip-meta__sep">·</span>
+                                {% if member.departed_at %}
+                                <span class="cl-pill" style="background: linear-gradient(135deg, #666, #999); color: #fff; border-color: transparent; font-size: 10px; padding: 1px 6px;">🚪 {{ t('crew.departed') }}</span>
+                                {% else %}
+                                <span class="cl-pill cl-pill--solid-success" style="font-size: 10px; padding: 1px 6px;">✅ {{ t('common.active') }}</span>
                                 {% endif %}
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="cl-td-desktop">
                             {% if member.is_trip_admin %}
-                            <span class="px-3 py-1 text-xs rounded-full text-white font-semibold" 
-                                  style="background: linear-gradient(135deg, #8b4513 0%, #d2691e 100%);">
-                                ⚓ {{ t('crew.trip_admin') }}
-                            </span>
+                            <span class="cl-pill" style="background: linear-gradient(135deg, #8b4513, #d2691e); color: #fff; border-color: transparent;">⚓ {{ t('crew.trip_admin') }}</span>
                             {% else %}
-                            <span class="text-sm ui-muted">Crew</span>
+                            <span class="cl-muted" style="font-size: 14px;">Crew</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="cl-td-desktop">
                             {% if member.departed_at %}
-                            <div class="flex flex-col gap-1">
-                                <span class="px-2 py-1 text-xs rounded-full text-white font-semibold inline-block w-fit" 
-                                      style="background: linear-gradient(135deg, #666 0%, #999 100%);">
-                                    🚪 {{ t('crew.departed') }}
-                                </span>
-                                <span class="text-xs ui-muted">
-                                    {{ member.departed_at.strftime('%d.%m.%Y %H:%M') }}
-                                </span>
+                            <div style="display: flex; flex-direction: column; gap: var(--cl-space-1);">
+                                <span class="cl-pill" style="background: linear-gradient(135deg, #666, #999); color: #fff; border-color: transparent; width: fit-content;">🚪 {{ t('crew.departed') }}</span>
+                                <span class="cl-help cl-help--muted">{{ member.departed_at.strftime('%d.%m.%Y %H:%M') }}</span>
                             </div>
                             {% else %}
-                            <span class="px-2 py-1 text-xs rounded-full text-white font-semibold" 
-                                  style="background: var(--success);">
-                                ✅ {{ t('common.active') }}
-                            </span>
+                            <span class="cl-pill cl-pill--solid-success">✅ {{ t('common.active') }}</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm ui-muted">{{ member.iban_or_handle or '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm space-y-2">
-                            <div class="flex gap-2 flex-wrap">
-                                <a href="/crew/{{ member.id }}/edit" class="hover:underline touch-action" style="color: var(--accent);">✏️ {{ t('common.edit') }}</a>
+                        <td class="cl-td-desktop" style="font-size: 14px; color: var(--cl-text-muted);">{{ member.iban_or_handle or '—' }}</td>
+                        <td>
+                            <div class="cl-actions">
+                                <a href="/crew/{{ member.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm">✏️ {{ t('common.edit') }}</a>
                                 {% if member.departed_at %}
-                                <form action="/crew/{{ member.id }}/reactivate" method="post" class="inline" onsubmit="return confirm({{ t('crew.confirm_reactivate', name=member.name) | tojson }})">
+                                <form action="/crew/{{ member.id }}/reactivate" method="post" style="margin: 0;" onsubmit="return confirm({{ t('crew.confirm_reactivate', name=member.name) | tojson }})">
                                     {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action" style="color: var(--success);">🔄 {{ t('crew.reactivate') }}</button>
+                                    <button type="submit" class="cl-btn cl-btn--success cl-btn--sm">🔄 {{ t('crew.reactivate') }}</button>
                                 </form>
                                 {% else %}
-                                <button onclick="showDeactivateModal({{ member.id }}, '{{ member.name }}')" class="hover:underline touch-action" style="color: #ff9800;">🚪 {{ t('crew.deactivate') }}</button>
+                                <button onclick="showDeactivateModal({{ member.id }}, '{{ member.name }}')" class="cl-btn cl-btn--warn cl-btn--sm">🚪 {{ t('crew.deactivate') }}</button>
                                 {% endif %}
-                                <form action="/crew/{{ member.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ t('common.confirm_delete_name').replace('{name}', member.name) }}')">
+                                <form action="/crew/{{ member.id }}/delete" method="post" style="margin: 0;" onsubmit="return confirm('{{ t('common.confirm_delete_name').replace('{name}', member.name) }}')">
                                     {{ csrf_input | safe }}
-                                    <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
+                                    <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️ {{ t('common.delete') }}</button>
                                 </form>
                             </div>
                         </td>
@@ -101,43 +101,33 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
 </div>
 
 <!-- Deactivate Modal -->
 <div id="deactivateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" onclick="hideDeactivateModal(event)">
-    <div class="bg-white porthole-card p-6 max-w-md w-full mx-4" onclick="event.stopPropagation()">
-        <h2 class="text-2xl font-bold maritime-header mb-4">🚪 {{ t('crew.deactivate_title') }}</h2>
-        <p class="mb-4">
-            <span id="deactivateMemberName" class="font-semibold"></span> {{ t('crew.deactivate_desc', name='') }}
+    <div class="cl-card" style="max-width: 480px; width: calc(100% - 32px); margin: 0 auto;" onclick="event.stopPropagation()">
+        <header class="cl-card__head">
+            <h2 class="cl-card__title">🚪 {{ t('crew.deactivate_title') }}</h2>
+        </header>
+        <p style="margin: 0; font-size: 15px; color: var(--cl-text);">
+            <span id="deactivateMemberName" style="font-weight: 600;"></span> {{ t('crew.deactivate_desc', name='') }}
         </p>
-        <form id="deactivateForm" method="post" action="" class="space-y-4">
+        <form id="deactivateForm" method="post" action="" class="cl-stack cl-stack--sm">
             {{ csrf_input | safe }}
             <input type="hidden" name="timezone_offset" id="timezone_offset_input">
-            <div>
-                <label class="block text-sm font-medium mb-1">📅 {{ t('crew.departure_datetime') }}</label>
-                <input type="datetime-local" 
-                       name="departed_at" 
+            <div class="cl-field">
+                <label class="cl-label cl-label--inline">📅 {{ t('crew.departure_datetime') }}</label>
+                <input type="datetime-local"
+                       name="departed_at"
                        id="departed_at_input"
-                       required 
-                       class="w-full px-3 py-2 border rounded-lg" 
-                       style="border-color: var(--border);">
-                <p class="text-xs mt-1 ui-muted">
-                    💡 {{ t('crew.departure_hint') }}
-                </p>
+                       required
+                       class="cl-input">
+                <p class="cl-help cl-help--muted">💡 {{ t('crew.departure_hint') }}</p>
             </div>
-            <div class="flex gap-3 justify-end">
-                <button type="button" 
-                        onclick="hideDeactivateModal()" 
-                        class="px-4 py-2 rounded-lg border" 
-                        style="border-color: var(--border);">
-                    {{ t('common.cancel') }}
-                </button>
-                <button type="submit" 
-                        class="px-4 py-2 rounded-lg text-white" 
-                        style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">
-                    🚪 {{ t('crew.deactivate') }}
-                </button>
+            <div class="cl-card__footer" style="justify-content: flex-end;">
+                <button type="button" onclick="hideDeactivateModal()" class="cl-btn cl-btn--secondary">{{ t('common.cancel') }}</button>
+                <button type="submit" class="cl-btn cl-btn--warn">🚪 {{ t('crew.deactivate') }}</button>
             </div>
         </form>
     </div>
@@ -149,14 +139,10 @@ function showDeactivateModal(memberId, memberName) {
     const form = document.getElementById('deactivateForm');
     const nameSpan = document.getElementById('deactivateMemberName');
     const dateInput = document.getElementById('departed_at_input');
-    
-    // Set form action
+
     form.action = `/crew/${memberId}/deactivate`;
-    
-    // Set member name
     nameSpan.textContent = memberName;
-    
-    // Set current datetime as default (datetime-local uses local time directly)
+
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -164,12 +150,9 @@ function showDeactivateModal(memberId, memberName) {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     dateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-    
-    // Set timezone offset (in minutes) for server-side conversion
-    const timezoneOffsetInput = document.getElementById('timezone_offset_input');
-    timezoneOffsetInput.value = now.getTimezoneOffset();
-    
-    // Show modal
+
+    document.getElementById('timezone_offset_input').value = now.getTimezoneOffset();
+
     modal.classList.remove('hidden');
     modal.classList.add('flex');
 }
