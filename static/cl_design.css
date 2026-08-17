@@ -693,6 +693,180 @@
     }
 }
 
+/* --- Phone card layout for balances table (≤640 px) ---------------------- */
+/* Scoped to .cl-balances-table so other .cl-table instances are unaffected. */
+@media (max-width: 640px) {
+    .cl-balances-table-scroll { overflow-x: visible; }
+    .cl-balances-table thead { display: none; }
+    .cl-balances-table,
+    .cl-balances-table tbody,
+    .cl-balances-table tr,
+    .cl-balances-table td { display: block; }
+    .cl-balances-table tbody tr {
+        margin: var(--cl-space-3) var(--cl-space-3);
+        padding: var(--cl-space-3) var(--cl-space-4);
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius);
+        background: var(--cl-surface);
+        box-shadow: var(--cl-shadow);
+    }
+    .cl-balances-table tbody tr:hover { background: var(--cl-surface); }
+    .cl-balances-table tbody td { padding: var(--cl-space-1) 0; border-bottom: none; }
+    /* Hide paid/share columns — values shown in mobile meta line instead */
+    .cl-balances-table .cl-td-desktop { display: none !important; }
+    /* Group summary rows: pull up to attach visually to the representative card above */
+    .cl-balances-table .cl-balances-summary-row {
+        margin-top: calc(-1 * var(--cl-space-3) + 2px);
+        margin-bottom: var(--cl-space-3);
+        border-top: 1px dashed var(--cl-accent);
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        background: var(--cl-accent-soft) !important;
+        box-shadow: none;
+        padding: var(--cl-space-2) var(--cl-space-4);
+    }
+    /* The single colspan td in summary row: no extra divider border */
+    .cl-balances-table .cl-balances-summary-row td:last-child {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+    /* Net value: small top margin to separate from member meta line */
+    .cl-balances-table td.cl-num { margin-top: var(--cl-space-2); }
+    /* Status cell: divider above to separate from net */
+    .cl-balances-table td:last-child {
+        margin-top: var(--cl-space-2);
+        padding-top: var(--cl-space-2);
+        border-top: 1px solid var(--cl-border);
+    }
+}
+
+/* Mobile meta line inside the member cell (hidden on desktop) */
+.cl-bal-meta { display: none; }
+@media (max-width: 640px) {
+    .cl-bal-meta {
+        display: block;
+        font-size: 12px;
+        color: var(--cl-text-muted);
+        margin-top: 2px;
+    }
+}
+
+/* --- Phone card layout for deposits table (≤640 px) ---------------------- */
+/* Scoped to .cl-deposits-table so other .cl-table instances are unaffected. */
+@media (max-width: 640px) {
+    .cl-deposits-table-scroll { overflow-x: visible; }
+    .cl-deposits-table thead { display: none; }
+    .cl-deposits-table,
+    .cl-deposits-table tbody,
+    .cl-deposits-table tr,
+    .cl-deposits-table td { display: block; }
+    .cl-deposits-table tbody tr {
+        margin: var(--cl-space-3) var(--cl-space-3);
+        padding: var(--cl-space-3) var(--cl-space-4);
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius);
+        background: var(--cl-surface);
+        box-shadow: var(--cl-shadow);
+    }
+    .cl-deposits-table tbody tr:hover { background: var(--cl-surface); }
+    .cl-deposits-table tbody td { padding: 0; border-bottom: none; }
+    /* Hide standalone date and note columns — shown in mobile meta line */
+    .cl-deposits-table .cl-td-desktop { display: none !important; }
+    /* Amount cell: small top margin to separate from member meta line */
+    .cl-deposits-table td.cl-num { margin-top: var(--cl-space-2); }
+    /* Actions row */
+    .cl-deposits-table td:last-child {
+        margin-top: var(--cl-space-2);
+        padding-top: var(--cl-space-2);
+        border-top: 1px solid var(--cl-border);
+    }
+    .cl-deposits-table .cl-actions { gap: var(--cl-space-2); flex-wrap: wrap; }
+    .cl-deposits-table .cl-actions .cl-btn,
+    .cl-deposits-table .cl-actions a.cl-btn,
+    .cl-deposits-table .cl-actions button.cl-btn {
+        min-height: 36px;
+        flex: 1 1 auto;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+/* Mobile meta line inside the member cell (hidden on desktop) */
+.cl-dep-meta { display: none; }
+@media (max-width: 640px) {
+    .cl-dep-meta {
+        display: block;
+        font-size: 12px;
+        color: var(--cl-text-muted);
+        margin-top: 2px;
+    }
+}
+
+/* --- Phone card layout for templates table (≤640 px) --------------------- */
+/* Scoped to .cl-templates-table so other .cl-table instances are unaffected.*/
+@media (max-width: 640px) {
+    .cl-templates-table-scroll { overflow-x: visible; }
+    .cl-templates-table thead { display: none; }
+    .cl-templates-table,
+    .cl-templates-table tbody,
+    .cl-templates-table tr,
+    .cl-templates-table td { display: block; }
+    .cl-templates-table tbody tr {
+        margin: var(--cl-space-3) var(--cl-space-3);
+        padding: var(--cl-space-3) var(--cl-space-4);
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius);
+        background: var(--cl-surface);
+        box-shadow: var(--cl-shadow);
+    }
+    .cl-templates-table tbody tr:hover { background: var(--cl-surface); }
+    .cl-templates-table tbody td { padding: 0; border-bottom: none; }
+    /* Hide category/amount/paid_from/split columns — shown in mobile meta line */
+    .cl-templates-table .cl-td-desktop { display: none !important; }
+    /* Actions row */
+    .cl-templates-table td:last-child {
+        margin-top: var(--cl-space-2);
+        padding-top: var(--cl-space-2);
+        border-top: 1px solid var(--cl-border);
+    }
+    .cl-templates-table .cl-actions { gap: var(--cl-space-2); flex-wrap: wrap; }
+    .cl-templates-table .cl-actions .cl-btn,
+    .cl-templates-table .cl-actions a.cl-btn,
+    .cl-templates-table .cl-actions button.cl-btn {
+        min-height: 36px;
+        flex: 1 1 auto;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+/* Mobile meta line inside the template name cell (hidden on desktop) */
+.cl-tmpl-meta { display: none; }
+@media (max-width: 640px) {
+    .cl-tmpl-meta {
+        display: block;
+        font-size: 12px;
+        color: var(--cl-text-muted);
+        margin-top: 2px;
+    }
+}
+
+/* --- Mobile button fix for groups page action buttons (≤640 px) ---------- */
+@media (max-width: 640px) {
+    .cl-groups-actions {
+        flex-wrap: wrap;
+        gap: var(--cl-space-2);
+    }
+    .cl-groups-actions .btn {
+        min-height: 44px;
+        flex: 1 1 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
 /* --- KPI tiles (Apple-style soft surfaces) ------------------------------- */
 .cl-kpi {
     background: var(--cl-surface);

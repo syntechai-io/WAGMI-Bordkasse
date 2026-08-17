@@ -15,42 +15,52 @@
         <p class="text-sm">💡 <strong>{{ t('template.tip') }}</strong> {{ t('template.tip_desc') }}</p>
     </div>
 
-    <div class="bg-white porthole-card overflow-hidden">
+    <section class="cl-table-wrap">
         {% if expense_templates %}
-        <div class="overflow-x-auto">
-            <table class="min-w-full">
-                <thead style="background: var(--surface-2);">
+        <div class="cl-table-scroll cl-templates-table-scroll">
+            <table class="cl-table cl-templates-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_name') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_category') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_amount') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_paid_from') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_split') }}</th>
+                        <th>{{ t('template.col_name') }}</th>
+                        <th>{{ t('template.col_category') }}</th>
+                        <th>{{ t('template.col_amount') }}</th>
+                        <th>{{ t('template.col_paid_from') }}</th>
+                        <th>{{ t('template.col_split') }}</th>
                         {% if request.session.get('role') == 'admin' %}
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase">{{ t('template.col_actions') }}</th>
+                        <th>{{ t('template.col_actions') }}</th>
                         {% endif %}
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-sky-200">
+                <tbody>
                     {% for template in expense_templates %}
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap font-semibold" style="color: var(--accent);">{{ template.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ display_expense_cat(template.category) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td>
+                            <strong style="color: var(--cl-accent);">{{ template.name }}</strong>
+                            <div class="cl-tmpl-meta">
+                                {{ display_expense_cat(template.category) }}
+                                {% if template.default_amount %}
+                                 · {{ "%.2f"|format(template.default_amount) }} {{ template.currency.value }}
+                                {% endif %}
+                                 · {% if template.paid_from.value == 'wallet' %}💰 {{ t('template.paid_wallet') }}{% else %}👤 {{ t('template.paid_private') }}{% endif %}
+                                 · {% if template.split_mode.value == 'equal' %}⚖️ {{ t('template.split_equal') }}{% elif template.split_mode.value == 'participants' %}👥 {{ t('template.split_participants') }}{% else %}📊 {{ t('template.split_percentage') }}{% endif %}
+                            </div>
+                        </td>
+                        <td class="cl-td-desktop">{{ display_expense_cat(template.category) }}</td>
+                        <td class="cl-td-desktop">
                             {% if template.default_amount %}
                                 {{ "%.2f"|format(template.default_amount) }} {{ template.currency.value }}
                             {% else %}
-                                <span style="opacity: 0.5;">-</span>
+                                <span class="cl-muted">-</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="cl-td-desktop">
                             {% if template.paid_from.value == 'wallet' %}
                                 💰 {{ t('template.paid_wallet') }}
                             {% else %}
                                 👤 {{ t('template.paid_private') }}
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="cl-td-desktop">
                             {% if template.split_mode.value == 'equal' %}
                                 ⚖️ {{ t('template.split_equal') }}
                             {% elif template.split_mode.value == 'participants' %}
@@ -60,12 +70,14 @@
                             {% endif %}
                         </td>
                         {% if request.session.get('role') == 'admin' %}
-                        <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                            <a href="/templates/{{ template.id }}/edit" class="hover:underline touch-action" style="color: var(--accent);">✏️ {{ t('common.edit') }}</a>
-                            <form action="/templates/{{ template.id }}/delete" method="post" class="inline" onsubmit="return confirm('{{ t('template.confirm_delete') }}')">
-                                {{ csrf_input | safe }}
-                                <button type="submit" class="hover:underline touch-action" style="color: var(--coral);">🗑️ {{ t('common.delete') }}</button>
-                            </form>
+                        <td>
+                            <div class="cl-actions">
+                                <a href="/templates/{{ template.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm">✏️ {{ t('common.edit') }}</a>
+                                <form action="/templates/{{ template.id }}/delete" method="post" style="margin:0;" onsubmit="return confirm('{{ t('template.confirm_delete') }}')">
+                                    {{ csrf_input | safe }}
+                                    <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️ {{ t('common.delete') }}</button>
+                                </form>
+                            </div>
                         </td>
                         {% endif %}
                     </tr>
@@ -74,13 +86,13 @@
             </table>
         </div>
         {% else %}
-        <div class="p-8 text-center ui-muted">
-            <p class="text-lg">📋 {{ t('template.no_templates') }}</p>
+        <div style="padding: var(--cl-space-6) var(--cl-space-5); text-align: center; color: var(--cl-text-muted);">
+            <p style="font-size: 16px; margin: 0 0 var(--cl-space-2);">📋 {{ t('template.no_templates') }}</p>
             {% if request.session.get('role') == 'admin' %}
-            <p class="text-sm mt-2">{{ t('template.create_first') }}</p>
+            <p style="font-size: 14px; margin: 0;">{{ t('template.create_first') }}</p>
             {% endif %}
         </div>
         {% endif %}
-    </div>
+    </section>
 </div>
 {% endblock %}
