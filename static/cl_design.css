@@ -1575,3 +1575,177 @@ html[data-theme="night"] .cl-tabbar__item:hover { color: rgba(255, 80, 80, .95);
 
 /* ── Body / page background ──────────────────────────────────────────────── */
 body { background: var(--cl-bg); }
+
+/* ── Pill size modifier ──────────────────────────────────────────────────── */
+.cl-pill--sm {
+    font-size: 11px;
+    padding: 2px 8px;
+    height: 20px;
+    line-height: 1;
+}
+
+/* ── Pill info colour (neutral/blue) ─────────────────────────────────────── */
+.cl-pill--info {
+    background: rgba(61,154,212,0.18);
+    color: #7ecdf5;
+    border-color: transparent;
+}
+
+/* ── Logbook: day-section wrapper ────────────────────────────────────────── */
+.cl-day-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-3);
+}
+
+/* ── Logbook: day-group header bar ───────────────────────────────────────── */
+.cl-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cl-space-3);
+    padding: var(--cl-space-2) var(--cl-space-1);
+    border-bottom: 1px solid var(--cl-border);
+    margin-bottom: var(--cl-space-1);
+}
+.cl-day-header__left {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-3);
+}
+.cl-day-header__num {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--cl-accent);
+    letter-spacing: -0.03em;
+    min-width: 2ch;
+    text-align: center;
+}
+.cl-day-header__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.cl-day-header__month {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cl-text);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.cl-day-header__count {
+    font-size: 11px;
+    color: var(--cl-text-subtle);
+}
+.cl-day-header__link {
+    flex-shrink: 0;
+}
+
+/* ── Logbook: entry expand/collapse (overrides + extensions) ─────────────── */
+.cl-entry-collapse__time {
+    font-weight: 700;
+    color: var(--cl-text);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    min-width: 3.5ch;
+}
+.cl-entry-collapse__summary {
+    gap: var(--cl-space-3);
+}
+.cl-entry-collapse:hover > .cl-entry-collapse__summary {
+    background: var(--cl-surface-hover, rgba(255,255,255,0.04));
+    border-radius: var(--cl-radius) var(--cl-radius) 0 0;
+}
+
+/* ── Logbook: entry photo thumbnail ─────────────────────────────────────── */
+.cl-entry-photo {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: var(--cl-radius-sm);
+    cursor: pointer;
+    flex-shrink: 0;
+    border: 1px solid var(--cl-border);
+}
+
+/* ── Logbook: entry data grid (position / wind / sea / temp / nm) ────────── */
+.cl-entry-data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--cl-space-2);
+}
+.cl-entry-data-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--cl-surface-2);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-sm);
+    padding: var(--cl-space-2) var(--cl-space-3);
+}
+.cl-entry-data-cell__label {
+    font-size: 11px;
+    color: var(--cl-text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.cl-entry-data-cell__value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cl-text);
+}
+.cl-entry-data-cell__value--accent {
+    color: var(--cl-accent);
+}
+
+/* ── Logbook: watch crew row ─────────────────────────────────────────────── */
+.cl-entry-watch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+.cl-entry-watch__label {
+    font-size: 12px;
+    color: var(--cl-text-subtle);
+}
+
+/* ── Logbook: notes block ────────────────────────────────────────────────── */
+.cl-entry-notes {
+    background: rgba(255,255,255,0.04);
+    border-left: 3px solid var(--cl-accent);
+    border-radius: 0 var(--cl-radius-sm) var(--cl-radius-sm) 0;
+    padding: var(--cl-space-3) var(--cl-space-4);
+    font-size: 14px;
+    color: var(--cl-text);
+    line-height: 1.55;
+    white-space: pre-wrap;
+}
+
+/* ── Empty state (used on logbook and other zero-data pages) ─────────────── */
+.cl-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--cl-space-3);
+    text-align: center;
+    padding: var(--cl-space-8) var(--cl-space-5);
+}
+.cl-empty-state__icon {
+    font-size: 48px;
+    line-height: 1;
+}
+.cl-empty-state__title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--cl-navy);
+    margin: 0;
+}
+.cl-empty-state__desc {
+    font-size: 14px;
+    color: var(--cl-text-muted);
+    max-width: 40ch;
+    margin: 0;
+}
