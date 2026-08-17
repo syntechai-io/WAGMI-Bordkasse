@@ -333,17 +333,26 @@
 }
 .cl-btn--secondary:hover { background: #b4c2d0; color: #0c1e30; }
 .cl-btn--ghost {
-    background: #c8d4e0;
-    color: #0c1e30;
-    border-color: transparent;
+    background: rgba(255, 255, 255, 0.07);
+    color: #eef2f6 !important;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.18);
 }
-.cl-btn--ghost:hover { background: #b4c2d0; color: #0c1e30; }
+.cl-btn--ghost:hover {
+    background: rgba(255, 255, 255, 0.13);
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.32);
+}
 .cl-btn--ghost-danger {
     background: transparent;
-    color: var(--cl-danger);
-    border-color: transparent;
+    color: var(--cl-danger) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.12);
 }
-.cl-btn--ghost-danger:hover { background: var(--cl-danger-soft); }
+.cl-btn--ghost-danger:hover {
+    background: var(--cl-danger-soft);
+    border-color: var(--cl-danger);
+}
 
 .cl-iconbtn {
     width: 40px;
