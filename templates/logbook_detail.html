@@ -17,11 +17,11 @@
             </p>
         </div>
         <div class="cl-pageheader__actions">
-            <a href="/logbook" class="cl-btn cl-btn--ghost">← {{ t('logbook.back_to_list') }}</a>
-            <a href="/logbook/{{ entry.id }}/edit" class="cl-btn cl-btn--primary">✏️ {{ t('common.edit') }}</a>
+            <a href="/logbook" class="cl-btn cl-hero-btn--secondary">← {{ t('logbook.back_to_list') }}</a>
+            <a href="/logbook/{{ entry.id }}/edit" class="cl-btn cl-hero-btn--primary">✏️ {{ t('common.edit') }}</a>
             <form action="/logbook/{{ entry.id }}/delete" method="post" style="margin: 0;" onsubmit="return confirm('{{ t('common.confirm_delete_entry') }}')">
                 {{ csrf_input | safe }}
-                <button type="submit" class="cl-btn cl-btn--ghost-danger">🗑️ {{ t('common.delete') }}</button>
+                <button type="submit" class="cl-btn cl-hero-btn--danger">🗑️ {{ t('common.delete') }}</button>
             </form>
         </div>
     </header>
@@ -95,7 +95,7 @@
         </section>
         {% endif %}
 
-        <section class="cl-card">
+        <section class="cl-card cl-photo-panel">
             <header class="cl-card__head"><h2 class="cl-card__title">📸 {{ t('logbook.photos') }}</h2></header>
 
             {% if entry.photos %}
@@ -123,14 +123,14 @@
             <p class="cl-muted">{{ t('logbook.no_photos') }}</p>
             {% endif %}
 
-            <form action="/logbook/{{ entry.id }}/photos/upload" method="post" enctype="multipart/form-data" id="photoUploadForm" class="cl-stack cl-stack--sm">
+            <form action="/logbook/{{ entry.id }}/photos/upload" method="post" enctype="multipart/form-data" id="photoUploadForm" class="cl-stack cl-stack--sm cl-photo-upload-form">
                 {{ csrf_input | safe }}
                 <div class="cl-field">
                     <label class="cl-label cl-label--inline">📷 {{ t('logbook.add_photo') }} ({{ t('logbook.photos_multi_hint') }})</label>
                     <input type="file" id="photoInput" name="photo" multiple accept="image/jpeg,image/png,image/jpg" required class="hidden">
-                    <div style="display: flex; gap: var(--cl-space-2);">
-                        <button type="button" onclick="activateCamera()" class="cl-btn cl-btn--accent" style="flex: 1;">📷 {{ t('logbook.open_camera') }}</button>
-                        <button type="button" onclick="activateFile()" class="cl-btn cl-btn--secondary" style="flex: 1;">📁 {{ t('logbook.select_file') }}</button>
+                    <div class="cl-photo-source-actions">
+                        <button type="button" onclick="activateCamera()" class="cl-btn cl-btn--ghost cl-photo-source-btn">📷 {{ t('logbook.open_camera') }}</button>
+                        <button type="button" onclick="activateFile()" class="cl-btn cl-btn--ghost cl-photo-source-btn">📁 {{ t('logbook.select_file') }}</button>
                     </div>
                     <p id="photoFileName" class="cl-help cl-help--success"></p>
                     <div id="photoPreview" class="cl-photo-grid"></div>
@@ -139,8 +139,8 @@
                     <label class="cl-label cl-label--inline">💬 {{ t('logbook.caption') }} ({{ t('common.optional') }})</label>
                     <input type="text" name="caption" placeholder="{{ t('logbook.placeholder_photo_caption') }}" class="cl-input">
                 </div>
-                <div>
-                    <button type="submit" id="uploadButton" disabled class="cl-btn cl-btn--success" style="opacity: .5;">
+                <div class="cl-photo-submit">
+                    <button type="submit" id="uploadButton" disabled class="cl-btn cl-btn--success cl-photo-upload-btn">
                         📤 {{ t('logbook.upload_photo') }}
                     </button>
                 </div>

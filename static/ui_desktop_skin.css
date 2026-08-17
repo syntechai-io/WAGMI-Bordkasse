@@ -350,11 +350,13 @@
   }
 
   tr:nth-child(even) td {
-    background: #FAFBFC;
+    /* Keep legacy tables on the active CrewLog theme instead of forcing
+       white cells into the dark maritime palette. */
+    background: var(--surface, var(--cl-surface));
   }
 
   tr:hover td {
-    background: #F1F5F9;
+    background: var(--surface-2, var(--cl-surface-2));
   }
 
   /* ── 7) Buttons ── */

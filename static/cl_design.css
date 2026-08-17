@@ -556,11 +556,16 @@ a.cl-btn--ghost-danger:hover {
 .cl-table tbody td {
     padding: var(--cl-space-3) var(--cl-space-4);
     border-bottom: 1px solid var(--cl-border);
+    background: var(--cl-surface);
     color: var(--cl-text);
     vertical-align: middle;
 }
 .cl-table tbody tr:last-child td { border-bottom: none; }
-.cl-table tbody tr:hover { background: var(--cl-surface-2); }
+.cl-table tbody tr:hover,
+.cl-table tbody tr:hover td {
+    background: var(--cl-surface-2);
+    color: var(--cl-text);
+}
 .cl-table .cl-num { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
 .cl-table .cl-actions {
     display: flex;
@@ -1528,6 +1533,55 @@ html[data-theme="night"] .cl-tabbar__item:hover { color: rgba(255, 80, 80, .95);
     background: rgba(5, 18, 35, 0.80) !important;
     border-color: rgba(255, 255, 255, 0.55) !important;
     color: #ffffff !important;
+}
+/* Destructive action in the hero: clear danger affordance without using
+   the bright success/primary fills reserved for safe actions. */
+.cl-hero-btn--danger {
+    background: rgba(110, 24, 35, 0.48) !important;
+    border: 1.5px solid rgba(255, 132, 145, 0.48) !important;
+    color: #ffb4bc !important;
+    font-weight: 700 !important;
+}
+.cl-hero-btn--danger:hover {
+    background: rgba(150, 28, 43, 0.72) !important;
+    border-color: rgba(255, 173, 182, 0.78) !important;
+    color: #ffffff !important;
+}
+
+/* Photo upload controls use the same dark-glass language as card actions.
+   Disabled upload remains visibly actionable but cannot be mistaken for a
+   completed upload. */
+.cl-photo-panel {
+    border-color: rgba(87, 151, 211, 0.48);
+}
+.cl-photo-source-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--cl-space-2);
+}
+.cl-photo-source-btn {
+    width: 100%;
+}
+.cl-photo-upload-btn {
+    min-width: 160px;
+}
+.cl-photo-upload-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    filter: saturate(.65);
+}
+.cl-photo-submit {
+    display: flex;
+    justify-content: flex-start;
+}
+
+@media (max-width: 560px) {
+    .cl-photo-source-actions {
+        grid-template-columns: 1fr;
+    }
+    .cl-photo-submit .cl-photo-upload-btn {
+        width: 100%;
+    }
 }
 
 /* Legacy fallback — keep secondary/ghost in pageheader readable if used elsewhere */

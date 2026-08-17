@@ -47,3 +47,10 @@ Add `<header class="cl-pageheader"><div class="cl-pageheader__main"><h1 class="c
 - `ui_v1.css:222` — `a { color: var(--accent); }` bare tag selector catches all `<a>` including `<a class="cl-btn">`. Workaround: `!important` on all dark button text colors + explicit `a.cl-btn--ghost-danger` rule in cl_design.css. Permanent fix is task #86.
 - `ui_desktop_skin.css` — `a:not(.btn)` link rule was catching `<a class="cl-btn">` (different class name). Fixed to `a:not(.btn):not(.cl-btn)`.
 - All three theme modes (default dark, day, night) have overrides for ghost/ghost-success/ghost-danger in ui_night_mode.css.
+
+## Table theme guard
+Legacy desktop/table skins must use the active theme tokens for row and hover backgrounds, not hardcoded light grays. Component tables also set their cell background explicitly so later `tr:hover td` rules cannot reveal white cells in dark mode.
+
+**Why:** The Trips log view had alternating and hovered rows turn nearly white while text remained dark-theme colors, making most content unreadable.
+
+**How to apply:** When adding or changing table skins, use `var(--surface)` / `var(--surface-2)` or the `--cl-*` equivalents, and keep `.cl-table tbody td` / hover-cell rules explicit.
