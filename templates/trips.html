@@ -222,7 +222,7 @@
                                     {% else %}
                                     <form action="/trips/{{ trip.id }}/reopen" method="post" style="margin:0;">
                                         {{ csrf_input | safe }}
-                                        <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm" style="color:var(--cl-success);">🔓 {{ t('trips.action_reopen') }}</button>
+                                        <button type="submit" class="cl-btn cl-btn--ghost-success cl-btn--sm">🔓 {{ t('trips.action_reopen') }}</button>
                                     </form>
                                     {% endif %}
                                     {% if trip.status.value == 'archived' %}
@@ -333,7 +333,7 @@
                                             {% else %}
                                             <form action="/trips/{{ trip.id }}/reopen" method="post" style="margin:0;">
                                                 {{ csrf_input | safe }}
-                                                <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm" style="color: var(--cl-success);" title="{{ t('trips.help_reopen') }}">🔓 {{ t('trips.action_reopen') }}</button>
+                                                <button type="submit" class="cl-btn cl-btn--ghost-success cl-btn--sm" title="{{ t('trips.help_reopen') }}">🔓 {{ t('trips.action_reopen') }}</button>
                                             </form>
                                             {% endif %}
 

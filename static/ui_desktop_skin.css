@@ -460,16 +460,16 @@
   }
 
   /* ── 9) Links ── */
-  a:not(.btn):not(.nav-item):not(.topbar a):not(.lang-pill a) {
+  a:not(.btn):not(.cl-btn):not(.nav-item):not(.topbar a):not(.lang-pill a) {
     color: var(--accent-blue);
   }
 
-  a:not(.btn):not(.nav-item):not(.topbar a):not(.lang-pill a):hover {
+  a:not(.btn):not(.cl-btn):not(.nav-item):not(.topbar a):not(.lang-pill a):hover {
     color: #1F5AD6;
     text-decoration: underline;
   }
 
-  a:not(.btn):not(.nav-item):not(.topbar a):not(.lang-pill a):visited {
+  a:not(.btn):not(.cl-btn):not(.nav-item):not(.topbar a):not(.lang-pill a):visited {
     color: var(--accent-blue);
   }
 

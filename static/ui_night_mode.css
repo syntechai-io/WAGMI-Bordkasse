@@ -294,6 +294,7 @@ html[data-theme="night"] .cl-btn--success,
 html[data-theme="night"] .cl-btn--warn,
 html[data-theme="night"] .cl-btn--secondary,
 html[data-theme="night"] .cl-btn--ghost,
+html[data-theme="night"] .cl-btn--ghost-success,
 html[data-theme="night"] .cl-btn--ghost-danger,
 html[data-theme="night"] .cl-iconbtn,
 html[data-theme="night"] button,
@@ -311,6 +312,7 @@ html[data-theme="night"] .cl-btn--success:hover,
 html[data-theme="night"] .cl-btn--warn:hover,
 html[data-theme="night"] .cl-btn--secondary:hover,
 html[data-theme="night"] .cl-btn--ghost:hover,
+html[data-theme="night"] .cl-btn--ghost-success:hover,
 html[data-theme="night"] .cl-btn--ghost-danger:hover,
 html[data-theme="night"] .cl-iconbtn:hover,
 html[data-theme="night"] button:not([disabled]):hover {
@@ -828,6 +830,15 @@ html[data-theme="day"] .cl-pageheader::after {
 }
 
 /* Day mode: ghost buttons restore light-surface styling on white/light card backgrounds */
+html[data-theme="day"] .cl-btn--ghost-success {
+  background: transparent !important;
+  color: #2f7a4d !important;
+  border-color: transparent !important;
+}
+html[data-theme="day"] .cl-btn--ghost-success:hover {
+  background: #e6f3ec !important;
+  border-color: #2f7a4d !important;
+}
 html[data-theme="day"] .cl-btn--ghost {
   background: #f1f5f9 !important;
   color: #334155 !important;

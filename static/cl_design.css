@@ -343,15 +343,35 @@
     color: #ffffff !important;
     border-color: rgba(255, 255, 255, 0.32);
 }
-.cl-btn--ghost-danger {
+/* Success variant — used for "Reopen" in trip cards */
+.cl-btn--ghost-success,
+a.cl-btn--ghost-success {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--cl-success) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+.cl-btn--ghost-success:hover,
+a.cl-btn--ghost-success:hover {
+    background: rgba(255, 255, 255, 0.13);
+    color: var(--cl-success) !important;
+    border-color: var(--cl-success);
+    text-decoration: none;
+}
+
+.cl-btn--ghost-danger,
+a.cl-btn--ghost-danger {
     background: transparent;
     color: var(--cl-danger) !important;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.12);
 }
-.cl-btn--ghost-danger:hover {
+.cl-btn--ghost-danger:hover,
+a.cl-btn--ghost-danger:hover {
     background: var(--cl-danger-soft);
     border-color: var(--cl-danger);
+    color: var(--cl-danger) !important;
+    text-decoration: none;
 }
 
 .cl-iconbtn {

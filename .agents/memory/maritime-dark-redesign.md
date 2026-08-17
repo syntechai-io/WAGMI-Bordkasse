@@ -37,3 +37,13 @@ Converted the entire app from a light off-white theme to the HarborDeck dark mar
 
 ## How to add wave hero to a non-cl-pageheader page
 Add `<header class="cl-pageheader"><div class="cl-pageheader__main"><h1 class="cl-title">…</h1></div></header>` at the top of the `.cl-page` block and the wave gradient applies automatically.
+
+## Button variant system (dark-theme rules — all have !important on color)
+- `cl-btn--ghost` — dark-glass (rgba white bg, #eef2f6 text). Use for neutral actions (View, Track, Archive, Back).
+- `cl-btn--ghost-success` — same dark-glass but `color: var(--cl-success)`. Use for Reopen / positive ghost actions. **Do NOT use inline style="color:var(--cl-success)" on cl-btn--ghost** — the !important on ghost overrides inline styles.
+- `cl-btn--ghost-danger` — transparent bg, `color: var(--cl-danger)`. Use for destructive actions (Finalize/Abschließen, Delete). **Must use `a.cl-btn--ghost-danger` CSS alias** because trips.html finalize is an `<a>` tag; `a { color: var(--accent) }` in ui_v1.css catches all `<a>` elements.
+
+## Root link-color bugs (partially fixed, partially task #86)
+- `ui_v1.css:222` — `a { color: var(--accent); }` bare tag selector catches all `<a>` including `<a class="cl-btn">`. Workaround: `!important` on all dark button text colors + explicit `a.cl-btn--ghost-danger` rule in cl_design.css. Permanent fix is task #86.
+- `ui_desktop_skin.css` — `a:not(.btn)` link rule was catching `<a class="cl-btn">` (different class name). Fixed to `a:not(.btn):not(.cl-btn)`.
+- All three theme modes (default dark, day, night) have overrides for ghost/ghost-success/ghost-danger in ui_night_mode.css.
