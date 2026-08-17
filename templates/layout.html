@@ -416,6 +416,17 @@
                      the horizontal nav, so we hide this to avoid duplicates.
                      CSS gates: see static/ui_ios_prime.css. -->
                 <div class="topbar-mobile-actions" aria-label="{{ t('nav.account') if t('nav.account') != 'nav.account' else 'Account' }}">
+                    <!-- Back button: hidden on the dashboard itself -->
+                    {% if request.url.path != '/' %}
+                    <button type="button"
+                            class="topbar-back-btn"
+                            onclick="history.length > 1 ? history.back() : (window.location.href='/')"
+                            aria-label="{{ t('common.back') if t('common.back') != 'common.back' else 'Zurück' }}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M5 12l7 7M5 12l7-7"/>
+                        </svg>
+                    </button>
+                    {% endif %}
                     <!-- night-mode.js mounts the 3-segment theme switch here -->
                     <div id="topbar-mobile-theme-slot"></div>
 
