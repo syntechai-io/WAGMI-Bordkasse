@@ -1728,25 +1728,25 @@ body { background: var(--cl-bg); }
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    height: 36px;
+    height: 38px;
     padding: 0 var(--cl-space-4);
     border-radius: var(--cl-radius);
-    border: 1px solid var(--cl-border);
-    background: var(--cl-surface-2);
-    color: var(--cl-text);
+    border: 1.5px solid rgba(255, 255, 255, 0.30);
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
     transition: background .15s ease, border-color .15s ease;
 }
 .cl-page-nav__link:hover {
-    background: var(--cl-surface-hover, rgba(255,255,255,0.07));
-    border-color: var(--cl-border-strong, rgba(255,255,255,0.25));
-    color: var(--cl-text);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.50);
+    color: #ffffff;
     text-decoration: none;
 }
-/* Day-mode override: chips read as solid surface on white bg */
+/* Day-mode: dark text on light chip */
 html[data-theme="day"] .cl-page-nav__link {
     background: #f1f5f9;
     border-color: #cbd5e1;
@@ -1755,6 +1755,7 @@ html[data-theme="day"] .cl-page-nav__link {
 html[data-theme="day"] .cl-page-nav__link:hover {
     background: #e2e8f0;
     border-color: #94a3b8;
+    color: #1e293b;
 }
 
 /* ── Empty state (used on logbook and other zero-data pages) ─────────────── */
