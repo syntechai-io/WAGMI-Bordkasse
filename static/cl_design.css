@@ -959,3 +959,281 @@ html[data-theme="night"] .cl-tabbar__item:hover { color: rgba(255, 80, 80, .95);
 .topbar-back-btn:hover  { opacity: 0.88; }
 .topbar-back-btn:active { transform: scale(0.95); opacity: 0.8; }
 .topbar-back-btn svg    { flex-shrink: 0; }
+
+/* ==========================================================================
+   Trips — two-view switcher (Cards / Log)
+   ========================================================================== */
+
+/* ── Section header with toggle ─────────────────────────────────────── */
+.cl-trips-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cl-space-3);
+    flex-wrap: wrap;
+    padding: var(--cl-space-4) var(--cl-space-5);
+    background: var(--cl-surface-2);
+    border-bottom: 1px solid var(--cl-border);
+}
+.cl-trips-toggle {
+    display: flex;
+    align-items: center;
+    background: var(--cl-border);
+    border-radius: 10px;
+    padding: 2px;
+    gap: 2px;
+    flex-shrink: 0;
+}
+.cl-trips-toggle__btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 13px;
+    border-radius: 8px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--cl-text-subtle);
+    background: transparent;
+    transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+}
+.cl-trips-toggle__btn.is-active {
+    background: var(--cl-surface);
+    color: var(--cl-accent);
+    box-shadow: 0 1px 3px rgba(15,41,66,.10);
+}
+.cl-trips-toggle__btn svg { flex-shrink: 0; }
+
+/* ── View show/hide ─────────────────────────────────────────────────── */
+#cl-trips-view-wrap[data-view="cards"] .cl-trv-log  { display: none; }
+#cl-trips-view-wrap[data-view="log"]   .cl-trv-cards { display: none; }
+
+/* ── Cards view container ───────────────────────────────────────────── */
+.cl-trv-cards { padding: var(--cl-space-4) var(--cl-space-4) var(--cl-space-5); }
+
+/* ── Hero (featured voyage) card ────────────────────────────────────── */
+.cl-trv-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    padding: 24px 22px 22px;
+    min-height: 220px;
+    margin-bottom: var(--cl-space-5);
+    color: #fff;
+    background: linear-gradient(148deg, #0d2742 0%, #163d68 55%, #1e4f80 100%);
+    box-shadow: 0 8px 32px rgba(13,39,66,.30), 0 2px 8px rgba(13,39,66,.20);
+}
+/* Decorative rings */
+.cl-trv-hero::before,
+.cl-trv-hero::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.07);
+    pointer-events: none;
+}
+.cl-trv-hero::before { right: -30px; top: -50px; width: 200px; height: 200px; }
+.cl-trv-hero::after  { right: -55px; top:  10px; width: 250px; height: 250px; border-color: rgba(255,255,255,.04); }
+
+/* Wave animation container */
+.cl-trv-hero-waves {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 90px;
+    overflow: hidden;
+    border-radius: 0 0 20px 20px;
+    pointer-events: none;
+}
+.cl-trv-hero-wave {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 100%;
+    width: 200%;
+    fill: white;
+}
+@keyframes cl-trv-wave1 { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes cl-trv-wave2 { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@keyframes cl-trv-wave3 { from { transform: translateX(-20%); } to { transform: translateX(-70%); } }
+.cl-trv-hero-wave--1 { animation: cl-trv-wave1  9s linear infinite; opacity: .18; }
+.cl-trv-hero-wave--2 { animation: cl-trv-wave2 13s linear infinite; opacity: .13; }
+.cl-trv-hero-wave--3 { animation: cl-trv-wave3 17s linear infinite; opacity: .09; }
+
+/* Sailboat watermark */
+.cl-trv-hero-boat {
+    position: absolute;
+    right: 28px;
+    bottom: 38px;
+    opacity: .22;
+    pointer-events: none;
+}
+@keyframes cl-trv-boat {
+    0%   { transform: translateY(0)    rotate(-1deg); }
+    30%  { transform: translateY(-7px) rotate(1.2deg); }
+    60%  { transform: translateY(-4px) rotate(-0.8deg); }
+    100% { transform: translateY(0)    rotate(-1deg); }
+}
+.cl-trv-hero-boat svg { animation: cl-trv-boat 7s ease-in-out infinite; }
+
+/* Hero content (above waves) */
+.cl-trv-hero-content { position: relative; z-index: 1; }
+.cl-trv-hero-eyebrow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.cl-trv-hero-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    color: rgba(186,216,255,.7);
+}
+.cl-trv-hero-date {
+    font-size: 11px;
+    color: rgba(255,255,255,.5);
+    margin-top: 4px;
+}
+.cl-trv-hero-name {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -.04em;
+    color: #fff;
+    margin: 0 0 6px;
+}
+.cl-trv-hero-route {
+    font-size: 11px;
+    color: rgba(255,255,255,.45);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 18px;
+}
+.cl-trv-hero-stats {
+    display: flex;
+    gap: 24px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,.12);
+}
+.cl-trv-hero-stat-label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    color: rgba(255,255,255,.45);
+    margin-bottom: 3px;
+}
+.cl-trv-hero-stat-value {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -.04em;
+    color: #fff;
+}
+.cl-trv-hero-stat-unit {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,.5);
+    margin-left: 2px;
+}
+
+/* Status badge — dark pill for use on the hero card */
+.cl-trv-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 10px;
+    padding: 5px 10px;
+    font-size: 9.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    white-space: nowrap;
+    border: 1px solid transparent;
+}
+.cl-trv-badge--active   { background: rgba(16,185,129,.12); border-color: rgba(52,211,153,.20); color: #34d399; }
+.cl-trv-badge--archived { background: rgba(150,168,200,.12); border-color: rgba(150,168,200,.20); color: #94a3b8; }
+.cl-trv-badge--closed   { background: rgba(239,68,68,.12);   border-color: rgba(239,68,68,.20);  color: #f87171; }
+
+/* ── Card list ──────────────────────────────────────────────────────── */
+.cl-trv-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.cl-trv-card {
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    box-shadow: var(--cl-shadow);
+    padding: 14px 16px;
+    transition: box-shadow 140ms ease;
+}
+.cl-trv-card:active { box-shadow: none; }
+.cl-trv-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.cl-trv-card-name {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--cl-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cl-trv-card-date {
+    font-size: 11px;
+    color: var(--cl-text-subtle);
+    margin-top: 2px;
+}
+.cl-trv-card-divider {
+    height: 1px;
+    background: var(--cl-border);
+    margin: 10px 0;
+}
+.cl-trv-card-bottom {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-4);
+}
+.cl-trv-card-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+}
+.cl-trv-card-stat-val {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    color: var(--cl-text);
+}
+.cl-trv-card-stat-unit {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--cl-text-subtle);
+}
+.cl-trv-card-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ── Log view wrapper ───────────────────────────────────────────────── */
+.cl-trv-log .cl-table-scroll { margin: 0; }
+
+/* ── Reduced motion ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .cl-trv-hero-wave,
+    .cl-trv-hero-boat svg { animation: none; }
+}

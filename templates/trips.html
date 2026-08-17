@@ -83,121 +83,281 @@
         </section>
         {% endif %}
 
-        <section class="cl-table-wrap">
-            <div style="padding: var(--cl-space-4) var(--cl-space-5); background: var(--cl-surface-2); border-bottom: 1px solid var(--cl-border);">
+        <section id="cl-trips-view-wrap" class="cl-table-wrap" data-view="cards">
+
+            {# ── Section header with Cards / Log toggle ──────────────────── #}
+            <div class="cl-trips-section-head">
                 <h2 class="cl-section-title" style="margin: 0;">📋 {{ t('trips.all_trips') }}</h2>
+                <div class="cl-trips-toggle" role="group" aria-label="View style">
+                    <button class="cl-trips-toggle__btn" data-trips-view="cards" aria-pressed="true">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                        Cards
+                    </button>
+                    <button class="cl-trips-toggle__btn" data-trips-view="log" aria-pressed="false">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                        Log
+                    </button>
+                </div>
             </div>
-            <div class="cl-table-scroll cl-trips-table-scroll">
-                <table class="cl-table cl-trips-table">
-                    <thead>
-                        <tr>
-                            <th>{{ t('trips.col_name') }}</th>
-                            <th>{{ t('trips.col_start') }}</th>
-                            <th>{{ t('trips.col_end') }}</th>
-                            <th>{{ t('trips.col_distance') }}</th>
-                            <th>{{ t('trips.col_status') }}</th>
-                            <th>{{ t('trips.col_actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for trip in trips %}
-                        <tr>
-                            <td>
-                                <div id="trip-name-display-{{ trip.id }}" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                                    <strong>{{ trip.name }}</strong>
+
+            {# ── CARDS VIEW ───────────────────────────────────────────────── #}
+            <div class="cl-trv-cards">
+
+                {# Hero: featured / active voyage #}
+                {% set featured = active_trip if active_trip else (trips[0] if trips else None) %}
+                {% if featured %}
+                {% set featured_nm = trip_totals.get(featured.id) %}
+                <div class="cl-trv-hero">
+                    {# Animated waves #}
+                    <div class="cl-trv-hero-waves">
+                        <svg class="cl-trv-hero-wave cl-trv-hero-wave--3" viewBox="0 0 1600 90" preserveAspectRatio="none">
+                            <path d="M0,55 C200,30 400,80 600,55 S1000,30 1200,55 S1400,80 1600,55 L1600,90 L0,90 Z M1600,55 C1400,30 1200,80 1000,55 S600,30 400,55 S200,80 0,55 L0,90 L1600,90 Z"/>
+                        </svg>
+                        <svg class="cl-trv-hero-wave cl-trv-hero-wave--2" viewBox="0 0 1600 90" preserveAspectRatio="none">
+                            <path d="M0,65 C160,42 320,82 480,65 S800,42 960,65 S1280,82 1440,65 S1520,42 1600,65 L1600,90 L0,90 Z M1600,65 C1440,42 1280,82 1120,65 S800,42 640,65 S320,82 160,65 S80,42 0,65 L0,90 L1600,90 Z"/>
+                        </svg>
+                        <svg class="cl-trv-hero-wave cl-trv-hero-wave--1" viewBox="0 0 1600 90" preserveAspectRatio="none">
+                            <path d="M0,72 C133,52 267,86 400,72 S667,52 800,72 S1067,86 1200,72 S1467,52 1600,72 L1600,90 L0,90 Z M1600,72 C1467,52 1333,86 1200,72 S933,52 800,72 S533,86 400,72 S133,52 0,72 L0,90 L1600,90 Z"/>
+                        </svg>
+                    </div>
+                    {# Sailboat watermark #}
+                    <div class="cl-trv-hero-boat">
+                        <svg width="58" height="54" viewBox="0 0 64 60" fill="none">
+                            <path d="M10 42 L54 42 L48 54 L16 54 Z" fill="white"/>
+                            <line x1="32" y1="42" x2="32" y2="4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M32 6 L32 40 L6 40 Z" fill="white" fill-opacity=".75"/>
+                            <path d="M32 14 L32 40 L54 34 Z" fill="white" fill-opacity=".5"/>
+                            <line x1="32" y1="40" x2="56" y2="45" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-opacity=".6"/>
+                            <path d="M32 4 L42 8 L32 12 Z" fill="white" fill-opacity=".9"/>
+                        </svg>
+                    </div>
+                    {# Content #}
+                    <div class="cl-trv-hero-content">
+                        <div class="cl-trv-hero-eyebrow">
+                            <div>
+                                <div class="cl-trv-hero-label">⛵ Featured voyage</div>
+                                <div class="cl-trv-hero-date">{{ featured.start_date }}{% if featured.end_date %} – {{ featured.end_date }}{% endif %}</div>
+                            </div>
+                            {% if featured.is_closed == 1 %}
+                            <span class="cl-trv-badge cl-trv-badge--closed">🔒 {{ t('trips.status_closed') }}</span>
+                            {% elif featured.status.value == 'active' %}
+                            <span class="cl-trv-badge cl-trv-badge--active">{{ t('trips.status_active') }}</span>
+                            {% else %}
+                            <span class="cl-trv-badge cl-trv-badge--archived">{{ t('trips.status_archived') }}</span>
+                            {% endif %}
+                        </div>
+                        <h2 class="cl-trv-hero-name">{{ featured.name }}</h2>
+                        {% if featured.home_port %}
+                        <p class="cl-trv-hero-route">🏠 {{ featured.home_port }}</p>
+                        {% endif %}
+                        <div class="cl-trv-hero-stats">
+                            {% if featured_nm %}
+                            <div>
+                                <div class="cl-trv-hero-stat-label">Distance</div>
+                                <div class="cl-trv-hero-stat-value">{{ "%.1f"|format(featured_nm) }}<span class="cl-trv-hero-stat-unit">nm</span></div>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <div class="cl-trv-hero-stat-label">Started</div>
+                                <div class="cl-trv-hero-stat-value" style="font-size:15px; letter-spacing:-.02em;">{{ featured.start_date }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Card list — all trips #}
+                <div class="cl-trv-list">
+                    {% for trip in trips %}
+                    {% set total_nm = trip_totals.get(trip.id) %}
+                    <article class="cl-trv-card">
+                        <div class="cl-trv-card-top">
+                            <div style="min-width:0; flex:1;">
+                                <div id="trip-name-display-{{ trip.id }}" style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+                                    <span class="cl-trv-card-name">{{ trip.name }}</span>
                                     {% if trip.end_date and trip.end_date == trip.start_date %}
-                                    <span class="cl-pill cl-pill--accent" style="margin-left: 6px; font-size: 10px;">☀️ {{ t('trips.day_trip_pill') }}</span>
-                                    {% endif %}
-                                    {% if trip.id == active_trip.id %}
-                                    <span class="cl-pill cl-pill--solid-success">{{ t('trips.status_active') }}</span>
-                                    {% endif %}
-                                    {% if trip.is_closed == 1 %}
-                                    <span class="cl-pill cl-pill--solid-danger">🔒 {{ t('trips.status_closed') }}</span>
+                                    <span class="cl-pill cl-pill--accent" style="font-size:10px;">☀️ {{ t('trips.day_trip_pill') }}</span>
                                     {% endif %}
                                     {% if request.session.get('role') == 'admin' or is_saas_owner %}
-                                    <button type="button" onclick="toggleRename({{ trip.id }})" class="cl-iconbtn" style="width: 28px; height: 28px; font-size: 12px;" title="{{ t('trips.action_rename') }}">✏️</button>
+                                    <button type="button" onclick="toggleRename({{ trip.id }})" class="cl-iconbtn" style="width:26px; height:26px; font-size:11px;" title="{{ t('trips.action_rename') }}">✏️</button>
                                     {% endif %}
                                 </div>
                                 {% if request.session.get('role') == 'admin' or is_saas_owner %}
-                                <form id="trip-rename-form-{{ trip.id }}" action="/trips/{{ trip.id }}/rename" method="post" class="hidden" style="margin-top: 8px; display: flex; gap: 4px; align-items: center;">
+                                <form id="trip-rename-form-{{ trip.id }}" action="/trips/{{ trip.id }}/rename" method="post" class="hidden" style="margin-top:6px; display:flex; gap:4px; align-items:center;">
                                     {{ csrf_input | safe }}
-                                    <input type="text" name="name" value="{{ trip.name }}" required class="cl-input" style="height: 36px; flex: 1;">
+                                    <input type="text" name="name" value="{{ trip.name }}" required class="cl-input" style="height:34px; flex:1;">
                                     <button type="submit" class="cl-btn cl-btn--success cl-btn--sm">✔</button>
                                     <button type="button" onclick="toggleRename({{ trip.id }})" class="cl-btn cl-btn--secondary cl-btn--sm">✖</button>
                                 </form>
                                 {% endif %}
-                                {# Mobile-only meta line: dates + distance + status shown inside the name cell #}
-                                <div class="cl-trip-meta">
-                                    <span>{{ trip.start_date }}</span>
-                                    <span class="cl-help cl-help--muted">→</span>
-                                    <span>{{ trip.end_date or '…' }}</span>
+                                <div class="cl-trv-card-date">{{ trip.start_date }}{% if trip.end_date %} → {{ trip.end_date }}{% endif %}</div>
+                            </div>
+                            {% if trip.is_closed == 1 %}
+                            <span class="cl-pill cl-pill--solid-danger" style="flex-shrink:0;">🔒 {{ t('trips.status_closed') }}</span>
+                            {% elif trip.status.value == 'active' %}
+                            <span class="cl-pill cl-pill--solid-success" style="flex-shrink:0;">{{ t('trips.status_active') }}</span>
+                            {% else %}
+                            <span class="cl-pill" style="flex-shrink:0;">{{ t('trips.status_archived') }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="cl-trv-card-divider"></div>
+                        <div class="cl-trv-card-bottom">
+                            {% if total_nm %}
+                            <div class="cl-trv-card-stat">
+                                <span class="cl-trv-card-stat-val">{{ "%.1f"|format(total_nm) }}</span>
+                                <span class="cl-trv-card-stat-unit">nm</span>
+                            </div>
+                            {% else %}
+                            <span style="font-size:12px; color:var(--cl-text-subtle);">—</span>
+                            {% endif %}
+                            <div class="cl-trv-card-actions">
+                                <form action="/trips/{{ trip.id }}/select" method="post" style="margin:0;">
+                                    {{ csrf_input | safe }}
+                                    <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">👁️ {{ t('trips.action_view') }}</button>
+                                </form>
+                                <a href="/trips/{{ trip.id }}/track" class="cl-btn cl-btn--ghost cl-btn--sm">🗺️ {{ t('trips.action_track') }}</a>
+                                {% if request.session.get('role') == 'admin' or is_saas_owner %}
+                                    {% if trip.is_closed == 0 %}
+                                    <a href="/trips/{{ trip.id }}/finalize" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🏁 {{ t('trips.finalize_action') }}</a>
+                                    {% else %}
+                                    <form action="/trips/{{ trip.id }}/reopen" method="post" style="margin:0;">
+                                        {{ csrf_input | safe }}
+                                        <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm" style="color:var(--cl-success);">🔓 {{ t('trips.action_reopen') }}</button>
+                                    </form>
+                                    {% endif %}
+                                    {% if trip.status.value == 'archived' %}
+                                    <form action="/trips/{{ trip.id }}/activate" method="post" style="margin:0;">
+                                        {{ csrf_input | safe }}
+                                        <button type="submit" class="cl-btn cl-btn--success cl-btn--sm">✅ {{ t('trips.action_activate') }}</button>
+                                    </form>
+                                    {% elif trip.id != active_trip.id %}
+                                    <form action="/trips/{{ trip.id }}/archive" method="post" style="margin:0;" onsubmit="return confirm('{{ t("trips.confirm_archive") }}')">
+                                        {{ csrf_input | safe }}
+                                        <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">📦 {{ t('trips.action_archive') }}</button>
+                                    </form>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>{# end .cl-trv-cards #}
+
+            {# ── LOG VIEW (original table) ────────────────────────────────── #}
+            <div class="cl-trv-log">
+                <div class="cl-table-scroll cl-trips-table-scroll">
+                    <table class="cl-table cl-trips-table">
+                        <thead>
+                            <tr>
+                                <th>{{ t('trips.col_name') }}</th>
+                                <th>{{ t('trips.col_start') }}</th>
+                                <th>{{ t('trips.col_end') }}</th>
+                                <th>{{ t('trips.col_distance') }}</th>
+                                <th>{{ t('trips.col_status') }}</th>
+                                <th>{{ t('trips.col_actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for trip in trips %}
+                            <tr>
+                                <td>
+                                    <div id="trip-name-display-log-{{ trip.id }}" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                                        <strong>{{ trip.name }}</strong>
+                                        {% if trip.end_date and trip.end_date == trip.start_date %}
+                                        <span class="cl-pill cl-pill--accent" style="margin-left: 6px; font-size: 10px;">☀️ {{ t('trips.day_trip_pill') }}</span>
+                                        {% endif %}
+                                        {% if trip.id == active_trip.id %}
+                                        <span class="cl-pill cl-pill--solid-success">{{ t('trips.status_active') }}</span>
+                                        {% endif %}
+                                        {% if trip.is_closed == 1 %}
+                                        <span class="cl-pill cl-pill--solid-danger">🔒 {{ t('trips.status_closed') }}</span>
+                                        {% endif %}
+                                        {% if request.session.get('role') == 'admin' or is_saas_owner %}
+                                        <button type="button" onclick="toggleRename({{ trip.id }})" class="cl-iconbtn" style="width: 28px; height: 28px; font-size: 12px;" title="{{ t('trips.action_rename') }}">✏️</button>
+                                        {% endif %}
+                                    </div>
+                                    {% if request.session.get('role') == 'admin' or is_saas_owner %}
+                                    <form id="trip-rename-form-log-{{ trip.id }}" action="/trips/{{ trip.id }}/rename" method="post" class="hidden" style="margin-top: 8px; display: flex; gap: 4px; align-items: center;">
+                                        {{ csrf_input | safe }}
+                                        <input type="text" name="name" value="{{ trip.name }}" required class="cl-input" style="height: 36px; flex: 1;">
+                                        <button type="submit" class="cl-btn cl-btn--success cl-btn--sm">✔</button>
+                                        <button type="button" onclick="toggleRename({{ trip.id }})" class="cl-btn cl-btn--secondary cl-btn--sm">✖</button>
+                                    </form>
+                                    {% endif %}
+                                    <div class="cl-trip-meta">
+                                        <span>{{ trip.start_date }}</span>
+                                        <span class="cl-help cl-help--muted">→</span>
+                                        <span>{{ trip.end_date or '…' }}</span>
+                                        {% set total_nm = trip_totals.get(trip.id) %}
+                                        {% if total_nm %}
+                                        <span class="cl-trip-meta__sep">·</span>
+                                        <span class="cl-num">{{ "%.1f"|format(total_nm) }} <span class="cl-help cl-help--muted">nm</span></span>
+                                        {% endif %}
+                                        <span class="cl-trip-meta__sep">·</span>
+                                        {% if trip.status.value == 'active' %}
+                                        <span class="cl-pill cl-pill--solid-success" style="font-size:10px;">{{ t('trips.status_active') }}</span>
+                                        {% else %}
+                                        <span class="cl-pill" style="font-size:10px;">{{ t('trips.status_archived') }}</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="cl-td-desktop">{{ trip.start_date }}</td>
+                                <td class="cl-td-desktop">{{ trip.end_date or '-' }}</td>
+                                <td class="cl-td-desktop cl-num">
                                     {% set total_nm = trip_totals.get(trip.id) %}
                                     {% if total_nm %}
-                                    <span class="cl-trip-meta__sep">·</span>
-                                    <span class="cl-num">{{ "%.1f"|format(total_nm) }} <span class="cl-help cl-help--muted">nm</span></span>
-                                    {% endif %}
-                                    <span class="cl-trip-meta__sep">·</span>
-                                    {% if trip.status.value == 'active' %}
-                                    <span class="cl-pill cl-pill--solid-success" style="font-size:10px;">{{ t('trips.status_active') }}</span>
+                                        {{ "%.1f"|format(total_nm) }} <span class="cl-help cl-help--muted">nm</span>
                                     {% else %}
-                                    <span class="cl-pill" style="font-size:10px;">{{ t('trips.status_archived') }}</span>
+                                        <span class="cl-help cl-help--muted">—</span>
                                     {% endif %}
-                                </div>
-                            </td>
-                            <td class="cl-td-desktop">{{ trip.start_date }}</td>
-                            <td class="cl-td-desktop">{{ trip.end_date or '-' }}</td>
-                            <td class="cl-td-desktop cl-num">
-                                {% set total_nm = trip_totals.get(trip.id) %}
-                                {% if total_nm %}
-                                    {{ "%.1f"|format(total_nm) }} <span class="cl-help cl-help--muted">nm</span>
-                                {% else %}
-                                    <span class="cl-help cl-help--muted">—</span>
-                                {% endif %}
-                            </td>
-                            <td class="cl-td-desktop">
-                                {% if trip.status.value == 'active' %}
-                                <span class="cl-pill cl-pill--solid-success">{{ t('trips.status_active') }}</span>
-                                {% else %}
-                                <span class="cl-pill">{{ t('trips.status_archived') }}</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="cl-actions">
-                                    <form action="/trips/{{ trip.id }}/select" method="post" style="margin:0;">
-                                        {{ csrf_input | safe }}
-                                        <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">👁️ {{ t('trips.action_view') }}</button>
-                                    </form>
-                                    <a href="/trips/{{ trip.id }}/track" class="cl-btn cl-btn--ghost cl-btn--sm" title="{{ t('track.title') }}">🗺️ {{ t('trips.action_track') }}</a>
-
-                                    {% if request.session.get('role') == 'admin' or is_saas_owner %}
-                                        {% if trip.is_closed == 0 %}
-                                        <a href="/trips/{{ trip.id }}/finalize" class="cl-btn cl-btn--ghost-danger cl-btn--sm" title="{{ t('trips.finalize_title') }}">🏁 {{ t('trips.finalize_action') }}</a>
-                                        {% else %}
-                                        <form action="/trips/{{ trip.id }}/reopen" method="post" style="margin:0;">
-                                            {{ csrf_input | safe }}
-                                            <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm" style="color: var(--cl-success);" title="{{ t('trips.help_reopen') }}">🔓 {{ t('trips.action_reopen') }}</button>
-                                        </form>
-                                        {% endif %}
-
-                                        {% if trip.status.value == 'archived' %}
-                                        <form action="/trips/{{ trip.id }}/activate" method="post" style="margin:0;">
-                                            {{ csrf_input | safe }}
-                                            <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">✅ {{ t('trips.action_activate') }}</button>
-                                        </form>
-                                        {% elif trip.id != active_trip.id %}
-                                        <form action="/trips/{{ trip.id }}/archive" method="post" style="margin:0;" onsubmit="return confirm('{{ t('trips.confirm_archive') }}')">
-                                            {{ csrf_input | safe }}
-                                            <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">📦 {{ t('trips.action_archive') }}</button>
-                                        </form>
-                                        {% endif %}
+                                </td>
+                                <td class="cl-td-desktop">
+                                    {% if trip.status.value == 'active' %}
+                                    <span class="cl-pill cl-pill--solid-success">{{ t('trips.status_active') }}</span>
+                                    {% else %}
+                                    <span class="cl-pill">{{ t('trips.status_archived') }}</span>
                                     {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                                </td>
+                                <td>
+                                    <div class="cl-actions">
+                                        <form action="/trips/{{ trip.id }}/select" method="post" style="margin:0;">
+                                            {{ csrf_input | safe }}
+                                            <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">👁️ {{ t('trips.action_view') }}</button>
+                                        </form>
+                                        <a href="/trips/{{ trip.id }}/track" class="cl-btn cl-btn--ghost cl-btn--sm" title="{{ t('track.title') }}">🗺️ {{ t('trips.action_track') }}</a>
+
+                                        {% if request.session.get('role') == 'admin' or is_saas_owner %}
+                                            {% if trip.is_closed == 0 %}
+                                            <a href="/trips/{{ trip.id }}/finalize" class="cl-btn cl-btn--ghost-danger cl-btn--sm" title="{{ t('trips.finalize_title') }}">🏁 {{ t('trips.finalize_action') }}</a>
+                                            {% else %}
+                                            <form action="/trips/{{ trip.id }}/reopen" method="post" style="margin:0;">
+                                                {{ csrf_input | safe }}
+                                                <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm" style="color: var(--cl-success);" title="{{ t('trips.help_reopen') }}">🔓 {{ t('trips.action_reopen') }}</button>
+                                            </form>
+                                            {% endif %}
+
+                                            {% if trip.status.value == 'archived' %}
+                                            <form action="/trips/{{ trip.id }}/activate" method="post" style="margin:0;">
+                                                {{ csrf_input | safe }}
+                                                <button type="submit" class="cl-btn cl-btn--success cl-btn--sm">✅ {{ t('trips.action_activate') }}</button>
+                                            </form>
+                                            {% elif trip.id != active_trip.id %}
+                                            <form action="/trips/{{ trip.id }}/archive" method="post" style="margin:0;" onsubmit="return confirm('{{ t("trips.confirm_archive") }}')">
+                                                {{ csrf_input | safe }}
+                                                <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">📦 {{ t('trips.action_archive') }}</button>
+                                            </form>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>{# end .cl-trv-log #}
+
         </section>
 
         {% if is_saas_owner and current_plan == 'FREE' and not is_legacy_admin %}
@@ -268,14 +428,46 @@ async function openBillingPortal() {
     } catch (e) { alert('{{ t("trips.portal_fetch_error") }}'); }
 }
 function toggleRename(tripId) {
-    var display = document.getElementById('trip-name-display-' + tripId);
-    var form = document.getElementById('trip-rename-form-' + tripId);
-    if (display) display.classList.toggle('hidden');
-    if (form) form.classList.toggle('hidden');
-    if (form && !form.classList.contains('hidden')) {
-        var input = form.querySelector('input[name="name"]');
-        if (input) { input.focus(); input.select(); }
-    }
+    // Update both cards-view and log-view rename forms
+    ['', '-log'].forEach(function(suffix) {
+        var display = document.getElementById('trip-name-display' + suffix + '-' + tripId);
+        var form = document.getElementById('trip-rename-form' + suffix + '-' + tripId);
+        if (display) display.classList.toggle('hidden');
+        if (form) form.classList.toggle('hidden');
+        if (form && !form.classList.contains('hidden')) {
+            var input = form.querySelector('input[name="name"]');
+            if (input) { input.focus(); input.select(); }
+        }
+    });
 }
+
+// ── Trips view toggle (Cards / Log) ──────────────────────────────────
+(function() {
+    var PREF_KEY = 'trips-view';
+    var wrap = document.getElementById('cl-trips-view-wrap');
+    if (!wrap) return;
+
+    function applyView(view) {
+        wrap.setAttribute('data-view', view);
+        wrap.querySelectorAll('.cl-trips-toggle__btn').forEach(function(btn) {
+            var active = btn.getAttribute('data-trips-view') === view;
+            btn.classList.toggle('is-active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+    }
+
+    // Restore saved preference (default: cards)
+    var saved = localStorage.getItem(PREF_KEY) || 'cards';
+    applyView(saved);
+
+    // Wire up toggle buttons
+    wrap.querySelectorAll('.cl-trips-toggle__btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var view = btn.getAttribute('data-trips-view');
+            localStorage.setItem(PREF_KEY, view);
+            applyView(view);
+        });
+    });
+})();
 </script>
 {% endblock %}

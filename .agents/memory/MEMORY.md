@@ -1,0 +1,1 @@
+- [Trips page view switcher](trips-view-switcher.md) — Cards/Log toggle shipped to real app; design came from mockup sandbox HarborDeck + VoyageTimeline exploration.
