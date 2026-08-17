@@ -54,3 +54,10 @@ Legacy desktop/table skins must use the active theme tokens for row and hover ba
 **Why:** The Trips log view had alternating and hovered rows turn nearly white while text remained dark-theme colors, making most content unreadable.
 
 **How to apply:** When adding or changing table skins, use `var(--surface)` / `var(--surface-2)` or the `--cl-*` equivalents, and keep `.cl-table tbody td` / hover-cell rules explicit.
+
+## Login native select contrast
+The login page needs an explicit class on its trip `<select>` with matching `<option>` colors; the desktop form skin forces a white select surface while the dark default tokens otherwise provide light text.
+
+**Why:** A populated trip appeared almost invisible because the value inherited the light-on-dark text color and rendered on the desktop skin’s white select background.
+
+**How to apply:** Keep the default/day login select as dark text on a light native control, and provide a separate black/red `data-theme="night"` override. Do not rely on inherited `select` colors.

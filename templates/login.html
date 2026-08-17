@@ -43,6 +43,47 @@
         input {
             font-size: 16px;
         }
+
+        /* The desktop skin gives native selects a white surface. Keep the
+           populated trip value readable instead of inheriting the dark-theme
+           light text token onto that white surface. */
+        .login-trip-select {
+            color: #172536 !important;
+            background-color: #ffffff !important;
+            border-color: #7ea8d1 !important;
+            font-weight: 500;
+            color-scheme: light;
+        }
+        .login-trip-select option {
+            color: #172536 !important;
+            background-color: #ffffff !important;
+            font-weight: 500;
+        }
+        .login-trip-select:focus {
+            border-color: #3b9ad4 !important;
+            box-shadow: 0 0 0 3px rgba(59, 154, 212, 0.22) !important;
+        }
+        .login-trip-hint {
+            color: var(--text-secondary) !important;
+            opacity: 1 !important;
+        }
+        html[data-theme="night"] .login-trip-select {
+            color: #ff2b2b !important;
+            background-color: #0a0000 !important;
+            border-color: #7a0000 !important;
+            color-scheme: dark;
+        }
+        html[data-theme="night"] .login-trip-select option {
+            color: #ff2b2b !important;
+            background-color: #0a0000 !important;
+        }
+        html[data-theme="night"] .login-trip-select:focus {
+            border-color: #ff2b2b !important;
+            box-shadow: 0 0 0 3px rgba(255, 43, 43, 0.2) !important;
+        }
+        html[data-theme="night"] .login-trip-hint {
+            color: #9b1c1c !important;
+        }
     </style>
 </head>
 <body>
@@ -113,14 +154,14 @@
                     </label>
                     <select 
                         name="trip_id" 
-                        class="w-full px-4 py-3 rounded-lg text-base" 
+                        class="login-trip-select w-full px-4 py-3 rounded-lg text-base"
                         style="border: 1px solid var(--border);">
                         <option value="">{{ t('auth.trip_no_selection') }}</option>
                         {% for trip in trips %}
                         <option value="{{ trip.id }}">{{ trip.name }} ({{ trip.start_date }})</option>
                         {% endfor %}
                     </select>
-                    <p class="text-xs mt-1" style="color: var(--muted);">
+                    <p class="login-trip-hint text-xs mt-1">
                         {{ t('auth.trip_hint') }}
                     </p>
                 </div>
