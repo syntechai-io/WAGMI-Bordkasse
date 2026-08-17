@@ -12,11 +12,11 @@
     --cl-surface-2:    #1a3350;
     --cl-border:       #1d3d60;
     --cl-border-strong:#2a5580;
-    --cl-text:         #d6e8f8;
-    --cl-text-muted:   #78a8cc;
-    --cl-text-subtle:  #476888;
-    --cl-navy:         #d6e8f8;
-    --cl-navy-soft:    #a6c8e8;
+    --cl-text:         #eef2f6;
+    --cl-text-muted:   #8a9fb4;
+    --cl-text-subtle:  #587080;
+    --cl-navy:         #f0f5fa;
+    --cl-navy-soft:    #2a7ab5;
     --cl-accent:       #3b9ad4;
     --cl-accent-soft:  #0e2438;
     --cl-success:      #3dbf78;
@@ -305,7 +305,7 @@
 .cl-btn--sm { height: 36px; padding: 0 var(--cl-space-3); font-size: 13px; }
 .cl-btn--block { width: 100%; }
 .cl-btn--primary {
-    background: var(--cl-navy);
+    background: var(--cl-accent);
     color: #fff;
 }
 .cl-btn--primary:hover { background: var(--cl-navy-soft); }
@@ -332,10 +332,10 @@
 .cl-btn--secondary:hover { background: var(--cl-surface-2); }
 .cl-btn--ghost {
     background: transparent;
-    color: var(--cl-accent);
-    border-color: transparent;
+    color: #e0eaf4;
+    border-color: rgba(255,255,255,0.14);
 }
-.cl-btn--ghost:hover { background: var(--cl-accent-soft); }
+.cl-btn--ghost:hover { background: var(--cl-accent-soft); border-color: var(--cl-accent); color: #fff; }
 .cl-btn--ghost-danger {
     background: transparent;
     color: var(--cl-danger);

@@ -2,18 +2,18 @@
 
 /* ── Design tokens ────────────────────────────────────────────────── */
 .harbor-deck {
-  --hd-bg:           #f4f7fb;
-  --hd-bg-alt:       #edf1f7;
-  --hd-surface:      #ffffff;
-  --hd-surface-soft: #f0f4fa;
-  --hd-ink:          #08152a;
-  --hd-ink-2:        #2c3e58;
-  --hd-muted:        #6b7d96;
-  --hd-line:         #dde5f0;
-  --hd-accent:       #2563eb;
-  --hd-accent-glow:  rgba(37, 99, 235, .22);
-  --hd-shadow-card:  0 2px 12px rgba(8, 21, 42, .07), 0 1px 3px rgba(8, 21, 42, .05);
-  --hd-shadow-fab:   0 8px 28px rgba(37, 99, 235, .38), 0 2px 8px rgba(37, 99, 235, .22);
+  --hd-bg:           #0b1d2e;
+  --hd-bg-alt:       #0e2236;
+  --hd-surface:      #112233;
+  --hd-surface-soft: #182e48;
+  --hd-ink:          #f1f5f9;
+  --hd-ink-2:        #c8d8e4;
+  --hd-muted:        #7a8f9e;
+  --hd-line:         #1d3d5a;
+  --hd-accent:       #3b9ad4;
+  --hd-accent-glow:  rgba(59, 154, 212, .22);
+  --hd-shadow-card:  0 2px 16px rgba(0,0,0,.32), 0 1px 4px rgba(0,0,0,.22);
+  --hd-shadow-fab:   0 8px 28px rgba(59,154,212,.38), 0 2px 8px rgba(59,154,212,.22);
   --hd-hero-grad:    linear-gradient(148deg, #1a3d6b 0%, #0c2241 45%, #06152c 100%);
   min-height: 100dvh;
   background: var(--hd-bg);

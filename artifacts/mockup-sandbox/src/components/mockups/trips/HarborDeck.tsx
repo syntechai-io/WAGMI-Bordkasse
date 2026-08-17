@@ -127,14 +127,14 @@ export function HarborDeck() {
             </p>
             <h1 className="mt-2 text-[26px] font-extrabold leading-none tracking-[-0.045em]">
               Good morning, Alex
-              <span style={{ color: "var(--hd-accent)" }}>.</span>
+              <span style={{ color: "rgba(255,255,255,0.4)" }}>.</span>
             </h1>
           </div>
           <button
             aria-label="Toggle night mode"
             onClick={() => setNight(n => !n)}
             className="hd-focus mt-1 flex h-11 w-11 items-center justify-center rounded-[14px] border transition-all"
-            style={{ borderColor: "var(--hd-line)", background: "var(--hd-surface)", color: "var(--hd-accent)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.18)", background: "var(--hd-surface)", color: "#e0eaf4" }}>
             <Icon name={night ? "sun" : "moon"} size={18}/>
           </button>
         </header>
@@ -154,7 +154,7 @@ export function HarborDeck() {
           <div className="relative z-10">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[9.5px] font-bold uppercase tracking-[.2em] text-sky-200/70">
+                <p className="text-[9.5px] font-bold uppercase tracking-[.2em] text-white/60">
                   Featured voyage
                 </p>
                 <p className="mt-2 text-[11px] text-white/55">{featured.date}</p>
@@ -254,7 +254,7 @@ export function HarborDeck() {
                   aria-label={`Open ${trip.name}`}
                   onClick={() => flash(`Opening ${trip.name}…`)}
                   className="hd-focus ml-auto flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] transition-all active:scale-90"
-                  style={{ background: "var(--hd-surface-soft)", color: "var(--hd-accent)" }}>
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#e0eaf4" }}>
                   <Icon name="chevron" size={17}/>
                 </button>
               </div>
@@ -286,7 +286,7 @@ export function HarborDeck() {
               key={label}
               onClick={() => setActiveTab(label)}
               className={`hd-focus flex min-w-[62px] flex-col items-center gap-1.5 text-[10px] font-semibold transition-colors${activeTab === label ? " hd-tab-active" : ""}`}
-              style={{ color: activeTab === label ? "var(--hd-accent)" : "var(--hd-muted)" }}>
+              style={{ color: activeTab === label ? "#ffffff" : "var(--hd-muted)" }}>
               <Icon name={icon} size={20}/>
               <span>{label}</span>
             </button>
