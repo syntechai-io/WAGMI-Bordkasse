@@ -1463,35 +1463,33 @@ html[data-theme="night"] .cl-tabbar__item:hover { color: rgba(255, 80, 80, .95);
 .cl-pageheader .cl-pageheader__main,
 .cl-pageheader .cl-pageheader__actions { position: relative; z-index: 1; }
 .cl-pageheader .cl-btn--primary {
-    background: #c8d4e0;
+    background: rgba(255,255,255,0.92);
     border-color: transparent;
-    color: #0c1e30;
+    color: #071929;
+    font-weight: 600;
     backdrop-filter: none;
 }
 .cl-pageheader .cl-btn--primary:hover {
-    background: #b4c2d0;
+    background: #ffffff;
     border-color: transparent;
-    color: #0c1e30;
+    color: #071929;
 }
+/* Secondary / ghost / accent in the hero: glass outline — sits inside the gradient */
 .cl-pageheader .cl-btn--secondary,
-.cl-pageheader .cl-btn--ghost {
-    background: #c8d4e0;
-    border-color: transparent;
-    color: #0c1e30;
+.cl-pageheader .cl-btn--ghost,
+.cl-pageheader .cl-btn--accent {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.28);
+    color: rgba(255,255,255,0.90);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 .cl-pageheader .cl-btn--secondary:hover,
-.cl-pageheader .cl-btn--ghost:hover {
-    background: #b4c2d0;
-    color: #0c1e30;
-}
-.cl-pageheader .cl-btn--accent {
-    background: #c8d4e0;
-    border-color: transparent;
-    color: #0c1e30;
-}
+.cl-pageheader .cl-btn--ghost:hover,
 .cl-pageheader .cl-btn--accent:hover {
-    background: #b4c2d0;
-    color: #0c1e30;
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.45);
+    color: #ffffff;
 }
 
 /* ── Row cards (replaces tables) ─────────────────────────────────────────── */
