@@ -268,36 +268,36 @@ a:hover {
 }
 
 .btn-primary {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
+  background: #c8d4e0;
+  color: #0c1e30;
+  border-color: transparent;
 }
 
 .btn-primary:hover {
-  background: var(--accent-2);
-  color: #fff;
+  background: #b4c2d0;
+  color: #0c1e30;
 }
 
 .btn-secondary {
-  background: var(--surface);
-  color: var(--text);
-  border-color: var(--border);
+  background: #c8d4e0;
+  color: #0c1e30;
+  border-color: transparent;
 }
 
 .btn-secondary:hover {
-  background: var(--surface-2);
-  color: var(--text);
+  background: #b4c2d0;
+  color: #0c1e30;
 }
 
 .btn-ghost {
-  background: transparent;
-  color: var(--accent);
+  background: #c8d4e0;
+  color: #0c1e30;
   border-color: transparent;
 }
 
 .btn-ghost:hover {
-  background: var(--accent-light);
-  color: var(--accent-2);
+  background: #b4c2d0;
+  color: #0c1e30;
 }
 
 .btn-danger {
@@ -1500,23 +1500,26 @@ div[style*="linear-gradient"]:not(.login-surface) {
   }
 
   .btn-primary {
-    background: #1F4E8C;
-    border-color: #1F4E8C;
+    background: #c8d4e0;
+    color: #0c1e30;
+    border-color: transparent;
   }
 
   .btn-primary:hover {
-    background: #173B6B;
-    border-color: #173B6B;
+    background: #b4c2d0;
+    color: #0c1e30;
+    border-color: transparent;
   }
 
   .btn-secondary {
-    background: #ffffff;
-    color: #1F2937;
-    border-color: #E5E7EB;
+    background: #c8d4e0;
+    color: #0c1e30;
+    border-color: transparent;
   }
 
   .btn-secondary:hover {
-    background: #F3F4F6;
+    background: #b4c2d0;
+    color: #0c1e30;
   }
 
   .btn-danger {

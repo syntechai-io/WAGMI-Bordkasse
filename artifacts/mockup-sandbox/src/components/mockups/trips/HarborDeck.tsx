@@ -134,7 +134,7 @@ export function HarborDeck() {
             aria-label="Toggle night mode"
             onClick={() => setNight(n => !n)}
             className="hd-focus mt-1 flex h-11 w-11 items-center justify-center rounded-[14px] border transition-all"
-            style={{ borderColor: "rgba(255,255,255,0.18)", background: "var(--hd-surface)", color: "#e0eaf4" }}>
+            style={{ background: "#c8d4e0", border: "none", color: "#0c1e30" }}>
             <Icon name={night ? "sun" : "moon"} size={18}/>
           </button>
         </header>
@@ -254,7 +254,7 @@ export function HarborDeck() {
                   aria-label={`Open ${trip.name}`}
                   onClick={() => flash(`Opening ${trip.name}…`)}
                   className="hd-focus ml-auto flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] transition-all active:scale-90"
-                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#e0eaf4" }}>
+                  style={{ background: "#c8d4e0", border: "none", color: "#0c1e30" }}>
                   <Icon name="chevron" size={17}/>
                 </button>
               </div>

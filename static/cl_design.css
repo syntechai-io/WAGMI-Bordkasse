@@ -305,15 +305,17 @@
 .cl-btn--sm { height: 36px; padding: 0 var(--cl-space-3); font-size: 13px; }
 .cl-btn--block { width: 100%; }
 .cl-btn--primary {
-    background: var(--cl-accent);
-    color: #fff;
+    background: #c8d4e0;
+    color: #0c1e30;
+    border-color: transparent;
 }
-.cl-btn--primary:hover { background: var(--cl-navy-soft); }
+.cl-btn--primary:hover { background: #b4c2d0; color: #0c1e30; }
 .cl-btn--accent {
-    background: var(--cl-accent);
-    color: #fff;
+    background: #c8d4e0;
+    color: #0c1e30;
+    border-color: transparent;
 }
-.cl-btn--accent:hover { background: #155a9b; }
+.cl-btn--accent:hover { background: #b4c2d0; color: #0c1e30; }
 .cl-btn--success {
     background: var(--cl-success);
     color: #fff;
@@ -325,17 +327,17 @@
 }
 .cl-btn--warn:hover { background: #976015; }
 .cl-btn--secondary {
-    background: var(--cl-surface);
-    color: var(--cl-text);
-    border-color: var(--cl-border-strong);
+    background: #c8d4e0;
+    color: #0c1e30;
+    border-color: transparent;
 }
-.cl-btn--secondary:hover { background: var(--cl-surface-2); }
+.cl-btn--secondary:hover { background: #b4c2d0; color: #0c1e30; }
 .cl-btn--ghost {
-    background: transparent;
-    color: #e0eaf4;
-    border-color: rgba(255,255,255,0.14);
+    background: #c8d4e0;
+    color: #0c1e30;
+    border-color: transparent;
 }
-.cl-btn--ghost:hover { background: var(--cl-accent-soft); border-color: var(--cl-accent); color: #fff; }
+.cl-btn--ghost:hover { background: #b4c2d0; color: #0c1e30; }
 .cl-btn--ghost-danger {
     background: transparent;
     color: var(--cl-danger);
@@ -1287,20 +1289,35 @@ html[data-theme="night"] .cl-tabbar__item:hover { color: rgba(255, 80, 80, .95);
 .cl-pageheader .cl-pageheader__main,
 .cl-pageheader .cl-pageheader__actions { position: relative; z-index: 1; }
 .cl-pageheader .cl-btn--primary {
-    background: rgba(255,255,255,0.15);
-    border-color: rgba(255,255,255,0.30);
-    color: #fff;
-    backdrop-filter: blur(8px);
+    background: #c8d4e0;
+    border-color: transparent;
+    color: #0c1e30;
+    backdrop-filter: none;
 }
 .cl-pageheader .cl-btn--primary:hover {
-    background: rgba(255,255,255,0.25);
-    border-color: rgba(255,255,255,0.40);
+    background: #b4c2d0;
+    border-color: transparent;
+    color: #0c1e30;
 }
 .cl-pageheader .cl-btn--secondary,
 .cl-pageheader .cl-btn--ghost {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.18);
-    color: rgba(255,255,255,0.90);
+    background: #c8d4e0;
+    border-color: transparent;
+    color: #0c1e30;
+}
+.cl-pageheader .cl-btn--secondary:hover,
+.cl-pageheader .cl-btn--ghost:hover {
+    background: #b4c2d0;
+    color: #0c1e30;
+}
+.cl-pageheader .cl-btn--accent {
+    background: #c8d4e0;
+    border-color: transparent;
+    color: #0c1e30;
+}
+.cl-pageheader .cl-btn--accent:hover {
+    background: #b4c2d0;
+    color: #0c1e30;
 }
 
 /* ── Row cards (replaces tables) ─────────────────────────────────────────── */
