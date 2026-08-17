@@ -1,54 +1,96 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
+/* ── Design tokens ────────────────────────────────────────────────── */
 .harbor-deck {
-  --hd-bg: #fafbfc;
-  --hd-surface: #ffffff;
-  --hd-surface-soft: #f1f5f9;
-  --hd-ink: #0a1628;
-  --hd-muted: #617084;
-  --hd-line: #e4eaf1;
-  --hd-accent: #2563eb;
-  --hd-accent-soft: #e8f0ff;
-  --hd-shadow: 0 18px 42px rgba(10, 22, 40, .12);
+  --hd-bg:           #f4f7fb;
+  --hd-bg-alt:       #edf1f7;
+  --hd-surface:      #ffffff;
+  --hd-surface-soft: #f0f4fa;
+  --hd-ink:          #08152a;
+  --hd-ink-2:        #2c3e58;
+  --hd-muted:        #6b7d96;
+  --hd-line:         #dde5f0;
+  --hd-accent:       #2563eb;
+  --hd-accent-glow:  rgba(37, 99, 235, .22);
+  --hd-shadow-card:  0 2px 12px rgba(8, 21, 42, .07), 0 1px 3px rgba(8, 21, 42, .05);
+  --hd-shadow-fab:   0 8px 28px rgba(37, 99, 235, .38), 0 2px 8px rgba(37, 99, 235, .22);
+  --hd-hero-grad:    linear-gradient(148deg, #1a3d6b 0%, #0c2241 45%, #06152c 100%);
   min-height: 100dvh;
   background: var(--hd-bg);
   color: var(--hd-ink);
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  transition: background-color .3s ease, color .3s ease;
+  transition: background-color .35s ease, color .35s ease;
 }
 
 .harbor-deck[data-theme="night"] {
-  --hd-bg: #050e1a;
-  --hd-surface: #0c1929;
-  --hd-surface-soft: #132234;
-  --hd-ink: #e7edf5;
-  --hd-muted: #8c9aad;
-  --hd-line: #213248;
-  --hd-accent: #f59e0b;
-  --hd-accent-soft: #322712;
-  --hd-shadow: 0 18px 42px rgba(0, 0, 0, .35);
+  --hd-bg:           #040c18;
+  --hd-bg-alt:       #060f1e;
+  --hd-surface:      #091525;
+  --hd-surface-soft: #0f1f33;
+  --hd-ink:          #dce8f5;
+  --hd-ink-2:        #b0c4db;
+  --hd-muted:        #6b85a0;
+  --hd-line:         #162336;
+  --hd-accent:       #f59e0b;
+  --hd-accent-glow:  rgba(245, 158, 11, .25);
+  --hd-shadow-card:  0 2px 16px rgba(0, 0, 0, .28), 0 1px 4px rgba(0, 0, 0, .2);
+  --hd-shadow-fab:   0 8px 32px rgba(245, 158, 11, .35), 0 2px 8px rgba(245, 158, 11, .2);
+  --hd-hero-grad:    linear-gradient(148deg, #142234 0%, #09192b 45%, #040e1c 100%);
 }
 
+/* subtle noise texture */
 .harbor-deck::before {
   content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: .028;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  opacity: .025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* ── Hero card ────────────────────────────────────────────────────── */
 .hd-feature {
-  background: linear-gradient(152deg, #123354 0%, #0a1c31 55%, #071321 100%);
-  box-shadow: var(--hd-shadow);
+  background: var(--hd-hero-grad);
+  box-shadow: 0 24px 56px rgba(6, 21, 44, .22), 0 4px 12px rgba(6, 21, 44, .12);
 }
 
-.harbor-deck[data-theme="night"] .hd-feature {
-  background: linear-gradient(152deg, #172b3b 0%, #0a1828 55%, #06101c 100%);
+/* ── Wave animation ───────────────────────────────────────────────── */
+@keyframes hd-wave-1 {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes hd-wave-2 {
+  from { transform: translateX(-25%); }
+  to   { transform: translateX(-75%); }
+}
+@keyframes hd-wave-3 {
+  from { transform: translateX(-10%); }
+  to   { transform: translateX(-60%); }
+}
+.hd-wave-path-1 { animation: hd-wave-1 11s linear infinite; }
+.hd-wave-path-2 { animation: hd-wave-2 16s linear infinite; }
+.hd-wave-path-3 { animation: hd-wave-3 22s linear infinite; }
+
+/* ── Sailboat bob ─────────────────────────────────────────────────── */
+@keyframes hd-boat-bob {
+  0%,100% { transform: translateY(0)    rotate(-0.8deg); }
+  30%      { transform: translateY(-7px) rotate( 1.2deg); }
+  60%      { transform: translateY(-3px) rotate(-0.4deg); }
+  80%      { transform: translateY(-9px) rotate( 1.6deg); }
+}
+.hd-boat { animation: hd-boat-bob 7s ease-in-out infinite; }
+
+/* ── Focus ring ───────────────────────────────────────────────────── */
+.hd-focus:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--hd-accent) 50%, transparent);
+  outline-offset: 3px;
 }
 
-.hd-tab-active { color: var(--hd-accent); }
-.hd-focus:focus-visible { outline: 3px solid color-mix(in srgb, var(--hd-accent) 45%, transparent); outline-offset: 3px; }
-@media (min-width: 640px) {
-  .harbor-deck { max-width: 430px; margin: 0 auto; min-height: 100dvh; }
+/* ── Card press ───────────────────────────────────────────────────── */
+.hd-card { transition: transform .18s ease, box-shadow .18s ease; }
+.hd-card:active { transform: scale(.985); }
+
+/* ── Tab indicator ────────────────────────────────────────────────── */
+.hd-tab-active { color: var(--hd-accent) !important; }
+
+@media (min-width: 440px) {
+  .harbor-deck { max-width: 430px; margin: 0 auto; }
 }
