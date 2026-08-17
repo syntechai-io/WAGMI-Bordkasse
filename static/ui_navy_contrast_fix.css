@@ -63,23 +63,26 @@
   color: #F8FAFC !important;
 }
 
+/* Dropdown — dark navy to match maritime theme */
 .navy-shell .dropdown-content {
-  background: #ffffff !important;
+  background: #112233 !important;
+  border: 1px solid #1d3d60 !important;
+  box-shadow: 0 8px 24px rgba(0,8,22,.7) !important;
 }
 
 .navy-shell .dropdown-content * {
-  color: #1f2937 !important;
+  color: #d6e8f8 !important;
 }
 
 .navy-shell .dropdown-content a:hover,
 .navy-shell .dropdown-content button:hover {
-  background: #f0f9ff !important;
+  background: #1a3350 !important;
   text-decoration: none !important;
 }
 
 .navy-shell .dropdown-content .text-gray-500,
 .navy-shell .dropdown-content .text-xs {
-  color: #6b7280 !important;
+  color: #78a8cc !important;
 }
 
 .navy-shell input,

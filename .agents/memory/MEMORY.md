@@ -1,1 +1,2 @@
 - [Trips page view switcher](trips-view-switcher.md) — Cards/Log toggle shipped to real app; design came from mockup sandbox HarborDeck + VoyageTimeline exploration.
+- [Full-app dark maritime redesign](maritime-dark-redesign.md) — Whole-app HarborDeck dark theme: token swap, wave hero headers, row-card tables, day-mode override.

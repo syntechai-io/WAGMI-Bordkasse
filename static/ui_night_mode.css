@@ -759,3 +759,70 @@ html[data-theme="night"] [class*="ring-"] {
 html[data-theme="night"] [class*="divide-"] > :not([hidden]) ~ :not([hidden]) {
   border-color: var(--night-border) !important;
 }
+
+/* ── Day mode — restores the original light palette ─────────────────────── */
+html[data-theme="day"] {
+  color-scheme: light;
+
+  --cl-bg:           #f6f8fb;
+  --cl-surface:      #ffffff;
+  --cl-surface-2:    #f1f4f8;
+  --cl-border:       #e2e6ec;
+  --cl-border-strong:#cdd3db;
+  --cl-text:         #1a2540;
+  --cl-text-muted:   #5a6479;
+  --cl-text-subtle:  #8a93a4;
+  --cl-navy:         #0f2942;
+  --cl-navy-soft:    #1a3a5c;
+  --cl-accent:       #1d6fbb;
+  --cl-accent-soft:  #e7f0fa;
+  --cl-success:      #2f7a4d;
+  --cl-success-soft: #e6f3ec;
+  --cl-warn:         #b8741b;
+  --cl-warn-soft:    #fbf1e0;
+  --cl-danger:       #c53e3e;
+  --cl-danger-soft:  #fdecec;
+  --cl-shadow:       0 1px 2px rgba(15,41,66,.04), 0 4px 12px rgba(15,41,66,.04);
+
+  --bg:              #f7f8fa;
+  --surface:         #ffffff;
+  --surface-2:       #f1f3f5;
+  --border:          #e2e5e9;
+  --border-light:    #edf0f3;
+  --text:            #1a1d21;
+  --text-secondary:  #5f6b7a;
+  --muted:           #8b95a5;
+  --accent:          #0B5CAB;
+  --accent-light:    #e8f2fc;
+  --accent-2:        #3d7ec4;
+  --warning:         #d97b0d;
+  --success:         #1a9a5c;
+  --success-light:   #e6f7ef;
+  --warn:            #d97b0d;
+  --warn-light:      #fef5e6;
+  --danger:          #d93636;
+  --danger-light:    #fde8e8;
+  --navy-deep:       #1a2f4a;
+}
+html[data-theme="day"],
+html[data-theme="day"] body {
+  background: #f7f8fa !important;
+  color: #1a1d21 !important;
+}
+/* Day mode: restore light dropdown */
+html[data-theme="day"] .navy-shell .dropdown-content {
+  background: #ffffff !important;
+  border-color: #e2e5e9 !important;
+}
+html[data-theme="day"] .navy-shell .dropdown-content * { color: #1f2937 !important; }
+html[data-theme="day"] .navy-shell .dropdown-content a:hover,
+html[data-theme="day"] .navy-shell .dropdown-content button:hover {
+  background: #f0f9ff !important;
+}
+/* Day mode: page hero with lighter gradient */
+html[data-theme="day"] .cl-pageheader {
+  background: linear-gradient(148deg, #0d2a4a 0%, #1048a0 52%, #1a66cc 100%);
+}
+html[data-theme="day"] .cl-pageheader::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 52'%3E%3Cpath d='M0,26 C240,52 480,0 720,26 C960,52 1200,0 1440,26 L1440,52 L0,52 Z' fill='%23f6f8fb'/%3E%3C/svg%3E") center bottom / 100% 52px no-repeat;
+}

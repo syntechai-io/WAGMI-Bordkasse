@@ -61,44 +61,35 @@
         </div>
         {% endif %}
 
-        <section class="cl-table-wrap">
-            <div class="cl-table-scroll">
-                <table class="cl-table">
-                    <thead>
-                        <tr>
-                            <th>{{ t('deposit.col_date') }}</th>
-                            <th>{{ t('deposit.col_member') }}</th>
-                            <th>{{ t('deposit.col_amount') }}</th>
-                            <th>{{ t('deposit.col_note') }}</th>
-                            <th>{{ t('deposit.col_actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody id="depositsTableBody">
-                        {% for deposit in deposits %}
-                        <tr>
-                            <td>{{ deposit.date }}</td>
-                            <td>{{ deposit.member.code }} - {{ deposit.member.name }}</td>
-                            <td class="cl-num" style="color: var(--cl-success);">
-                                {% if deposit.currency.value != 'EUR' %}
-                                    {{ "%.2f"|format(deposit.amount) }} {{ deposit.currency.value }} (≈ {{ "%.2f"|format(deposit.amount_eur) }} €)
-                                {% else %}
-                                    {{ "%.2f"|format(deposit.amount_eur) }} €
-                                {% endif %}
-                            </td>
-                            <td>{{ deposit.note or '-' }}</td>
-                            <td>
-                                <div class="cl-actions">
-                                    <a href="/deposits/{{ deposit.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm">✏️ {{ t('common.edit') }}</a>
-                                    <form action="/deposits/{{ deposit.id }}/delete" method="post" style="margin:0;" onsubmit="return confirm('{{ t('common.confirm_delete_deposit') }}')">
-                                        {{ csrf_input | safe }}
-                                        <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <section>
+            <div class="cl-row-list" id="depositsTableBody">
+                {% for deposit in deposits %}
+                <div class="cl-row-card--wrap">
+                    <div class="cl-row-card cl-row-card--deposit" style="cursor: default;">
+                        <div class="cl-row-card__main">
+                            <div class="cl-row-card__title">{{ deposit.member.code }} — {{ deposit.member.name }}</div>
+                            <div class="cl-row-card__meta">{{ deposit.date }}{% if deposit.note %} · {{ deposit.note }}{% endif %}</div>
+                        </div>
+                        <div class="cl-row-card__aside">
+                            <span class="cl-row-card__amount">
+                                {% if deposit.currency.value != 'EUR' %}{{ "%.2f"|format(deposit.amount) }} {{ deposit.currency.value }}{% else %}{{ "%.2f"|format(deposit.amount_eur) }} €{% endif %}
+                            </span>
+                            <span class="cl-pill cl-pill--solid-success" style="font-size: 10px; padding: 1px 7px;">💰 {{ t('deposit.col_deposit') if t('deposit.col_deposit') != 'deposit.col_deposit' else 'Deposit' }}</span>
+                        </div>
+                    </div>
+                    <div class="cl-row-card__foot">
+                        <a href="/deposits/{{ deposit.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm">✏️ {{ t('common.edit') }}</a>
+                        <form action="/deposits/{{ deposit.id }}/delete" method="post" style="margin:0;" onsubmit="return confirm('{{ t('common.confirm_delete_deposit') }}')">
+                            {{ csrf_input | safe }}
+                            <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="cl-card" style="padding: var(--cl-space-5); text-align: center; color: var(--cl-text-muted);">
+                    💰 No deposits recorded yet.
+                </div>
+                {% endfor %}
             </div>
         </section>
     </div>

@@ -10,27 +10,27 @@
   --topbar-h: 48px;
   --topbar-safe-h: calc(48px + env(safe-area-inset-top, 0px));
 
-  /* ── Color tokens (unchanged) ── */
-  --bg: #f7f8fa;
-  --surface: #ffffff;
-  --surface-2: #f1f3f5;
-  --border: #e2e5e9;
-  --border-light: #edf0f3;
-  --text: #1a1d21;
-  --text-secondary: #5f6b7a;
-  --muted: #8b95a5;
+  /* ── Color tokens — dark maritime default (day mode overrides in ui_night_mode.css) ── */
+  --bg: #0b1d2e;
+  --surface: #112233;
+  --surface-2: #1a3350;
+  --border: #1d3d60;
+  --border-light: #1d3d60;
+  --text: #d6e8f8;
+  --text-secondary: #78a8cc;
+  --muted: #476888;
 
-  --accent: #0B5CAB;
-  --accent-light: #e8f2fc;
-  --accent-2: #3d7ec4;
-  --warning: #d97b0d;
+  --accent: #3b9ad4;
+  --accent-light: #0e2438;
+  --accent-2: #5ab2e8;
+  --warning: #f5a020;
 
-  --success: #1a9a5c;
-  --success-light: #e6f7ef;
-  --warn: #d97b0d;
-  --warn-light: #fef5e6;
-  --danger: #d93636;
-  --danger-light: #fde8e8;
+  --success: #3dbf78;
+  --success-light: #0a2518;
+  --warn: #f5a020;
+  --warn-light: #2e1e05;
+  --danger: #df5454;
+  --danger-light: #2e0a0a;
 
   /* ── Typography tokens ── */
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
@@ -73,15 +73,15 @@
   --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
 
-  --navy-deep: #1a2f4a;
+  --navy-deep: #050f1e;
 
-  /* Legacy aliases → map to accent/border system */
-  --ocean-blue: #0B5CAB;
-  --sky-blue: #0B5CAB;
-  --sea-foam: #0B5CAB;
+  /* Legacy aliases */
+  --ocean-blue: #3b9ad4;
+  --sky-blue: #3b9ad4;
+  --sea-foam: #3dbf78;
   --coral: var(--danger);
-  --cream: #f7f8fa;
-  --sand: #8b95a5;
+  --cream: #1a3350;
+  --sand: #476888;
 }
 
 /* ── Global typography baseline ── */

@@ -18,90 +18,57 @@
     </div>
     {% endif %}
 
-    <section class="cl-table-wrap">
-        <div class="cl-table-scroll cl-crew-table-scroll">
-            <table class="cl-table cl-crew-table">
-                <thead>
-                    <tr>
-                        <th>{{ t('crew.username') }}</th>
-                        <th>{{ t('common.name') }}</th>
-                        <th>{{ t('crew.role') }}</th>
-                        <th>{{ t('common.status') }}</th>
-                        <th>{{ t('crew.iban_handle') }}</th>
-                        <th>{{ t('common.actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for member in crew_members %}
-                    <tr{% if member.departed_at %} style="opacity: 0.7;"{% endif %}>
-                        <td class="cl-td-desktop" style="font-weight: 600; color: var(--cl-accent);">{{ member.code }}</td>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: var(--cl-space-2); flex-wrap: wrap;">
-                                <span style="font-weight: 600; color: var(--cl-text);">{{ member.name }}</span>
-                                {% if member.id in member_groups %}
-                                <span class="cl-pill cl-pill--solid-success" style="font-size: 11px;">👥 {{ member_groups[member.id].name }}</span>
-                                {% if member_groups[member.id].is_representative %}
-                                <span class="cl-pill" style="background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff; border-color: transparent; font-size: 11px;">👑 {{ t('crew.representative') }}</span>
-                                {% endif %}
-                                {% endif %}
-                            </div>
-                            <div class="cl-trip-meta">
-                                <span style="font-weight: 600; color: var(--cl-accent);">{{ member.code }}</span>
-                                <span class="cl-trip-meta__sep">·</span>
-                                {% if member.is_trip_admin %}
-                                <span class="cl-pill" style="background: linear-gradient(135deg, #8b4513, #d2691e); color: #fff; border-color: transparent; font-size: 10px; padding: 1px 6px;">⚓ {{ t('crew.trip_admin') }}</span>
-                                {% else %}
-                                <span>Crew</span>
-                                {% endif %}
-                                <span class="cl-trip-meta__sep">·</span>
-                                {% if member.departed_at %}
-                                <span class="cl-pill" style="background: linear-gradient(135deg, #666, #999); color: #fff; border-color: transparent; font-size: 10px; padding: 1px 6px;">🚪 {{ t('crew.departed') }}</span>
-                                {% else %}
-                                <span class="cl-pill cl-pill--solid-success" style="font-size: 10px; padding: 1px 6px;">✅ {{ t('common.active') }}</span>
-                                {% endif %}
-                            </div>
-                        </td>
-                        <td class="cl-td-desktop">
-                            {% if member.is_trip_admin %}
-                            <span class="cl-pill" style="background: linear-gradient(135deg, #8b4513, #d2691e); color: #fff; border-color: transparent;">⚓ {{ t('crew.trip_admin') }}</span>
-                            {% else %}
-                            <span class="cl-muted" style="font-size: 14px;">Crew</span>
-                            {% endif %}
-                        </td>
-                        <td class="cl-td-desktop">
-                            {% if member.departed_at %}
-                            <div style="display: flex; flex-direction: column; gap: var(--cl-space-1);">
-                                <span class="cl-pill" style="background: linear-gradient(135deg, #666, #999); color: #fff; border-color: transparent; width: fit-content;">🚪 {{ t('crew.departed') }}</span>
-                                <span class="cl-help cl-help--muted">{{ member.departed_at.strftime('%d.%m.%Y %H:%M') }}</span>
-                            </div>
-                            {% else %}
-                            <span class="cl-pill cl-pill--solid-success">✅ {{ t('common.active') }}</span>
-                            {% endif %}
-                        </td>
-                        <td class="cl-td-desktop" style="font-size: 14px; color: var(--cl-text-muted);">{{ member.iban_or_handle or '—' }}</td>
-                        <td>
-                            <div class="cl-actions">
-                                <a href="/crew/{{ member.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm">✏️ {{ t('common.edit') }}</a>
-                                {% if member.departed_at %}
-                                <form action="/crew/{{ member.id }}/reactivate" method="post" style="margin: 0;" onsubmit="return confirm({{ t('crew.confirm_reactivate', name=member.name) | tojson }})">
-                                    {{ csrf_input | safe }}
-                                    <button type="submit" class="cl-btn cl-btn--success cl-btn--sm">🔄 {{ t('crew.reactivate') }}</button>
-                                </form>
-                                {% else %}
-                                <button onclick="showDeactivateModal({{ member.id }}, '{{ member.name }}')" class="cl-btn cl-btn--warn cl-btn--sm">🚪 {{ t('crew.deactivate') }}</button>
-                                {% endif %}
-                                <form action="/crew/{{ member.id }}/delete" method="post" style="margin: 0;" onsubmit="return confirm('{{ t('common.confirm_delete_name').replace('{name}', member.name) }}')">
-                                    {{ csrf_input | safe }}
-                                    <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️ {{ t('common.delete') }}</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="cl-row-list">
+        {% for member in crew_members %}
+        <div class="cl-row-card--wrap" style="{% if member.departed_at %}opacity: 0.72;{% endif %}">
+            <div class="cl-row-card" style="cursor: default;">
+                <div class="cl-row-card__main">
+                    <div style="display: flex; align-items: center; gap: var(--cl-space-2); flex-wrap: wrap;">
+                        <span class="cl-row-card__title">{{ member.name }}</span>
+                        <span style="font-size: 12px; font-weight: 700; color: var(--cl-accent); letter-spacing: .04em;">{{ member.code }}</span>
+                        {% if member.is_trip_admin %}
+                        <span class="cl-pill" style="background: linear-gradient(135deg, #7a3a10, #c06020); color: #fff; border-color: transparent; font-size: 10px; padding: 1px 7px;">⚓ {{ t('crew.trip_admin') }}</span>
+                        {% endif %}
+                        {% if member.id in member_groups %}
+                        <span class="cl-pill cl-pill--solid-success" style="font-size: 10px; padding: 1px 7px;">👥 {{ member_groups[member.id].name }}</span>
+                        {% if member_groups[member.id].is_representative %}
+                        <span class="cl-pill" style="background: linear-gradient(135deg, #c87e10, #e0a030); color: #fff; border-color: transparent; font-size: 10px; padding: 1px 7px;">👑 {{ t('crew.representative') }}</span>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    <div class="cl-row-card__meta">{{ member.iban_or_handle or '—' }}</div>
+                </div>
+                <div class="cl-row-card__aside">
+                    {% if member.departed_at %}
+                    <span class="cl-pill" style="background: rgba(100,100,120,0.4); color: var(--cl-text-muted); border-color: transparent; font-size: 10px;">🚪 {{ t('crew.departed') }}</span>
+                    <span style="font-size: 11px; color: var(--cl-text-subtle);">{{ member.departed_at.strftime('%d.%m.%Y') }}</span>
+                    {% else %}
+                    <span class="cl-pill cl-pill--solid-success" style="font-size: 10px; padding: 1px 7px;">✅ {{ t('common.active') }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="cl-row-card__foot">
+                <a href="/crew/{{ member.id }}/edit" class="cl-btn cl-btn--ghost cl-btn--sm">✏️ {{ t('common.edit') }}</a>
+                {% if member.departed_at %}
+                <form action="/crew/{{ member.id }}/reactivate" method="post" style="margin: 0;" onsubmit="return confirm({{ t('crew.confirm_reactivate', name=member.name) | tojson }})">
+                    {{ csrf_input | safe }}
+                    <button type="submit" class="cl-btn cl-btn--success cl-btn--sm">🔄 {{ t('crew.reactivate') }}</button>
+                </form>
+                {% else %}
+                <button onclick="showDeactivateModal({{ member.id }}, '{{ member.name }}')" class="cl-btn cl-btn--warn cl-btn--sm">🚪 {{ t('crew.deactivate') }}</button>
+                {% endif %}
+                <form action="/crew/{{ member.id }}/delete" method="post" style="margin: 0;" onsubmit="return confirm('{{ t('common.confirm_delete_name').replace('{name}', member.name) }}')">
+                    {{ csrf_input | safe }}
+                    <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️</button>
+                </form>
+            </div>
         </div>
-    </section>
+        {% else %}
+        <div class="cl-card" style="padding: var(--cl-space-5); text-align: center; color: var(--cl-text-muted);">
+            👥 No crew members yet.
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <!-- Deactivate Modal -->

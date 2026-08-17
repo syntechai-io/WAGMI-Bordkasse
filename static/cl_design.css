@@ -5,29 +5,30 @@
    ========================================================================== */
 
 /* --- Design tokens (global, so any page can use cl-* primitives) ---------- */
+/* Default: HarborDeck dark maritime theme. Day mode restores light in ui_night_mode.css */
 :root {
-    --cl-bg:           #f6f8fb;
-    --cl-surface:      #ffffff;
-    --cl-surface-2:    #f1f4f8;
-    --cl-border:       #e2e6ec;
-    --cl-border-strong:#cdd3db;
-    --cl-text:         #1a2540;
-    --cl-text-muted:   #5a6479;
-    --cl-text-subtle:  #8a93a4;
-    --cl-navy:         #0f2942;
-    --cl-navy-soft:    #1a3a5c;
-    --cl-accent:       #1d6fbb;
-    --cl-accent-soft:  #e7f0fa;
-    --cl-success:      #2f7a4d;
-    --cl-success-soft: #e6f3ec;
-    --cl-warn:         #b8741b;
-    --cl-warn-soft:    #fbf1e0;
-    --cl-danger:       #c53e3e;
-    --cl-danger-soft:  #fdecec;
+    --cl-bg:           #0b1d2e;
+    --cl-surface:      #112233;
+    --cl-surface-2:    #1a3350;
+    --cl-border:       #1d3d60;
+    --cl-border-strong:#2a5580;
+    --cl-text:         #d6e8f8;
+    --cl-text-muted:   #78a8cc;
+    --cl-text-subtle:  #476888;
+    --cl-navy:         #d6e8f8;
+    --cl-navy-soft:    #a6c8e8;
+    --cl-accent:       #3b9ad4;
+    --cl-accent-soft:  #0e2438;
+    --cl-success:      #3dbf78;
+    --cl-success-soft: #0a2518;
+    --cl-warn:         #f5a020;
+    --cl-warn-soft:    #2e1e05;
+    --cl-danger:       #df5454;
+    --cl-danger-soft:  #2e0a0a;
 
     --cl-radius:       12px;
     --cl-radius-sm:    8px;
-    --cl-shadow:       0 1px 2px rgba(15,41,66,.04), 0 4px 12px rgba(15,41,66,.04);
+    --cl-shadow:       0 1px 4px rgba(0,8,22,.6), 0 4px 16px rgba(0,8,22,.5);
 
     --cl-space-1:      4px;
     --cl-space-2:      8px;
@@ -1237,3 +1238,149 @@ html[data-theme="night"] .cl-tabbar__item:hover { color: rgba(255, 80, 80, .95);
     .cl-trv-hero-wave,
     .cl-trv-hero-boat svg { animation: none; }
 }
+
+/* ==========================================================================
+   HarborDeck Maritime Dark — page heroes, row cards, spacing
+   ========================================================================== */
+
+/* ── Wave gradient hero on every .cl-pageheader ─────────────────────────── */
+.cl-pageheader {
+    background: linear-gradient(148deg, #071929 0%, #0c3260 52%, #1455a8 100%);
+    margin: calc(-1 * var(--cl-space-6)) calc(-1 * var(--cl-space-4)) 0;
+    padding: 36px var(--cl-space-4) 64px;
+    position: relative;
+    overflow: hidden;
+    align-items: flex-end;
+    border-radius: 0;
+}
+@media (min-width: 768px) {
+    .cl-pageheader {
+        margin: calc(-1 * var(--cl-space-7)) calc(-1 * var(--cl-space-5)) 0;
+        padding: 52px var(--cl-space-5) 80px;
+    }
+}
+/* wave cutout at the bottom edge */
+.cl-pageheader::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: -5%; right: -5%;
+    height: 52px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 52'%3E%3Cpath d='M0,26 C240,52 480,0 720,26 C960,52 1200,0 1440,26 L1440,52 L0,52 Z' fill='%230b1d2e'/%3E%3C/svg%3E") center bottom / 100% 52px no-repeat;
+    pointer-events: none;
+}
+/* radial shimmer accent */
+.cl-pageheader::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -10%;
+    width: 55%; height: 200%;
+    background: radial-gradient(ellipse at center, rgba(61,154,212,0.13) 0%, transparent 70%);
+    pointer-events: none;
+}
+/* text + button colours on the dark hero */
+.cl-pageheader .cl-title {
+    color: #ffffff;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+    position: relative; z-index: 1;
+}
+.cl-pageheader .cl-subtitle { color: rgba(200,228,255,0.75); position: relative; z-index: 1; }
+.cl-pageheader .cl-pageheader__main,
+.cl-pageheader .cl-pageheader__actions { position: relative; z-index: 1; }
+.cl-pageheader .cl-btn--primary {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.30);
+    color: #fff;
+    backdrop-filter: blur(8px);
+}
+.cl-pageheader .cl-btn--primary:hover {
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.40);
+}
+.cl-pageheader .cl-btn--secondary,
+.cl-pageheader .cl-btn--ghost {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.90);
+}
+
+/* ── Row cards (replaces tables) ─────────────────────────────────────────── */
+.cl-row-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-2);
+}
+.cl-row-card--wrap {
+    display: flex;
+    flex-direction: column;
+}
+.cl-row-card--wrap .cl-row-card {
+    border-radius: var(--cl-radius) var(--cl-radius) 0 0;
+    border-bottom-color: transparent;
+}
+.cl-row-card {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-3);
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    padding: var(--cl-space-3) var(--cl-space-4);
+    text-decoration: none;
+    color: var(--cl-text);
+    transition: background 0.14s, border-color 0.14s;
+}
+.cl-row-card:hover {
+    background: var(--cl-surface-2);
+    border-color: var(--cl-border-strong);
+    text-decoration: none;
+    color: var(--cl-text);
+}
+.cl-row-card__foot {
+    display: flex;
+    gap: var(--cl-space-2);
+    padding: 5px var(--cl-space-3) 7px;
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-top: none;
+    border-radius: 0 0 var(--cl-radius) var(--cl-radius);
+}
+.cl-row-card__main { flex: 1 1 auto; min-width: 0; }
+.cl-row-card__title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--cl-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cl-row-card__meta {
+    font-size: 12px;
+    color: var(--cl-text-muted);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cl-row-card__aside {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    text-align: right;
+}
+.cl-row-card__amount {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--cl-text);
+}
+/* semantic amount colours */
+.cl-row-card--expense   .cl-row-card__amount { color: var(--cl-danger); }
+.cl-row-card--deposit   .cl-row-card__amount { color: var(--cl-success); }
+.cl-row-card--balance-positive .cl-row-card__amount { color: var(--cl-success); }
+.cl-row-card--balance-negative .cl-row-card__amount { color: var(--cl-danger); }
+.cl-row-card--balance-even     .cl-row-card__amount { color: var(--cl-text-muted); }
+
+/* ── Body / page background ──────────────────────────────────────────────── */
+body { background: var(--cl-bg); }
