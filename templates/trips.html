@@ -6,14 +6,15 @@
         <div class="cl-pageheader__main">
             <h1 class="cl-title">⛵ {{ t('trips.title') }}</h1>
         </div>
-        {% if request.session.get('role') == 'admin' or is_saas_owner %}
-        <div class="cl-pageheader__actions">
-            <a href="/trips/yearly/report" class="cl-btn cl-btn--accent">
-                📊 {{ branding.brand_name }} {{ t('trips.yearly_overview') }}
-            </a>
-        </div>
-        {% endif %}
     </header>
+
+    {% if request.session.get('role') == 'admin' or is_saas_owner %}
+    <nav class="cl-page-nav">
+        <a href="/trips/yearly/report" class="cl-page-nav__link">
+            📊 {{ branding.brand_name }} {{ t('trips.yearly_overview') }}
+        </a>
+    </nav>
+    {% endif %}
 
     <div class="cl-stack">
         {% if request.query_params.get('upgrade_required') and not is_legacy_admin %}

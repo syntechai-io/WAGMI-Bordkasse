@@ -1474,22 +1474,16 @@ html[data-theme="night"] .cl-tabbar__item:hover { color: rgba(255, 80, 80, .95);
     border-color: transparent;
     color: #071929;
 }
-/* Secondary / ghost / accent in the hero: glass outline — sits inside the gradient */
+/* Secondary / ghost / accent buttons are no longer placed inside .cl-pageheader —
+   they live in .cl-page-nav below the wave. Styles below are kept as a safety net
+   only; prefer moving any secondary action to .cl-page-nav instead. */
 .cl-pageheader .cl-btn--secondary,
 .cl-pageheader .cl-btn--ghost,
 .cl-pageheader .cl-btn--accent {
-    background: rgba(255,255,255,0.10);
-    border: 1px solid rgba(255,255,255,0.28);
-    color: rgba(255,255,255,0.90);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-}
-.cl-pageheader .cl-btn--secondary:hover,
-.cl-pageheader .cl-btn--ghost:hover,
-.cl-pageheader .cl-btn--accent:hover {
-    background: rgba(255,255,255,0.18);
-    border-color: rgba(255,255,255,0.45);
-    color: #ffffff;
+    background: rgba(255,255,255,0.92);
+    border-color: transparent;
+    color: #071929;
+    font-weight: 600;
 }
 
 /* ── Row cards (replaces tables) ─────────────────────────────────────────── */
@@ -1720,6 +1714,47 @@ body { background: var(--cl-bg); }
     color: var(--cl-text);
     line-height: 1.55;
     white-space: pre-wrap;
+}
+
+/* ── Page nav strip (secondary actions below the wave hero) ──────────────── */
+/* Lives on the flat dark body — never inside the gradient. Always readable.  */
+.cl-page-nav {
+    display: flex;
+    gap: var(--cl-space-2);
+    flex-wrap: wrap;
+    margin-bottom: var(--cl-space-5);
+}
+.cl-page-nav__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 var(--cl-space-4);
+    border-radius: var(--cl-radius);
+    border: 1px solid var(--cl-border);
+    background: var(--cl-surface-2);
+    color: var(--cl-text);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .15s ease, border-color .15s ease;
+}
+.cl-page-nav__link:hover {
+    background: var(--cl-surface-hover, rgba(255,255,255,0.07));
+    border-color: var(--cl-border-strong, rgba(255,255,255,0.25));
+    color: var(--cl-text);
+    text-decoration: none;
+}
+/* Day-mode override: chips read as solid surface on white bg */
+html[data-theme="day"] .cl-page-nav__link {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+html[data-theme="day"] .cl-page-nav__link:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
 }
 
 /* ── Empty state (used on logbook and other zero-data pages) ─────────────── */

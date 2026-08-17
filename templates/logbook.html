@@ -3,28 +3,29 @@
 {% block content %}
 <div class="cl-page">
 
-    {# ── Wave hero header ─────────────────────────────────────────────────── #}
+    {# ── Wave hero header — title + single primary CTA only ──────────────── #}
     <header class="cl-pageheader">
         <div class="cl-pageheader__main">
             <h1 class="cl-title">📓 {{ t('logbook.title') }}</h1>
-            {% if entries %}
-            <p class="cl-subtitle">{{ entries|length }} {{ t('logbook.entries_count') if 'entries_count' in t('logbook.entries_count') else 'Einträge' }}</p>
-            {% endif %}
         </div>
         <div class="cl-pageheader__actions">
             <a href="/logbook/new" class="cl-btn cl-btn--primary">
                 ➕ {{ t('logbook.new_entry') }}
             </a>
-            <a href="/logbook/day-new" class="cl-btn cl-btn--secondary">
-                📅 {{ t('logbook.day_logbook_title') }}
-            </a>
-            {% if active_trip %}
-            <a href="/trips/{{ active_trip.id }}/track" class="cl-btn cl-btn--secondary">
-                🗺️ {{ t('track.title') }}
-            </a>
-            {% endif %}
         </div>
     </header>
+
+    {# ── Secondary navigation strip (on flat dark body — always readable) ─── #}
+    <nav class="cl-page-nav">
+        <a href="/logbook/day-new" class="cl-page-nav__link">
+            📅 {{ t('logbook.day_logbook_title') }}
+        </a>
+        {% if active_trip %}
+        <a href="/trips/{{ active_trip.id }}/track" class="cl-page-nav__link">
+            🗺️ {{ t('track.title') }}
+        </a>
+        {% endif %}
+    </nav>
 
     {# ── Entry list ───────────────────────────────────────────────────────── #}
     {% if entries %}
