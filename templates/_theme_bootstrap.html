@@ -6,7 +6,9 @@
   page doesn't flash light then go dark. The full theme controller lives in
   the regular page JS and takes over once it has loaded; this partial only
   carries the minimum logic needed to set data-theme="night" on <html>
-  before any CSS paints.
+   before any CSS paints. It sets an explicit resolved state (`day` or
+   `night`) so both palettes, including their controls, receive the right
+   scoped CSS.
 
   Included by templates/layout.html and templates/login.html. If you add a
   new top-level template that ships its own <head>, include this partial too
@@ -20,7 +22,7 @@
       user's stored DB preference if present, otherwise the system default
       ('auto').
     - Anonymous (login/unauth) pages fall back to localStorage, then seeded.
-    - 'auto' resolves to 'night' iff prefers-color-scheme: dark, else 'light'.
+   - 'auto' resolves to 'night' iff prefers-color-scheme: dark, else 'day'.
 
   The auth-flow flags (saved_theme, theme_signed_in, theme_authoritative) are
   computed in template_helpers.py and injected into every template context.
@@ -47,9 +49,7 @@
       var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       resolved = prefersDark ? 'night' : 'light';
     }
-    if (resolved === 'night') {
-      document.documentElement.setAttribute('data-theme', 'night');
-    }
+    document.documentElement.setAttribute('data-theme', resolved === 'night' ? 'night' : 'day');
   } catch(e) {}
 })();
 </script>

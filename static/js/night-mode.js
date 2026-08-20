@@ -27,11 +27,13 @@
 
   function apply(pref) {
     var resolved = resolve(pref);
-    if (resolved === THEMES.NIGHT) {
-      document.documentElement.setAttribute('data-theme', 'night');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
+    // Keep an explicit resolved state for both palettes. Day-mode CSS is
+    // scoped to data-theme="day"; removing the attribute made the switch
+    // inherit the dark/default icon colors on the light drawer surface.
+    document.documentElement.setAttribute(
+      'data-theme',
+      resolved === THEMES.NIGHT ? 'night' : 'day'
+    );
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', resolved === THEMES.NIGHT ? '#000000' : '#1a2f4a');
     try {
