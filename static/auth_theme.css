@@ -1,0 +1,70 @@
+/* ==========================================================================
+   CrewLog standalone authentication pages
+   These templates do not extend layout.html, so they need a small, explicit
+   bridge to the shared maritime tokens rather than the desktop skin defaults.
+   ========================================================================== */
+
+.auth-page {
+  background: var(--cl-bg, var(--bg));
+  color: var(--cl-text, var(--text));
+}
+
+.auth-page .auth-brand-title {
+  color: var(--cl-text, var(--text));
+}
+
+.auth-page .auth-brand-subtitle {
+  color: var(--cl-text-muted, var(--text-secondary));
+}
+
+.auth-page .auth-brand-footer {
+  color: var(--cl-text-subtle, var(--muted));
+}
+
+.auth-page .lang-pill {
+  background: var(--cl-surface-2, var(--surface-2));
+  border: 1px solid var(--cl-border, var(--border));
+}
+
+.auth-page .lang-pill a {
+  color: var(--cl-text-muted, var(--text-secondary));
+}
+
+.auth-page .lang-pill a:hover,
+.auth-page .lang-pill a.lang-active {
+  color: var(--cl-text, var(--text));
+}
+
+.auth-page .lang-pill a.lang-active {
+  background: var(--cl-surface, var(--surface));
+}
+
+.auth-page .login-card {
+  background: var(--cl-surface, var(--surface));
+  border-color: var(--cl-border, var(--border));
+  box-shadow: var(--cl-shadow, var(--shadow-lg));
+}
+
+.auth-page .login-card label {
+  color: var(--cl-text, var(--text));
+}
+
+.auth-page .login-card input[type="text"],
+.auth-page .login-card input[type="email"],
+.auth-page .login-card input[type="password"],
+.auth-page .login-card select {
+  background-color: var(--cl-surface-2, var(--surface-2));
+  border-color: var(--cl-border, var(--border));
+  color: var(--cl-text, var(--text));
+}
+
+.auth-page .login-card input::placeholder {
+  color: var(--cl-text-subtle, var(--muted));
+  opacity: 1;
+}
+
+.auth-page .login-card input:focus,
+.auth-page .login-card select:focus {
+  border-color: var(--cl-accent, var(--accent));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cl-accent, var(--accent)) 24%, transparent);
+}

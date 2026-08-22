@@ -11,13 +11,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/ui_v1.css?v={{ asset_version }}">
-    <link rel="stylesheet" href="/static/ui_night_mode.css?v={{ asset_version }}">
     {% include "_theme_bootstrap.html" %}
+    <link rel="stylesheet" href="/static/ui_v1.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="/static/cl_design.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="/static/ui_night_mode.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="/static/auth_theme.css?v={{ asset_version }}">
     {% include "_night_critical.html" %}
     <style>
         body {
-            background: linear-gradient(180deg, #1a2f4a 0%, #0d3b5e 100%);
+            background: var(--cl-bg, var(--bg));
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -44,27 +46,28 @@
             font-size: 16px;
         }
 
-        /* The desktop skin gives native selects a white surface. Keep the
-           populated trip value readable instead of inheriting the dark-theme
-           light text token onto that white surface. */
+        /* Keep the native select aligned with the dark maritime form inputs. */
         .login-trip-select {
-            color: #172536 !important;
-            background-color: #ffffff !important;
-            border-color: #7ea8d1 !important;
+            color: var(--cl-text, var(--text)) !important;
+            background-color: var(--cl-surface-2, var(--surface-2)) !important;
+            border-color: var(--cl-border, var(--border)) !important;
             font-weight: 500;
-            color-scheme: light;
+            color-scheme: dark;
         }
         .login-trip-select option {
-            color: #172536 !important;
-            background-color: #ffffff !important;
+            color: var(--cl-text, var(--text)) !important;
+            background-color: var(--cl-surface-2, var(--surface-2)) !important;
             font-weight: 500;
         }
         .login-trip-select:focus {
-            border-color: #3b9ad4 !important;
-            box-shadow: 0 0 0 3px rgba(59, 154, 212, 0.22) !important;
+            border-color: var(--cl-accent, var(--accent)) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--cl-accent, var(--accent)) 24%, transparent) !important;
+        }
+        html[data-theme="day"] .login-trip-select {
+            color-scheme: light;
         }
         .login-trip-hint {
-            color: var(--text-secondary) !important;
+            color: var(--cl-text-muted, var(--text-secondary)) !important;
             opacity: 1 !important;
         }
         html[data-theme="night"] .login-trip-select {
@@ -86,7 +89,7 @@
         }
     </style>
 </head>
-<body>
+<body class="auth-page">
     <div class="w-full max-w-md px-4">
         <div class="flex justify-end mb-4">
             <div class="lang-pill">
@@ -99,8 +102,8 @@
             <div class="logo-float mb-4 flex justify-center">
                 <img src="/static/logo-crewlog.svg" alt="CrewLog Logo" class="w-20 h-20 object-contain">
             </div>
-            <h1 class="text-3xl font-bold text-white mb-1" style="letter-spacing: -0.02em;">{% if not branding.is_default %}{{ branding.brand_name }} {% endif %}CrewLog</h1>
-            <p class="text-sm" style="color: rgba(255,255,255,0.6);">{{ t('auth.subtitle') }}</p>
+            <h1 class="auth-brand-title text-3xl font-bold mb-1" style="letter-spacing: -0.02em;">{% if not branding.is_default %}{{ branding.brand_name }} {% endif %}CrewLog</h1>
+            <p class="auth-brand-subtitle text-sm">{{ t('auth.subtitle') }}</p>
         </div>
         
         <div class="login-card p-8">
@@ -268,7 +271,7 @@
             </div>
         </div>
         
-        <div class="text-center mt-6 text-sm" style="color: rgba(255,255,255,0.4);">
+        <div class="auth-brand-footer text-center mt-6 text-sm">
             <p>{% if not branding.is_default %}{{ branding.brand_name }} - {% endif %}CrewLog</p>
         </div>
     </div>
