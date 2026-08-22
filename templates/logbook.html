@@ -45,7 +45,7 @@
                     <span class="cl-day-header__num">{{ day_entries[0].entry_date.strftime('%d') }}</span>
                     <div class="cl-day-header__info">
                         <span class="cl-day-header__month">{{ day_entries[0].entry_date.strftime('%b %Y') }}</span>
-                        <span class="cl-day-header__count">{{ day_entries|length }} {{ 'Eintrag' if day_entries|length == 1 else 'Einträge' }}</span>
+                        <span class="cl-day-header__count">{{ day_entries|length }} {{ t('logbook.entry_singular') if day_entries|length == 1 else t('logbook.entries_count') }}</span>
                     </div>
                 </div>
                 <a href="/logbook/daily?date={{ date_str }}" class="cl-btn cl-btn--ghost cl-btn--sm cl-day-header__link">

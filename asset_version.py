@@ -22,6 +22,7 @@ TRACKED_CSS: Tuple[str, ...] = (
     "static/cl_design.css",
     "static/ui_ios_prime.css",
     "static/ui_night_mode.css",
+    "static/auth_theme.css",
 )
 
 TRACKED_JS: Tuple[str, ...] = (
