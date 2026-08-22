@@ -13,7 +13,7 @@ playwright_sync_api = pytest.importorskip(
 sync_playwright = playwright_sync_api.sync_playwright
 
 
-BASE_URL = os.environ.get("CREWLOG_BASE_URL", "http://localhost:5000")
+BASE_URL = os.environ.get("TEST_BASE_URL", os.environ.get("CREWLOG_BASE_URL", "http://localhost:5000"))
 ARTIFACT_DIR = Path("test_artifacts/night_mode")
 
 

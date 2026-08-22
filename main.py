@@ -375,7 +375,9 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
     # Törn hub summary: trip stats, legs/route, and recent logbook activity —
     # composed here so "/" is a single place showing this trip right now,
     # instead of splitting it across the dashboard/trips-list/logbook pages.
-    track_summary = compute_track_summary(db, trip_id)
+    # Only the numeric totals are shown here (KPI tiles) — skip building the
+    # polyline/marker payload that only the /trips/{id}/track map page renders.
+    track_summary = compute_track_summary(db, trip_id, include_map=False)
     crew_count = db.query(CrewMember).filter(
         CrewMember.trip_id == trip_id, CrewMember.departed_at.is_(None)
     ).count()

@@ -1,8 +1,8 @@
-# WAGMI CrewLog - Maritime Logbook & Bordkasse
+# WAGMI Bordkasse - Maritime Logbook & Crew Wallet
 
 ## Executive Summary
 
-**WAGMI CrewLog** is a specialized web-based application designed for sailing crews to maintain professional maritime logbooks and track shared expenses (Bordkasse). The application combines comprehensive logbook entries with GPS and weather data alongside automated expense tracking, multi-currency support, and fair settlement calculations for multi-day or multi-week sailing trips.
+**WAGMI Bordkasse** is a specialized web-based application designed for sailing crews to maintain professional maritime logbooks and track shared expenses (Bordkasse). The application combines comprehensive logbook entries with GPS and weather data alongside automated expense tracking, multi-currency support, and fair settlement calculations for multi-day or multi-week sailing trips.
 
 ### The Problem It Solves
 
@@ -14,7 +14,7 @@ When groups embark on sailing trips, managing shared expenses becomes complex:
 - Disputes arise from unclear expense allocation
 - Paper receipts get lost, and memories fade about who paid what
 
-**WAGMI CrewLog solves all of these problems** with automated logbook entries, GPS tracking, weather data integration, multi-currency expense support, receipt management, and optimized settlement calculations.
+**WAGMI Bordkasse solves all of these problems** with automated logbook entries, GPS tracking, weather data integration, multi-currency expense support, receipt management, and optimized settlement calculations.
 
 ## Core Features
 
@@ -352,24 +352,21 @@ Instead of 11 individual transfers in a 6-person crew, the algorithm might gener
 
 **Development Workflow:**
 - Hot reload for rapid development
-- Comprehensive test suite (36 E2E tests, 100% pass rate)
+- Comprehensive test suite (135+ tests, `./run_tests.sh`)
 - Version control (Git)
 - Environment-based configuration
 
 ## Test Suite & Quality Assurance
 
-**Comprehensive E2E Testing:**
-- 36 end-to-end tests with 100% pass rate
-- Test categories:
-  - Authentication & session management (7 tests)
-  - Trip management & archiving (4 tests)
-  - Crew CRUD operations (4 tests)
-  - Deposits with multi-currency (4 tests)
-  - Expenses with flexible splitting (4 tests)
-  - Balance calculations & settlement (3 tests)
-  - PDF export functionality (3 tests)
-  - Edge cases & validation (3 tests)
-  - PWA manifest & icons (3 tests)
+**Comprehensive Testing:**
+- 135+ tests across unit, integration, and end-to-end coverage, run via `./run_tests.sh`
+- Test categories in `tests/`:
+  - Core functionality: trips, crew, deposits, expenses (`test_core_functionality.py`)
+  - Balance & settlement calculations, all split modes (`test_balances.py`)
+  - Permissions and trip-level data scoping (`test_permissions.py`)
+  - CSRF, biometric login, password-reset rate limiting (`test_csrf_login.py`, `test_biometric_login.py`, `test_password_reset_rate_limit.py`)
+  - Trip legs, timezone handling, asset versioning (`test_trip_legs.py`, `test_timezone.py`, `test_asset_version.py`)
+  - Night mode, responsive layout, and service-worker offline behavior via Playwright (`test_night_mode_e2e.py`, `test_desktop_sidebar_breakpoint_e2e.py`, `test_service_worker_offline.py`)
 
 **Test Infrastructure:**
 - pytest framework

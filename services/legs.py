@@ -80,7 +80,7 @@ def update_leg(db: Session, trip_id: int, leg_id: int, **fields) -> Optional[Tri
         "planned_start", "planned_end", "distance_planned_nm", "notes",
     }
     for key, value in fields.items():
-        if key in allowed:
+        if key in allowed and value is not None:
             setattr(leg, key, value)
     leg.updated_at = datetime.utcnow()
     db.commit()

@@ -102,7 +102,7 @@ def test_gps_button_still_exists():
     form_html = Path('templates/logbook_form.html').read_text()
     
     assert 'id="gps-button"' in form_html
-    assert '📍 GPS-Position abrufen' in form_html
+    assert "t('logbook.gps_get_position')" in form_html
     assert 'id="gps-tracking-toggle"' in form_html
 
 def test_motor_hours_calculation_preserved():
@@ -228,21 +228,29 @@ def test_all_phase_a_fields_preserved():
 def test_night_mode_critical_css_present_in_layout():
     from pathlib import Path
     layout = Path('templates/layout.html').read_text()
+    night_critical = Path('templates/_night_critical.html').read_text()
     # CSS link tags must carry the dynamic content-hash cache-buster — not
     # a hand-edited number — so a stylesheet deploy invalidates browsers
     # automatically. See asset_version.py.
     assert '?v={{ asset_version }}' in layout
-    assert 'html[data-theme="night"]' in layout
+    # The critical inline block was extracted into _night_critical.html
+    # (single source of truth, included by both layout.html and login.html)
+    # — assert the include is wired up and the partial still carries the
+    # rules, rather than looking for them inline here.
+    assert '_night_critical.html' in layout
+    assert 'html[data-theme="night"]' in night_critical
     for primitive in ['.cl-card', '.cl-btn', '.cl-input', '.cl-tabbar', 'accent-color']:
-        assert primitive in layout, f"layout.html inline night CSS missing {primitive}"
+        assert primitive in night_critical, f"_night_critical.html missing {primitive}"
 
 
 def test_night_mode_critical_css_present_in_login():
     from pathlib import Path
     login = Path('templates/login.html').read_text()
+    night_critical = Path('templates/_night_critical.html').read_text()
     assert '?v={{ asset_version }}' in login
-    assert 'html[data-theme="night"]' in login
-    assert 'Critical inline Night Mode' in login
+    assert '_night_critical.html' in login
+    assert 'html[data-theme="night"]' in night_critical
+    assert 'Critical first-paint Night Mode' in night_critical
 
 
 def test_night_mode_svg_rule_no_longer_overreaches():

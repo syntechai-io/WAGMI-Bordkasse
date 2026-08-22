@@ -278,6 +278,8 @@ async def day_recap_submit(
             db.rollback()
             request.session["error"] = "Fehler beim Speichern der Einträge."
             return RedirectResponse(url="/logbook/day-recap", status_code=303)
+        for touched_leg_id in {e.leg_id for e in saved_entries if e.leg_id is not None}:
+            LegService.recompute_leg_actuals(db, touched_leg_id)
         if skipped > 0:
             request.session["success"] = f"{saved} Einträge gespeichert, {skipped} übersprungen."
         else:
@@ -748,6 +750,8 @@ async def create_day_entries(request: Request, db: Session = Depends(get_db)):
             db.flush()
             created_ids.append(entry.id)
         db.commit()
+        if leg_id is not None:
+            LegService.recompute_leg_actuals(db, leg_id)
     except Exception as e:
         db.rollback()
         return _render_day_form(
@@ -986,7 +990,9 @@ async def create_entry(
             db.add(crew_watch)
         
         db.commit()
-        
+        if entry.leg_id is not None:
+            LegService.recompute_leg_actuals(db, entry.leg_id)
+
         # Audit log
         AuditService.log(
             db=db,
@@ -1158,11 +1164,12 @@ async def update_entry(
         return RedirectResponse(url="/logbook", status_code=303)
 
     try:
+        _old_leg_id = entry.leg_id
         # Combine date and time
         entry_datetime = datetime.fromisoformat(f"{entry_date}T{entry_time}")
         # Update UTC datetime to match (no timezone conversion)
         entry_datetime_utc = entry_datetime
-        
+
         # Parse sea state enum
         sea_state_enum = SeaStateEnum(sea_state) if sea_state else None
         
@@ -1231,7 +1238,9 @@ async def update_entry(
             db.add(crew_watch)
         
         db.commit()
-        
+        for touched_leg_id in {_old_leg_id, entry.leg_id} - {None}:
+            LegService.recompute_leg_actuals(db, touched_leg_id)
+
         # Audit log
         AuditService.log(
             db=db,
@@ -1292,9 +1301,12 @@ async def delete_entry(request: Request, entry_id: int, db: Session = Depends(ge
         details=f"Deleted logbook entry from {entry.entry_date.strftime('%Y-%m-%d')}"
     )
     
+    deleted_leg_id = entry.leg_id
     db.delete(entry)
     db.commit()
-    
+    if deleted_leg_id is not None:
+        LegService.recompute_leg_actuals(db, deleted_leg_id)
+
     return RedirectResponse(url="/logbook", status_code=303)
 
 @router.post("/{entry_id}/addendum")

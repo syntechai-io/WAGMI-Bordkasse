@@ -3,8 +3,7 @@
 ## ✅ Pre-Deployment Validation
 
 ### Test Suite Status
-- **All 32 tests passing** ✅
-- Test execution time: ~2 seconds
+- **All 135+ tests passing** ✅ (this document originally shipped alongside a 32-test suite — see the timezone-fix history below; the suite has grown substantially since)
 - Test report generated: `test_report.html`
 - Zero failures, zero errors
 
@@ -34,7 +33,7 @@
 # Run the complete test suite
 ./run_tests.sh
 
-# Verify all 32 tests pass
+# Verify all tests pass
 # Review test_report.html for details
 ```
 
@@ -119,13 +118,17 @@ If issues arise:
 
 ## 📊 Test Coverage Summary
 
+Snapshot at the time of the timezone fix below (32 tests total). The suite has
+grown substantially since — run `./run_tests.sh` for the current, authoritative
+count rather than relying on this table.
+
 | Category | Tests | Status |
 |----------|-------|--------|
 | Timezone Handling | 6 | ✅ All Pass |
 | Balance Calculation | 7 | ✅ All Pass |
 | Core Functionality | 13 | ✅ All Pass |
 | Permissions | 6 | ✅ All Pass |
-| **TOTAL** | **32** | **✅ All Pass** |
+| **TOTAL (at the time)** | **32** | **✅ All Pass** |
 
 ---
 
@@ -171,6 +174,6 @@ If issues arise:
 - Use Rollback feature if needed
 - All test files in `tests/` directory for reference
 
-**Last Updated**: November 5, 2025  
-**Test Report**: `test_report.html`  
-**Test Coverage**: 32 passing tests
+**Originally written**: November 5, 2025 (timezone fix, 32 tests at the time)
+**Test Report**: `test_report.html`
+**Test Coverage**: run `./run_tests.sh` for the current count (135+ as of 2026-08-21)

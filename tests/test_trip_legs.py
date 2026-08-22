@@ -109,6 +109,19 @@ class TestLegLifecycle:
         assert updated.name == "Renamed"
         assert updated.notes == "Windy crossing"
 
+    def test_update_leg_ignores_none_valued_fields(self, db_session, test_trip):
+        """Per update_leg's own docstring: a None-valued key must be left
+        untouched, not used to blank the column out."""
+        leg = LegService.create_leg(
+            db_session, trip_id=test_trip.id, name="Original", notes="Keep me",
+        )
+        updated = LegService.update_leg(
+            db_session, test_trip.id, leg.id,
+            name="Renamed", notes=None,
+        )
+        assert updated.name == "Renamed"
+        assert updated.notes == "Keep me"
+
     def test_delete_leg_without_entries(self, db_session, test_trip):
         leg = LegService.create_leg(db_session, trip_id=test_trip.id, name="Leg A")
         LegService.delete_leg(db_session, test_trip.id, leg.id)
