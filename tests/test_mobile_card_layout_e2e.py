@@ -2,33 +2,30 @@
 
 Why this test exists
 --------------------
-The Expenses and Crew pages switch from a traditional table to a card-per-row
-layout at ``max-width: 640px`` (iPhone viewports).  The CSS lives in the
-``@media (max-width: 640px)`` block inside ``static/cl_design.css``.
+The Expenses and Crew pages render a ``.cl-row-card`` list (see
+``static/cl_design.css``) at every viewport width — there is no separate
+desktop ``<table>`` that gets toggled to a card layout via a media query;
+the card markup is the only markup.
 
-Without this test a future CSS or template change could silently:
-- Restore the hidden ``<thead>`` (re-introducing the redundant column headers
-  in card mode), or
-- Cause the scroll wrapper to re-acquire ``overflow-x: auto``, meaning rows
-  could overflow horizontally on narrow screens.
+Without this test a future template change could silently:
+- Reintroduce a ``<table>``/``<thead>`` (undoing the card-list layout), or
+- Cause a row to widen beyond the viewport, reintroducing a horizontal
+  scrollbar on narrow screens.
 
 This test renders each page at 390 × 844 px (iPhone 14 logical pixels) and
 asserts:
 
-1. ``.cl-expenses-table thead`` and ``.cl-crew-table thead`` are **not**
-   visible (display: none in card mode).
-2. The table rows (``tbody tr``) are **block-level** elements, confirming the
-   card layout is active.
-3. The scroll wrapper (``.cl-expenses-table-scroll`` /
-   ``.cl-crew-table-scroll``) has ``overflow-x: visible`` (not ``auto`` or
-   ``scroll``), so no horizontal scrollbar can appear.
+1. No ``<table>`` element exists on the page.
+2. At least one ``.cl-row-card`` renders and is visible.
+3. The row's rendered width fits inside the viewport (no horizontal
+   overflow).
 
 Determinism guarantee
 ---------------------
 The fixture seeds its own isolated trip, a crew member, and an expense, then
 cleans everything up after the module finishes.  It never borrows pre-existing
-database rows, so the row-level assertions (tbody tr display, body scroll
-width) are always exercised against real rendered cards.
+database rows, so the row-level assertions are always exercised against real
+rendered cards.
 """
 from __future__ import annotations
 
@@ -45,7 +42,7 @@ playwright_sync_api = pytest.importorskip(
 )
 sync_playwright = playwright_sync_api.sync_playwright
 
-BASE_URL = os.environ.get("CREWLOG_BASE_URL", "http://localhost:5000")
+BASE_URL = os.environ.get("TEST_BASE_URL", os.environ.get("CREWLOG_BASE_URL", "http://localhost:5000"))
 ARTIFACT_DIR = Path("test_artifacts/mobile_card_layout")
 
 # iPhone 14 logical resolution (390 × 844) — well inside the ≤640 px breakpoint.
@@ -258,62 +255,44 @@ def auth_storage_state(browser, seeded_data, tmp_path_factory):
 # Core assertion helper
 # ---------------------------------------------------------------------------
 
-def _assert_card_layout(page, *, route: str, table_cls: str, scroll_cls: str) -> None:
-    """Assert that the card-mode CSS is active for the given table.
+def _assert_card_layout(page, *, route: str) -> None:
+    """Assert that the ``.cl-row-card`` list layout is rendering correctly.
 
     Checks:
-      1. The ``<thead>`` of the table is display:none (hidden in card mode).
-      2. The first ``tbody tr`` is display:block (card layout active).
-         Fails the test if no rows are present — the fixture must seed data.
-      3. The scroll wrapper has overflow-x that is NOT ``auto`` or ``scroll``
-         (so no horizontal scrollbar can appear on the page).
+      1. No ``<table>`` exists — these pages never had one; they render a
+         ``.cl-row-card`` per row at every viewport width.
+      2. At least one ``.cl-row-card`` is present and visible (not
+         ``display: none``). Fails if no rows are present — the fixture
+         must seed data.
+      3. The row's rendered width fits inside the viewport, so no
+         horizontal scrollbar can appear.
     """
     page.wait_for_timeout(200)  # allow layout CSS to settle
 
-    # 1. thead must be invisible
-    thead_display = page.evaluate(
-        """(cls) => {
-            const thead = document.querySelector('.' + cls + ' thead');
-            if (!thead) return 'MISSING';
-            return getComputedStyle(thead).display;
-        }""",
-        table_cls,
-    )
-    assert thead_display == "none", (
-        f"{route} @{IPHONE_WIDTH}px: expected .{table_cls} thead to be "
-        f"display:none (card mode), got display:{thead_display}"
+    has_table = page.evaluate("() => !!document.querySelector('table')")
+    assert not has_table, (
+        f"{route} @{IPHONE_WIDTH}px: found a <table> — expected the "
+        f".cl-row-card list layout used at every viewport width instead"
     )
 
-    # 2. tbody tr must be display:block — rows are required (seeded by fixture)
-    tr_display = page.evaluate(
-        """(cls) => {
-            const tr = document.querySelector('.' + cls + ' tbody tr');
-            if (!tr) return 'NO_ROWS';
-            return getComputedStyle(tr).display;
-        }""",
-        table_cls,
+    row = page.evaluate(
+        """() => {
+            const row = document.querySelector('.cl-row-card');
+            if (!row) return null;
+            const r = row.getBoundingClientRect();
+            return {display: getComputedStyle(row).display, width: r.width};
+        }"""
     )
-    assert tr_display != "NO_ROWS", (
-        f"{route} @{IPHONE_WIDTH}px: no rows in .{table_cls} tbody — "
+    assert row is not None, (
+        f"{route} @{IPHONE_WIDTH}px: no .cl-row-card rows found — "
         f"the fixture must seed at least one row so card rendering is exercised"
     )
-    assert tr_display == "block", (
-        f"{route} @{IPHONE_WIDTH}px: expected .{table_cls} tbody tr to be "
-        f"display:block in card mode, got display:{tr_display}"
+    assert row["display"] != "none", (
+        f"{route} @{IPHONE_WIDTH}px: .cl-row-card is display:none"
     )
-
-    # 3. The scroll wrapper must not have overflow-x: auto or scroll
-    overflow_x = page.evaluate(
-        """(cls) => {
-            const wrap = document.querySelector('.' + cls);
-            if (!wrap) return 'MISSING';
-            return getComputedStyle(wrap).overflowX;
-        }""",
-        scroll_cls,
-    )
-    assert overflow_x not in ("auto", "scroll"), (
-        f"{route} @{IPHONE_WIDTH}px: .{scroll_cls} has overflow-x:{overflow_x} "
-        f"— horizontal scrollbar would reappear on iPhone. Expected 'visible'."
+    assert row["width"] <= IPHONE_WIDTH, (
+        f"{route} @{IPHONE_WIDTH}px: .cl-row-card width={row['width']}px "
+        f"exceeds the viewport — horizontal overflow detected"
     )
 
 
@@ -338,11 +317,11 @@ def test_expenses_card_layout_on_iphone(browser, auth_storage_state):
         assert landed == expected, (
             f"/expenses redirected to {page.url} — trip may not be selected"
         )
-        # Scroll the table into view before screenshotting so cards are visible
+        # Scroll the row list into view before screenshotting so cards are visible
         page.evaluate(
             """() => {
-                const tbl = document.querySelector('.cl-expenses-table');
-                if (tbl) tbl.scrollIntoView({block: 'start'});
+                const row = document.querySelector('.cl-row-card');
+                if (row) row.scrollIntoView({block: 'start'});
             }"""
         )
         page.wait_for_timeout(100)
@@ -350,12 +329,7 @@ def test_expenses_card_layout_on_iphone(browser, auth_storage_state):
             path=str(ARTIFACT_DIR / "expenses_iphone390.png"),
             full_page=False,
         )
-        _assert_card_layout(
-            page,
-            route="/expenses",
-            table_cls="cl-expenses-table",
-            scroll_cls="cl-expenses-table-scroll",
-        )
+        _assert_card_layout(page, route="/expenses")
     finally:
         ctx.close()
 
@@ -377,11 +351,11 @@ def test_crew_card_layout_on_iphone(browser, auth_storage_state):
         assert landed == expected, (
             f"/crew redirected to {page.url} — trip may not be selected"
         )
-        # Scroll the crew table into view before screenshotting
+        # Scroll the row list into view before screenshotting
         page.evaluate(
             """() => {
-                const tbl = document.querySelector('.cl-crew-table');
-                if (tbl) tbl.scrollIntoView({block: 'start'});
+                const row = document.querySelector('.cl-row-card');
+                if (row) row.scrollIntoView({block: 'start'});
             }"""
         )
         page.wait_for_timeout(100)
@@ -389,12 +363,7 @@ def test_crew_card_layout_on_iphone(browser, auth_storage_state):
             path=str(ARTIFACT_DIR / "crew_iphone390.png"),
             full_page=False,
         )
-        _assert_card_layout(
-            page,
-            route="/crew",
-            table_cls="cl-crew-table",
-            scroll_cls="cl-crew-table-scroll",
-        )
+        _assert_card_layout(page, route="/crew")
     finally:
         ctx.close()
 

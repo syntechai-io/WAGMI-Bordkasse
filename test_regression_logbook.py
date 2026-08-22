@@ -304,7 +304,14 @@ def test_service_worker_cache_name_derived_from_asset_version():
 def test_diagnostics_theme_route_renders_night_with_correct_palette():
     from pathlib import Path
     tpl = Path('templates/theme_diagnostics.html').read_text()
-    assert 'data-theme="night"' in tpl
+    # The <html> tag must always stamp an explicit data-theme (night or day)
+    # rather than leaving it unstamped for non-night requests — an
+    # unstamped root falls through to cl_design.css's dark-default tokens
+    # regardless of the requested theme. See test_night_mode_e2e.py's
+    # test_day_mode_remains_unchanged_no_regression for the live-render
+    # check of this.
+    assert 'data-theme=' in tpl
+    assert "'night'" in tpl and "'day'" in tpl
     assert 'ui_night_mode.css?v={{ asset_version }}' in tpl
     for primitive in [
         'cl-btn--primary', 'cl-btn--accent', 'cl-btn--success', 'cl-btn--warn',

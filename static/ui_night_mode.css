@@ -878,3 +878,25 @@ html[data-theme="day"] .cl-btn--ghost-danger:hover {
   background: #fdecec !important;
   border-color: #c53e3e !important;
 }
+
+/* Day mode: primary/accent were hardcoded to the dark theme's light-on-dark
+   button colors in cl_design.css, so they never picked up the day palette.
+   Restore navy/blue solid buttons with light text here instead. */
+html[data-theme="day"] .cl-btn--primary {
+  background: var(--cl-navy) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+html[data-theme="day"] .cl-btn--primary:hover {
+  background: var(--cl-navy-soft) !important;
+  color: #fff !important;
+}
+html[data-theme="day"] .cl-btn--accent {
+  background: var(--cl-accent) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+html[data-theme="day"] .cl-btn--accent:hover {
+  background: #175a99 !important;
+  color: #fff !important;
+}

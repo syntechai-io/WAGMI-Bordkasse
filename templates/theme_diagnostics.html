@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"{% if theme == "night" %} data-theme="night"{% endif %}>
+<html lang="en" data-theme="{{ 'night' if theme == 'night' else 'day' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

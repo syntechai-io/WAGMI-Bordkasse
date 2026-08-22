@@ -49,7 +49,7 @@ playwright_sync_api = pytest.importorskip(
 )
 sync_playwright = playwright_sync_api.sync_playwright
 
-BASE_URL = os.environ.get("CREWLOG_BASE_URL", "http://localhost:5000")
+BASE_URL = os.environ.get("TEST_BASE_URL", os.environ.get("CREWLOG_BASE_URL", "http://localhost:5000"))
 ARTIFACT_DIR = Path("test_artifacts/mobile_card_layout_extended")
 
 # iPhone 14 logical resolution (390 × 844) — well inside the ≤640 px breakpoint.
@@ -148,8 +148,8 @@ def seeded_data():
     password = secrets.token_urlsafe(12)
 
     db = SessionLocal()
-    (user_id, trip_id, member_id, expense_id,
-     deposit_id, template_id, group_id) = (None,) * 7
+    (user_id, trip_id, member_id, member2_id, expense_id,
+     deposit_id, template_id, group_id) = (None,) * 8
     try:
         # User
         user = User(username=username, role=UserRole.admin)
@@ -175,6 +175,19 @@ def seeded_data():
         db.add(member)
         db.flush()
         member_id = member.id
+
+        # A second crew member so the equal-split expense below produces an
+        # actual imbalance — with only one member on the trip, that member's
+        # share always equals what they paid, so /settlement would show its
+        # "all settled" empty state instead of a real transfer row.
+        member2 = CrewMember(
+            trip_id=trip_id,
+            code=f"TY{suffix[:4].upper()}",
+            name="Extended Test Second Mariner",
+        )
+        db.add(member2)
+        db.flush()
+        member2_id = member2.id
 
         # Expense (for /balances and /settlement to show a row)
         today = date.today()
@@ -271,6 +284,10 @@ def seeded_data():
                 e = db.query(Expense).filter(Expense.id == expense_id).first()
                 if e:
                     db.delete(e)
+            if member2_id:
+                m2 = db.query(CrewMember).filter(CrewMember.id == member2_id).first()
+                if m2:
+                    db.delete(m2)
             if member_id:
                 m = db.query(CrewMember).filter(CrewMember.id == member_id).first()
                 if m:
@@ -392,6 +409,45 @@ def _assert_card_layout(page, *, route: str, table_cls: str, scroll_cls: str) ->
     )
 
 
+def _assert_row_card_layout(page, *, route: str) -> None:
+    """Assert that the ``.cl-row-card`` list layout is rendering correctly.
+
+    Balances and Deposits render a ``.cl-row-card`` per row at every
+    viewport width (see ``static/cl_design.css``) — unlike Templates, they
+    never had a ``<table>``/``<thead>`` to toggle. Checks:
+      1. No ``<table>`` exists.
+      2. At least one ``.cl-row-card`` is present and visible.
+      3. The row's rendered width fits inside the viewport.
+    """
+    page.wait_for_timeout(200)
+
+    has_table = page.evaluate("() => !!document.querySelector('table')")
+    assert not has_table, (
+        f"{route} @{IPHONE_WIDTH}px: found a <table> — expected the "
+        f".cl-row-card list layout used at every viewport width instead"
+    )
+
+    row = page.evaluate(
+        """() => {
+            const row = document.querySelector('.cl-row-card');
+            if (!row) return null;
+            const r = row.getBoundingClientRect();
+            return {display: getComputedStyle(row).display, width: r.width};
+        }"""
+    )
+    assert row is not None, (
+        f"{route} @{IPHONE_WIDTH}px: no .cl-row-card rows found — "
+        f"the fixture must seed at least one row so card rendering is exercised"
+    )
+    assert row["display"] != "none", (
+        f"{route} @{IPHONE_WIDTH}px: .cl-row-card is display:none"
+    )
+    assert row["width"] <= IPHONE_WIDTH, (
+        f"{route} @{IPHONE_WIDTH}px: .cl-row-card width={row['width']}px "
+        f"exceeds the viewport — horizontal overflow detected"
+    )
+
+
 # ---------------------------------------------------------------------------
 # Helper: navigate and assert correct landing
 # ---------------------------------------------------------------------------
@@ -424,8 +480,8 @@ def test_balances_card_layout_on_iphone(browser, auth_storage_state):
         _navigate(page, "/balances")
         page.evaluate(
             """() => {
-                const tbl = document.querySelector('.cl-balances-table');
-                if (tbl) tbl.scrollIntoView({block: 'start'});
+                const row = document.querySelector('.cl-row-card');
+                if (row) row.scrollIntoView({block: 'start'});
             }"""
         )
         page.wait_for_timeout(100)
@@ -433,12 +489,7 @@ def test_balances_card_layout_on_iphone(browser, auth_storage_state):
             path=str(ARTIFACT_DIR / "balances_iphone390.png"),
             full_page=False,
         )
-        _assert_card_layout(
-            page,
-            route="/balances",
-            table_cls="cl-balances-table",
-            scroll_cls="cl-balances-table-scroll",
-        )
+        _assert_row_card_layout(page, route="/balances")
     finally:
         ctx.close()
 
@@ -454,8 +505,8 @@ def test_deposits_card_layout_on_iphone(browser, auth_storage_state):
         _navigate(page, "/deposits")
         page.evaluate(
             """() => {
-                const tbl = document.querySelector('.cl-deposits-table');
-                if (tbl) tbl.scrollIntoView({block: 'start'});
+                const row = document.querySelector('.cl-row-card');
+                if (row) row.scrollIntoView({block: 'start'});
             }"""
         )
         page.wait_for_timeout(100)
@@ -463,18 +514,20 @@ def test_deposits_card_layout_on_iphone(browser, auth_storage_state):
             path=str(ARTIFACT_DIR / "deposits_iphone390.png"),
             full_page=False,
         )
-        _assert_card_layout(
-            page,
-            route="/deposits",
-            table_cls="cl-deposits-table",
-            scroll_cls="cl-deposits-table-scroll",
-        )
+        _assert_row_card_layout(page, route="/deposits")
     finally:
         ctx.close()
 
 
 def test_settlement_card_layout_on_iphone(browser, auth_storage_state):
-    """/settlement at iPhone width renders card layout, not a scrolling table."""
+    """/settlement at iPhone width renders its transfer rows without overflow.
+
+    Settlement never used a <table> — each transfer is a flex row
+    (``.cl-settlement-row`` in templates/settlement.html) that already
+    wraps via inline ``flex-wrap: wrap``, so there's no card-mode CSS to
+    toggle. This checks the real thing: the row renders, is visible, and
+    fits inside the viewport.
+    """
     ctx = browser.new_context(
         viewport={"width": IPHONE_WIDTH, "height": IPHONE_HEIGHT},
         storage_state=auth_storage_state,
@@ -484,8 +537,8 @@ def test_settlement_card_layout_on_iphone(browser, auth_storage_state):
         _navigate(page, "/settlement")
         page.evaluate(
             """() => {
-                const tbl = document.querySelector('.cl-settlement-table');
-                if (tbl) tbl.scrollIntoView({block: 'start'});
+                const row = document.querySelector('.cl-settlement-row');
+                if (row) row.scrollIntoView({block: 'start'});
             }"""
         )
         page.wait_for_timeout(100)
@@ -493,11 +546,24 @@ def test_settlement_card_layout_on_iphone(browser, auth_storage_state):
             path=str(ARTIFACT_DIR / "settlement_iphone390.png"),
             full_page=False,
         )
-        _assert_card_layout(
-            page,
-            route="/settlement",
-            table_cls="cl-settlement-table",
-            scroll_cls="cl-settlement-table-scroll",
+        row = page.evaluate(
+            """() => {
+                const row = document.querySelector('.cl-settlement-row');
+                if (!row) return null;
+                const r = row.getBoundingClientRect();
+                return {display: getComputedStyle(row).display, width: r.width};
+            }"""
+        )
+        assert row is not None, (
+            f"/settlement @{IPHONE_WIDTH}px: no .cl-settlement-row found — "
+            f"the fixture must seed an imbalance so a transfer is generated"
+        )
+        assert row["display"] != "none", (
+            f"/settlement @{IPHONE_WIDTH}px: .cl-settlement-row is display:none"
+        )
+        assert row["width"] <= IPHONE_WIDTH, (
+            f"/settlement @{IPHONE_WIDTH}px: .cl-settlement-row width="
+            f"{row['width']}px exceeds the viewport — horizontal overflow detected"
         )
     finally:
         ctx.close()
@@ -534,7 +600,16 @@ def test_templates_card_layout_on_iphone(browser, auth_storage_state):
 
 
 def test_groups_card_layout_on_iphone(browser, auth_storage_state):
-    """/groups at iPhone width renders card layout, not a scrolling table."""
+    """/groups at iPhone width gives its action buttons a real tap target.
+
+    Groups never had a <table> — it's a plain divide-y list (see
+    templates/groups.html). The actual mobile fix that shipped for this
+    page is the ``@media (max-width: 640px) .cl-groups-actions .btn``
+    rule in static/cl_design.css, which gives the Edit/Delete buttons a
+    44px minimum height (Apple's minimum tap target) and lets them wrap.
+    This checks that fix instead of a table/thead toggle that never
+    existed here.
+    """
     ctx = browser.new_context(
         viewport={"width": IPHONE_WIDTH, "height": IPHONE_HEIGHT},
         storage_state=auth_storage_state,
@@ -544,8 +619,8 @@ def test_groups_card_layout_on_iphone(browser, auth_storage_state):
         _navigate(page, "/groups")
         page.evaluate(
             """() => {
-                const tbl = document.querySelector('.cl-groups-table');
-                if (tbl) tbl.scrollIntoView({block: 'start'});
+                const actions = document.querySelector('.cl-groups-actions');
+                if (actions) actions.scrollIntoView({block: 'start'});
             }"""
         )
         page.wait_for_timeout(100)
@@ -553,11 +628,25 @@ def test_groups_card_layout_on_iphone(browser, auth_storage_state):
             path=str(ARTIFACT_DIR / "groups_iphone390.png"),
             full_page=False,
         )
-        _assert_card_layout(
-            page,
-            route="/groups",
-            table_cls="cl-groups-table",
-            scroll_cls="cl-groups-table-scroll",
+        btn = page.evaluate(
+            """() => {
+                const btn = document.querySelector('.cl-groups-actions .btn');
+                if (!btn) return null;
+                const r = btn.getBoundingClientRect();
+                return {height: r.height, width: r.width};
+            }"""
+        )
+        assert btn is not None, (
+            f"/groups @{IPHONE_WIDTH}px: no .cl-groups-actions .btn found — "
+            f"the fixture must seed an editable group so action buttons render"
+        )
+        assert btn["height"] >= 44, (
+            f"/groups @{IPHONE_WIDTH}px: action button height={btn['height']}px "
+            f"is below the 44px minimum tap target"
+        )
+        assert btn["width"] <= IPHONE_WIDTH, (
+            f"/groups @{IPHONE_WIDTH}px: action button width={btn['width']}px "
+            f"exceeds the viewport — horizontal overflow detected"
         )
     finally:
         ctx.close()
