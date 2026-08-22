@@ -1,0 +1,300 @@
+{% extends "layout.html" %}
+
+{% set category_labels = {
+    'service': t('maintenance.category_service'),
+    'repair': t('maintenance.category_repair'),
+    'inspection': t('maintenance.category_inspection'),
+    'warranty_claim': t('maintenance.category_warranty_claim'),
+} %}
+{% set status_labels = {
+    'open': t('maintenance.status_open'),
+    'in_progress': t('maintenance.status_in_progress'),
+    'resolved': t('maintenance.status_resolved'),
+} %}
+
+{% block content %}
+<div class="cl-page">
+    <header class="cl-pageheader">
+        <div class="cl-pageheader__main">
+            <h1 class="cl-title">🔧 {{ t('maintenance.title') }}</h1>
+            <p class="cl-subtitle">{{ boat_profile.boat_name }}</p>
+        </div>
+        <a href="/admin/maintenance/export.pdf" class="cl-btn cl-btn--secondary cl-btn--sm">
+            📄 {{ t('maintenance.export_pdf') }}
+        </a>
+    </header>
+
+    {% if request.session.get('success') %}
+    <div class="cl-alert cl-alert--success" role="alert">{{ request.session.pop('success') }}</div>
+    {% endif %}
+    {% if request.session.get('error') %}
+    <div class="cl-alert cl-alert--danger" role="alert">{{ request.session.pop('error') }}</div>
+    {% endif %}
+
+    {% if overdue_count > 0 %}
+    <div class="cl-alert cl-alert--danger" role="alert">
+        ⚠️ {{ t('maintenance.overdue_banner', count=overdue_count) }}
+    </div>
+    {% elif due_soon_count > 0 %}
+    <div class="cl-alert cl-alert--warn" role="alert">
+        ⏰ {{ t('maintenance.due_soon_banner', count=due_soon_count) }}
+    </div>
+    {% endif %}
+
+    <div class="cl-stack">
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">📊 {{ t('maintenance.stats_title') }}</h2>
+            </header>
+            <div class="cl-grid cl-grid--2">
+                <div class="cl-kpi">
+                    <span class="cl-kpi__label">⛵ {{ t('maintenance.stats_kpi_nm') }}</span>
+                    <span class="cl-kpi__value">{{ boat_stats.total_nm }} sm</span>
+                </div>
+                <div class="cl-kpi">
+                    <span class="cl-kpi__label">⚙️ {{ t('maintenance.stats_kpi_motor_h') }}</span>
+                    <span class="cl-kpi__value">{{ boat_stats.total_motor_h }} h</span>
+                </div>
+            </div>
+            <p class="cl-help cl-help--muted">{{ t('maintenance.stats_helper') }}</p>
+        </section>
+
+        {% if is_owner %}
+        <section class="cl-card">
+            <header class="cl-card__head">
+                <h2 class="cl-card__title">➕ {{ t('maintenance.create_title') }}</h2>
+            </header>
+            <p class="cl-help cl-help--muted">{{ t('maintenance.create_hint') }}</p>
+            <form method="post" action="/admin/maintenance/create" class="cl-stack cl-stack--sm">
+                {{ csrf_input | safe }}
+                <div class="cl-grid cl-grid--3">
+                    <div class="cl-field cl-field--full">
+                        <label class="cl-label">🏷️ {{ t('maintenance.field_title') }}</label>
+                        <input type="text" name="title" class="cl-input" required maxlength="200"
+                               placeholder="{{ t('maintenance.field_title_placeholder') }}">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">📁 {{ t('maintenance.field_category') }}</label>
+                        <select name="category" class="cl-input">
+                            {% for c in categories %}
+                            <option value="{{ c }}">{{ category_labels[c] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">🚦 {{ t('maintenance.field_status') }}</label>
+                        <select name="status" class="cl-input">
+                            {% for s in statuses %}
+                            <option value="{{ s }}" {% if s == 'resolved' %}selected{% endif %}>{{ status_labels[s] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">📅 {{ t('maintenance.field_performed_at') }}</label>
+                        <input type="date" name="performed_at" class="cl-input" value="{{ today }}">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">⚙️ {{ t('maintenance.field_engine_hours_at') }}</label>
+                        <input type="number" step="0.1" name="engine_hours_at" class="cl-input" placeholder="{{ boat_stats.total_motor_h }}">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">⛵ {{ t('maintenance.field_nm_at') }}</label>
+                        <input type="number" step="0.1" name="nm_at" class="cl-input" placeholder="{{ boat_stats.total_nm }}">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">🏭 {{ t('maintenance.field_vendor') }}</label>
+                        <input type="text" name="vendor" class="cl-input" maxlength="150"
+                               placeholder="{{ t('maintenance.field_vendor_placeholder') }}">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">💶 {{ t('maintenance.field_cost_amount') }}</label>
+                        <input type="number" step="0.01" name="cost_amount" class="cl-input">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">💱 {{ t('maintenance.field_cost_currency') }}</label>
+                        <select name="cost_currency" class="cl-input">
+                            <option value="">—</option>
+                            {% for c in currencies %}
+                            <option value="{{ c }}">{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="cl-field cl-field--full">
+                        <label class="cl-label">📝 {{ t('common.notes') }}</label>
+                        <textarea name="notes" class="cl-input" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <p class="cl-help cl-help--muted" style="margin-top: var(--cl-space-3);">
+                    ⏰ {{ t('maintenance.section_due') }}
+                </p>
+                <div class="cl-grid cl-grid--3">
+                    <div class="cl-field">
+                        <label class="cl-label">📅 {{ t('maintenance.field_next_due_date') }}</label>
+                        <input type="date" name="next_due_date" class="cl-input">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">⚙️ {{ t('maintenance.field_next_due_engine_hours') }}</label>
+                        <input type="number" step="0.1" name="next_due_engine_hours" class="cl-input">
+                    </div>
+                    <div class="cl-field">
+                        <label class="cl-label">⛵ {{ t('maintenance.field_next_due_nm') }}</label>
+                        <input type="number" step="0.1" name="next_due_nm" class="cl-input">
+                    </div>
+                </div>
+
+                <div class="cl-card__footer">
+                    <button type="submit" class="cl-btn cl-btn--success">
+                        ✅ {{ t('maintenance.add_record') }}
+                    </button>
+                </div>
+            </form>
+        </section>
+        {% else %}
+        <div class="cl-alert cl-alert--info">{{ t('maintenance.read_only') }}</div>
+        {% endif %}
+
+        <section class="cl-table-wrap">
+            <div style="padding: var(--cl-space-4) var(--cl-space-5); background: var(--cl-surface-2); border-bottom: 1px solid var(--cl-border);">
+                <h2 class="cl-section-title" style="margin: 0;">📋 {{ t('maintenance.all_records') }}</h2>
+            </div>
+
+            {% if rows %}
+            <div class="cl-table-scroll">
+                <table class="cl-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t('maintenance.col_date') }}</th>
+                            <th>{{ t('maintenance.col_title') }}</th>
+                            <th>{{ t('maintenance.col_category') }}</th>
+                            <th>{{ t('maintenance.col_status') }}</th>
+                            <th>{{ t('maintenance.col_vendor') }}</th>
+                            <th>{{ t('maintenance.col_cost') }}</th>
+                            <th>{{ t('maintenance.col_attachments') }}</th>
+                            <th>{{ t('maintenance.col_actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                        {% set record = row.record %}
+                        <tr>
+                            <td>{{ record.performed_at.strftime('%d.%m.%Y') if record.performed_at else '—' }}</td>
+                            <td>
+                                <div id="maint-display-{{ record.id }}">
+                                    <strong>{{ record.title }}</strong>
+                                    {% if row.due == 'overdue' %}
+                                    <span class="cl-pill cl-pill--danger">⚠️ {{ t('maintenance.due_badge_overdue') }}</span>
+                                    {% elif row.due == 'due_soon' %}
+                                    <span class="cl-pill cl-pill--warn">⏰ {{ t('maintenance.due_badge_due_soon') }}</span>
+                                    {% endif %}
+                                    {% if record.notes %}
+                                    <p class="cl-help cl-help--muted" style="margin:2px 0 0;">{{ record.notes }}</p>
+                                    {% endif %}
+                                </div>
+                                {% if is_owner %}
+                                <form id="maint-edit-form-{{ record.id }}" action="/admin/maintenance/{{ record.id }}/edit" method="post" class="hidden cl-stack cl-stack--sm" style="margin-top: 8px;">
+                                    {{ csrf_input | safe }}
+                                    <div class="cl-grid cl-grid--2">
+                                        <input type="text" name="title" value="{{ record.title }}" class="cl-input" placeholder="{{ t('maintenance.field_title') }}">
+                                        <select name="category" class="cl-input">
+                                            {% for c in categories %}
+                                            <option value="{{ c }}" {% if c == record.category %}selected{% endif %}>{{ category_labels[c] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <select name="status" class="cl-input">
+                                            {% for s in statuses %}
+                                            <option value="{{ s }}" {% if s == record.status %}selected{% endif %}>{{ status_labels[s] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <input type="date" name="performed_at" value="{{ record.performed_at.isoformat() if record.performed_at else '' }}" class="cl-input">
+                                        <input type="number" step="0.1" name="engine_hours_at" value="{{ record.engine_hours_at if record.engine_hours_at is not none else '' }}" class="cl-input" placeholder="{{ t('maintenance.field_engine_hours_at') }}">
+                                        <input type="number" step="0.1" name="nm_at" value="{{ record.nm_at if record.nm_at is not none else '' }}" class="cl-input" placeholder="{{ t('maintenance.field_nm_at') }}">
+                                        <input type="text" name="vendor" value="{{ record.vendor or '' }}" class="cl-input" placeholder="{{ t('maintenance.field_vendor') }}">
+                                        <input type="number" step="0.01" name="cost_amount" value="{{ record.cost_amount if record.cost_amount is not none else '' }}" class="cl-input" placeholder="{{ t('maintenance.field_cost_amount') }}">
+                                        <select name="cost_currency" class="cl-input">
+                                            <option value="">—</option>
+                                            {% for c in currencies %}
+                                            <option value="{{ c }}" {% if record.cost_currency and record.cost_currency.value == c %}selected{% endif %}>{{ c }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <input type="date" name="next_due_date" value="{{ record.next_due_date.isoformat() if record.next_due_date else '' }}" class="cl-input" placeholder="{{ t('maintenance.field_next_due_date') }}">
+                                        <input type="number" step="0.1" name="next_due_engine_hours" value="{{ record.next_due_engine_hours if record.next_due_engine_hours is not none else '' }}" class="cl-input" placeholder="{{ t('maintenance.field_next_due_engine_hours') }}">
+                                        <input type="number" step="0.1" name="next_due_nm" value="{{ record.next_due_nm if record.next_due_nm is not none else '' }}" class="cl-input" placeholder="{{ t('maintenance.field_next_due_nm') }}">
+                                        <textarea name="notes" class="cl-input" placeholder="{{ t('common.notes') }}">{{ record.notes or '' }}</textarea>
+                                    </div>
+                                    <div class="cl-actions">
+                                        <button type="submit" class="cl-btn cl-btn--success cl-btn--sm">✔ {{ t('common.save') }}</button>
+                                        <button type="button" onclick="toggleMaintEdit({{ record.id }})" class="cl-btn cl-btn--secondary cl-btn--sm">✖ {{ t('common.cancel') }}</button>
+                                    </div>
+                                </form>
+                                {% endif %}
+                            </td>
+                            <td>{{ category_labels[record.category] }}</td>
+                            <td>{{ status_labels[record.status] }}</td>
+                            <td>{{ record.vendor or '—' }}</td>
+                            <td class="cl-num">
+                                {% if record.cost_amount is not none and record.cost_currency %}
+                                    {{ "%.2f"|format(record.cost_amount) }} {{ record.cost_currency.value }}
+                                {% else %}
+                                    <span class="cl-help cl-help--muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.attachments %}
+                                <div class="cl-stack cl-stack--sm">
+                                    {% for a in record.attachments %}
+                                    <a href="/admin/maintenance/attachments/{{ a.id }}" target="_blank" class="cl-help">
+                                        📎 {{ a.original_name }}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <span class="cl-help cl-help--muted">{{ t('maintenance.attachments_none') }}</span>
+                                {% endif %}
+                                {% if is_owner %}
+                                <form action="/admin/maintenance/{{ record.id }}/attachments" method="post" enctype="multipart/form-data" class="cl-stack cl-stack--sm" style="margin-top: 6px;">
+                                    {{ csrf_input | safe }}
+                                    <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png" class="cl-input" style="font-size: 12px;">
+                                    <button type="submit" class="cl-btn cl-btn--ghost cl-btn--sm">⬆️ {{ t('maintenance.attachment_upload_button') }}</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_owner %}
+                                <div class="cl-actions">
+                                    <button type="button" onclick="toggleMaintEdit({{ record.id }})" class="cl-btn cl-btn--ghost cl-btn--sm">✏️ {{ t('common.edit') }}</button>
+                                    <form action="/admin/maintenance/{{ record.id }}/delete" method="post" style="margin:0;" onsubmit="return confirm('{{ t('maintenance.confirm_delete') }}')">
+                                        {{ csrf_input | safe }}
+                                        <button type="submit" class="cl-btn cl-btn--ghost-danger cl-btn--sm">🗑️</button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="padding: var(--cl-space-6) var(--cl-space-5); text-align: center;">
+                <p class="cl-muted">📭 {{ t('maintenance.no_records_yet') }}</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <div class="cl-alert cl-alert--info">
+            <strong>💡 {{ t('maintenance.about_title') }}</strong>
+            <div>{{ t('maintenance.about_desc') }}</div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleMaintEdit(recordId) {
+    var display = document.getElementById('maint-display-' + recordId);
+    var form = document.getElementById('maint-edit-form-' + recordId);
+    if (display) display.classList.toggle('hidden');
+    if (form) form.classList.toggle('hidden');
+}
+</script>
+{% endblock %}

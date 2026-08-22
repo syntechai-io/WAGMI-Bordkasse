@@ -448,6 +448,7 @@ class Account(Base):
     subscriptions = relationship("Subscription", back_populates="account", cascade="all, delete-orphan")
     saas_users = relationship("SaaSUser", back_populates="account", cascade="all, delete-orphan")
     boat_profile = relationship("BoatProfile", back_populates="account", uselist=False, cascade="all, delete-orphan")
+    maintenance_records = relationship("MaintenanceRecord", back_populates="account", cascade="all, delete-orphan")
 
 
 class Subscription(Base):
@@ -624,3 +625,50 @@ class SailProfile(Base):
         if self.has_spinnaker:
             names.append("Spinnaker")
         return names if names else None
+
+
+class MaintenanceRecord(Base):
+    """A service, repair, inspection, or warranty-claim entry for the boat.
+    Account-scoped (like Trip) rather than hung off BoatProfile directly, so
+    it survives a boat-profile reset and mirrors the existing Trip.account_id
+    ownership pattern used throughout the SaaS layer."""
+    __tablename__ = "maintenance_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False, index=True)
+    title = Column(String(200), nullable=False)
+    category = Column(String(20), nullable=False, default="service")  # service|repair|inspection|warranty_claim
+    status = Column(String(20), nullable=False, default="resolved")  # open|in_progress|resolved
+    performed_at = Column(Date, nullable=False)
+    engine_hours_at = Column(Float, nullable=True)
+    nm_at = Column(Float, nullable=True)
+    vendor = Column(String(150), nullable=True)
+    cost_amount = Column(Float, nullable=True)
+    cost_currency = Column(SQLEnum(Currency), nullable=True)
+    notes = Column(Text, nullable=True)
+    next_due_date = Column(Date, nullable=True)
+    next_due_engine_hours = Column(Float, nullable=True)
+    next_due_nm = Column(Float, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    account = relationship("Account", back_populates="maintenance_records")
+    attachments = relationship(
+        "MaintenanceAttachment", back_populates="record", cascade="all, delete-orphan"
+    )
+
+
+class MaintenanceAttachment(Base):
+    """A photo or document (invoice, warranty letter, inspection report)
+    attached to a MaintenanceRecord. Same shape as Receipt/LogbookPhoto."""
+    __tablename__ = "maintenance_attachments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    record_id = Column(Integer, ForeignKey("maintenance_records.id"), nullable=False, index=True)
+    stored_filename = Column(String(100), nullable=False)
+    original_name = Column(String(200), nullable=False)
+    content_type = Column(String(50), nullable=False)
+    size_bytes = Column(Integer, nullable=False)
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+
+    record = relationship("MaintenanceRecord", back_populates="attachments")

@@ -242,6 +242,9 @@
                 <a href="/admin/boat" class="drawer-link">
                     <span class="drawer-icon">⛵</span> {{ t('nav.boat_setup') }}
                 </a>
+                <a href="/admin/maintenance" class="drawer-link">
+                    <span class="drawer-icon">🔧</span> {{ t('nav.maintenance') }}
+                </a>
                 <a href="/billing" class="drawer-link">
                     <span class="drawer-icon">💳</span> {{ t('nav.billing') }}
                 </a>
@@ -374,6 +377,7 @@
                             <a href="/export/csv" class="block px-4 py-2 hover:bg-sky-100 transition">📋 {{ t('nav.export') }}</a>
                             {% if request.session.get('saas_user_id') %}
                             <a href="/admin/boat" class="block px-4 py-2 hover:bg-sky-100 transition">⛵ {{ t('nav.boat_setup') }}</a>
+                            <a href="/admin/maintenance" class="block px-4 py-2 hover:bg-sky-100 transition">🔧 {{ t('nav.maintenance') }}</a>
                             <a href="/billing" class="block px-4 py-2 hover:bg-sky-100 transition">💳 {{ t('nav.billing') }}</a>
                             {% endif %}
                             {% if request.session.get('role') == 'admin' %}

@@ -29,6 +29,7 @@ from routers.logbook import router as logbook_router
 from routers.templates import router as templates_router
 from routers.groups import router as groups_router
 from routers.legs import router as legs_router
+from routers.maintenance import router as maintenance_router
 from routers.api import router as api_router
 from routers.widget import router as widget_router
 from routes_auth import router as saas_auth_router
@@ -137,6 +138,7 @@ app.include_router(logbook_router)
 app.include_router(templates_router)
 app.include_router(groups_router)
 app.include_router(legs_router)
+app.include_router(maintenance_router)
 app.include_router(saas_auth_router)
 app.include_router(billing_router)
 app.include_router(billing_ui_router)

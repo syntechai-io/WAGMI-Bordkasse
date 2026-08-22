@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 from template_helpers import create_templates
 from db import get_db
 from auth_saas import get_current_saas_user, get_active_account_id
-from models import SaaSUser, LogbookEntry, Trip as TripModel
-from services.boat import get_or_create_boat_profile
+from models import SaaSUser
+from services.boat import get_or_create_boat_profile, compute_boat_stats
 from typing import Optional
 from datetime import datetime
 
@@ -24,41 +23,7 @@ async def boat_setup_page(request: Request, db: Session = Depends(get_db)):
     bp = get_or_create_boat_profile(db, account_id)
     sp = bp.sail_profile
 
-    # ── Cumulative boat stats ──────────────────────────────────────────
-    # Aggregates only trips flagged use_main_boat=True so the user can
-    # exclude charter / friend's-boat trips with a single checkbox.
-    main_boat_trips = db.query(TripModel).filter(
-        TripModel.account_id == account_id,
-        TripModel.use_main_boat == True,
-    ).order_by(TripModel.start_date.desc()).all()
-    main_boat_trip_ids = [t.id for t in main_boat_trips]
-
-    total_nm = 0.0
-    if main_boat_trip_ids:
-        total_nm = float(
-            db.query(func.coalesce(func.sum(LogbookEntry.dist_day_nm), 0))
-            .filter(LogbookEntry.trip_id.in_(main_boat_trip_ids))
-            .scalar() or 0
-        )
-
-    # Motor hours per trip = max(eng_hours_total) - min(eng_hours_total).
-    # Trips with <2 readings contribute 0 (no measurable runtime).
-    total_motor_h = 0.0
-    for tid in main_boat_trip_ids:
-        readings = db.query(LogbookEntry.eng_hours_total).filter(
-            LogbookEntry.trip_id == tid,
-            LogbookEntry.eng_hours_total.isnot(None),
-        ).all()
-        vals = [r[0] for r in readings if r[0] is not None]
-        if len(vals) >= 2:
-            total_motor_h += max(vals) - min(vals)
-
-    boat_stats = {
-        "total_nm":      round(total_nm, 1),
-        "total_motor_h": round(total_motor_h, 1),
-        "trip_count":    len(main_boat_trip_ids),
-        "last_trip":     main_boat_trips[0].start_date if main_boat_trips else None,
-    }
+    boat_stats = compute_boat_stats(db, account_id)
 
     return templates.TemplateResponse("admin_boat.html", {
         "request": request,
